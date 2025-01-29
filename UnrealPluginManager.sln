@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server", "UnrealPluginManager.Server\UnrealPluginManager.Server.csproj", "{1AF09A44-ED09-4C18-9F59-554A5437FBF4}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "unrealpluginmanager.client", "unrealpluginmanager.client\unrealpluginmanager.client.esproj", "{14DA7D81-0C7E-4201-8E03-65B8230EA26A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core", "UnrealPluginManager.Core\UnrealPluginManager.Core.csproj", "{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1AF09A44-ED09-4C18-9F59-554A5437FBF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AF09A44-ED09-4C18-9F59-554A5437FBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AF09A44-ED09-4C18-9F59-554A5437FBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AF09A44-ED09-4C18-9F59-554A5437FBF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14DA7D81-0C7E-4201-8E03-65B8230EA26A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

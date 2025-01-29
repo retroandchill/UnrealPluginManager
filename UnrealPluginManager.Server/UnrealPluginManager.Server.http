@@ -1,0 +1,6 @@
+@UnrealPluginManager.Server_HostAddress = http://localhost:5099
+
+GET {{UnrealPluginManager.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
