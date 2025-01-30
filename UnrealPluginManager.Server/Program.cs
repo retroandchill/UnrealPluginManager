@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UnrealPluginManagerContext>(options => options.UseSqlite("Filename=dev.sqlite", 
     b => b.MigrationsAssembly("UnrealPluginManager.Server")));
+builder.Services.AddScoped<IPluginService, PluginService>();
 
 var app = builder.Build();
 
