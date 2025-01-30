@@ -10,7 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<UnrealPluginManagerContext>(options => options.UseSqlite());
+builder.Services.AddDbContext<UnrealPluginManagerContext>(options => options.UseSqlite("Filename=dev.sqlite", 
+    b => b.MigrationsAssembly("UnrealPluginManager.Server")));
 
 var app = builder.Build();
 
