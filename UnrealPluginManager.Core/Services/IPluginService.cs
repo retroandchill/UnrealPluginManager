@@ -7,4 +7,5 @@ public interface IPluginService {
 
     IEnumerable<PluginSummary> GetPluginSummaries();
 
+    IEnumerable<PluginSummary> GetDependencyList(string pluginName);
 }
