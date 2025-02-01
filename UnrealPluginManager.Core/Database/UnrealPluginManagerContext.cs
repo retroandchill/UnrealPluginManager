@@ -9,6 +9,7 @@ public class UnrealPluginManagerContext(DbContextOptions<UnrealPluginManagerCont
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        Plugin.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
         EngineVersion.DefineModelMetadata(modelBuilder);
     }

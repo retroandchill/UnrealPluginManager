@@ -8,4 +8,6 @@ public interface IPluginService {
     IEnumerable<PluginSummary> GetPluginSummaries();
 
     IEnumerable<PluginSummary> GetDependencyList(string pluginName);
+    
+    PluginSummary AddPlugin(string pluginName, PluginDescriptor descriptor);
 }

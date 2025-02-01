@@ -20,6 +20,15 @@ public class EngineVersion {
     
     public Plugin Plugin { get; set; }
 
+    public EngineVersion() {
+        
+    }
+
+    public EngineVersion(Version version) {
+        Major = (uint)version.Major;
+        Minor = (uint)version.Minor;
+    }
+
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<EngineVersion>()
             .HasOne(x => x.Plugin)

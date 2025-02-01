@@ -38,9 +38,8 @@ public class PluginDescriptor {
     /// <summary>
     /// Friendly name of the plugin
     /// </summary>
-    [Required]
     [JsonPropertyName("FriendlyName")]
-    public string FriendlyName { get; set; }
+    public string? FriendlyName { get; set; }
 
     /// <summary>
     /// Description of the plugin
@@ -222,7 +221,7 @@ public class PluginDescriptor {
     /// <summary>
     /// When true, an empty SupportedTargetPlatforms is interpreted as 'no platforms' with the expectation that explicit platforms will be added in plugin platform extensions
     /// </summary>
-    [JsonPropertyName("bExplicitlyLoaded")]
+    [JsonPropertyName("bHasExplicitPlatforms")]
     [DefaultValue(false)]
     public bool HasExplicitPlatforms { get; set; } = false;
 
