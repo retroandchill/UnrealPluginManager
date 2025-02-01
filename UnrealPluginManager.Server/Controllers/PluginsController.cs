@@ -13,5 +13,10 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     public IEnumerable<PluginSummary> Get() {
         return pluginService.GetPluginSummaries();
     }
+
+    [HttpPost(Name = "AddPlugin")]
+    public PluginDescriptor Post(PluginDescriptor pluginDescriptor) {
+        throw new NotImplementedException();
+    }
     
 }

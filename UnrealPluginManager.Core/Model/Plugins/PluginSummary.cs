@@ -1,3 +1,5 @@
-﻿namespace UnrealPluginManager.Core.Model.Plugins;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record PluginSummary(string Name, string Description);
+namespace UnrealPluginManager.Core.Model.Plugins;
+
+public record PluginSummary([Required] string Name, [Required] string Description);

@@ -11,7 +11,7 @@ public class Dependency {
     public ulong ChildId { get; set; }
     public Plugin Child { get; set; }
 
-    internal static void ApplyRelationships(ModelBuilder modelBuilder) {
+    internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Dependency>()
             .HasKey(x => new { x.ParentId, x.ChildId });
         

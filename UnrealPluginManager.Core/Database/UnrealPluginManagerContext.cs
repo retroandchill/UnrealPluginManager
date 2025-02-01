@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UnrealPluginManager.Core.Database.Entities.Engine;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
 namespace UnrealPluginManager.Core.Database;
@@ -8,6 +9,7 @@ public class UnrealPluginManagerContext(DbContextOptions<UnrealPluginManagerCont
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        Dependency.ApplyRelationships(modelBuilder);
+        Dependency.DefineModelMetadata(modelBuilder);
+        EngineVersion.DefineModelMetadata(modelBuilder);
     }
 }
