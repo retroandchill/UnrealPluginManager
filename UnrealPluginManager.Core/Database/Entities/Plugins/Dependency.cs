@@ -21,12 +21,18 @@ public class Dependency {
             .HasOne(x => x.Parent)
             .WithMany(x => x.DependsOn)
             .HasForeignKey(x => x.ParentId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
         
         modelBuilder.Entity<Dependency>()
             .HasOne(x => x.Child)
             .WithMany(x => x.DependedBy)
             .HasForeignKey(x => x.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<Dependency>()
+            .HasIndex(x => x.ParentId);
+        
+        modelBuilder.Entity<Dependency>()
+            .HasIndex(x => x.ChildId);
     }
 }

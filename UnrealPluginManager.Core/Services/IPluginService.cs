@@ -39,6 +39,8 @@ public interface IPluginService {
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
     PluginSummary AddPlugin(string pluginName, PluginDescriptor descriptor);
+    
+    IEnumerable<PluginSummary> ImportPlugins(string pluginsFolder, Version? engineVersion = null);
 
     /// <summary>
     /// Imports engine plugins from the specified directory and returns their summaries.
@@ -46,8 +48,9 @@ public interface IPluginService {
     /// <param name="pluginsFolder">
     ///     A directory containing the plugins to be imported.
     /// </param>
+    /// <param name="engineVersion"></param>
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of the imported plugins.
     /// </returns>
-    IEnumerable<PluginSummary> ImportEnginePlugins(string pluginsFolder);
+    IEnumerable<PluginSummary> ImportEnginePlugins(string pluginsFolder, Version? engineVersion = null);
 }

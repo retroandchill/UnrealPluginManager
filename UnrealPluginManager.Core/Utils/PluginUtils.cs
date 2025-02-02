@@ -16,7 +16,6 @@ public static class PluginUtils {
     internal static (string, PluginDescriptor) ReadPluginDescriptorFromFile(string filePath) {
         using var fileStream = new StreamReader(filePath);
         var json = fileStream.ReadToEnd();
-        Console.WriteLine(filePath);
         var descriptor = JsonSerializer.Deserialize<PluginDescriptor>(json, new JsonSerializerOptions {
             AllowTrailingCommas = true
         });

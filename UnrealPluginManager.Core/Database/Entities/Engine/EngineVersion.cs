@@ -35,6 +35,10 @@ public class EngineVersion {
             .WithMany(x => x.CompatibleEngineVersions)
             .HasForeignKey(x => x.PluginId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<EngineVersion>()
+            .HasIndex(x => new { x.PluginId, x.Major, x.Minor })
+            .IsUnique();
     }
     
     

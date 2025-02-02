@@ -33,7 +33,8 @@ namespace UnrealPluginManager.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PluginId");
+                    b.HasIndex("PluginId", "Major", "Minor")
+                        .IsUnique();
 
                     b.ToTable("EngineVersion");
                 });
@@ -53,6 +54,8 @@ namespace UnrealPluginManager.Server.Migrations
 
                     b.HasIndex("ChildId");
 
+                    b.HasIndex("ParentId");
+
                     b.ToTable("Dependency");
                 });
 
@@ -67,6 +70,7 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FriendlyName")
+                        .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -82,7 +86,35 @@ namespace UnrealPluginManager.Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("Type");
+
                     b.ToTable("Plugins");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginAuthor", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AuthorWebsite")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("PluginId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorName");
+
+                    b.HasIndex("PluginId", "AuthorName")
+                        .IsUnique();
+
+                    b.ToTable("PluginAuthor");
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Engine.EngineVersion", b =>
@@ -107,7 +139,7 @@ namespace UnrealPluginManager.Server.Migrations
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Parent")
                         .WithMany("DependsOn")
                         .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Child");
@@ -115,8 +147,21 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginAuthor", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Plugin")
+                        .WithMany("Authors")
+                        .HasForeignKey("PluginId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plugin");
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", b =>
                 {
+                    b.Navigation("Authors");
+
                     b.Navigation("CompatibleEngineVersions");
 
                     b.Navigation("DependedBy");
