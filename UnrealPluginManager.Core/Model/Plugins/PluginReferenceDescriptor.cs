@@ -27,6 +27,7 @@ public class PluginReferenceDescriptor {
 		[JsonPropertyName("bOptional")]
 		public bool Optional { get; set; }
 
+		[JsonPropertyName("PluginType")]
 		public PluginType PluginType { get; set; } = PluginType.Engine;
 
 		/// <summary>
@@ -100,4 +101,8 @@ public class PluginReferenceDescriptor {
 		/// </summary>
 		[JsonPropertyName("RequestedVersion")]
 		public double? RequestedVersion { get; set; }
+		
+	
+		[JsonPropertyName("VersionMatcher")]
+		public string VersionMatcher { get; set; }
 }

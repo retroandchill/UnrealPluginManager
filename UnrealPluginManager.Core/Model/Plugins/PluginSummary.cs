@@ -2,4 +2,4 @@
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
-public record PluginSummary([Required] string Name, string? Description);
+public record PluginSummary([Required] string Name, [Required] Version Version, string? Description);

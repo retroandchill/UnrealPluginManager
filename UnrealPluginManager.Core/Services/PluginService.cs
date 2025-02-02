@@ -13,7 +13,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
     /// <inheritdoc/>
     public IEnumerable<PluginSummary> GetPluginSummaries() {
         return dbContext.Plugins
-            .Select(p => new PluginSummary(p.Name, p.Description))
+            .Select(p => new PluginSummary(p.Name, p.Version, p.Description))
             .ToList();
     }
 
@@ -54,7 +54,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         }
         
         return (new [] { plugin }).Union(found.Values)
-            .Select(x => new PluginSummary(x.Name, x.Description))
+            .Select(x => new PluginSummary(x.Name, x.Version, x.Description))
             .ToList();
     }
 
@@ -65,14 +65,15 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         plugin.Dependencies = descriptor.Plugins
             .Select(x => new Dependency {
                 PluginName = x.Name,
-                Optional = x.Optional
+                Optional = x.Optional,
+                Type = x.PluginType
             })
             .ToList();
         
 
         dbContext.Plugins.Add(plugin);
         dbContext.SaveChanges();
-        return new PluginSummary(plugin.Name, plugin.Description);
+        return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
     }
 
     public IEnumerable<PluginSummary> ImportPlugins(string pluginsFolder) {
@@ -94,7 +95,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         dbContext.SaveChanges();
         transaction.Commit();
         return pluginEntities.Values
-            .Select(x => new PluginSummary(x.Name, x.Description))
+            .Select(x => new PluginSummary(x.Name, x.Version, x.Description))
             .ToList();
     }
 
