@@ -85,16 +85,18 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         var pluginEntities = pluginDescriptors
             .ToDictionary(x => x.Item1.ToLower(), x => MapBasePluginInfo(x.Item1, x.Item2, x.Item3, engineVersion));
         dbContext.Plugins.AddRange(pluginEntities.Values);
-        
-        var pluginNames = pluginDescriptors
-            .SelectMany(x => x.Item2.Plugins)
-            .Select(x => x.Name)
-            .Where(x => !pluginEntities.ContainsKey(x.ToLower()))
-            .ToHashSet();
-        foreach (var plugin in dbContext.Plugins.Where(x => pluginNames.Contains(x.Name))) {
-            pluginEntities[plugin.Name.ToLower()] = plugin;
+
+        if (queryForMissing) {
+            var pluginNames = pluginDescriptors
+                .SelectMany(x => x.Item2.Plugins)
+                .Select(x => x.Name)
+                .Where(x => !pluginEntities.ContainsKey(x.ToLower()))
+                .ToHashSet();
+            foreach (var plugin in dbContext.Plugins.Where(x => pluginNames.Contains(x.Name))) {
+                pluginEntities[plugin.Name.ToLower()] = plugin;
+            }
         }
-        
+
         foreach (var plugin in pluginDescriptors) {
             var entity = pluginEntities[plugin.Item1.ToLower()];
             entity.DependsOn = plugin.Item2.Plugins
