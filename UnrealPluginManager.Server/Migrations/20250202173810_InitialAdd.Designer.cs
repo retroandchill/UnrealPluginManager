@@ -10,8 +10,8 @@ using UnrealPluginManager.Core.Database;
 namespace UnrealPluginManager.Server.Migrations
 {
     [DbContext(typeof(UnrealPluginManagerContext))]
-    [Migration("20250201213813_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250202173810_InitialAdd")]
+    partial class InitialAdd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,9 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Property<ulong>("ChildId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Optional")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("ParentId", "ChildId");
 
                     b.HasIndex("ChildId");
@@ -74,6 +77,9 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -96,13 +102,13 @@ namespace UnrealPluginManager.Server.Migrations
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Child")
-                        .WithMany("DependsOn")
+                        .WithMany("DependedBy")
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Parent")
-                        .WithMany("DependedBy")
+                        .WithMany("DependsOn")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

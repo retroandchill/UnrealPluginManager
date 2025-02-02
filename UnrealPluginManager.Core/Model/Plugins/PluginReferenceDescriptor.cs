@@ -97,5 +97,5 @@ public class PluginReferenceDescriptor {
 		/// When set, specifies a specific version of the plugin that this references.
 		/// </summary>
 		[JsonPropertyName("RequestedVersion")]
-		public int? RequestedVersion { get; set; }
+		public double? RequestedVersion { get; set; }
 }

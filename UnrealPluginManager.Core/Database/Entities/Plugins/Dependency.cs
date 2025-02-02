@@ -10,6 +10,8 @@ public class Dependency {
     
     public ulong ChildId { get; set; }
     public Plugin Child { get; set; }
+    
+    public bool Optional { get; set; }
 
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Dependency>()
@@ -17,13 +19,13 @@ public class Dependency {
         
         modelBuilder.Entity<Dependency>()
             .HasOne(x => x.Parent)
-            .WithMany(x => x.DependedBy)
+            .WithMany(x => x.DependsOn)
             .HasForeignKey(x => x.ParentId)
             .OnDelete(DeleteBehavior.Restrict);
         
         modelBuilder.Entity<Dependency>()
             .HasOne(x => x.Child)
-            .WithMany(x => x.DependsOn)
+            .WithMany(x => x.DependedBy)
             .HasForeignKey(x => x.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
     }

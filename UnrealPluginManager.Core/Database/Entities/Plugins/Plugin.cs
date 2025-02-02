@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database.Entities.Engine;
+using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -21,6 +22,8 @@ public class Plugin {
     [MinLength(1)]
     [MaxLength(2000)]
     public string? Description { get; set; }
+
+    public PluginType Type { get; set; } = PluginType.Provided;
 
     [MinLength(1)]
     public ICollection<EngineVersion> CompatibleEngineVersions { get; set; }

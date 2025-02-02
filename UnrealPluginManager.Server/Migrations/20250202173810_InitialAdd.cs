@@ -5,7 +5,7 @@
 namespace UnrealPluginManager.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialAdd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,8 @@ namespace UnrealPluginManager.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     FriendlyName = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true)
+                    Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +31,8 @@ namespace UnrealPluginManager.Server.Migrations
                 columns: table => new
                 {
                     ParentId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    ChildId = table.Column<ulong>(type: "INTEGER", nullable: false)
+                    ChildId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Optional = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

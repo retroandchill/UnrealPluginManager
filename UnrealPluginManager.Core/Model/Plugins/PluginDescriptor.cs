@@ -25,7 +25,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("Version")]
-    public int Version { get; set; }
+    public double Version { get; set; }
 
     /// <summary>
     /// Name of the version for this plugin.  This is the front-facing part of the version number.  It doesn't need to match
@@ -33,7 +33,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("VersionName")]
-    public Version VersionName { get; set; }
+    public string VersionName { get; set; }
 
     /// <summary>
     /// Friendly name of the plugin
