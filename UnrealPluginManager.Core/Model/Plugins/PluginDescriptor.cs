@@ -33,7 +33,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("VersionName")]
-    public string VersionName { get; set; }
+    public Version VersionName { get; set; }
 
     /// <summary>
     /// Friendly name of the plugin

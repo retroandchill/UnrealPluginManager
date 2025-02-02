@@ -27,6 +27,8 @@ public class PluginReferenceDescriptor {
 		[JsonPropertyName("bOptional")]
 		public bool Optional { get; set; }
 
+		public PluginType PluginType { get; set; } = PluginType.Engine;
+
 		/// <summary>
 		/// Description of the plugin for users that do not have it installed.
 		/// </summary>

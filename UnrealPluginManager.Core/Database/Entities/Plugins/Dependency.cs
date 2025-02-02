@@ -1,38 +1,40 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
 public class Dependency {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public ulong Id { get; set; }
+    
     public ulong ParentId { get; set; }
     public Plugin Parent { get; set; }
     
-    public ulong ChildId { get; set; }
-    public Plugin Child { get; set; }
+    [Required]
+    [MinLength(1)]
+    [MaxLength(255)]
+    [RegularExpression(@"^[A-Z][a-zA-Z0-9]+$", ErrorMessage = "Whitespace is not allowed.")]
+    public string PluginName { get; set; }
+    
+    [MinLength(1)]
+    [MaxLength(255)]
+    public string? PluginVersion { get; set; }
     
     public bool Optional { get; set; }
+    
+    public PluginType Type { get; set; } = PluginType.Provided;
 
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Dependency>()
-            .HasKey(x => new { x.ParentId, x.ChildId });
-        
-        modelBuilder.Entity<Dependency>()
             .HasOne(x => x.Parent)
-            .WithMany(x => x.DependsOn)
+            .WithMany(x => x.Dependencies)
             .HasForeignKey(x => x.ParentId)
             .OnDelete(DeleteBehavior.Cascade);
         
         modelBuilder.Entity<Dependency>()
-            .HasOne(x => x.Child)
-            .WithMany(x => x.DependedBy)
-            .HasForeignKey(x => x.ChildId)
-            .OnDelete(DeleteBehavior.Restrict);
-        
-        modelBuilder.Entity<Dependency>()
             .HasIndex(x => x.ParentId);
-        
-        modelBuilder.Entity<Dependency>()
-            .HasIndex(x => x.ChildId);
     }
 }

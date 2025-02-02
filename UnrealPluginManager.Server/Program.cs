@@ -36,11 +36,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    using var scope = app.Services.CreateScope();
-    var pluginService = scope.ServiceProvider.GetRequiredService<IPluginService>();
-    pluginService.ImportEnginePlugins(@"C:\Program Files\Epic Games\UE_5.5\Engine\Plugins", new Version(5, 5));
-    pluginService.ImportPlugins(@"D:\dev\UnrealProjects\UnrealPokemon", new Version(5, 5));
 }
 
 app.UseHttpsRedirection();
