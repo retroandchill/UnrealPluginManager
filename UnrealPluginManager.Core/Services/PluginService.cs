@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LanguageExt;
+using Microsoft.EntityFrameworkCore;
+using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
@@ -23,53 +27,67 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             .Include(p => p.Dependencies)
             .Where(p => p.Name == pluginName)
             .OrderByDescending(p => p.Version)
-            .Single();
+            .First();
 
-        var unresolved = new HashSet<string>();
-        var found = new Dictionary<string, Plugin>();
+        var pluginData = new Dictionary<string, List<Plugin>> { { plugin.Name, [plugin] } };
+        var unresolved = new System.Collections.Generic.HashSet<string>();
+
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
-            .Select(x => x.PluginName));
+            .Select(pd => pd.PluginName));
         while (unresolved.Any()) {
+            var currentlyExisting = unresolved.ToHashSet();
             var plugins = dbContext.Plugins
                 .Include(p => p.Dependencies)
                 .Where(p => unresolved.Contains(p.Name))
-                .ToList();
-            
-            var candidates = plugins
-                .GroupBy(p => p.Name)
-                .Select(x => x.OrderByDescending(y => y.Version).First());
+                .OrderByDescending(p => p.Version)
+                .AsEnumerable()
+                .GroupBy(x => x.Name);
 
-            foreach (var candidate in candidates) {
-                if (found.ContainsKey(candidate.Name)) {
-                    continue;
-                }
-                
-                found.Add(candidate.Name, candidate);
-                unresolved.Remove(candidate.Name);
-                unresolved.UnionWith(candidate.Dependencies
-                    .Where(x => !found.ContainsKey(x.PluginName) && x.Type == PluginType.Provided)
-                    .Select(x => x.PluginName));
+            foreach (var pluginList in plugins) {
+                unresolved.Remove(pluginList.Key);
+                var asList = pluginList
+                    .OrderByDescending(p => p.Version)
+                    .ToList();
+                pluginData.Add(pluginList.Key, asList);
+
+                unresolved.UnionWith(pluginList
+                    .SelectMany(p => p.Dependencies)
+                    .Where(x => x.Type == PluginType.Provided && !pluginData.ContainsKey(x.PluginName))
+                    .Select(pd => pd.PluginName));
+            }
+
+            var intersection = currentlyExisting.Intersect(unresolved).ToList();
+            if (intersection.Count > 0) {
+                throw new DependencyResolutionException($"Unable to resolve plugin names:\n{string.Join("\n", intersection)}");
             }
         }
+
+        var formula = ExpressionSolver.Convert(pluginName, plugin.Version, pluginData);
+        var bindings = formula.Solve();
+        if (bindings.IsNone) {
+            return [];
+        }
         
-        return (new [] { plugin }).Union(found.Values)
-            .Select(x => new PluginSummary(x.Name, x.Version, x.Description))
+        return bindings.SelectMany(b => b)
+            .Select(p => pluginData[p.Item1].First(d => d.Version == p.Item2))
+            .Select(p => new PluginSummary(p.Name, p.Version, p.Description))
             .ToList();
     }
 
     /// <inheritdoc/>
     public PluginSummary AddPlugin(string pluginName, PluginDescriptor descriptor) {
         var plugin = MapBasePluginInfo(pluginName, descriptor);
-        
+
         plugin.Dependencies = descriptor.Plugins
             .Select(x => new Dependency {
                 PluginName = x.Name,
                 Optional = x.Optional,
-                Type = x.PluginType
+                Type = x.PluginType,
+                PluginVersion = x.VersionMatcher
             })
             .ToList();
-        
+
 
         dbContext.Plugins.Add(plugin);
         dbContext.SaveChanges();
@@ -86,12 +104,12 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         var pluginDescriptors = plugins
             .Select(filePath => PluginUtils.ReadPluginDescriptorFromFile(filePath.Item1).Add(filePath.Item2))
             .ToList();
-        
+
         using var transaction = dbContext.Database.BeginTransaction();
         var pluginEntities = pluginDescriptors
             .ToDictionary(x => x.Item1.ToLower(), x => MapBasePluginInfo(x.Item1, x.Item2));
         dbContext.Plugins.AddRange(pluginEntities.Values);
-        
+
         dbContext.SaveChanges();
         transaction.Commit();
         return pluginEntities.Values
@@ -110,7 +128,8 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             Dependencies = descriptor.Plugins
                 .Select(x => new Dependency {
                     PluginName = x.Name,
-                    Type = x.PluginType
+                    Type = x.PluginType,
+                    PluginVersion = x.VersionMatcher
                 })
                 .ToList()
         };

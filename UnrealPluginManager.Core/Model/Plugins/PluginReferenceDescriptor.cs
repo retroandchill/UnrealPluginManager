@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Semver;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Targets;
 
@@ -100,9 +101,9 @@ public class PluginReferenceDescriptor {
 		/// When set, specifies a specific version of the plugin that this references.
 		/// </summary>
 		[JsonPropertyName("RequestedVersion")]
-		public double? RequestedVersion { get; set; }
+		public int? RequestedVersion { get; set; }
 		
 	
 		[JsonPropertyName("VersionMatcher")]
-		public string VersionMatcher { get; set; }
+		public SemVersionRange VersionMatcher { get; set; }
 }

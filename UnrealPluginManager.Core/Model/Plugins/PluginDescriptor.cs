@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Semver;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Localization;
 using UnrealPluginManager.Core.Model.Scripting;
@@ -25,7 +25,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("Version")]
-    public double Version { get; set; }
+    public int Version { get; set; }
 
     /// <summary>
     /// Name of the version for this plugin.  This is the front-facing part of the version number.  It doesn't need to match

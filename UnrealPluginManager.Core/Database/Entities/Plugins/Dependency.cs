@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -21,7 +22,7 @@ public class Dependency {
     
     [MinLength(1)]
     [MaxLength(255)]
-    public string? PluginVersion { get; set; }
+    public SemVersionRange PluginVersion { get; set; } = SemVersionRange.All;
     
     public bool Optional { get; set; }
     
@@ -36,5 +37,11 @@ public class Dependency {
         
         modelBuilder.Entity<Dependency>()
             .HasIndex(x => x.ParentId);
+        
+        modelBuilder.Entity<Dependency>()
+            .Property(x => x.PluginVersion)
+            .HasConversion(
+                x => x.ToString(), 
+                x => SemVersionRange.Parse(x, 2048));
     }
 }
