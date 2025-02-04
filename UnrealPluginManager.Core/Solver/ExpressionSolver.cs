@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using LanguageExt;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Solver;
@@ -40,7 +41,8 @@ public static class ExpressionSolver {
     public static IExpression Convert<T>(string root, Version rootVersion, IDictionary<string, T> pluginData) where T : IEnumerable<Plugin> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
         foreach (var pack in pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version))) {
-            terms.AddRange(pack.Dependencies.Select(dep => pluginData[dep.PluginName]
+            terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
+                    .Select(dep => pluginData[dep.PluginName]
                     .Where(pd => dep.PluginVersion.Contains(pd.Version.ToSemVersion()))
                     .Select(pd => pd.Version)
                     .Select(v => PackageVar(dep.PluginName, v))

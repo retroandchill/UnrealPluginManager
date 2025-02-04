@@ -16,7 +16,7 @@ public class PluginServiceTests {
     public void Setup() {
         var services = new ServiceCollection();
         services.AddDbContext<UnrealPluginManagerContext>(options => options
-            .UseInMemoryDatabase("TestDb")
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors()
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
