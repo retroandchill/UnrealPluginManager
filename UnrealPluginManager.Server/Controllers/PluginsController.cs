@@ -9,18 +9,19 @@ namespace UnrealPluginManager.Server.Controllers;
 
 [ApiController]
 [ApiExceptionFilter]
+[Route("/api/plugins")]
 public class PluginsController(IPluginService pluginService) : ControllerBase {
-    [HttpGet("/api/plugins")]
+    [HttpGet]
     public IEnumerable<PluginSummary> Get() {
         return pluginService.GetPluginSummaries();
     }
 
-    [HttpPost("/api/plugins")]
+    [HttpPost]
     public PluginSummary Post([FromQuery] string name, [FromBody] PluginDescriptor descriptor) {
         return pluginService.AddPlugin(name, descriptor);
     }
     
-    [HttpGet("/api/plugins/{pluginName}")]
+    [HttpGet("/{pluginName}")]
     public IEnumerable<PluginSummary> GetDependencyTree([FromRoute] string pluginName) {
         return pluginService.GetDependencyList(pluginName);
     }

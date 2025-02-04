@@ -12,7 +12,7 @@ public class PluginReferenceDescriptor {
 		/// </summary>
 		[Required]
 		[JsonPropertyName("Name")]
-		public string Name { get; set; }
+		public string Name { get; set; } = "PlaceholderName";
 
 		/// <summary>
 		/// Whether it should be enabled by default
@@ -41,7 +41,7 @@ public class PluginReferenceDescriptor {
 		/// URL for this plugin on the marketplace, if the user doesn't have it installed.
 		/// </summary>
 		[JsonPropertyName("MarketplaceURL")]
-		public Uri? MarketplaceURL { get; set; }
+		public Uri? MarketplaceUrl { get; set; }
 
 		/// <summary>
 		/// If enabled, list of platforms for which the plugin should be enabled (or all platforms if blank).
@@ -105,5 +105,5 @@ public class PluginReferenceDescriptor {
 		
 	
 		[JsonPropertyName("VersionMatcher")]
-		public SemVersionRange VersionMatcher { get; set; }
+		public SemVersionRange VersionMatcher { get; set; } = SemVersionRange.All;
 }

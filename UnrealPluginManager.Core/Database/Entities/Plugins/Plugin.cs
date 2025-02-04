@@ -15,9 +15,9 @@ public class Plugin {
     [MinLength(1)]
     [MaxLength(255)]
     [RegularExpression(@"^[A-Z][a-zA-Z0-9]+$", ErrorMessage = "Whitespace is not allowed.")]
-    public string Name { get; set; }
-    
-    public Version Version { get; set; }
+    public string Name { get; set; } = "PlaceholderName";
+
+    public Version Version { get; set; } = new Version(1, 0, 0);
     
     [MinLength(1)]
     [MaxLength(255)]
@@ -27,6 +27,8 @@ public class Plugin {
     [MaxLength(2000)]
     public string? Description { get; set; }
     
+    [MinLength(1)]
+    [MaxLength(255)]
     public string? AuthorName { get; set; }
     
     public Uri? AuthorWebsite { get; set; }

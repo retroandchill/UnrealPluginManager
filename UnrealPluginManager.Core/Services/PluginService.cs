@@ -35,7 +35,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
             .Select(pd => pd.PluginName));
-        while (unresolved.Any()) {
+        while (unresolved.Count > 0) {
             var currentlyExisting = unresolved.ToHashSet();
             var plugins = dbContext.Plugins
                 .Include(p => p.Dependencies)
@@ -100,7 +100,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         return ImportPluginFiles(plugins);
     }
 
-    private IEnumerable<PluginSummary> ImportPluginFiles(IEnumerable<(string, PluginType)> plugins) {
+    private List<PluginSummary> ImportPluginFiles(IEnumerable<(string, PluginType)> plugins) {
         var pluginDescriptors = plugins
             .Select(filePath => PluginUtils.ReadPluginDescriptorFromFile(filePath.Item1).Add(filePath.Item2))
             .ToList();
@@ -124,7 +124,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             Version = descriptor.VersionName,
             Description = descriptor.Description,
             AuthorName = !string.IsNullOrWhiteSpace(descriptor.CreatedBy) ? descriptor.CreatedBy : null,
-            AuthorWebsite = descriptor.CreatedByURL,
+            AuthorWebsite = descriptor.CreatedByUrl,
             Dependencies = descriptor.Plugins
                 .Select(x => new Dependency {
                     PluginName = x.Name,

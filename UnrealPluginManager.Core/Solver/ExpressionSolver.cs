@@ -78,7 +78,7 @@ public static class ExpressionSolver {
         return Version.Parse(name.Split("-v")[1]);
     }
 
-    private static ISet<(Version, Version)> AllCombinations(IEnumerable<Version> versions) {
+    private static ImmutableSortedSet<(Version, Version)> AllCombinations(IEnumerable<Version> versions) {
         return versions.Combinations(2)
             .Select(x => x.ToList())
             .Select(x => (x[0], x[1]))

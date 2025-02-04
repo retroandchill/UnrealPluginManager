@@ -13,12 +13,12 @@ public class Dependency {
     
     public ulong ParentId { get; set; }
     public Plugin Parent { get; set; }
-    
+
     [Required]
     [MinLength(1)]
     [MaxLength(255)]
     [RegularExpression(@"^[A-Z][a-zA-Z0-9]+$", ErrorMessage = "Whitespace is not allowed.")]
-    public string PluginName { get; set; }
+    public string PluginName { get; set; } = "PlaceholderName";
     
     [MinLength(1)]
     [MaxLength(255)]
