@@ -17,10 +17,7 @@ public static class ExpressionSolver {
     private static Option<Dictionary<string, bool>> SolveInternal(IExpression expr, Dictionary<string, bool> bindings) {
         var freeVar = AnyVar(expr);
         if (freeVar.IsNone) {
-            if (expr.Evaluate()) {
-                return bindings;
-            }
-            return Option<Dictionary<string, bool>>.None;
+            return expr.Evaluate() ? bindings : Option<Dictionary<string, bool>>.None;
         }
 
         var validatedVar = (string) freeVar;
@@ -43,17 +40,12 @@ public static class ExpressionSolver {
     public static IExpression Convert<T>(string root, Version rootVersion, IDictionary<string, T> pluginData) where T : IEnumerable<Plugin> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
         foreach (var pack in pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version))) {
-            foreach (var dep in pack.Dependencies) {
-                var versions =  pluginData[dep.PluginName]
+            terms.AddRange(pack.Dependencies.Select(dep => pluginData[dep.PluginName]
                     .Where(pd => dep.PluginVersion.Contains(pd.Version.ToSemVersion()))
                     .Select(pd => pd.Version)
-                    .ToList();
-                var deps = versions
                     .Select(v => PackageVar(dep.PluginName, v))
-                    .ToList();
-                var impl = new Impl(PackageVar(pack.Name, pack.Version), new Or(deps));
-                terms.Add(impl);
-            }
+                    .ToList())
+                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version), new Or(deps))));
         }
 
         var variables = new And(terms).Free()
