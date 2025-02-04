@@ -11,7 +11,7 @@ public class TestPermute {
             .Select(x => x.ToList())
             .Select(x => (x[0], x[1]))
             .ToList();
-        Assert.That(permutations.Count, Is.EqualTo(90));
+        Assert.That(permutations, Has.Count.EqualTo(90));
     }
     
     [Test]
@@ -21,6 +21,6 @@ public class TestPermute {
             .Select(x => x.ToList())
             .Select(x => (x[0], x[1]))
             .ToList();
-        Assert.That(combinations.Count, Is.EqualTo(45));
+        Assert.That(combinations, Has.Count.EqualTo(45));
     }
 }

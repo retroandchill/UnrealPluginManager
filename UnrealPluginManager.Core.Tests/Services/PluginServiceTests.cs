@@ -84,19 +84,21 @@ public class PluginServiceTests {
         });
 
         var plugin1List = pluginService.GetDependencyList("Plugin1").ToList();
-        Assert.That(plugin1List.Count, Is.EqualTo(1));
+        Assert.That(plugin1List, Has.Count.EqualTo(1));
         Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
         
         var plugin2List = pluginService.GetDependencyList("Plugin2").ToList();
-        Assert.That(plugin2List.Count, Is.EqualTo(2));
-        Assert.Contains("Plugin1", plugin2List.Select(x => x.Name).ToList());
-        Assert.Contains("Plugin2", plugin2List.Select(x => x.Name).ToList());
+        Assert.That(plugin2List, Has.Count.EqualTo(2));
+        var plugin2Names = plugin2List.Select(x => x.Name).ToList();
+        Assert.That(plugin2Names, Does.Contain("Plugin1"));
+        Assert.That(plugin2Names, Does.Contain("Plugin2"));
         
         var plugin3List = pluginService.GetDependencyList("Plugin3").ToList();
-        Assert.That(plugin3List.Count, Is.EqualTo(3));
-        Assert.Contains("Plugin1", plugin3List.Select(x => x.Name).ToList());
-        Assert.Contains("Plugin2", plugin3List.Select(x => x.Name).ToList());
-        Assert.Contains("Plugin3", plugin3List.Select(x => x.Name).ToList());
+        Assert.That(plugin3List, Has.Count.EqualTo(3));
+        var plugin3Names = plugin3List.Select(x => x.Name).ToList();
+        Assert.That(plugin3Names, Does.Contain("Plugin1"));
+        Assert.That(plugin3Names, Does.Contain("Plugin2"));
+        Assert.That(plugin3Names, Does.Contain("Plugin3"));
     }
     
     [Test]
@@ -281,12 +283,13 @@ public class PluginServiceTests {
         #endregion
         
         var dependencyGraph = pluginService.GetDependencyList("App").ToList();
-        Assert.That(dependencyGraph.Count, Is.EqualTo(5));
-        Assert.That(dependencyGraph.Count, Is.EqualTo(5));
-        Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new Version(2, 0, 0)));
-        Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new Version(4, 0, 0)));
-        Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new Version(2, 0, 0)));
-        Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new Version(4, 0, 0)));
-        Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new Version(1, 0, 0)));
+        Assert.That(dependencyGraph, Has.Count.EqualTo(5));
+        Assert.Multiple(() => {
+            Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new Version(2, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new Version(4, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new Version(2, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new Version(4, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new Version(1, 0, 0)));
+        });
     }
 }
