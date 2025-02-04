@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Semver;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Localization;
 using UnrealPluginManager.Core.Model.Scripting;
@@ -33,7 +33,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("VersionName")]
-    public Version VersionName { get; set; }
+    public Version VersionName { get; set; } = new Version(1, 0, 0);
 
     /// <summary>
     /// Friendly name of the plugin
@@ -63,25 +63,25 @@ public class PluginDescriptor {
     /// Hyperlink URL string for the company or individual who created this plugin.  This is optional.
     /// </summary>
     [JsonPropertyName("CreatedByURL")]
-    public Uri? CreatedByURL { get; set; }
+    public Uri? CreatedByUrl { get; set; }
 
     /// <summary>
     /// Documentation URL string.
     /// </summary>
     [JsonPropertyName("DocsURL")]
-    public Uri? DocsURL { get; set; }
+    public Uri? DocsUrl { get; set; }
 
     /// <summary>
     /// Marketplace URL for this plugin. This URL will be embedded into projects that enable this plugin, so we can redirect to the marketplace if a user doesn't have it installed.
     /// </summary>
     [JsonPropertyName("MarketplaceURL")]
-    public Uri? MarketplaceURL { get; set; }
+    public Uri? MarketplaceUrl { get; set; }
 
     /// <summary>
     /// Support URL/email for this plugin.
     /// </summary>
     [JsonPropertyName("SupportURL")]
-    public Uri? SupportURL { get; set; }
+    public Uri? SupportUrl { get; set; }
 
     /// <summary>
     /// Sets the version of the engine that this plugin is compatible with.

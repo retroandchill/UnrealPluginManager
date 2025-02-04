@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Semver;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Targets;
 
@@ -11,7 +12,7 @@ public class PluginReferenceDescriptor {
 		/// </summary>
 		[Required]
 		[JsonPropertyName("Name")]
-		public string Name { get; set; }
+		public string Name { get; set; } = "PlaceholderName";
 
 		/// <summary>
 		/// Whether it should be enabled by default
@@ -27,6 +28,9 @@ public class PluginReferenceDescriptor {
 		[JsonPropertyName("bOptional")]
 		public bool Optional { get; set; }
 
+		[JsonPropertyName("PluginType")]
+		public PluginType PluginType { get; set; } = PluginType.Engine;
+
 		/// <summary>
 		/// Description of the plugin for users that do not have it installed.
 		/// </summary>
@@ -37,7 +41,7 @@ public class PluginReferenceDescriptor {
 		/// URL for this plugin on the marketplace, if the user doesn't have it installed.
 		/// </summary>
 		[JsonPropertyName("MarketplaceURL")]
-		public Uri? MarketplaceURL { get; set; }
+		public Uri? MarketplaceUrl { get; set; }
 
 		/// <summary>
 		/// If enabled, list of platforms for which the plugin should be enabled (or all platforms if blank).
@@ -98,4 +102,8 @@ public class PluginReferenceDescriptor {
 		/// </summary>
 		[JsonPropertyName("RequestedVersion")]
 		public int? RequestedVersion { get; set; }
+		
+	
+		[JsonPropertyName("VersionMatcher")]
+		public SemVersionRange VersionMatcher { get; set; } = SemVersionRange.All;
 }

@@ -12,8 +12,11 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<UnrealPluginManagerContext>(options => options.UseSqlite("Filename=dev.sqlite", 
-    b => b.MigrationsAssembly("UnrealPluginManager.Server")));
+builder.Services.AddDbContext<UnrealPluginManagerContext>(options => 
+    options.UseSqlite("Filename=dev.sqlite", b => 
+        b.MigrationsAssembly("UnrealPluginManager.Server")
+            .MinBatchSize(1)
+            .MaxBatchSize(100)));
 builder.Services.AddScoped<IPluginService, PluginService>();
 
 if (builder.Environment.IsDevelopment()) {
