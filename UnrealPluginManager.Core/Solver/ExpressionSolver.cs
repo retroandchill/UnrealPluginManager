@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using LanguageExt;
+using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Utils;
@@ -7,7 +8,7 @@ using UnrealPluginManager.Core.Utils;
 namespace UnrealPluginManager.Core.Solver;
 
 public static class ExpressionSolver {
-    public static Option<List<(string, Version)>> Solve(this IExpression expr) {
+    public static Option<List<(string, SemVersion)>> Solve(this IExpression expr) {
         var selected = SolveInternal(expr, new Dictionary<string, bool>());
         return selected
             .Select(x => x.Where(y => y.Value)
@@ -38,12 +39,12 @@ public static class ExpressionSolver {
         return variables.Count != 0 ? variables[0] : Option<string>.None;
     }
 
-    public static IExpression Convert<T>(string root, Version rootVersion, IDictionary<string, T> pluginData) where T : IEnumerable<Plugin> {
+    public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData) where T : IEnumerable<Plugin> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
-        foreach (var pack in pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version))) {
+        foreach (var pack in pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
             terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
                     .Select(dep => pluginData[dep.PluginName]
-                    .Where(pd => dep.PluginVersion.Contains(pd.Version.ToSemVersion()))
+                    .Where(pd => dep.PluginVersion.Contains(pd.Version))
                     .Select(pd => pd.Version)
                     .Select(v => PackageVar(dep.PluginName, v))
                     .ToList())
@@ -59,7 +60,7 @@ public static class ExpressionSolver {
             var versions = variables
                 .Where(v => VarName(v) == name)
                 .Select(VarVersion)
-                .ToImmutableSortedSet();
+                .ToHashSet();
             terms.AddRange(AllCombinations(versions)
                 .Select(combo => 
                     new Not(new And([PackageVar(name, combo.Item1), PackageVar(name, combo.Item2)]))));
@@ -68,7 +69,7 @@ public static class ExpressionSolver {
         return new And(terms);
     }
     
-    private static Var PackageVar(string name, Version version) {
+    private static Var PackageVar(string name, SemVersion version) {
         return new Var($"{name}-v{version}");
     }
 
@@ -76,15 +77,15 @@ public static class ExpressionSolver {
         return name.Split("-v")[0];
     }
 
-    private static Version VarVersion(string name) {
-        return Version.Parse(name.Split("-v")[1]);
+    private static SemVersion VarVersion(string name) {
+        return SemVersion.Parse(name.Split("-v")[1]);
     }
 
-    private static ImmutableSortedSet<(Version, Version)> AllCombinations(IEnumerable<Version> versions) {
+    private static List<(SemVersion, SemVersion)> AllCombinations(IEnumerable<SemVersion> versions) {
         return versions.Combinations(2)
             .Select(x => x.ToList())
             .Select(x => (x[0], x[1]))
-            .ToImmutableSortedSet();
+            .ToList();
     }
     
     

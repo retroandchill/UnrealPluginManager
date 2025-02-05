@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Tests", "UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj", "{F4529935-7CAC-4257-8228-DE20D74AD955}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server.Tests", "UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj", "{0DF810B9-0E26-4639-A5FA-0537C7D964D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{F4529935-7CAC-4257-8228-DE20D74AD955}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4529935-7CAC-4257-8228-DE20D74AD955}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4529935-7CAC-4257-8228-DE20D74AD955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DF810B9-0E26-4639-A5FA-0537C7D964D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DF810B9-0E26-4639-A5FA-0537C7D964D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DF810B9-0E26-4639-A5FA-0537C7D964D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DF810B9-0E26-4639-A5FA-0537C7D964D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

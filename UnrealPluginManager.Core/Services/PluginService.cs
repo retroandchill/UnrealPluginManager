@@ -1,4 +1,4 @@
-﻿using LanguageExt;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -6,7 +6,6 @@ using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Solver;
-using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -15,39 +14,43 @@ namespace UnrealPluginManager.Core.Services;
 /// </summary>
 public class PluginService(UnrealPluginManagerContext dbContext) : IPluginService {
     /// <inheritdoc/>
-    public IEnumerable<PluginSummary> GetPluginSummaries() {
-        return dbContext.Plugins
-            .Select(p => new PluginSummary(p.Name, p.Version, p.Description))
-            .ToList();
+    public async Task<List<PluginSummary>> GetPluginSummaries() {
+        return await dbContext.Plugins
+            .GroupBy(x => x.Name)
+            .Select(g => g.OrderByDescending(x => x.VersionString).FirstOrDefault())
+            .AsAsyncEnumerable()
+            .Where(p => p != null)
+            .Select(p => new PluginSummary(p!.Name, p.Version, p.Description))
+            .ToListAsync();
     }
 
     /// <inheritdoc/>
-    public IEnumerable<PluginSummary> GetDependencyList(string pluginName) {
-        var plugin = dbContext.Plugins
+    public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
+        var plugin = await dbContext.Plugins
             .Include(p => p.Dependencies)
             .Where(p => p.Name == pluginName)
-            .OrderByDescending(p => p.Version)
-            .First();
+            .OrderByDescending(p => p.VersionString)
+            .FirstAsync();
 
         var pluginData = new Dictionary<string, List<Plugin>> { { plugin.Name, [plugin] } };
-        var unresolved = new System.Collections.Generic.HashSet<string>();
+        var unresolved = new HashSet<string>();
 
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
             .Select(pd => pd.PluginName));
         while (unresolved.Count > 0) {
             var currentlyExisting = unresolved.ToHashSet();
-            var plugins = dbContext.Plugins
+            var plugins = (await dbContext.Plugins
                 .Include(p => p.Dependencies)
                 .Where(p => unresolved.Contains(p.Name))
-                .OrderByDescending(p => p.Version)
-                .AsEnumerable()
+                .OrderByDescending(p => p.VersionString)
+                .ToListAsync())
                 .GroupBy(x => x.Name);
 
             foreach (var pluginList in plugins) {
                 unresolved.Remove(pluginList.Key);
                 var asList = pluginList
-                    .OrderByDescending(p => p.Version)
+                    .OrderByDescending(p => p.Version, SemVersion.PrecedenceComparer)
                     .ToList();
                 pluginData.Add(pluginList.Key, asList);
 
@@ -76,7 +79,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
     }
 
     /// <inheritdoc/>
-    public PluginSummary AddPlugin(string pluginName, PluginDescriptor descriptor) {
+    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor) {
         var plugin = MapBasePluginInfo(pluginName, descriptor);
 
         plugin.Dependencies = descriptor.Plugins
@@ -90,31 +93,8 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
 
 
         dbContext.Plugins.Add(plugin);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
-    }
-
-    public IEnumerable<PluginSummary> ImportPlugins(string pluginsFolder) {
-        var plugins = Directory.EnumerateFiles(pluginsFolder, "*.uplugin", SearchOption.AllDirectories)
-            .Select(x => (x, PluginType.Provided));
-        return ImportPluginFiles(plugins);
-    }
-
-    private List<PluginSummary> ImportPluginFiles(IEnumerable<(string, PluginType)> plugins) {
-        var pluginDescriptors = plugins
-            .Select(filePath => PluginUtils.ReadPluginDescriptorFromFile(filePath.Item1).Add(filePath.Item2))
-            .ToList();
-
-        using var transaction = dbContext.Database.BeginTransaction();
-        var pluginEntities = pluginDescriptors
-            .ToDictionary(x => x.Item1.ToLower(), x => MapBasePluginInfo(x.Item1, x.Item2));
-        dbContext.Plugins.AddRange(pluginEntities.Values);
-
-        dbContext.SaveChanges();
-        transaction.Commit();
-        return pluginEntities.Values
-            .Select(x => new PluginSummary(x.Name, x.Version, x.Description))
-            .ToList();
     }
 
     private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor) {
