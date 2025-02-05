@@ -3,4 +3,4 @@ using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
-public record PluginSummary([Required] string Name, [Required] Version Version, string? Description);
+public record PluginSummary([Required] string Name, [Required] SemVersion Version, string? Description);

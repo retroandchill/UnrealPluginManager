@@ -13,18 +13,18 @@ public interface IPluginService {
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
-    IEnumerable<PluginSummary> GetPluginSummaries();
+    List<PluginSummary> GetPluginSummaries();
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
     /// </summary>
     /// <param name="pluginName">
-    /// The name of the plugin for which to retrieve the dependency list.
+    ///     The name of the plugin for which to retrieve the dependency list.
     /// </param>
     /// <returns>
     /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
     /// </returns>
-    IEnumerable<PluginSummary> GetDependencyList(string pluginName);
+    List<PluginSummary> GetDependencyList(string pluginName);
 
     /// <summary>
     /// Adds a new plugin to the system using the provided plugin name and descriptor information.
@@ -39,6 +39,4 @@ public interface IPluginService {
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
     PluginSummary AddPlugin(string pluginName, PluginDescriptor descriptor);
-    
-    IEnumerable<PluginSummary> ImportPlugins(string pluginsFolder);
 }

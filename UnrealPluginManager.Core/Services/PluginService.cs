@@ -1,4 +1,4 @@
-﻿using LanguageExt;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -15,22 +15,26 @@ namespace UnrealPluginManager.Core.Services;
 /// </summary>
 public class PluginService(UnrealPluginManagerContext dbContext) : IPluginService {
     /// <inheritdoc/>
-    public IEnumerable<PluginSummary> GetPluginSummaries() {
+    public List<PluginSummary> GetPluginSummaries() {
         return dbContext.Plugins
-            .Select(p => new PluginSummary(p.Name, p.Version, p.Description))
+            .GroupBy(x => x.Name)
+            .Select(g => g.OrderByDescending(x => x.VersionString).FirstOrDefault())
+            .AsEnumerable()
+            .Where(p => p != null)
+            .Select(p => new PluginSummary(p!.Name, p.Version, p.Description))
             .ToList();
     }
 
     /// <inheritdoc/>
-    public IEnumerable<PluginSummary> GetDependencyList(string pluginName) {
+    public List<PluginSummary> GetDependencyList(string pluginName) {
         var plugin = dbContext.Plugins
             .Include(p => p.Dependencies)
             .Where(p => p.Name == pluginName)
-            .OrderByDescending(p => p.Version)
+            .OrderByDescending(p => p.VersionString)
             .First();
 
         var pluginData = new Dictionary<string, List<Plugin>> { { plugin.Name, [plugin] } };
-        var unresolved = new System.Collections.Generic.HashSet<string>();
+        var unresolved = new HashSet<string>();
 
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
@@ -40,14 +44,14 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             var plugins = dbContext.Plugins
                 .Include(p => p.Dependencies)
                 .Where(p => unresolved.Contains(p.Name))
-                .OrderByDescending(p => p.Version)
+                .OrderByDescending(p => p.VersionString)
                 .AsEnumerable()
                 .GroupBy(x => x.Name);
 
             foreach (var pluginList in plugins) {
                 unresolved.Remove(pluginList.Key);
                 var asList = pluginList
-                    .OrderByDescending(p => p.Version)
+                    .OrderByDescending(p => p.Version, SemVersion.PrecedenceComparer)
                     .ToList();
                 pluginData.Add(pluginList.Key, asList);
 
@@ -94,7 +98,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
     }
 
-    public IEnumerable<PluginSummary> ImportPlugins(string pluginsFolder) {
+    public List<PluginSummary> ImportPlugins(string pluginsFolder) {
         var plugins = Directory.EnumerateFiles(pluginsFolder, "*.uplugin", SearchOption.AllDirectories)
             .Select(x => (x, PluginType.Provided));
         return ImportPluginFiles(plugins);
