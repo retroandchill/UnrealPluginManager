@@ -17,8 +17,9 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     }
 
     [HttpPost]
-    public async Task<PluginSummary> Post([FromQuery] string name, [FromBody] PluginDescriptor descriptor) {
-        return await pluginService.AddPlugin(name, descriptor);
+    public async Task<PluginSummary> Post([FromForm] IFormFile pluginFile) {
+        await using var stream = pluginFile.OpenReadStream();
+        return await pluginService.SubmitPlugin(stream);
     }
     
     [HttpGet("/{pluginName}")]

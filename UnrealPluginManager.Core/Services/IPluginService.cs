@@ -39,4 +39,6 @@ public interface IPluginService {
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
     Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor);
+
+    Task<PluginSummary> SubmitPlugin(Stream fileData);
 }

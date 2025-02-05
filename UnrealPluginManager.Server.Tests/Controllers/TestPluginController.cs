@@ -36,12 +36,13 @@ public class TestPluginController {
 
     [Test]
     public async Task TestBasicAddAndGet() {
-        await _pluginsController.Post("Plugin1", new PluginDescriptor {
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
         });
         
-        await _pluginsController.Post("Plugin2", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -58,7 +59,7 @@ public class TestPluginController {
             ]
         });
         
-        await _pluginsController.Post("Plugin3", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -69,7 +70,7 @@ public class TestPluginController {
             ]
         });
         
-        await _pluginsController.Post("Plugin3", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
             Plugins = [
@@ -80,7 +81,7 @@ public class TestPluginController {
             ]
         });
         
-        await _pluginsController.Post("Plugin4", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin4", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
             Plugins = []

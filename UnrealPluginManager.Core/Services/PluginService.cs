@@ -1,4 +1,7 @@
 ﻿
+using System.CodeDom.Compiler;
+using System.IO.Compression;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -13,6 +16,11 @@ namespace UnrealPluginManager.Core.Services;
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
 public class PluginService(UnrealPluginManagerContext dbContext) : IPluginService {
+    
+    private static readonly JsonSerializerOptions JsonOptions = new() {
+        AllowTrailingCommas = true
+    };
+    
     /// <inheritdoc/>
     public async Task<List<PluginSummary>> GetPluginSummaries() {
         return await dbContext.Plugins
@@ -115,5 +123,31 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
         };
 
         return plugin;
+    }
+    
+    public async Task<PluginSummary> SubmitPlugin(Stream fileData) {
+        // TODO: We need to handle actually saving the uploaded zip file to storage. We want it to remain zipped up to
+        // save space and to cut down on processing time when downloading from the server.
+        using var archive = new ZipArchive(fileData);
+        
+        var archiveEntry = archive.Entries
+            .FirstOrDefault(entry => entry.FullName.EndsWith(".uplugin"));
+        if (archiveEntry is null) {
+            throw new BadSubmissionException("Uplugin file was not found");
+        }
+
+        var baseName = Path.GetFileNameWithoutExtension(archiveEntry.FullName);
+        await using var upluginFile = archiveEntry.Open();
+
+        try {
+            var descriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
+            if (descriptor is null) {
+                throw new BadSubmissionException("Uplugin file was malformed");
+            }
+            
+            return await AddPlugin(baseName, descriptor);
+        } catch (JsonException e) {
+            throw new BadSubmissionException("Uplugin file was malformed", e);
+        }
     }
 }
