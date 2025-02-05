@@ -12,18 +12,18 @@ namespace UnrealPluginManager.Server.Controllers;
 [Route("/api/plugins")]
 public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet]
-    public IEnumerable<PluginSummary> Get() {
-        return pluginService.GetPluginSummaries();
+    public async Task<List<PluginSummary>> Get() {
+        return await pluginService.GetPluginSummaries();
     }
 
     [HttpPost]
-    public PluginSummary Post([FromQuery] string name, [FromBody] PluginDescriptor descriptor) {
-        return pluginService.AddPlugin(name, descriptor);
+    public async Task<PluginSummary> Post([FromQuery] string name, [FromBody] PluginDescriptor descriptor) {
+        return await pluginService.AddPlugin(name, descriptor);
     }
     
     [HttpGet("/{pluginName}")]
-    public IEnumerable<PluginSummary> GetDependencyTree([FromRoute] string pluginName) {
-        return pluginService.GetDependencyList(pluginName);
+    public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
+        return await pluginService.GetDependencyList(pluginName);
     }
     
     

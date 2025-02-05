@@ -31,7 +31,7 @@ public class PluginServiceTests {
     }
 
     [Test]
-    public void TestGetPlugins() {
+    public async Task TestGetPlugins() {
         var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
         var plugins = Enumerable.Range(1, 10)
             .SelectMany(i => new [] { 
@@ -47,22 +47,22 @@ public class PluginServiceTests {
                 } 
             });
         context.AddRange(plugins);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
         
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = pluginService.GetPluginSummaries();
+        var summaries = await pluginService.GetPluginSummaries();
         Assert.That(summaries, Has.Count.EqualTo(10));
     }
     
     [Test]
-    public void TestAddPlugins() {
+    public async Task TestAddPlugins() {
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        pluginService.AddPlugin("Plugin1", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
         });
         
-        pluginService.AddPlugin("Plugin2", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -79,7 +79,7 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Plugin3", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -90,7 +90,7 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Plugin3", new PluginDescriptor {
+        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
             Plugins = [
@@ -101,17 +101,17 @@ public class PluginServiceTests {
             ]
         });
 
-        var plugin1List = pluginService.GetDependencyList("Plugin1").ToList();
+        var plugin1List = await pluginService.GetDependencyList("Plugin1");
         Assert.That(plugin1List, Has.Count.EqualTo(1));
         Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
         
-        var plugin2List = pluginService.GetDependencyList("Plugin2").ToList();
+        var plugin2List = await pluginService.GetDependencyList("Plugin2");
         Assert.That(plugin2List, Has.Count.EqualTo(2));
         var plugin2Names = plugin2List.Select(x => x.Name).ToList();
         Assert.That(plugin2Names, Does.Contain("Plugin1"));
         Assert.That(plugin2Names, Does.Contain("Plugin2"));
         
-        var plugin3List = pluginService.GetDependencyList("Plugin3").ToList();
+        var plugin3List = await pluginService.GetDependencyList("Plugin3");
         Assert.That(plugin3List, Has.Count.EqualTo(3));
         var plugin3Names = plugin3List.Select(x => x.Name).ToList();
         Assert.That(plugin3Names, Does.Contain("Plugin1"));
@@ -120,10 +120,10 @@ public class PluginServiceTests {
     }
     
     [Test]
-    public void TestAddPluginVersions() {
+    public async Task TestAddPluginVersions() {
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         #region Setup
-        pluginService.AddPlugin("App", new PluginDescriptor {
+        await pluginService.AddPlugin("App", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -150,11 +150,11 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Sql", new PluginDescriptor {
+        await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0)
         });
-        pluginService.AddPlugin("Sql", new PluginDescriptor {
+        await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -170,7 +170,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Sql", new PluginDescriptor {
+        await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
             Plugins = [
@@ -187,7 +187,7 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Threads", new PluginDescriptor {
+        await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
             Plugins = [
@@ -198,7 +198,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Threads", new PluginDescriptor {
+        await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -209,7 +209,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Threads", new PluginDescriptor {
+        await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
             Plugins = [
@@ -221,7 +221,7 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Http", new PluginDescriptor {
+        await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
             Plugins = [
@@ -232,7 +232,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Http", new PluginDescriptor {
+        await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -243,7 +243,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Http", new PluginDescriptor {
+        await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
             Plugins = [
@@ -255,7 +255,7 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("Http", new PluginDescriptor {
+        await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 4,
             VersionName = new SemVersion(3, 0, 0),
             Plugins = [
@@ -266,7 +266,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        pluginService.AddPlugin("Http", new PluginDescriptor {
+        await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 5,
             VersionName = new SemVersion(4, 0, 0),
             Plugins = [
@@ -278,29 +278,29 @@ public class PluginServiceTests {
             ]
         });
         
-        pluginService.AddPlugin("StdLib", new PluginDescriptor {
+        await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
         });
-        pluginService.AddPlugin("StdLib", new PluginDescriptor {
+        await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
         });
-        pluginService.AddPlugin("StdLib", new PluginDescriptor {
+        await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
         });
-        pluginService.AddPlugin("StdLib", new PluginDescriptor {
+        await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 4,
             VersionName = new SemVersion(3, 0, 0),
         });
-        pluginService.AddPlugin("StdLib", new PluginDescriptor {
+        await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 5,
             VersionName = new SemVersion(4, 0, 0),
         });
         #endregion
         
-        var dependencyGraph = pluginService.GetDependencyList("App").ToList();
+        var dependencyGraph = await pluginService.GetDependencyList("App");
         Assert.That(dependencyGraph, Has.Count.EqualTo(5));
         Assert.Multiple(() => {
             Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
