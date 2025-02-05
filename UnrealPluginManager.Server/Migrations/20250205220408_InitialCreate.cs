@@ -17,10 +17,10 @@ namespace UnrealPluginManager.Server.Migrations
                     Id = table.Column<ulong>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    Version = table.Column<string>(type: "TEXT", nullable: false),
+                    Version = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     FriendlyName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
                     Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
-                    AuthorName = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthorName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
                     AuthorWebsite = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -36,7 +36,7 @@ namespace UnrealPluginManager.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ParentId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     PluginName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    PluginVersion = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
+                    PluginVersion = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     Optional = table.Column<bool>(type: "INTEGER", nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -55,12 +55,6 @@ namespace UnrealPluginManager.Server.Migrations
                 name: "IX_Dependency_ParentId",
                 table: "Dependency",
                 column: "ParentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Plugins_Name_Version",
-                table: "Plugins",
-                columns: new[] { "Name", "Version" },
-                unique: true);
         }
 
         /// <inheritdoc />

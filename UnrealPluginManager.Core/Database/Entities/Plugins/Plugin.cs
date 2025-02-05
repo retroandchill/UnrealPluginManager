@@ -49,8 +49,8 @@ public class Plugin {
             .HasIndex(x => new { x.Name, x.Version })
             .IsUnique();
         
+        
         modelBuilder.Entity<Plugin>()
-            .Property(x => x.Version)
-            .HasConversion(x => x.ToString(), x => SemVersion.Parse(x, 1024));
+            .Ignore(x => x.Version);
     }
 }

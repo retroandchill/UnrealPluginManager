@@ -10,7 +10,7 @@ using UnrealPluginManager.Core.Database;
 namespace UnrealPluginManager.Server.Migrations
 {
     [DbContext(typeof(UnrealPluginManagerContext))]
-    [Migration("20250202194916_InitialCreate")]
+    [Migration("20250205220408_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -37,6 +37,7 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PluginVersion")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
@@ -57,6 +58,7 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AuthorName")
+                        .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AuthorWebsite")
@@ -75,14 +77,13 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Version")
+                    b.Property<string>("VersionString")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("Version");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name", "Version")
-                        .IsUnique();
 
                     b.ToTable("Plugins");
                 });
