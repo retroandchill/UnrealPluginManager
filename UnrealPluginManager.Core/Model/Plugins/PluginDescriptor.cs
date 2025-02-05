@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Localization;
 using UnrealPluginManager.Core.Model.Scripting;
@@ -33,6 +34,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("VersionName")]
+    [JsonConverter(typeof(SemVersionJsonConverter))]
     public SemVersion VersionName { get; set; } = new(1, 0, 0);
 
     /// <summary>

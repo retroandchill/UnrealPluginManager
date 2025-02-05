@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
+using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Swagger;
@@ -19,8 +22,19 @@ builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
             .MaxBatchSize(100)));
 builder.Services.AddScoped<IPluginService, PluginService>();
 
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 250 * 1024 * 1024);
+
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddSwaggerGen(options => {
+        options.MapType<SemVersion>(() => new OpenApiSchema {
+            Type = "string",
+            Pattern = @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
+            Example = new OpenApiString("1.0.0")
+        });
+        options.MapType<SemVersionRange>(() => new OpenApiSchema {
+            Type = "string",
+            Example = new OpenApiString(">=1.0.0")
+        });
         options.AddSchemaFilterInstance(new CollectionPropertyFilter());
     });
 }

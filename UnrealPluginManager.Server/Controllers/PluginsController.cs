@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -17,12 +18,13 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     }
 
     [HttpPost]
-    public async Task<PluginSummary> Post([FromForm] IFormFile pluginFile) {
+    [Consumes(MediaTypeNames.Multipart.FormData)]
+    public async Task<PluginSummary> Post(IFormFile pluginFile) {
         await using var stream = pluginFile.OpenReadStream();
         return await pluginService.SubmitPlugin(stream);
     }
     
-    [HttpGet("/{pluginName}")]
+    [HttpGet("{pluginName}")]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
         return await pluginService.GetDependencyList(pluginName);
     }
