@@ -1,17 +1,17 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Tests.Helpers;
+using UnrealPluginManager.Server.Controllers;
 
-namespace UnrealPluginManager.Core.Tests.Services;
+namespace UnrealPluginManager.Server.Tests.Controllers;
 
-public class PluginServiceTests {
+public class TestPluginController {
     
     private ServiceProvider _serviceProvider;
+    private PluginsController _pluginsController;
     
     [SetUp]
     public void Setup() {
@@ -24,46 +24,24 @@ public class PluginServiceTests {
             .LogTo(Console.WriteLine));
         services.AddScoped<IPluginService, PluginService>();
         _serviceProvider = services.BuildServiceProvider();
+        
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        _pluginsController = new PluginsController(pluginService);
     }
-
+    
     [TearDown]
     public void TearDown() {
         _serviceProvider.Dispose();
     }
 
     [Test]
-    public async Task TestGetPlugins() {
-        var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
-        var plugins = Enumerable.Range(1, 10)
-            .SelectMany(i => new [] { 
-                new Plugin {
-                    Name = "Plugin" + i,
-                    FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 0, 0)
-                },
-                new Plugin {
-                    Name = "Plugin" + i,
-                    FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 2, 2)
-                } 
-            });
-        context.AddRange(plugins);
-        await context.SaveChangesAsync();
-        
-        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = await pluginService.GetPluginSummaries();
-        Assert.That(summaries, Has.Count.EqualTo(10));
-    }
-    
-    [Test]
-    public async Task TestAddPlugins() {
-        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
+    public async Task TestBasicAddAndGet() {
+        await _pluginsController.Post("Plugin1", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
         });
         
-        await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
+        await _pluginsController.Post("Plugin2", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -80,7 +58,7 @@ public class PluginServiceTests {
             ]
         });
         
-        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
+        await _pluginsController.Post("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
             Plugins = [
@@ -91,7 +69,7 @@ public class PluginServiceTests {
             ]
         });
         
-        await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
+        await _pluginsController.Post("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
             Plugins = [
@@ -101,38 +79,32 @@ public class PluginServiceTests {
                 }
             ]
         });
+        
+        await _pluginsController.Post("Plugin4", new PluginDescriptor {
+            Version = 1,
+            VersionName = new SemVersion(1, 2, 1),
+            Plugins = []
+        });
 
-        var plugin1List = await pluginService.GetDependencyList("Plugin1");
+        var plugin1List = await _pluginsController.GetDependencyTree("Plugin1");
         Assert.That(plugin1List, Has.Count.EqualTo(1));
         Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
         
-        var plugin2List = await pluginService.GetDependencyList("Plugin2");
+        var plugin2List = await _pluginsController.GetDependencyTree("Plugin2");
         Assert.That(plugin2List, Has.Count.EqualTo(2));
         var plugin2Names = plugin2List.Select(x => x.Name).ToList();
         Assert.That(plugin2Names, Does.Contain("Plugin1"));
         Assert.That(plugin2Names, Does.Contain("Plugin2"));
         
-        var plugin3List = await pluginService.GetDependencyList("Plugin3");
+        var plugin3List = await _pluginsController.GetDependencyTree("Plugin3");
         Assert.That(plugin3List, Has.Count.EqualTo(3));
         var plugin3Names = plugin3List.Select(x => x.Name).ToList();
         Assert.That(plugin3Names, Does.Contain("Plugin1"));
         Assert.That(plugin3Names, Does.Contain("Plugin2"));
         Assert.That(plugin3Names, Does.Contain("Plugin3"));
+
+        var allPluginsList = await _pluginsController.Get();
+        Assert.That(allPluginsList, Has.Count.EqualTo(4));
     }
     
-    [Test]
-    public async Task TestAddPluginVersions() {
-        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        await pluginService.SetupVersionResolutionTree();
-        
-        var dependencyGraph = await pluginService.GetDependencyList("App");
-        Assert.That(dependencyGraph, Has.Count.EqualTo(5));
-        Assert.Multiple(() => {
-            Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
-            Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
-            Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
-            Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
-            Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
-        });
-    }
 }
