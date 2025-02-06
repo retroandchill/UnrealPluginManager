@@ -42,4 +42,6 @@ public interface IPluginService {
     Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile = null);
 
     Task<PluginSummary> SubmitPlugin(Stream fileData);
+    
+    Task<Stream> GetPluginFileData(string pluginName); 
 }

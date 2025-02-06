@@ -36,4 +36,8 @@ public class CloudStorageService : IStorageService {
         
         return new FileInfo(fullPath);
     }
+
+    public Stream RetrievePlugin(FileInfo fileInfo) {
+        return fileInfo.OpenRead();
+    }
 }

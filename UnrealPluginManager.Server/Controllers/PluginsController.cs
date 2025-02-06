@@ -1,4 +1,6 @@
-﻿using System.Net.Mime;
+﻿using System.Net;
+using System.Net.Mime;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -27,6 +29,14 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet("{pluginName}")]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
         return await pluginService.GetDependencyList(pluginName);
+    }
+    
+    [HttpGet("{pluginName}/download")]
+    [Produces(MediaTypeNames.Application.Zip)]
+    [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
+    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName) {
+        return File(await pluginService.GetPluginFileData(pluginName), MediaTypeNames.Application.Zip, 
+            $"{pluginName}.zip");
     }
     
     

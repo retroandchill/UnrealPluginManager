@@ -147,4 +147,17 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
     }
+
+    public async Task<Stream> GetPluginFileData(string pluginName) {
+        var pluginInfo = await dbContext.UploadedPlugins
+            .Include(x => x.Parent)
+            .Where(p => p.Parent.Name == pluginName)
+            .OrderByDescending(p => p.Parent.VersionString)
+            .FirstOrDefaultAsync();
+        if (pluginInfo == null) {
+            throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
+        }
+
+        return storageService.RetrievePlugin(pluginInfo.FilePath);
+    }
 }
