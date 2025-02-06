@@ -40,7 +40,7 @@ public class TestPluginController {
         await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
-        });
+        }, null);
         
         await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
             Version = 1,
@@ -57,7 +57,7 @@ public class TestPluginController {
                     VersionMatcher = SemVersionRange.Parse(">=1.0.0")
                 }
             ]
-        });
+        }, null);
         
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
@@ -68,7 +68,7 @@ public class TestPluginController {
                     PluginType = PluginType.Provided
                 }
             ]
-        });
+        }, null);
         
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
@@ -79,13 +79,13 @@ public class TestPluginController {
                     PluginType = PluginType.Provided
                 }
             ]
-        });
+        }, null);
         
         await pluginService.AddPlugin("Plugin4", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
             Plugins = []
-        });
+        }, null);
 
         var plugin1List = await _pluginsController.GetDependencyTree("Plugin1");
         Assert.That(plugin1List, Has.Count.EqualTo(1));

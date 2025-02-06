@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,8 +23,13 @@ builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
             .MinBatchSize(1)
             .MaxBatchSize(100)));
 builder.Services.AddScoped<IPluginService, PluginService>();
+builder.Services.AddScoped<IStorageService, CloudStorageService>();
+builder.Services.Configure<FormOptions>(options => {
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = long.MaxValue;
+});
 
-builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 250 * 1024 * 1024);
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddSwaggerGen(options => {

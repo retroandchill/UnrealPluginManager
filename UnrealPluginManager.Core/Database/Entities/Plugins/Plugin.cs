@@ -43,10 +43,12 @@ public class Plugin {
     public Uri? AuthorWebsite { get; set; }
 
     public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
+    
+    public ICollection<PluginFileInfo> UploadedPlugins { get; set; } = new List<PluginFileInfo>();
 
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Plugin>()
-            .HasIndex(x => new { x.Name, x.Version })
+            .HasIndex(x => new { x.Name, x.VersionString })
             .IsUnique();
         
         

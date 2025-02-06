@@ -35,10 +35,11 @@ public interface IPluginService {
     /// <param name="descriptor">
     ///     A <see cref="PluginDescriptor"/> object containing detailed metadata about the plugin, such as version, description, and other attributes.
     /// </param>
+    /// <param name="storedFile"></param>
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
-    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor);
+    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile = null);
 
     Task<PluginSummary> SubmitPlugin(Stream fileData);
 }

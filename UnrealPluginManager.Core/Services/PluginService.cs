@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.IO.Compression;
 using System.Text.Json;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -15,7 +16,7 @@ namespace UnrealPluginManager.Core.Services;
 /// <summary>
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
-public class PluginService(UnrealPluginManagerContext dbContext) : IPluginService {
+public class PluginService(UnrealPluginManagerContext dbContext, IStorageService storageService) : IPluginService {
     
     private static readonly JsonSerializerOptions JsonOptions = new() {
         AllowTrailingCommas = true
@@ -41,7 +42,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             .FirstAsync();
 
         var pluginData = new Dictionary<string, List<Plugin>> { { plugin.Name, [plugin] } };
-        var unresolved = new HashSet<string>();
+        var unresolved = new System.Collections.Generic.HashSet<string>();
 
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
@@ -87,25 +88,14 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor) {
-        var plugin = MapBasePluginInfo(pluginName, descriptor);
-
-        plugin.Dependencies = descriptor.Plugins
-            .Select(x => new Dependency {
-                PluginName = x.Name,
-                Optional = x.Optional,
-                Type = x.PluginType,
-                PluginVersion = x.VersionMatcher
-            })
-            .ToList();
-
-
+    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile = null) {
+        var plugin = MapBasePluginInfo(pluginName, descriptor, storedFile);
         dbContext.Plugins.Add(plugin);
         await dbContext.SaveChangesAsync();
         return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
     }
 
-    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor) {
+    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile) {
         var plugin = new Plugin {
             Name = pluginName,
             FriendlyName = descriptor.FriendlyName,
@@ -116,19 +106,26 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
             Dependencies = descriptor.Plugins
                 .Select(x => new Dependency {
                     PluginName = x.Name,
+                    Optional = x.Optional,
                     Type = x.PluginType,
                     PluginVersion = x.VersionMatcher
                 })
-                .ToList()
+                .ToList(),
+            UploadedPlugins = ((Option<FileInfo>) storedFile)
+                .Select(x => new PluginFileInfo {
+                    FilePath = x
+                })
+                .AsEnumerable()
+                .ToList(),
         };
 
         return plugin;
     }
     
     public async Task<PluginSummary> SubmitPlugin(Stream fileData) {
-        // TODO: We need to handle actually saving the uploaded zip file to storage. We want it to remain zipped up to
-        // save space and to cut down on processing time when downloading from the server.
-        using var archive = new ZipArchive(fileData);
+        var fileInfo = await storageService.StorePlugin(fileData);
+        await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var archive = new ZipArchive(storedData);
         
         var archiveEntry = archive.Entries
             .FirstOrDefault(entry => entry.FullName.EndsWith(".uplugin"));
@@ -145,7 +142,7 @@ public class PluginService(UnrealPluginManagerContext dbContext) : IPluginServic
                 throw new BadSubmissionException("Uplugin file was malformed");
             }
             
-            return await AddPlugin(baseName, descriptor);
+            return await AddPlugin(baseName, descriptor, fileInfo);
         } catch (JsonException e) {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
