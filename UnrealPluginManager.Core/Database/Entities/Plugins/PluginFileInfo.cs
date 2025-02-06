@@ -16,6 +16,9 @@ public class PluginFileInfo {
     
     [Required]
     public FileInfo FilePath { get; set; }
+
+    [Required] 
+    public Version EngineVersion { get; set; } = new(5, 5);
     
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<PluginFileInfo>()
@@ -30,5 +33,12 @@ public class PluginFileInfo {
         modelBuilder.Entity<PluginFileInfo>()
             .Property(x => x.FilePath)
             .HasConversion(x => x.FullName, x => new FileInfo(x));
+        
+        modelBuilder.Entity<PluginFileInfo>()
+            .HasIndex(x => x.EngineVersion);
+        
+        modelBuilder.Entity<PluginFileInfo>()
+            .Property(x => x.EngineVersion)
+            .HasConversion(x => x.ToString(), x => Version.Parse(x));
     }
 }

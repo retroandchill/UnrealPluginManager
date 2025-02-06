@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Services;
@@ -39,9 +40,9 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
-    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile = null);
+    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
 
-    Task<PluginSummary> SubmitPlugin(Stream fileData);
+    Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion);
     
-    Task<Stream> GetPluginFileData(string pluginName); 
+    Task<Stream> GetPluginFileData(string pluginName, Version engineVersion); 
 }

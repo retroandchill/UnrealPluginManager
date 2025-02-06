@@ -21,9 +21,9 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
 
     [HttpPost]
     [Consumes(MediaTypeNames.Multipart.FormData)]
-    public async Task<PluginSummary> Post(IFormFile pluginFile) {
+    public async Task<PluginSummary> Post(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
-        return await pluginService.SubmitPlugin(stream);
+        return await pluginService.SubmitPlugin(stream, engineVersion);
     }
     
     [HttpGet("{pluginName}")]
@@ -34,8 +34,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet("{pluginName}/download")]
     [Produces(MediaTypeNames.Application.Zip)]
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
-    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName) {
-        return File(await pluginService.GetPluginFileData(pluginName), MediaTypeNames.Application.Zip, 
+    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
+        return File(await pluginService.GetPluginFileData(pluginName, engineVersion), MediaTypeNames.Application.Zip, 
             $"{pluginName}.zip");
     }
     

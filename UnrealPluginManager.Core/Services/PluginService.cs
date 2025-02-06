@@ -8,6 +8,7 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Solver;
 
@@ -88,14 +89,15 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile = null) {
+    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor,
+        EngineFileData? storedFile = null) {
         var plugin = MapBasePluginInfo(pluginName, descriptor, storedFile);
         dbContext.Plugins.Add(plugin);
         await dbContext.SaveChangesAsync();
         return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
     }
 
-    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor, FileInfo? storedFile) {
+    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile) {
         var plugin = new Plugin {
             Name = pluginName,
             FriendlyName = descriptor.FriendlyName,
@@ -111,9 +113,10 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
                     PluginVersion = x.VersionMatcher
                 })
                 .ToList(),
-            UploadedPlugins = ((Option<FileInfo>) storedFile)
+            UploadedPlugins = ((Option<EngineFileData>) storedFile)
                 .Select(x => new PluginFileInfo {
-                    FilePath = x
+                    EngineVersion = x.EngineVersion,
+                    FilePath = x.FileInfo
                 })
                 .AsEnumerable()
                 .ToList(),
@@ -122,7 +125,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         return plugin;
     }
     
-    public async Task<PluginSummary> SubmitPlugin(Stream fileData) {
+    public async Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);
@@ -142,17 +145,18 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
                 throw new BadSubmissionException("Uplugin file was malformed");
             }
             
-            return await AddPlugin(baseName, descriptor, fileInfo);
+            return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, fileInfo));
         } catch (JsonException e) {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
     }
 
-    public async Task<Stream> GetPluginFileData(string pluginName) {
+    public async Task<Stream> GetPluginFileData(string pluginName, Version engineVersion) {
         var pluginInfo = await dbContext.UploadedPlugins
             .Include(x => x.Parent)
             .Where(p => p.Parent.Name == pluginName)
             .OrderByDescending(p => p.Parent.VersionString)
+            .Where(x => x.EngineVersion == engineVersion)
             .FirstOrDefaultAsync();
         if (pluginInfo == null) {
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
