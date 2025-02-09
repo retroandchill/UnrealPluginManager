@@ -1,5 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.IO.Compression;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +18,10 @@ using UnrealPluginManager.Server.Services;
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
 public class PluginControllerTest {
+        
+    private static readonly JsonSerializerOptions JsonOptions = new() {
+        AllowTrailingCommas = true
+    };
     
     private ServiceProvider _serviceProvider;
     private PluginsController _pluginsController;
@@ -124,6 +131,34 @@ public class PluginControllerTest {
 
         var allPluginsList = await _pluginsController.Get();
         Assert.That(allPluginsList, Has.Count.EqualTo(4));
+    }
+
+    [Test]
+    public async Task TestAddAndDownloadPlugin() {
+        using var testZip = new MemoryStream();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
+            await using var writer = new StreamWriter(entry.Open());
+            
+            var descriptor = new PluginDescriptor {
+                FriendlyName = "Test Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Description = "Test description"
+            };
+            
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+        
+        testZip.Seek(0, SeekOrigin.Begin);
+        var result = await _pluginsController.Post(new FormFile(testZip, 0, testZip.Length, "file", "TestPlugin.zip"), new Version(5, 5));
+        Assert.That(result.Name, Is.EqualTo("TestPlugin"));
+        
+        var downloaded = await _pluginsController.DownloadPlugin("TestPlugin", new Version(5, 5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(downloaded.FileDownloadName, Is.EqualTo("TestPlugin.zip"));
+            Assert.That(downloaded.ContentType, Is.EqualTo("application/zip"));
+        });
     }
     
 }
