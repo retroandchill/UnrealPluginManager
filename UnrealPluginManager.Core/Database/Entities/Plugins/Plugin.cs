@@ -37,7 +37,7 @@ public class Plugin {
     [MinLength(1)]
     [MaxLength(255)]
     [RegularExpression(@"^[A-Z][a-zA-Z0-9]+$", ErrorMessage = "Whitespace is not allowed.")]
-    public string Name { get; set; } = "PlaceholderName";
+    public required string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the semantic version of the plugin.

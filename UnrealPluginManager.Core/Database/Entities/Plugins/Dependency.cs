@@ -57,7 +57,7 @@ public class Dependency {
     [MinLength(1)]
     [MaxLength(255)]
     [RegularExpression(@"^[A-Z][a-zA-Z0-9]+$", ErrorMessage = "Whitespace is not allowed.")]
-    public string PluginName { get; set; } = "PlaceholderName";
+    public required string PluginName { get; set; }
 
     /// <summary>
     /// Gets or sets the version requirement for the plugin dependency.

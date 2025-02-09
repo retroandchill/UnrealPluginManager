@@ -55,7 +55,7 @@ public class PluginFileInfo {
     /// It is required and stored using an abstraction to support flexible file system operations.
     /// </remarks>
     [Required]
-    public IFileInfo FilePath { get; set; }
+    public required IFileInfo FilePath { get; set; }
 
     /// <summary>
     /// Gets or sets the Unreal Engine version compatible with the plugin file.

@@ -17,7 +17,7 @@ public class ModuleDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("Name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Usage type of module

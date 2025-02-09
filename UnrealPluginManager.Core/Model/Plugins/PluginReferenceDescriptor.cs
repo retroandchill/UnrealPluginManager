@@ -18,7 +18,7 @@ public class PluginReferenceDescriptor {
 		/// </summary>
 		[Required]
 		[JsonPropertyName("Name")]
-		public string Name { get; set; } = "PlaceholderName";
+		public required string Name { get; set; }
 
 		/// <summary>
 		/// Whether it should be enabled by default
