@@ -1,7 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace UnrealPluginManager.Core.Model.Plugins;
+namespace UnrealPluginManager.Core.Model.Modules;
 
+/// <summary>
+/// Represents the phase during which a module is loaded within the startup sequence.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ModuleLoadingPhase {
     /// <summary>

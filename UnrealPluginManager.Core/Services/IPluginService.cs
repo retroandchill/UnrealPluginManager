@@ -36,13 +36,37 @@ public interface IPluginService {
     /// <param name="descriptor">
     ///     A <see cref="PluginDescriptor"/> object containing detailed metadata about the plugin, such as version, description, and other attributes.
     /// </param>
-    /// <param name="storedFile"></param>
+    /// <param name="storedFile">The information about the stored file for the plugin</param>
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
     Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
 
+    /// <summary>
+    /// Submits a plugin file for processing and storage, associating it with a specific engine version.
+    /// </summary>
+    /// <param name="fileData">
+    /// The stream containing the plugin file data to be submitted.
+    /// </param>
+    /// <param name="engineVersion">
+    /// The version of the Unreal Engine that the plugin is associated with.
+    /// </param>
+    /// <returns>
+    /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
+    /// </returns>
     Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion);
-    
+
+    /// <summary>
+    /// Retrieves the file data of a specific plugin for a given engine version.
+    /// </summary>
+    /// <param name="pluginName">
+    /// The name of the plugin whose file data is to be retrieved.
+    /// </param>
+    /// <param name="engineVersion">
+    /// The version of the engine for which the plugin file data is needed.
+    /// </param>
+    /// <returns>
+    /// A stream representing the binary content of the plugin file.
+    /// </returns>
     Task<Stream> GetPluginFileData(string pluginName, Version engineVersion); 
 }

@@ -125,6 +125,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         return plugin;
     }
     
+    /// <inheritdoc/>
     public async Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -151,6 +152,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         }
     }
 
+    /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, Version engineVersion) {
         var pluginInfo = await dbContext.UploadedPlugins
             .Include(x => x.Parent)

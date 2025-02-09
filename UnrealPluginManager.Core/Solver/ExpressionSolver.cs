@@ -7,7 +7,20 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Solver;
 
+/// Static class responsible for solving logical expressions and managing variable bindings.
+/// This class provides functionality to evaluate logical expressions represented by the `IExpression` interface
+/// and create binding pairs of variable names and their associated `SemVersion` values.
+/// It also supports converting plugin dependency data into solvable expressions.
 public static class ExpressionSolver {
+    /// Solves the given logical expression and returns a list of variable bindings that satisfy the expression.
+    /// <param name="expr">
+    /// An instance of IExpression representing the logical expression to be evaluated.
+    /// </param>
+    /// <returns>
+    /// An Option monad containing a list of tuples, where each tuple consists of
+    /// the variable name as a string and its corresponding version as a SemVersion.
+    /// If no solution exists, returns None.
+    /// </returns>
     public static Option<List<(string, SemVersion)>> Solve(this IExpression expr) {
         var selected = SolveInternal(expr, new Dictionary<string, bool>());
         return selected
@@ -39,6 +52,26 @@ public static class ExpressionSolver {
         return variables.Count != 0 ? variables[0] : Option<string>.None;
     }
 
+    /// Converts a given set of plugin data into an IExpression that represents
+    /// the logical relationships and dependencies of the plugins.
+    /// <param name="root">
+    /// The name of the root plugin for which the logical expression is being constructed.
+    /// </param>
+    /// <param name="rootVersion">
+    /// The version of the root plugin, represented as a SemVersion instance.
+    /// </param>
+    /// <param name="pluginData">
+    /// A dictionary mapping plugin names to collections of plugins. Each plugin
+    /// represents a specific version and contains data about its dependencies.
+    /// </param>
+    /// <typeparam name="T">
+    /// A collection type that implements IEnumerable of Plugin, representing
+    /// the structure of the plugin data values in the dictionary.
+    /// </typeparam>
+    /// <returns>
+    /// An IExpression instance that represents all logical relationships and dependencies
+    /// between the root plugin and its dependent plugins.
+    /// </returns>
     public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData) where T : IEnumerable<Plugin> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
         foreach (var pack in pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {

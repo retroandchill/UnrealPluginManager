@@ -3,6 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace UnrealPluginManager.Core.Model.Localization;
 
+/// <summary>
+/// Represents the configuration details of a localization target within the Unreal Plugin Manager.
+/// </summary>
+/// <remarks>
+/// This class encapsulates essential properties and metadata required to define and manage
+/// a localization target. It includes the name of the target, loading policies, and configuration
+/// generation policies for handling localization features in Unreal Engine plugin projects.
+/// </remarks>
+/// <seealso cref="UnrealPluginManager.Core.Model.Localization.LocalizationTargetDescriptorLoadingPolicy" />
+/// <seealso cref="UnrealPluginManager.Core.Model.Localization.LocalizationConfigGenerationPolicy" />
 public class LocalizationTargetDescriptor {
     /// <summary>
     /// Name of this target

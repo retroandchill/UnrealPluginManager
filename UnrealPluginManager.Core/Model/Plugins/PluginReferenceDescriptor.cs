@@ -7,6 +7,11 @@ using UnrealPluginManager.Core.Model.Targets;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
+/// <summary>
+/// Represents the descriptor for a plugin reference within the Unreal Plugin Manager.
+/// This class defines the properties that determine the settings, availability, and compatibility
+/// of a referenced plugin within a project or engine configuration.
+/// </summary>
 public class PluginReferenceDescriptor {
     		/// <summary>
 		/// Name of the plugin
