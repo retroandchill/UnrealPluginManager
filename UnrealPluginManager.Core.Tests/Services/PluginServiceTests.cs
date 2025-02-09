@@ -248,4 +248,45 @@ public class PluginServiceTests {
 
         Assert.ThrowsAsync<BadSubmissionException>(async () => await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
     }
+
+    [Test]
+    public async Task TestRetrievePlugin() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
+        
+        var zipFile = filesystem.FileInfo.New("TestPlugin.zip");
+        await using var testZip = zipFile.Create();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.json");
+            await using var writer = new StreamWriter(entry.Open());
+            
+            var descriptor = new PluginDescriptor {
+                FriendlyName = "Test Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Description = "Test description"
+            };
+            
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        var plugin = new Plugin {
+            Name = "TestPlugin",
+            FriendlyName = "Test Plugin",
+            Version = new SemVersion(1, 0, 0),
+            Description = "Test description",
+            UploadedPlugins = [
+                new PluginFileInfo {
+                    EngineVersion = new Version(5, 5),
+                    FilePath = zipFile
+                }
+            ]
+        };
+        await context.Plugins.AddAsync(plugin);
+        await context.SaveChangesAsync();
+
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 5)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 4)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("OtherPlugin", new Version(5, 5)));
+    }
 }
