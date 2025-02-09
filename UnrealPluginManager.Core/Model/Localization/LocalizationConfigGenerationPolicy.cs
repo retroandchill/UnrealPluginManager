@@ -2,6 +2,9 @@
 
 namespace UnrealPluginManager.Core.Model.Localization;
 
+/// <summary>
+/// Represents the policy for generating localization configuration files for a localization target.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LocalizationConfigGenerationPolicy {
     /// <summary>

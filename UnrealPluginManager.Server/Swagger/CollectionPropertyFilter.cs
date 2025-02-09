@@ -10,6 +10,12 @@ using UnrealPluginManager.Core.Meta;
 
 namespace UnrealPluginManager.Server.Swagger;
 
+/// <summary>
+/// A custom implementation of the <see cref="ISchemaFilter"/> interface that modifies the OpenAPI schema
+/// to handle properties or fields of types implementing <see cref="ICollection"/>. This class ensures certain
+/// collection properties are annotated with default values as empty arrays or objects when decorated with
+/// the <see cref="DefaultAsEmptyAttribute"/>.
+/// </summary>
 public class CollectionPropertyFilter : ISchemaFilter {
     /// <inheritdoc/>
     public void Apply(OpenApiSchema schema, SchemaFilterContext context) {

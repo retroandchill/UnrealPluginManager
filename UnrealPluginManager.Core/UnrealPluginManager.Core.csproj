@@ -14,11 +14,13 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
       <PackageReference Include="Semver" Version="3.0.0" />
+      <PackageReference Include="System.CodeDom" Version="9.0.1" />
       <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+      <PackageReference Include="TestableIO.System.IO.Abstractions" Version="21.3.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Versioning\" />
+      <Folder Include="Conveters\" />
     </ItemGroup>
 
 </Project>

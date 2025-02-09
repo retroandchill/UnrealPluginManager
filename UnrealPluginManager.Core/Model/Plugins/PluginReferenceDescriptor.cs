@@ -1,18 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Targets;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
+/// <summary>
+/// Represents the descriptor for a plugin reference within the Unreal Plugin Manager.
+/// This class defines the properties that determine the settings, availability, and compatibility
+/// of a referenced plugin within a project or engine configuration.
+/// </summary>
 public class PluginReferenceDescriptor {
     		/// <summary>
 		/// Name of the plugin
 		/// </summary>
 		[Required]
 		[JsonPropertyName("Name")]
-		public string Name { get; set; } = "PlaceholderName";
+		public required string Name { get; set; }
 
 		/// <summary>
 		/// Whether it should be enabled by default
@@ -105,5 +111,6 @@ public class PluginReferenceDescriptor {
 		
 	
 		[JsonPropertyName("VersionMatcher")]
+		[JsonConverter(typeof(SemVersionRangeJsonConverter))]
 		public SemVersionRange VersionMatcher { get; set; } = SemVersionRange.All;
 }

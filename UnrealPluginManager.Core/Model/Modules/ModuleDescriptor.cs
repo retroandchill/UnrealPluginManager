@@ -2,17 +2,22 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using UnrealPluginManager.Core.Meta;
+using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Targets;
 
-namespace UnrealPluginManager.Core.Model.Plugins;
+namespace UnrealPluginManager.Core.Model.Modules;
 
+/// <summary>
+/// Represents a descriptor for an Unreal Engine module, containing metadata
+/// and configuration options that define its behavior and compatibility.
+/// </summary>
 public class ModuleDescriptor {
     /// <summary>
     /// Name of this module
     /// </summary>
     [Required]
     [JsonPropertyName("Name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Usage type of module

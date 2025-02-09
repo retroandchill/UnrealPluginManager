@@ -2,6 +2,9 @@
 
 namespace UnrealPluginManager.Core.Model.Scripting;
 
+/// <summary>
+/// Represents the scope levels available for Verse definitions or functionality.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum VerseScope {
     /// <summary>

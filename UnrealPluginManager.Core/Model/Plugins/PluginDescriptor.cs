@@ -2,14 +2,21 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Meta;
 using UnrealPluginManager.Core.Model.Localization;
+using UnrealPluginManager.Core.Model.Modules;
 using UnrealPluginManager.Core.Model.Scripting;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
 using CustomBuildSteps = Dictionary<string, List<string>>;
 
+/// <summary>
+/// Represents the metadata and configuration for an Unreal Engine plugin.
+/// This class holds various attributes describing the plugin, including its version, creator information,
+/// supported platforms, dependencies, and additional settings related to content, extensions, and build configuration.
+/// </summary>
 public class PluginDescriptor {
     /// <summary>
     /// Descriptor version number
@@ -33,6 +40,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("VersionName")]
+    [JsonConverter(typeof(SemVersionJsonConverter))]
     public SemVersion VersionName { get; set; } = new(1, 0, 0);
 
     /// <summary>

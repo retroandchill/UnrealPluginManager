@@ -2,6 +2,9 @@
 
 namespace UnrealPluginManager.Core.Model.Targets;
 
+/// <summary>
+/// Represents the type of target available in the Unreal Engine build system.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TargetType {
     /// <summary>

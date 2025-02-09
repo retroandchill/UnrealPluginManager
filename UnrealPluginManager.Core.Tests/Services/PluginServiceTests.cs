@@ -1,8 +1,15 @@
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.IO.Compression;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Helpers;
@@ -11,11 +18,24 @@ namespace UnrealPluginManager.Core.Tests.Services;
 
 public class PluginServiceTests {
     
+    private static readonly JsonSerializerOptions JsonOptions = new() {
+        AllowTrailingCommas = true
+    };
+    
     private ServiceProvider _serviceProvider;
+    private Mock<IStorageService> _mockStorageService;
     
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
+
+        var mockFilesystem = new MockFileSystem();
+        services.AddSingleton<IFileSystem>(mockFilesystem);
+        
+        _mockStorageService = new Mock<IStorageService>();
+        services.AddSingleton(_mockStorageService.Object);
+        
+        
         services.AddDbContext<UnrealPluginManagerContext>(options => options
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()
@@ -134,5 +154,139 @@ public class PluginServiceTests {
             Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
             Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
         });
+    }
+
+    [Test]
+    public async Task TestSubmitPlugin() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        using var testZip = new MemoryStream();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
+            await using var writer = new StreamWriter(entry.Open());
+
+            var descriptor = new PluginDescriptor {
+                FriendlyName = "Test Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Description = "Test description"
+            };
+            
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
+            .Returns(async (Stream input) => {
+                var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
+                await using var stream = dummyInfo.Create();
+                input.Seek(0, SeekOrigin.Begin);
+                await input.CopyToAsync(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                return dummyInfo;
+            });
+
+        var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
+            Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
+            Assert.That(summary.Description, Is.EqualTo("Test description"));
+        });
+    }
+    
+    [Test]
+    public async Task TestSubmitPlugin_MalformedDescriptor() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        using var testZip = new MemoryStream();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
+            await using var writer = new StreamWriter(entry.Open());
+            
+            await writer.WriteAsync("This is not a JSON file");
+        }
+
+        _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
+            .Returns(async (Stream input) => {
+                var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
+                await using var stream = dummyInfo.Create();
+                input.Seek(0, SeekOrigin.Begin);
+                await input.CopyToAsync(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                return dummyInfo;
+            });
+
+        Assert.ThrowsAsync<BadSubmissionException>(async () => await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+    }
+    
+    [Test]
+    public async Task TestSubmitPlugin_NoUpluginFile() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        using var testZip = new MemoryStream();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.json");
+            await using var writer = new StreamWriter(entry.Open());
+            
+            var descriptor = new PluginDescriptor {
+                FriendlyName = "Test Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Description = "Test description"
+            };
+            
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
+            .Returns(async (Stream input) => {
+                var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
+                await using var stream = dummyInfo.Create();
+                input.Seek(0, SeekOrigin.Begin);
+                await input.CopyToAsync(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                return dummyInfo;
+            });
+
+        Assert.ThrowsAsync<BadSubmissionException>(async () => await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+    }
+
+    [Test]
+    public async Task TestRetrievePlugin() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
+        
+        var zipFile = filesystem.FileInfo.New("TestPlugin.zip");
+        await using var testZip = zipFile.Create();
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.json");
+            await using var writer = new StreamWriter(entry.Open());
+            
+            var descriptor = new PluginDescriptor {
+                FriendlyName = "Test Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Description = "Test description"
+            };
+            
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        var plugin = new Plugin {
+            Name = "TestPlugin",
+            FriendlyName = "Test Plugin",
+            Version = new SemVersion(1, 0, 0),
+            Description = "Test description",
+            UploadedPlugins = [
+                new PluginFileInfo {
+                    EngineVersion = new Version(5, 5),
+                    FilePath = zipFile
+                }
+            ]
+        };
+        await context.Plugins.AddAsync(plugin);
+        await context.SaveChangesAsync();
+
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 5)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 4)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("OtherPlugin", new Version(5, 5)));
     }
 }

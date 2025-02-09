@@ -1,7 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace UnrealPluginManager.Core.Model.Plugins;
+namespace UnrealPluginManager.Core.Model.Modules;
 
+/// <summary>
+/// Represents the type of host environment where a module is intended to be used in Unreal Engine.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ModuleHostType {
     /// <summary>

@@ -2,6 +2,9 @@
 
 namespace UnrealPluginManager.Core.Model.Targets;
 
+/// <summary>
+/// Defines the build configuration for Unreal Engine targets.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum UnrealTargetConfiguration {
     /// <summary>
