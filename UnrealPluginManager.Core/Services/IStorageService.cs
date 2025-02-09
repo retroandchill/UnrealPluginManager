@@ -1,9 +1,11 @@
-﻿namespace UnrealPluginManager.Core.Services;
+﻿using System.IO.Abstractions;
+
+namespace UnrealPluginManager.Core.Services;
 
 public interface IStorageService {
 
-    Task<FileInfo> StorePlugin(Stream fileData);
+    Task<IFileInfo> StorePlugin(Stream fileData);
     
-    Stream RetrievePlugin(FileInfo fileInfo);
+    Stream RetrievePlugin(IFileInfo fileInfo);
 
 }

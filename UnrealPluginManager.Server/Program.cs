@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
@@ -17,6 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IFileSystem, FileSystem>();
 builder.Services.AddDbContext<UnrealPluginManagerContext>(options => 
     options.UseSqlite("Filename=dev.sqlite", b => 
         b.MigrationsAssembly("UnrealPluginManager.Server")

@@ -1,3 +1,5 @@
-﻿namespace UnrealPluginManager.Core.Model.Engine;
+﻿using System.IO.Abstractions;
 
-public record struct EngineFileData(Version EngineVersion, FileInfo FileInfo);
+namespace UnrealPluginManager.Core.Model.Engine;
+
+public record struct EngineFileData(Version EngineVersion, IFileInfo FileInfo);

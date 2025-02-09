@@ -113,7 +113,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
                     PluginVersion = x.VersionMatcher
                 })
                 .ToList(),
-            UploadedPlugins = ((Option<EngineFileData>) storedFile)
+            UploadedPlugins = (storedFile ?? Option<EngineFileData>.None)
                 .Select(x => new PluginFileInfo {
                     EngineVersion = x.EngineVersion,
                     FilePath = x.FileInfo

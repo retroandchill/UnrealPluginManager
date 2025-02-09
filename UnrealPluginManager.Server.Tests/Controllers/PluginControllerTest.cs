@@ -1,10 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Server.Config;
 using UnrealPluginManager.Server.Controllers;
+using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
@@ -16,6 +22,18 @@ public class PluginControllerTest {
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
+        
+        var mockFilesystem = new MockFileSystem(new Dictionary<string, MockFileData>());
+        services.AddSingleton<IFileSystem>(mockFilesystem);
+        
+        var mockConfig = new Mock<IConfiguration>();
+        services.AddSingleton(mockConfig.Object);
+        var mockSection = new Mock<IConfigurationSection>();
+        
+        mockConfig.Setup(x => x.GetSection(StorageMetadata.Name)).Returns(mockSection.Object);
+        
+        services.AddScoped<IStorageService, CloudStorageService>();
+        
         services.AddDbContext<UnrealPluginManagerContext>(options => options
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()

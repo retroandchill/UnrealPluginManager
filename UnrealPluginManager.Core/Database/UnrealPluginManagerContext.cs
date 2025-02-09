@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IO.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -11,8 +13,10 @@ public class UnrealPluginManagerContext(DbContextOptions<UnrealPluginManagerCont
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        var filesystem = Database.GetService<IFileSystem>();
+        
         Plugin.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
-        PluginFileInfo.DefineModelMetadata(modelBuilder);
+        PluginFileInfo.DefineModelMetadata(modelBuilder, filesystem);
     }
 }

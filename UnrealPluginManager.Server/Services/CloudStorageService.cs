@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.IO.Abstractions;
+using System.IO.Compression;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Config;
@@ -8,18 +9,20 @@ namespace UnrealPluginManager.Server.Services;
 public class CloudStorageService : IStorageService {
     
     private readonly StorageMetadata _storageMetadata;
+    private readonly IFileSystem _filesystem;
 
-    public CloudStorageService(IConfiguration config) {
+    public CloudStorageService(IFileSystem filesystem, IConfiguration config) {
+        _filesystem = filesystem;
         _storageMetadata = new StorageMetadata();
         config.GetSection(StorageMetadata.Name).Bind(_storageMetadata);
         
-        var directoryInfo = new DirectoryInfo(_storageMetadata.BaseDirectory);
+        var directoryInfo = _filesystem.DirectoryInfo.New(_storageMetadata.BaseDirectory);
         if (!directoryInfo.Exists) {
             directoryInfo.Create();
         }
     }
     
-    public async Task<FileInfo> StorePlugin(Stream fileData) {
+    public async Task<IFileInfo> StorePlugin(Stream fileData) {
         using var archive = new ZipArchive(fileData);
         
         var archiveEntry = archive.Entries
@@ -28,16 +31,16 @@ public class CloudStorageService : IStorageService {
             throw new BadSubmissionException("Uplugin file was not found");
         }
         
-        var fileName = $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
-        var fullPath = Path.Combine(_storageMetadata.BaseDirectory, fileName);
-        await using var fileStream = new FileStream(fullPath, FileMode.Create);
+        var fileName = $"{_filesystem.Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{_filesystem.Path.GetRandomFileName()}.zip";
+        var fullPath = _filesystem.Path.Combine(_storageMetadata.BaseDirectory, fileName);
+        await using var fileStream = _filesystem.FileStream.New(fullPath, FileMode.Create);
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);
         
-        return new FileInfo(fullPath);
+        return _filesystem.FileInfo.New(fullPath);
     }
 
-    public Stream RetrievePlugin(FileInfo fileInfo) {
+    public Stream RetrievePlugin(IFileInfo fileInfo) {
         return fileInfo.OpenRead();
     }
 }

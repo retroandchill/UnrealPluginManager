@@ -1,5 +1,8 @@
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -16,6 +19,13 @@ public class PluginServiceTests {
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
+
+        var mockFilesystem = new MockFileSystem();
+        services.AddSingleton<IFileSystem>(mockFilesystem);
+        
+        var mockStorageService = new Mock<IStorageService>();
+        services.AddSingleton(mockStorageService.Object);
+        
         services.AddDbContext<UnrealPluginManagerContext>(options => options
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()
@@ -61,7 +71,7 @@ public class PluginServiceTests {
         await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
-        }, null);
+        });
         
         await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
             Version = 1,
@@ -78,7 +88,7 @@ public class PluginServiceTests {
                     VersionMatcher = SemVersionRange.Parse(">=1.0.0")
                 }
             ]
-        }, null);
+        });
         
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
@@ -89,7 +99,7 @@ public class PluginServiceTests {
                     PluginType = PluginType.Provided
                 }
             ]
-        }, null);
+        });
         
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
@@ -100,7 +110,7 @@ public class PluginServiceTests {
                     PluginType = PluginType.Provided
                 }
             ]
-        }, null);
+        });
 
         var plugin1List = await pluginService.GetDependencyList("Plugin1");
         Assert.That(plugin1List, Has.Count.EqualTo(1));

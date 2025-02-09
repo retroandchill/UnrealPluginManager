@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 
@@ -15,12 +16,12 @@ public class PluginFileInfo {
     public Plugin Parent { get; set; }
     
     [Required]
-    public FileInfo FilePath { get; set; }
+    public IFileInfo FilePath { get; set; }
 
     [Required] 
     public Version EngineVersion { get; set; } = new(5, 5);
     
-    internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
+    internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem filesystem) {
         modelBuilder.Entity<PluginFileInfo>()
             .HasOne(x => x.Parent)
             .WithMany(x => x.UploadedPlugins)
@@ -32,7 +33,7 @@ public class PluginFileInfo {
 
         modelBuilder.Entity<PluginFileInfo>()
             .Property(x => x.FilePath)
-            .HasConversion(x => x.FullName, x => new FileInfo(x));
+            .HasConversion(x => x.FullName, x => filesystem.FileInfo.New(x));
         
         modelBuilder.Entity<PluginFileInfo>()
             .HasIndex(x => x.EngineVersion);
