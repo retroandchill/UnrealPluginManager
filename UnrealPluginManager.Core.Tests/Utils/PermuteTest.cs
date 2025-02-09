@@ -3,7 +3,7 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Tests.Utils;
 
-public class TestPermute {
+public class PermuteTest {
     [Test]
     public void TestPermutations() {
         var numbers = Enumerable.Range(1, 10);

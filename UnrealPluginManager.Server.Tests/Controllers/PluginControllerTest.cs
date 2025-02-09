@@ -8,7 +8,7 @@ using UnrealPluginManager.Server.Controllers;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
-public class TestPluginController {
+public class PluginControllerTest {
     
     private ServiceProvider _serviceProvider;
     private PluginsController _pluginsController;
