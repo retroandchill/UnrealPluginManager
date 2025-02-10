@@ -19,6 +19,10 @@ var builder = new CommandLineBuilder(rootCommand)
         services.AddScoped<IStorageService, LocalStorageService>();
         if (OperatingSystem.IsWindows()) {
             services.AddScoped<IEngineService, WindowsEngineService>();
+        } else if (OperatingSystem.IsMacOS()) {
+            services.AddScoped<IEngineService, MacEngineService>();
+        } else if (OperatingSystem.IsLinux()) {
+            services.AddScoped<IEngineService, LinuxEngineService>();
         } else {
             // TODO: Add Mac and Linux support
             throw new PlatformNotSupportedException("The given platform is not supported.");

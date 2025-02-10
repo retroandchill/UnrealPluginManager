@@ -1,7 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using System.Runtime.Versioning;
+using Microsoft.Win32;
 
 namespace UnrealPluginManager.Cli.Services;
 
+[SupportedOSPlatform("windows")]
 public class WindowsEngineService : IEngineService {
     
     public List<string> GetInstalledEngines() {
