@@ -28,17 +28,17 @@ public class CommandGenerator : IIncrementalGenerator {
                         $"rootCommand.AddCommand({name}Command);"
                     };
                 }));
-        
+
         context.RegisterSourceOutput(selected, (ctx, data) => {
             var start = """
-                           using System.CommandLine;
+                        using System.CommandLine;
 
-                           namespace UnrealPluginManager.Cli.Utils;
+                        namespace UnrealPluginManager.Cli.Utils;
 
-                           public  static partial class CommandUtils {
-
-                            public static partial void SetUpCommands(this RootCommand rootCommand) {
-                           """;
+                        public  static partial class CommandUtils {
+                        
+                         public static partial void SetUpCommands(this RootCommand rootCommand) {
+                        """;
 
             var end = "} }";
             var result = string.Join('\n', data.SelectMany(x => x));

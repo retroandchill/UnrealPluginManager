@@ -10,7 +10,7 @@ public class SemVersionJsonConverter : JsonConverter<SemVersion> {
         return SemVersion.Parse(reader.GetString()!);
     }
 
-    
+
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, SemVersion value, JsonSerializerOptions options) {
         writer.WriteStringValue(value.ToString());

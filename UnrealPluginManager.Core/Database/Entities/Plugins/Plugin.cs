@@ -133,8 +133,8 @@ public class Plugin {
         modelBuilder.Entity<Plugin>()
             .HasIndex(x => new { x.Name, x.VersionString })
             .IsUnique();
-        
-        
+
+
         modelBuilder.Entity<Plugin>()
             .Ignore(x => x.Version);
     }

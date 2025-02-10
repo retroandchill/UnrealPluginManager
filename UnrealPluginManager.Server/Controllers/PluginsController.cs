@@ -74,11 +74,9 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet("{pluginName}/download")]
     [Produces(MediaTypeNames.Application.Zip)]
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
-    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await pluginService.GetPluginFileData(pluginName, engineVersion), MediaTypeNames.Application.Zip, 
+    public async Task<FileStreamResult>
+        DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
+        return File(await pluginService.GetPluginFileData(pluginName, engineVersion), MediaTypeNames.Application.Zip,
             $"{pluginName}.zip");
     }
-    
-    
-    
 }

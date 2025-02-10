@@ -1,60 +1,60 @@
 {
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
-	"FriendlyName": "GridBased2D",
-	"Description": "Library for top-down grid-based movement",
-	"Category": "Movement",
-	"CreatedBy": "Retro & Chill",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "GridBased2D",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "GridBased2DTests",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		}
-	],
-	"SupportURL": "",
-	"Plugins": [
-		{
-			"Name": "Paper2D",
-			"Enabled": true
-		},
-		{
-			"Name": "TileReplacer",
-			"Enabled": true,
-			"PluginType": "Provided"
-		},
-		{
-			"Name": "EnhancedInput",
-			"Enabled": true
-		},
-		{
-			"Name": "RetroLib",
-			"Enabled": true,
-			"PluginType": "Provided"
-		},
-		{
-			"Name": "AudioPlaybackManager",
-			"Enabled": true,
-			"PluginType": "Provided"
-		},
-		{
-			"Name": "AutomationTestHelpers",
-			"Enabled": true,
-			"Optional": true,
-			"PluginType": "Provided"
-		}
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "0.1.0",
+  "FriendlyName": "GridBased2D",
+  "Description": "Library for top-down grid-based movement",
+  "Category": "Movement",
+  "CreatedBy": "Retro & Chill",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "GridBased2D",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "GridBased2DTests",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "SupportURL": "",
+  "Plugins": [
+    {
+      "Name": "Paper2D",
+      "Enabled": true
+    },
+    {
+      "Name": "TileReplacer",
+      "Enabled": true,
+      "PluginType": "Provided"
+    },
+    {
+      "Name": "EnhancedInput",
+      "Enabled": true
+    },
+    {
+      "Name": "RetroLib",
+      "Enabled": true,
+      "PluginType": "Provided"
+    },
+    {
+      "Name": "AudioPlaybackManager",
+      "Enabled": true,
+      "PluginType": "Provided"
+    },
+    {
+      "Name": "AutomationTestHelpers",
+      "Enabled": true,
+      "Optional": true,
+      "PluginType": "Provided"
+    }
+  ]
 }

@@ -13,7 +13,7 @@ public class PermuteTest {
             .ToList();
         Assert.That(permutations, Has.Count.EqualTo(90));
     }
-    
+
     [Test]
     public void TestCombinations() {
         var numbers = Enumerable.Range(1, 10);

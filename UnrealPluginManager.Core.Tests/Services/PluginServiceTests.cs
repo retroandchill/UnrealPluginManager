@@ -17,25 +17,24 @@ using UnrealPluginManager.Core.Tests.Helpers;
 namespace UnrealPluginManager.Core.Tests.Services;
 
 public class PluginServiceTests {
-    
     private static readonly JsonSerializerOptions JsonOptions = new() {
         AllowTrailingCommas = true
     };
-    
+
     private ServiceProvider _serviceProvider;
     private Mock<IStorageService> _mockStorageService;
-    
+
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
 
         var mockFilesystem = new MockFileSystem();
         services.AddSingleton<IFileSystem>(mockFilesystem);
-        
+
         _mockStorageService = new Mock<IStorageService>();
         services.AddSingleton(_mockStorageService.Object);
-        
-        
+
+
         services.AddDbContext<UnrealPluginManagerContext>(options => options
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .EnableSensitiveDataLogging()
@@ -55,7 +54,7 @@ public class PluginServiceTests {
     public async Task TestGetPlugins() {
         var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
         var plugins = Enumerable.Range(1, 10)
-            .SelectMany(i => new [] { 
+            .SelectMany(i => new[] {
                 new Plugin {
                     Name = "Plugin" + i,
                     FriendlyName = "Plugin" + i,
@@ -65,16 +64,16 @@ public class PluginServiceTests {
                     Name = "Plugin" + i,
                     FriendlyName = "Plugin" + i,
                     Version = new SemVersion(1, 2, 2)
-                } 
+                }
             });
         context.AddRange(plugins);
         await context.SaveChangesAsync();
-        
+
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         var summaries = await pluginService.GetPluginSummaries();
         Assert.That(summaries, Has.Count.EqualTo(10));
     }
-    
+
     [Test]
     public async Task TestAddPlugins() {
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
@@ -82,7 +81,7 @@ public class PluginServiceTests {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0)
         });
-        
+
         await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
@@ -99,7 +98,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        
+
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
@@ -110,7 +109,7 @@ public class PluginServiceTests {
                 }
             ]
         });
-        
+
         await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 2, 1),
@@ -125,13 +124,13 @@ public class PluginServiceTests {
         var plugin1List = await pluginService.GetDependencyList("Plugin1");
         Assert.That(plugin1List, Has.Count.EqualTo(1));
         Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
-        
+
         var plugin2List = await pluginService.GetDependencyList("Plugin2");
         Assert.That(plugin2List, Has.Count.EqualTo(2));
         var plugin2Names = plugin2List.Select(x => x.Name).ToList();
         Assert.That(plugin2Names, Does.Contain("Plugin1"));
         Assert.That(plugin2Names, Does.Contain("Plugin2"));
-        
+
         var plugin3List = await pluginService.GetDependencyList("Plugin3");
         Assert.That(plugin3List, Has.Count.EqualTo(3));
         var plugin3Names = plugin3List.Select(x => x.Name).ToList();
@@ -139,12 +138,12 @@ public class PluginServiceTests {
         Assert.That(plugin3Names, Does.Contain("Plugin2"));
         Assert.That(plugin3Names, Does.Contain("Plugin3"));
     }
-    
+
     [Test]
     public async Task TestAddPluginVersions() {
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         await pluginService.SetupVersionResolutionTree();
-        
+
         var dependencyGraph = await pluginService.GetDependencyList("App");
         Assert.That(dependencyGraph, Has.Count.EqualTo(5));
         Assert.Multiple(() => {
@@ -170,7 +169,7 @@ public class PluginServiceTests {
                 VersionName = new SemVersion(1, 0, 0),
                 Description = "Test description"
             };
-            
+
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
 
@@ -185,14 +184,13 @@ public class PluginServiceTests {
             });
 
         var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
             Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
             Assert.That(summary.Description, Is.EqualTo("Test description"));
         });
     }
-    
+
     [Test]
     public async Task TestSubmitPlugin_MalformedDescriptor() {
         var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
@@ -201,7 +199,7 @@ public class PluginServiceTests {
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
             var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
             await using var writer = new StreamWriter(entry.Open());
-            
+
             await writer.WriteAsync("This is not a JSON file");
         }
 
@@ -215,9 +213,10 @@ public class PluginServiceTests {
                 return dummyInfo;
             });
 
-        Assert.ThrowsAsync<BadSubmissionException>(async () => await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+        Assert.ThrowsAsync<BadSubmissionException>(async () =>
+            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
     }
-    
+
     [Test]
     public async Task TestSubmitPlugin_NoUpluginFile() {
         var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
@@ -226,13 +225,13 @@ public class PluginServiceTests {
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
             var entry = zipArchive.CreateEntry("TestPlugin.json");
             await using var writer = new StreamWriter(entry.Open());
-            
+
             var descriptor = new PluginDescriptor {
                 FriendlyName = "Test Plugin",
                 VersionName = new SemVersion(1, 0, 0),
                 Description = "Test description"
             };
-            
+
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
 
@@ -246,7 +245,8 @@ public class PluginServiceTests {
                 return dummyInfo;
             });
 
-        Assert.ThrowsAsync<BadSubmissionException>(async () => await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+        Assert.ThrowsAsync<BadSubmissionException>(async () =>
+            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
     }
 
     [Test]
@@ -254,19 +254,19 @@ public class PluginServiceTests {
         var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
-        
+
         var zipFile = filesystem.FileInfo.New("TestPlugin.zip");
         await using var testZip = zipFile.Create();
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
             var entry = zipArchive.CreateEntry("TestPlugin.json");
             await using var writer = new StreamWriter(entry.Open());
-            
+
             var descriptor = new PluginDescriptor {
                 FriendlyName = "Test Plugin",
                 VersionName = new SemVersion(1, 0, 0),
                 Description = "Test description"
             };
-            
+
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
 
@@ -286,7 +286,9 @@ public class PluginServiceTests {
         await context.SaveChangesAsync();
 
         Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 5)));
-        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 4)));
-        Assert.ThrowsAsync<PluginNotFoundException>(async () => await pluginService.GetPluginFileData("OtherPlugin", new Version(5, 5)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () =>
+            await pluginService.GetPluginFileData("TestPlugin", new Version(5, 4)));
+        Assert.ThrowsAsync<PluginNotFoundException>(async () =>
+            await pluginService.GetPluginFileData("OtherPlugin", new Version(5, 5)));
     }
 }

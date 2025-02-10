@@ -12,7 +12,6 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// This class provides essential details about a plugin and serves as a DTO for plugin-related operations.
 /// </remarks>
 public class PluginSummary(string name, SemVersion version, string? description) {
-
     /// <summary>
     /// Gets the name of the plugin.
     /// This property is required and uniquely identifies the plugin within the context of the plugin system.
@@ -33,5 +32,4 @@ public class PluginSummary(string name, SemVersion version, string? description)
     /// This property provides additional information about the plugin's functionality or purpose.
     /// </summary>
     public string? Description { get; } = description;
-
 }

@@ -1,37 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>9bc72a2c-d9ab-4d30-a5ea-212409f10125</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <SpaRoot>..\unrealpluginmanager.client</SpaRoot>
-    <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
-    <SpaProxyServerUrl>https://localhost:60493</SpaProxyServerUrl>
-    <TargetFramework>net9.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>9bc72a2c-d9ab-4d30-a5ea-212409f10125</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <SpaRoot>..\unrealpluginmanager.client</SpaRoot>
+        <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
+        <SpaProxyServerUrl>https://localhost:60493</SpaProxyServerUrl>
+        <TargetFramework>net9.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-45" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
-      <Version>9.*-*</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="21.3.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-45"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
+            <Version>9.*-*</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0"/>
+        <PackageReference Include="System.IO.Abstractions" Version="21.3.1"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\unrealpluginmanager.client\unrealpluginmanager.client.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\unrealpluginmanager.client\unrealpluginmanager.client.esproj">
+            <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+        </ProjectReference>
+        <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
+    </ItemGroup>
 
 </Project>

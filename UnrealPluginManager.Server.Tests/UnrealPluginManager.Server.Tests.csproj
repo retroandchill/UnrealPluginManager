@@ -11,14 +11,14 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-        <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="Moq" Version="4.20.72"/>
         <PackageReference Include="NUnit" Version="3.14.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
-        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="21.3.1" />
+        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="21.3.1"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -26,14 +26,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
-      <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj" />
+        <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
+        <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="JetBrains.ReSharper.TestRunner.Abstractions">
-        <HintPath>C:\Program Files\JetBrains\Rider\r2r\2024.3.5R\949483FC5717145424A50D80F41F885\TestRunner\netcoreapp3.0\JetBrains.ReSharper.TestRunner.Abstractions.dll</HintPath>
-      </Reference>
+        <Reference Include="JetBrains.ReSharper.TestRunner.Abstractions">
+            <HintPath>C:\Program Files\JetBrains\Rider\r2r\2024.3.5R\949483FC5717145424A50D80F41F885\TestRunner\netcoreapp3.0\JetBrains.ReSharper.TestRunner.Abstractions.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

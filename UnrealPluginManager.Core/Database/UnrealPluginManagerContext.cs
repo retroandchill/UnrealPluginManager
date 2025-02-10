@@ -23,7 +23,7 @@ public class UnrealPluginManagerContext(DbContextOptions<UnrealPluginManagerCont
     /// It is used for performing CRUD operations and querying the plugins stored in the system.
     /// </remarks>
     public DbSet<Plugin> Plugins { get; init; }
-    
+
     /// <summary>
     /// Represents the database set for storing and managing uploaded plugin file metadata within the UnrealPluginManager context.
     /// </summary>
@@ -36,7 +36,7 @@ public class UnrealPluginManagerContext(DbContextOptions<UnrealPluginManagerCont
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         var filesystem = Database.GetService<IFileSystem>();
-        
+
         Plugin.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
         PluginFileInfo.DefineModelMetadata(modelBuilder, filesystem);

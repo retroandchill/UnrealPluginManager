@@ -33,7 +33,7 @@ public class Dependency {
     /// entity and the parent <c>Plugin</c> entity. It is used to associate a dependency with its parent plugin.
     /// </remarks>
     public ulong ParentId { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the parent plugin for the dependency.
     /// </summary>
@@ -98,14 +98,14 @@ public class Dependency {
             .WithMany(x => x.Dependencies)
             .HasForeignKey(x => x.ParentId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         modelBuilder.Entity<Dependency>()
             .HasIndex(x => x.ParentId);
-        
+
         modelBuilder.Entity<Dependency>()
             .Property(x => x.PluginVersion)
             .HasConversion(
-                x => x.ToString(), 
+                x => x.ToString(),
                 x => SemVersionRange.Parse(x, 2048));
     }
 }

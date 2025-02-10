@@ -19,8 +19,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
-builder.Services.AddDbContext<UnrealPluginManagerContext>(options => 
-    options.UseSqlite("Filename=dev.sqlite", b => 
+builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
+    options.UseSqlite("Filename=dev.sqlite", b =>
         b.MigrationsAssembly("UnrealPluginManager.Server")
             .MinBatchSize(1)
             .MaxBatchSize(100)));
@@ -37,7 +37,8 @@ if (builder.Environment.IsDevelopment()) {
     builder.Services.AddSwaggerGen(options => {
         options.MapType<SemVersion>(() => new OpenApiSchema {
             Type = "string",
-            Pattern = @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
+            Pattern =
+                @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
             Example = new OpenApiString("1.0.0")
         });
         options.MapType<SemVersionRange>(() => new OpenApiSchema {
@@ -54,8 +55,7 @@ app.UseDefaultFiles();
 app.MapStaticAssets();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();

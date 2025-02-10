@@ -5,7 +5,6 @@ using UnrealPluginManager.Core.Services;
 namespace UnrealPluginManager.Core.Tests.Helpers;
 
 public static class PluginSetupHelpers {
-
     internal static async Task SetupVersionResolutionTree(this IPluginService pluginService) {
         await pluginService.AddPlugin("App", new PluginDescriptor {
             Version = 1,
@@ -33,7 +32,7 @@ public static class PluginSetupHelpers {
                 }
             ]
         }, null);
-        
+
         await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0)
@@ -70,7 +69,7 @@ public static class PluginSetupHelpers {
                 }
             ]
         }, null);
-        
+
         await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
@@ -104,7 +103,7 @@ public static class PluginSetupHelpers {
                 }
             ]
         }, null);
-        
+
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
@@ -138,7 +137,7 @@ public static class PluginSetupHelpers {
                 }
             ]
         }, null);
-        
+
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 4,
             VersionName = new SemVersion(3, 0, 0),
@@ -161,7 +160,7 @@ public static class PluginSetupHelpers {
                 }
             ]
         }, null);
-        
+
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
@@ -183,5 +182,4 @@ public static class PluginSetupHelpers {
             VersionName = new SemVersion(4, 0, 0),
         }, null);
     }
-
 }

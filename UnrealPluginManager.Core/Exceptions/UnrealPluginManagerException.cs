@@ -17,15 +17,11 @@
 /// </example>
 public abstract class UnrealPluginManagerException : Exception {
     protected UnrealPluginManagerException() {
-        
     }
 
     protected UnrealPluginManagerException(string? message) : base(message) {
-        
     }
 
     protected UnrealPluginManagerException(string? message, Exception? innerException) : base(message, innerException) {
-        
     }
-    
 }

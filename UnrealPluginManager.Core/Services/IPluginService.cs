@@ -68,5 +68,5 @@ public interface IPluginService {
     /// <returns>
     /// A stream representing the binary content of the plugin file.
     /// </returns>
-    Task<Stream> GetPluginFileData(string pluginName, Version engineVersion); 
+    Task<Stream> GetPluginFileData(string pluginName, Version engineVersion);
 }

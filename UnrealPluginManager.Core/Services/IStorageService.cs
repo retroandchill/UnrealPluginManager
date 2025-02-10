@@ -8,7 +8,6 @@ namespace UnrealPluginManager.Core.Services;
 /// Provides methods to store and retrieve plugin data.
 /// </summary>
 public interface IStorageService {
-
     /// <summary>
     /// Stores the provided plugin data stream.
     /// </summary>
@@ -23,5 +22,4 @@ public interface IStorageService {
     /// <param name="fileInfo">The file information object representing the plugin file to be retrieved.</param>
     /// <returns>A <see cref="Stream"/> representing the contents of the retrieved plugin file.</returns>
     Stream RetrievePlugin(IFileInfo fileInfo);
-
 }

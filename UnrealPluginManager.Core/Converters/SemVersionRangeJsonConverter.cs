@@ -10,7 +10,7 @@ public class SemVersionRangeJsonConverter : JsonConverter<SemVersionRange> {
         return SemVersionRange.Parse(reader.GetString()!);
     }
 
-    
+
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, SemVersionRange value, JsonSerializerOptions options) {
         writer.WriteStringValue(value.ToString());

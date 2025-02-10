@@ -28,13 +28,14 @@ public static class Combinatorics {
             }
         }
     }
-    
+
     private static IEnumerable<T> AllAfter<T>(this IEnumerable<T> input, int indexToSkip) {
         var index = 0;
         foreach (var item in input) {
             if (index > indexToSkip) {
                 yield return item;
             }
+
             index++;
         }
     }
@@ -69,6 +70,7 @@ public static class Combinatorics {
             if (index != indexToSkip) {
                 yield return item;
             }
+
             index++;
         }
     }
