@@ -1,3 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System.CommandLine;
+using UnrealPluginManager.Cli.Utils;
 
-Console.WriteLine("Hello, World!");
+var rootCommand = new RootCommand();
+rootCommand.SetUpCommands();
