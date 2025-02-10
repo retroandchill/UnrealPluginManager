@@ -2,8 +2,11 @@
 
 namespace UnrealPluginManager.Cli.Commands;
 
-[Command("versions", "List all versions of the engine that are installed")]
+[Command("versions")]
 public class VersionsCommand {
+    /// <summary>
+    /// List all versions of the engine that are installed
+    /// </summary>
     public void Execute() {
     }
 }
