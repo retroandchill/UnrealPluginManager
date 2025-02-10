@@ -1,12 +1,13 @@
-﻿using UnrealPluginManager.Cli.Generator.Commands;
+﻿namespace UnrealPluginManager.Cli.Commands;
 
-namespace UnrealPluginManager.Cli.Commands;
+public class VersionsCommand()
+    : Command<VersionsCommandOptions, VerisionsCommandOptionsHandler>("versions",
+        "Lists all installed engine versions.");
 
-[Command("versions")]
-public class VersionsCommand {
-    /// <summary>
-    /// List all versions of the engine that are installed
-    /// </summary>
-    public void Execute() {
+public class VersionsCommandOptions : ICommandOptions;
+
+public class VerisionsCommandOptionsHandler : ICommandOptionsHandle<VersionsCommandOptions> {
+    public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
+        throw new NotImplementedException();
     }
 }
