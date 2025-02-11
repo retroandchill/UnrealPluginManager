@@ -8,6 +8,9 @@ namespace UnrealPluginManager.Core.Services;
 /// Provides methods to store and retrieve plugin data.
 /// </summary>
 public interface IStorageService {
+    
+    string BaseDirectory { get; }
+    
     /// <summary>
     /// Stores the provided plugin data stream.
     /// </summary>

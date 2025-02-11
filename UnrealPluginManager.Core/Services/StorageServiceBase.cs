@@ -7,8 +7,11 @@ namespace UnrealPluginManager.Core.Services;
 public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageService {
     
     protected IFileSystem FileSystem => fileSystem;
-    protected abstract string PluginDirectory { get; }
     
+    public abstract string BaseDirectory { get; }
+
+    private string PluginDirectory => Path.Join(BaseDirectory, "Plugins");
+
     public async Task<IFileInfo> StorePlugin(Stream fileData) {
         using var archive = new ZipArchive(fileData);
 

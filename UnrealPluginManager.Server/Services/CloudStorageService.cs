@@ -13,7 +13,7 @@ namespace UnrealPluginManager.Server.Services;
 public class CloudStorageService : StorageServiceBase {
     private readonly StorageMetadata _storageMetadata;
 
-    protected sealed override string PluginDirectory => _storageMetadata.BaseDirectory;
+    public sealed override string BaseDirectory => _storageMetadata.BaseDirectory;
 
     /// <summary>
     /// Provides a cloud storage service implementation for managing plugin files.

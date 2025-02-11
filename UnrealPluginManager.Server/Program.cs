@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Reflection;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
@@ -21,7 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
     options.UseSqlite("Filename=dev.sqlite", b =>
-        b.MigrationsAssembly("UnrealPluginManager.Server")
+        b.MigrationsAssembly(Assembly.GetExecutingAssembly())
             .MinBatchSize(1)
             .MaxBatchSize(100)));
 builder.Services.AddScoped<IPluginService, PluginService>();
