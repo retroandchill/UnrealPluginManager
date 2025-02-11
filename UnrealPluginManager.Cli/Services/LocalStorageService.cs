@@ -3,12 +3,8 @@ using UnrealPluginManager.Core.Services;
 
 namespace UnrealPluginManager.Cli.Services;
 
-public class LocalStorageService : IStorageService {
-    public Task<IFileInfo> StorePlugin(Stream fileData) {
-        throw new NotImplementedException();
-    }
-
-    public Stream RetrievePlugin(IFileInfo fileInfo) {
-        throw new NotImplementedException();
-    }
+public class LocalStorageService(IFileSystem fileSystem) : StorageServiceBase(fileSystem) {
+    protected sealed override string PluginDirectory =>
+        Environment.GetEnvironmentVariable(EnvironmentVariables.StorageDirectory) ??
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".upm");
 }

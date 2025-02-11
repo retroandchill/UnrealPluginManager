@@ -12,7 +12,7 @@ public class VersionsCommandOptions : ICommandOptions;
 public class VersionsCommandOptionsHandler(IConsole console, IEngineService engineService) : ICommandOptionsHandle<VersionsCommandOptions> {
     public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
         var installedEngines = engineService.GetInstalledEngines();
-        LanguageExt.Option<string> selected = Environment.GetEnvironmentVariable("PRIMARY_UNREAL_ENGINE_VERSION");
+        LanguageExt.Option<string> selected = Environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
         var currentVersion = selected
             .Match(x => installedEngines.FindIndex(y => y.Name == x),
                 () => installedEngines.Index()
