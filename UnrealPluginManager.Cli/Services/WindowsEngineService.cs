@@ -1,22 +1,36 @@
 ﻿using System.Runtime.Versioning;
+using System.Security.AccessControl;
 using Microsoft.Win32;
+using UnrealPluginManager.Cli.Model.Engine;
 
 namespace UnrealPluginManager.Cli.Services;
 
 [SupportedOSPlatform("windows")]
 public class WindowsEngineService : IEngineService {
-    
-    public List<string> GetInstalledEngines() {
-        var engineInstallations = Registry.LocalMachine.OpenSubKey(@"Software\EpicGames\Unreal Engine");
+
+    public List<InstalledEngine> GetInstalledEngines() {
+        return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine", false)
+            .Concat(GetInstalledEnginesFromRegistry(@"Software\Epic Games\Unreal Engine\Builds", true))
+            .ToList();
+    }
+
+    private static IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey, bool custom) {
+        var engineInstallations = Registry.LocalMachine.OpenSubKey(registryKey);
         if (engineInstallations is null) {
             return [];
         }
         
         return engineInstallations.GetSubKeyNames()
-            .Select(s => engineInstallations.OpenSubKey(s))
-            .Where(s => s is not null)
-            .Select(x => x.GetValue("InstalledDirectory") as string)
-            .Where(x => x is not null)
-            .ToList();
+            .Select(s => new EngineKey(s, custom))
+            .Select(s => (s.Name, Key: engineInstallations.OpenSubKey(s.Name), s.Custom))
+            .Where(s => s.Key is not null)
+            .Select(s => (s.Name, s.Key, Directory: s.Key!.GetValue("InstalledDirectory") as string, s.Custom))
+            .Where(s => s.Directory is not null)
+            .Select((x, i) => new InstalledEngine {
+                Version = Version.Parse(x.Name),
+                Name = x.Custom ? $"{x.Name} (Custom Build {i + 1})" : x.Name,
+                Directory = new DirectoryInfo(x.Directory!),
+                CustomBuild = x.Custom
+            });
     }
 }

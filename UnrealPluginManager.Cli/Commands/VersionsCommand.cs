@@ -11,8 +11,17 @@ public class VersionsCommandOptions : ICommandOptions;
 
 public class VersionsCommandOptionsHandler(IConsole console, IEngineService engineService) : ICommandOptionsHandle<VersionsCommandOptions> {
     public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
-        foreach (var version in engineService.GetInstalledEngines()) {
-            console.WriteLine(version);
+        var installedEngines = engineService.GetInstalledEngines();
+        LanguageExt.Option<string> selected = Environment.GetEnvironmentVariable("PRIMARY_UNREAL_ENGINE_VERSION");
+        var currentVersion = selected
+            .Match(x => installedEngines.FindIndex(y => y.Name == x),
+                () => installedEngines.Index()
+                    .Where(y => !y.Item.CustomBuild)
+                    .OrderByDescending(y => y.Item.Version)
+                    .Select(y => y.Index)
+                    .FirstOrDefault(-1));
+        foreach (var version in installedEngines.Index()) {
+            console.WriteLine($"- {version.Item.Name}{(version.Index == currentVersion ? " *" : "")}");
         }
         return Task.FromResult(0);
     }

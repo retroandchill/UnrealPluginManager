@@ -1,7 +1,9 @@
-﻿namespace UnrealPluginManager.Cli.Services;
+﻿using UnrealPluginManager.Cli.Model.Engine;
+
+namespace UnrealPluginManager.Cli.Services;
 
 public interface IEngineService {
     
-    List<string> GetInstalledEngines();
+    List<InstalledEngine> GetInstalledEngines();
     
 }
