@@ -6,7 +6,8 @@ using UnrealPluginManager.Cli.Model.Engine;
 namespace UnrealPluginManager.Cli.Services;
 
 [SupportedOSPlatform("windows")]
-public class WindowsEngineService : IEngineService {
+public class WindowsEnginePlatformService : IEnginePlatformService {
+    public string ScriptFileExtension => "bat";
 
     public List<InstalledEngine> GetInstalledEngines() {
         return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine", false)
@@ -27,6 +28,7 @@ public class WindowsEngineService : IEngineService {
             .Select(s => (s.Name, s.Key, Directory: s.Key!.GetValue("InstalledDirectory") as string, s.Custom))
             .Where(s => s.Directory is not null)
             .Select((x, i) => new InstalledEngine {
+                Key = x.Custom ? $"{x.Name}-c{i + 1})" : x.Name,
                 Version = Version.Parse(x.Name),
                 Name = x.Custom ? $"{x.Name} (Custom Build {i + 1})" : x.Name,
                 Directory = new DirectoryInfo(x.Directory!),

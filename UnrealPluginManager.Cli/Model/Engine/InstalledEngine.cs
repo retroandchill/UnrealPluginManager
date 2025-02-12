@@ -2,12 +2,14 @@
 
 public class InstalledEngine {
     
-    public Version Version { get; set; }
+    public required string Key { get; set; }
+    
+    public required Version Version { get; set; }
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
-    public DirectoryInfo Directory { get; set; }
+    public required DirectoryInfo Directory { get; set; }
 
-    public bool CustomBuild { get; set; }
+    public required bool CustomBuild { get; set; }
 
 }
