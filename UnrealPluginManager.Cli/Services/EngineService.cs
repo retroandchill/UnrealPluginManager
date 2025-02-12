@@ -27,6 +27,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
             $"RunUAT.{enginePlatformService.ScriptFileExtension}");
         using var intermediate = fileSystem.CreateDisposableDirectory(out var intermediateFolder);
 
+        
         var process = new Process();
         process.StartInfo.FileName = scriptPath;
         process.StartInfo.Arguments =
@@ -46,7 +47,8 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         pluginDescriptor["bInstalled"] = true;
         
         var destPath = fileSystem.Path.Join(intermediateFolder.FullName, upluginInfo.Name);
-        await using (var destination = fileSystem.FileStream.New(destPath, FileMode.Truncate)) {
+        await using (var destination = fileSystem.File.Open(destPath, FileMode.OpenOrCreate)) {
+            destination.SetLength(0);
             await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
         }
@@ -54,14 +56,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         // TODO: Abstract this out
         using var dest = fileSystem.CreateDisposableDirectory(out var destFolder);
         var zipFile = fileSystem.Path.Join(destFolder.FullName, $"{fileSystem.Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
-        var toFile = fileSystem.FileInfo.New(zipFile);
-        using (var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create)) {
-            foreach (var path in fileSystem.Directory.EnumerateFiles(destFolder.FullName)) {
-                var entry = targetZip.CreateEntry(path);
-                await using var entryStream = entry.Open();
-                await entryStream.WriteAsync(await fileSystem.File.ReadAllBytesAsync(path));
-            }
-        }
+        await fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
         
         await using var fileStream = fileSystem.FileStream.New(zipFile, FileMode.Open);
         await pluginService.SubmitPlugin(fileStream, installedEngine!.Version);
