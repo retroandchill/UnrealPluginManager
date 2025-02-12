@@ -42,12 +42,16 @@ public class EngineService(IPluginService pluginService, IEnginePlatformService 
             pluginDescriptor = (await JsonNode.ParseAsync(reader))!;
         }
         pluginDescriptor["bInstalled"] = true;
-        await using (var jsonWriter = new Utf8JsonWriter(upluginInfo.OpenWrite())) {
+        
+        var destPath = Path.Join(collection.BasePath, upluginInfo.Name);
+        await using (var destination = new FileStream(destPath, FileMode.Truncate)) {
+            await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
         }
-        upluginInfo.CopyTo(Path.Join(collection.BasePath, upluginInfo.Name), true);
 
-        var zipFile = Path.Join(collection.BasePath, $"{pluginFile.Name}.zip");
+        using var destFolder = new TempFileCollection();
+        Directory.CreateDirectory(destFolder.BasePath);
+        var zipFile = Path.Join(destFolder.BasePath, $"{Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
         ZipFile.CreateFromDirectory(collection.BasePath, zipFile);
         
         await using var fileStream = new FileStream(zipFile, FileMode.Open);
