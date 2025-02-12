@@ -18,8 +18,7 @@
         <PackageReference Include="NUnit" Version="3.14.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
-        <PackageReference Include="Testably.Abstractions.Compression" Version="4.0.0" />
-        <PackageReference Include="Testably.Abstractions.Testing" Version="4.0.0" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.3.1" />
     </ItemGroup>
 
     <ItemGroup>

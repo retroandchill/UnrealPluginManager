@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Testably.Abstractions;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -26,12 +25,12 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
                 .First();
         var scriptPath = fileSystem.Path.Join(GetBatchFilesDirectory(installedEngine!),
             $"RunUAT.{enginePlatformService.ScriptFileExtension}");
-        using var collection = new TempFileCollection();
+        using var intermediate = fileSystem.CreateDisposableDirectory(out var intermediateFolder);
 
         var process = new Process();
         process.StartInfo.FileName = scriptPath;
         process.StartInfo.Arguments =
-            $"BuildPlugin -Plugin=\"{pluginFile.FullName}\" -package=\"{collection.BasePath}\"";
+            $"BuildPlugin -Plugin=\"{pluginFile.FullName}\" -package=\"{intermediateFolder.FullName}\"";
 
         process.Start();
         await process.WaitForExitAsync();
@@ -46,17 +45,23 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         }
         pluginDescriptor["bInstalled"] = true;
         
-        var destPath = fileSystem.Path.Join(collection.BasePath, upluginInfo.Name);
+        var destPath = fileSystem.Path.Join(intermediateFolder.FullName, upluginInfo.Name);
         await using (var destination = fileSystem.FileStream.New(destPath, FileMode.Truncate)) {
             await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
         }
 
         // TODO: Abstract this out
-        using var destFolder = new TempFileCollection();
-        fileSystem.Directory.CreateDirectory(destFolder.BasePath);
-        var zipFile = fileSystem.Path.Join(destFolder.BasePath, $"{fileSystem.Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
-        fileSystem.ZipFile().CreateFromDirectory(collection.BasePath, zipFile);
+        using var dest = fileSystem.CreateDisposableDirectory(out var destFolder);
+        var zipFile = fileSystem.Path.Join(destFolder.FullName, $"{fileSystem.Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
+        var toFile = fileSystem.FileInfo.New(zipFile);
+        using (var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create)) {
+            foreach (var path in fileSystem.Directory.EnumerateFiles(destFolder.FullName)) {
+                var entry = targetZip.CreateEntry(path);
+                await using var entryStream = entry.Open();
+                await entryStream.WriteAsync(await fileSystem.File.ReadAllBytesAsync(path));
+            }
+        }
         
         await using var fileStream = fileSystem.FileStream.New(zipFile, FileMode.Open);
         await pluginService.SubmitPlugin(fileStream, installedEngine!.Version);
