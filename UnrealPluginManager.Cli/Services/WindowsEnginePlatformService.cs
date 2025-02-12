@@ -1,4 +1,5 @@
-﻿using System.Runtime.Versioning;
+﻿using System.IO.Abstractions;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using Microsoft.Win32;
 using UnrealPluginManager.Cli.Model.Engine;
@@ -6,7 +7,7 @@ using UnrealPluginManager.Cli.Model.Engine;
 namespace UnrealPluginManager.Cli.Services;
 
 [SupportedOSPlatform("windows")]
-public class WindowsEnginePlatformService : IEnginePlatformService {
+public class WindowsEnginePlatformService(IFileSystem fileSystem) : IEnginePlatformService {
     public string ScriptFileExtension => "bat";
 
     public List<InstalledEngine> GetInstalledEngines() {
@@ -15,7 +16,7 @@ public class WindowsEnginePlatformService : IEnginePlatformService {
             .ToList();
     }
 
-    private static IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey, bool custom) {
+    private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey, bool custom) {
         var engineInstallations = Registry.LocalMachine.OpenSubKey(registryKey);
         if (engineInstallations is null) {
             return [];
@@ -31,7 +32,7 @@ public class WindowsEnginePlatformService : IEnginePlatformService {
                 Key = x.Custom ? $"{x.Name}-c{i + 1})" : x.Name,
                 Version = Version.Parse(x.Name),
                 Name = x.Custom ? $"{x.Name} (Custom Build {i + 1})" : x.Name,
-                Directory = new DirectoryInfo(x.Directory!),
+                Directory = fileSystem.DirectoryInfo.New(x.Directory!),
                 CustomBuild = x.Custom
             });
     }

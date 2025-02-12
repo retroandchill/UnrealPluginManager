@@ -1,4 +1,6 @@
-﻿namespace UnrealPluginManager.Cli.Model.Engine;
+﻿using System.IO.Abstractions;
+
+namespace UnrealPluginManager.Cli.Model.Engine;
 
 public class InstalledEngine {
     
@@ -8,7 +10,7 @@ public class InstalledEngine {
 
     public required string Name { get; set; }
 
-    public required DirectoryInfo Directory { get; set; }
+    public required IDirectoryInfo Directory { get; set; }
 
     public required bool CustomBuild { get; set; }
 

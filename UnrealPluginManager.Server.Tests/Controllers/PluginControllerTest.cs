@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
+using Testably.Abstractions.Testing;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
@@ -29,7 +29,7 @@ public class PluginControllerTest {
     public void Setup() {
         var services = new ServiceCollection();
 
-        var mockFilesystem = new MockFileSystem(new Dictionary<string, MockFileData>());
+        var mockFilesystem = new MockFileSystem();
         services.AddSingleton<IFileSystem>(mockFilesystem);
 
         var mockConfig = new Mock<IConfiguration>();

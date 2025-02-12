@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Testably.Abstractions;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
@@ -21,7 +22,7 @@ var builder = new CommandLineBuilder(rootCommand)
     .UseDefaults()
     .UseExceptionHandler(errorExitCode: 1)
     .UseDependencyInjection(services => {
-        services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<IFileSystem, RealFileSystem>();
         services.AddDbContext<UnrealPluginManagerContext, SqliteUnrealPluginManagerContext>();
         services.AddScoped<IStorageService, LocalStorageService>();
         services.AddScoped<IPluginService, PluginService>();

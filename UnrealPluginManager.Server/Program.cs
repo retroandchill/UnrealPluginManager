@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Semver;
+using Testably.Abstractions;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Services;
@@ -19,7 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IFileSystem, FileSystem>();
+builder.Services.AddSingleton<IFileSystem, RealFileSystem>();
 builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
     options.UseSqlite("Filename=dev.sqlite", b =>
         b.MigrationsAssembly(Assembly.GetExecutingAssembly())
