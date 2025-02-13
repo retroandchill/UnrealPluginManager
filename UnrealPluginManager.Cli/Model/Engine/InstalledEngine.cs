@@ -2,16 +2,8 @@
 
 namespace UnrealPluginManager.Cli.Model.Engine;
 
-public class InstalledEngine {
-    
-    public required string Key { get; set; }
-    
-    public required Version Version { get; set; }
+public record InstalledEngine(string Name, Version Version, IDirectoryInfo Directory, bool CustomBuild = false) {
 
-    public required string Name { get; set; }
-
-    public required IDirectoryInfo Directory { get; set; }
-
-    public required bool CustomBuild { get; set; }
+    public string DisplayName => CustomBuild ? $"{Name}: Custom Build" : $"{Version}: Installed";
 
 }

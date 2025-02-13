@@ -19,7 +19,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
     public async Task<int> BuildPlugin(FileInfo pluginFile, string? engineVersion) {
         var installedEngines = GetInstalledEngines();
         var installedEngine = engineVersion is not null
-            ? installedEngines.Find(x => x.Key == engineVersion)
+            ? installedEngines.Find(x => x.Name == engineVersion)
             : installedEngines.Where(x => !x.CustomBuild)
                 .OrderByDescending(x => x.Version)
                 .First();

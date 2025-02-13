@@ -21,7 +21,7 @@ public class VersionsCommandOptionsHandler(IConsole console, IEngineService engi
                     .Select(y => y.Index)
                     .FirstOrDefault(-1));
         foreach (var version in installedEngines.Index()) {
-            console.WriteLine($"- {version.Item.Name}{(version.Index == currentVersion ? " *" : "")}");
+            console.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
         }
         return Task.FromResult(0);
     }
