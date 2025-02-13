@@ -153,12 +153,14 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Stream> GetPluginFileData(string pluginName, Version engineVersion) {
+    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion) {
         var pluginInfo = await dbContext.UploadedPlugins
             .Include(x => x.Parent)
             .Where(p => p.Parent.Name == pluginName)
             .OrderByDescending(p => p.Parent.VersionString)
             .Where(x => x.EngineVersion == engineVersion)
+            .AsAsyncEnumerable()
+            .Where(p => p.Parent.Version.Satisfies(targetVersion))
             .FirstOrDefaultAsync();
         if (pluginInfo == null) {
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");

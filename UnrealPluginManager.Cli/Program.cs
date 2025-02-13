@@ -14,7 +14,8 @@ using UnrealPluginManager.Core.Services;
 
 var rootCommand = new RootCommand {
     new VersionsCommand(),
-    new BuildCommand()
+    new BuildCommand(),
+    new InstallCommand()
 };
 
 var builder = new CommandLineBuilder(rootCommand)

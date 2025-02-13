@@ -2,6 +2,7 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -76,7 +77,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
     public async Task<FileStreamResult>
         DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await pluginService.GetPluginFileData(pluginName, engineVersion), MediaTypeNames.Application.Zip,
+        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion), MediaTypeNames.Application.Zip,
             $"{pluginName}.zip");
     }
 }

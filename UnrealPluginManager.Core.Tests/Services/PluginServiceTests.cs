@@ -285,10 +285,10 @@ public class PluginServiceTests {
         await context.Plugins.AddAsync(plugin);
         await context.SaveChangesAsync();
 
-        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", new Version(5, 5)));
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 5)));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("TestPlugin", new Version(5, 4)));
+            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 4)));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("OtherPlugin", new Version(5, 5)));
+            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, new Version(5, 5)));
     }
 }

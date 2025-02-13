@@ -7,7 +7,7 @@ namespace UnrealPluginManager.Cli.Utils;
 
 public static partial class EngineVersionUtils {
     public static Version GetEngineVersion(this IFileSystem fileSystem, string installDirectory) {
-        var versionFile = fileSystem.Path.Combine(installDirectory, "Engine", "Source", "Runtime", "Launch", "Resources", "Version.h");
+        var versionFile = Path.Combine(installDirectory, "Engine", "Source", "Runtime", "Launch", "Resources", "Version.h");
         int? localEngineVersionMajor = null;
         int? localEngineVersionMinor = null;
         int? localEngineVersionPatch = null;

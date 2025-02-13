@@ -15,7 +15,7 @@ public static class ZipUtils {
     private static async Task CreateZipEntryFromPath(IFileSystem fileSystem, ZipArchive targetZip,
         IDirectoryInfo rootDirectory, string directoryPath) {
         foreach (var path in rootDirectory.GetFileSystemInfos()) {
-            var relativeName = fileSystem.Path.GetRelativePath(directoryPath, path.FullName);
+            var relativeName = Path.GetRelativePath(directoryPath, path.FullName);
             if (path is IDirectoryInfo directory) {
                 targetZip.CreateEntry($"{relativeName}/");
                 await CreateZipEntryFromPath(fileSystem, targetZip, directory, directoryPath);
@@ -27,5 +27,19 @@ public static class ZipUtils {
             }
             
         }
+    }
+
+    public static async Task ExtractZipFile(this IFileSystem fileSystem, ZipArchive zipFile, string destinationDirectory) {
+        var outputDirectory = fileSystem.Directory.CreateDirectory(destinationDirectory);
+        foreach (var entry in zipFile.Entries) {
+            var fullPath = Path.Combine(outputDirectory.FullName, entry.FullName);
+            if (entry.FullName.EndsWith('/')) {
+                fileSystem.Directory.CreateDirectory(fullPath);
+            } else {
+                await using var fileStream = fileSystem.FileStream.New(fullPath, FileMode.Create);
+                await entry.Open().CopyToAsync(fileStream);
+            }
+        }
+        
     }
 }

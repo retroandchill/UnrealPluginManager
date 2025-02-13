@@ -22,9 +22,9 @@ public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageServi
         }
 
         var fileName =
-            $"{fileSystem.Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{fileSystem.Path.GetRandomFileName()}.zip";
+            $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
         Directory.CreateDirectory(PluginDirectory);
-        var fullPath = fileSystem.Path.Combine(PluginDirectory, fileName);
+        var fullPath = Path.Combine(PluginDirectory, fileName);
         await using var fileStream = fileSystem.FileStream.New(fullPath, FileMode.Create);
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);
