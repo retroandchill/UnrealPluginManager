@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Versioning;
 
-namespace UnrealPluginManager.Cli.System.Registry;
+namespace UnrealPluginManager.Cli.Abstractions;
 
 [SupportedOSPlatform("windows")]
 public interface IRegistry {

@@ -1,8 +1,7 @@
 ﻿using System.Runtime.Versioning;
 using Microsoft.Win32;
-using UnrealPluginManager.Cli.Services;
 
-namespace UnrealPluginManager.Cli.System.Registry;
+namespace UnrealPluginManager.Cli.Abstractions;
 
 
 [SupportedOSPlatform("windows")]

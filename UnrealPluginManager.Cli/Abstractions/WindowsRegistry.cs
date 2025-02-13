@@ -1,7 +1,6 @@
 ﻿using System.Runtime.Versioning;
-using UnrealPluginManager.Cli.Services;
 
-namespace UnrealPluginManager.Cli.System.Registry;
+namespace UnrealPluginManager.Cli.Abstractions;
 
 [SupportedOSPlatform("windows")]
 public class WindowsRegistry : IRegistry {
