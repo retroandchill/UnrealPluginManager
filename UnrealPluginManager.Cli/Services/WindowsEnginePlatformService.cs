@@ -11,13 +11,12 @@ public class WindowsEnginePlatformService(IFileSystem fileSystem) : IEnginePlatf
     public string ScriptFileExtension => "bat";
 
     public List<InstalledEngine> GetInstalledEngines() {
-        return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine", false)
-            .Concat(GetInstalledEnginesFromRegistry(@"Software\Epic Games\Unreal Engine\Builds", true))
+        return GetInstalledEnginesFromRegistry(Registry.LocalMachine.OpenSubKey(@"Software\EpicGames\Unreal Engine"), false)
+            .Concat(GetInstalledEnginesFromRegistry(Registry.CurrentUser.OpenSubKey(@"Software\Epic Games\Unreal Engine\Builds"), true))
             .ToList();
     }
 
-    private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey, bool custom) {
-        var engineInstallations = Registry.LocalMachine.OpenSubKey(registryKey);
+    private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(RegistryKey? engineInstallations, bool custom) {
         if (engineInstallations is null) {
             return [];
         }
