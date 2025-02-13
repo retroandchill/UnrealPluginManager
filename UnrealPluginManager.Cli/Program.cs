@@ -9,6 +9,7 @@ using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Cli.System.Registry;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 
@@ -27,6 +28,7 @@ var builder = new CommandLineBuilder(rootCommand)
         services.AddScoped<IStorageService, LocalStorageService>();
         services.AddScoped<IPluginService, PluginService>();
         if (OperatingSystem.IsWindows()) {
+            services.AddScoped<IRegistry, WindowsRegistry>();
             services.AddScoped<IEnginePlatformService, WindowsEnginePlatformService>();
         } else if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()) {
             services.AddScoped<IEnginePlatformService, PosixEnginePlatformService>();
