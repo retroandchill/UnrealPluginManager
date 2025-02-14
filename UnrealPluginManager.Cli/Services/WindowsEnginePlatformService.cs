@@ -9,10 +9,26 @@ using UnrealPluginManager.Cli.Utils;
 
 namespace UnrealPluginManager.Cli.Services;
 
+/// <summary>
+/// Provides platform-specific implementation for engine-related services on Windows.
+/// </summary>
+/// <remarks>
+/// This service interacts with the Windows registry to retrieve information about
+/// installed Unreal Engine versions, including both official installations and custom builds.
+/// </remarks>
+/// <example>
+/// The service uses the Windows registry paths to fetch engine data, such as:
+/// - Software\EpicGames\Unreal Engine
+/// - Software\Epic Games\Unreal Engine\Builds
+/// It also defines the appropriate script file extension to be used on Windows platforms.
+/// </example>
+/// <seealso cref="IEnginePlatformService"/>
 [SupportedOSPlatform("windows")]
 public class WindowsEnginePlatformService(IFileSystem fileSystem, IRegistry registry) : IEnginePlatformService {
+    /// <inheritdoc />
     public string ScriptFileExtension => "bat";
 
+    /// <inheritdoc />
     public List<InstalledEngine> GetInstalledEngines() {
         return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine")
             .Concat(GetCustomBuiltEnginesFromRegistry(@"Software\Epic Games\Unreal Engine\Builds"))

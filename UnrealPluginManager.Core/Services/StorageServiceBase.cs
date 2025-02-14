@@ -4,14 +4,27 @@ using UnrealPluginManager.Core.Exceptions;
 
 namespace UnrealPluginManager.Core.Services;
 
+/// <summary>
+/// Provides a base implementation for storage services managing plugin files.
+/// This abstract class handles common functionality for storage operations such as
+/// storing and retrieving plugin files while relying on derived classes for
+/// implementation of the base directory logic.
+/// </summary>
 public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageService {
-    
+    /// <summary>
+    /// Provides access to the file system abstraction used by storage services.
+    /// This property is used to perform file system operations without directly
+    /// depending on the standard System.IO classes, facilitating unit testing
+    /// and custom implementations.
+    /// </summary>
     protected IFileSystem FileSystem => fileSystem;
-    
+
+    /// <inheritdoc />
     public abstract string BaseDirectory { get; }
 
     private string PluginDirectory => Path.Join(BaseDirectory, "Plugins");
 
+    /// <inheritdoc />
     public async Task<IFileInfo> StorePlugin(Stream fileData) {
         using var archive = new ZipArchive(fileData);
 
@@ -32,6 +45,7 @@ public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageServi
         return fileSystem.FileInfo.New(fullPath);
     }
 
+    /// <inheritdoc />
     public Stream RetrievePlugin(IFileInfo fileInfo) {
         return fileInfo.OpenRead();
     }

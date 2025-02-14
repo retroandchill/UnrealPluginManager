@@ -3,13 +3,22 @@ using System.IO.Compression;
 
 namespace UnrealPluginManager.Core.Utils;
 
+/// <summary>
+/// Provides utility methods for creating and extracting ZIP archives using an abstracted file system.
+/// </summary>
 public static class ZipUtils {
+    /// <summary>
+    /// Creates a ZIP archive from a specified directory, including all its contents.
+    /// </summary>
+    /// <param name="fileSystem">The file system abstraction to be used for file and directory operations.</param>
+    /// <param name="zipFilePath">The full path where the ZIP file should be created.</param>
+    /// <param name="directoryPath">The path of the directory whose contents are to be archived.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task CreateZipFile(this IFileSystem fileSystem, string zipFilePath, string directoryPath) {
         var fromDirectory = fileSystem.DirectoryInfo.New(directoryPath);
         var toFile = fileSystem.FileInfo.New(zipFilePath);
-        using (var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create)) {
-            await CreateZipEntryFromPath(fileSystem, targetZip, fromDirectory, directoryPath);
-        }
+        using var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create);
+        await CreateZipEntryFromPath(fileSystem, targetZip, fromDirectory, directoryPath);
     }
 
     private static async Task CreateZipEntryFromPath(IFileSystem fileSystem, ZipArchive targetZip,
@@ -29,6 +38,13 @@ public static class ZipUtils {
         }
     }
 
+    /// <summary>
+    /// Extracts the contents of a ZIP archive to a specified destination directory using an abstracted file system.
+    /// </summary>
+    /// <param name="fileSystem">The file system abstraction to be used for creating directories and writing files.</param>
+    /// <param name="zipFile">The ZIP archive to be extracted.</param>
+    /// <param name="destinationDirectory">The path to the directory where the ZIP contents should be extracted.</param>
+    /// <returns>A task that represents the asynchronous extraction operation.</returns>
     public static async Task ExtractZipFile(this IFileSystem fileSystem, ZipArchive zipFile, string destinationDirectory) {
         var outputDirectory = fileSystem.Directory.CreateDirectory(destinationDirectory);
         foreach (var entry in zipFile.Entries) {

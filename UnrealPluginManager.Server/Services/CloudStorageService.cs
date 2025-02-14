@@ -13,6 +13,7 @@ namespace UnrealPluginManager.Server.Services;
 public class CloudStorageService : StorageServiceBase {
     private readonly StorageMetadata _storageMetadata;
 
+    /// <inheritdoc />
     public sealed override string BaseDirectory => _storageMetadata.BaseDirectory;
 
     /// <summary>

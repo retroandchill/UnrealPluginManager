@@ -5,7 +5,24 @@ using LanguageExt;
 
 namespace UnrealPluginManager.Cli.Utils;
 
+/// <summary>
+/// Provides utility methods for retrieving information about the engine version from the file system.
+/// </summary>
 public static partial class EngineVersionUtils {
+    /// <summary>
+    /// Retrieves the Unreal Engine version from the specified installation directory.
+    /// </summary>
+    /// <param name="fileSystem">The file system abstraction used to access files.</param>
+    /// <param name="installDirectory">The root directory of the Unreal Engine installation.</param>
+    /// <returns>
+    /// A <see cref="Version"/> object representing the engine's major, minor, and optional patch version.
+    /// </returns>
+    /// <exception cref="InvalidDataException">
+    /// Thrown if the version file cannot be found or the version data cannot be successfully parsed.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown if an invalid version part is encountered while parsing the version file.
+    /// </exception>
     public static Version GetEngineVersion(this IFileSystem fileSystem, string installDirectory) {
         var versionFile = Path.Combine(installDirectory, "Engine", "Source", "Runtime", "Launch", "Resources", "Version.h");
         int? localEngineVersionMajor = null;

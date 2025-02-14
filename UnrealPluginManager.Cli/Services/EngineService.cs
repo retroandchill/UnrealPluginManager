@@ -11,12 +11,16 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Services;
 
+/// <summary>
+/// Provides services related to managing Unreal Engine installations.
+/// </summary>
 public class EngineService(IFileSystem fileSystem, IPluginService pluginService, IEnginePlatformService enginePlatformService) : IEngineService {
-    
+    /// <inheritdoc />
     public List<InstalledEngine> GetInstalledEngines() {
         return enginePlatformService.GetInstalledEngines();
     }
 
+    /// <inheritdoc />
     public async Task<int> BuildPlugin(FileInfo pluginFile, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
@@ -58,6 +62,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         return 0;
     }
 
+    /// <inheritdoc />
     public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
