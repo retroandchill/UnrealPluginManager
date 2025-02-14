@@ -25,6 +25,7 @@ var builder = new CommandLineBuilder(rootCommand)
     .UseDependencyInjection(services => {
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IEnvironment, SystemEnvironment>();
+        services.AddSingleton<IProcessRunner, ProcessRunner>();
         services.AddDbContext<UnrealPluginManagerContext, SqliteUnrealPluginManagerContext>();
         services.AddScoped<IStorageService, LocalStorageService>();
         services.AddScoped<IPluginService, PluginService>();

@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Semver;
+using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -14,7 +15,7 @@ namespace UnrealPluginManager.Cli.Services;
 /// <summary>
 /// Provides services related to managing Unreal Engine installations.
 /// </summary>
-public class EngineService(IFileSystem fileSystem, IPluginService pluginService, IEnginePlatformService enginePlatformService) : IEngineService {
+public class EngineService(IFileSystem fileSystem, IPluginService pluginService, IEnginePlatformService enginePlatformService, IProcessRunner processRunner) : IEngineService {
     /// <inheritdoc />
     public List<InstalledEngine> GetInstalledEngines() {
         return enginePlatformService.GetInstalledEngines();
@@ -27,16 +28,13 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
             $"RunUAT.{enginePlatformService.ScriptFileExtension}");
         using var intermediate = fileSystem.CreateDisposableDirectory(out var intermediateFolder);
 
-        
-        var process = new Process();
-        process.StartInfo.FileName = scriptPath;
-        process.StartInfo.Arguments =
-            $"BuildPlugin -Plugin=\"{pluginFile.FullName}\" -package=\"{intermediateFolder.FullName}\"";
-
-        process.Start();
-        await process.WaitForExitAsync();
-        if (process.ExitCode != 0) {
-            return process.ExitCode;
+        var exitCode = await processRunner.RunProcess(scriptPath, [
+            "BuildPlugin",
+            $"-Plugin=\"{pluginFile.FullName}\"",
+            $"-package=\"{intermediateFolder.FullName}\""
+        ]);
+        if (exitCode != 0) {
+            return exitCode;
         }
 
         var upluginInfo = fileSystem.FileInfo.New(pluginFile.FullName);
