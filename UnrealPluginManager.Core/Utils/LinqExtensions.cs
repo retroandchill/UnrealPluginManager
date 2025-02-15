@@ -15,7 +15,7 @@ public static class LinqExtensions {
             TResult result;
             try {
                 result = selector(item);
-            } catch (Exception e) {
+            } catch (Exception) {
                 continue;
             }
                 
@@ -39,7 +39,7 @@ public static class LinqExtensions {
             TResult result;
             try {
                 result = selector(item, i);
-            } catch (Exception e) {
+            } catch (Exception) {
                 continue;
             }
                 
