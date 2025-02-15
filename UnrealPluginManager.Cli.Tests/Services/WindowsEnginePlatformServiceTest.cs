@@ -78,7 +78,7 @@ public class WindowsEnginePlatformServiceTest {
         var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
         fileSystem.Directory.CreateDirectory(ResourceFolder);
         using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
-            writeStream.Write("#define ENGINE_MAJOR_VERSION 5\n#define ENGINE_MINOR_VERSION 6");
+            writeStream.Write("//Header Comment\n#define ENGINE_MAJOR_VERSION 5\n#define ENGINE_MINOR_VERSION 6");
         }
 
         var installedEngines = platformService.GetInstalledEngines();
@@ -108,7 +108,7 @@ public class WindowsEnginePlatformServiceTest {
         var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
         fileSystem.Directory.CreateDirectory(ResourceFolder);
         using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
-            writeStream.Write("#define ENGINE_MINOR_VERSION 6");
+            writeStream.Write("//Header Comment\n#define ENGINE_MINOR_VERSION 6");
         }
 
         var installedEngines = platformService.GetInstalledEngines();
@@ -133,7 +133,7 @@ public class WindowsEnginePlatformServiceTest {
         var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
         fileSystem.Directory.CreateDirectory(ResourceFolder);
         using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
-            writeStream.Write("#define ENGINE_MAJOR_VERSION 5");
+            writeStream.Write("//Header Comment\n#define ENGINE_MAJOR_VERSION 5");
         }
 
         var installedEngines = platformService.GetInstalledEngines();
@@ -155,8 +155,7 @@ public class WindowsEnginePlatformServiceTest {
     [Test]
     public void TestGetEngineVersionsWithMissingVersionFile() {
         var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
-        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
-
+        
         var installedEngines = platformService.GetInstalledEngines();
         Assert.That(installedEngines, Has.Count.EqualTo(2));
         Assert.Multiple(() =>
