@@ -8,7 +8,7 @@ namespace UnrealPluginManager.Cli.DependencyInjection;
 /// <summary>
 /// Provides middleware for integrating dependency injection with the command line processing pipeline.
 /// </summary>
-internal static class DependencyInjectionMiddleware {
+public static class DependencyInjectionMiddleware {
     /// <summary>
     /// Adds dependency injection to the command line processing pipeline
     /// by configuring the service collection with the provided configuration action.

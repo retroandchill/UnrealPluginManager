@@ -1,5 +1,7 @@
 ﻿using System.CommandLine;
+using System.CommandLine.IO;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Core.Abstractions;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -35,11 +37,11 @@ public class VersionsCommandOptions : ICommandOptions;
 /// The class interacts with the IEngineService to retrieve engine version details and utilizes
 /// the console for displaying the results.
 /// </remarks>
-public class VersionsCommandOptionsHandler(IConsole console, IEngineService engineService) : ICommandOptionsHandle<VersionsCommandOptions> {
+public class VersionsCommandOptionsHandler(IConsole console, IEnvironment environment, IEngineService engineService) : ICommandOptionsHandle<VersionsCommandOptions> {
     /// <inheritdoc />
     public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
         var installedEngines = engineService.GetInstalledEngines();
-        LanguageExt.Option<string> selected = Environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
+        LanguageExt.Option<string> selected = environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
         var currentVersion = selected
             .Match(x => installedEngines.FindIndex(y => y.Name == x),
                 () => installedEngines.Index()
@@ -48,7 +50,7 @@ public class VersionsCommandOptionsHandler(IConsole console, IEngineService engi
                     .Select(y => y.Index)
                     .FirstOrDefault(-1));
         foreach (var version in installedEngines.Index()) {
-            console.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
+            console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
         }
         return Task.FromResult(0);
     }
