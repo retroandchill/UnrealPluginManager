@@ -1,4 +1,4 @@
-﻿namespace UnrealPluginManager.Cli.Abstractions;
+﻿namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Represents a contract for executing external processes with a specified command and arguments.

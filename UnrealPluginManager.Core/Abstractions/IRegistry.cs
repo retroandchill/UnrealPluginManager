@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Versioning;
 
-namespace UnrealPluginManager.Cli.Abstractions;
+namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Represents a registry abstraction for accessing the Windows registry keys.

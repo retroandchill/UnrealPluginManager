@@ -1,7 +1,7 @@
 ﻿using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore.Design;
-using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
 
 namespace UnrealPluginManager.Cli.Database;

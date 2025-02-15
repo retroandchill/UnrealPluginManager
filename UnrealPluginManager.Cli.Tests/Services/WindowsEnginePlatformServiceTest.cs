@@ -2,9 +2,9 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.DependencyInjection;
-using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Tests.Mocks;
+using UnrealPluginManager.Core.Abstractions;
 
 namespace UnrealPluginManager.Cli.Tests.Services;
 

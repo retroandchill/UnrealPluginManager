@@ -5,9 +5,9 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
-using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 

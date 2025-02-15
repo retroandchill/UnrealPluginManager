@@ -1,4 +1,4 @@
-﻿namespace UnrealPluginManager.Cli.Abstractions;
+﻿namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Provides methods for interacting with system environment variables and special folder paths.

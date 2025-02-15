@@ -5,11 +5,11 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 

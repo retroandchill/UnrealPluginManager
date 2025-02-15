@@ -3,9 +3,9 @@ using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Win32;
-using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Cli.Utils;
+using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Services;

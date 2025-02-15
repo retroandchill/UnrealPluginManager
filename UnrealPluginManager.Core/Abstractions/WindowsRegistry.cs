@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Versioning;
 
-namespace UnrealPluginManager.Cli.Abstractions;
+namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Provides an implementation of the <see cref="IRegistry"/> interface for accessing the Windows registry.

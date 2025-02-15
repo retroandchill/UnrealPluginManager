@@ -1,5 +1,5 @@
 ﻿using System.Runtime.Versioning;
-using UnrealPluginManager.Cli.Abstractions;
+using UnrealPluginManager.Core.Abstractions;
 
 namespace UnrealPluginManager.Cli.Tests.Mocks;
 

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Versioning;
 using Microsoft.Win32;
 
-namespace UnrealPluginManager.Cli.Abstractions;
+namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Represents a wrapper for a Windows registry key, providing a concrete

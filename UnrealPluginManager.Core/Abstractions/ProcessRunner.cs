@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace UnrealPluginManager.Cli.Abstractions;
+namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// A class responsible for executing external processes by invoking specified commands with arguments.
