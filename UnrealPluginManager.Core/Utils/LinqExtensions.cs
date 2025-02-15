@@ -39,7 +39,9 @@ public static class LinqExtensions {
             TResult result;
             try {
                 result = selector(item, i);
+                i++;
             } catch (Exception) {
+                i++;
                 continue;
             }
                 
