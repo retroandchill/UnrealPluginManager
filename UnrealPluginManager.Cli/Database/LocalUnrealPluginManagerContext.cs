@@ -10,7 +10,7 @@ namespace UnrealPluginManager.Cli.Database;
 /// Represents the SQLite implementation of the UnrealPluginManagerContext.
 /// Provides functionality to configure and manage the database context with SQLite as the underlying database.
 /// </summary>
-public class SqliteUnrealPluginManagerContext(IFileSystem filesystem, IStorageService storageService) : UnrealPluginManagerContext(filesystem) {
+public class LocalUnrealPluginManagerContext(IFileSystem filesystem, IStorageService storageService) : UnrealPluginManagerContext(filesystem) {
     /// <inheritdoc />
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         Directory.CreateDirectory(storageService.BaseDirectory);

@@ -12,9 +12,11 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
+using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Config;
 using UnrealPluginManager.Server.Controllers;
 using UnrealPluginManager.Server.Services;
+using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
@@ -39,10 +41,9 @@ public class PluginControllerTest {
 
         mockConfig.Setup(x => x.GetSection(StorageMetadata.Name)).Returns(mockSection.Object);
 
-        services.AddScoped<IStorageService, CloudStorageService>();
-
-        services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
-        services.AddScoped<IPluginService, PluginService>();
+        services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>()
+            .AddCoreServices()
+            .AddServerServices();
         _serviceProvider = services.BuildServiceProvider();
 
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();

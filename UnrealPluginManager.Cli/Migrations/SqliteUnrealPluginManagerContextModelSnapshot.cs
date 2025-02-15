@@ -8,7 +8,7 @@ using UnrealPluginManager.Cli.Database;
 
 namespace UnrealPluginManager.Cli.Migrations
 {
-    [DbContext(typeof(SqliteUnrealPluginManagerContext))]
+    [DbContext(typeof(LocalUnrealPluginManagerContext))]
     partial class SqliteUnrealPluginManagerContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

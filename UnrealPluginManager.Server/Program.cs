@@ -7,8 +7,11 @@ using Microsoft.OpenApi.Models;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Swagger;
+using UnrealPluginManager.Server.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,21 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IFileSystem, FileSystem>();
-builder.Services.AddDbContext<UnrealPluginManagerContext>(options =>
-    options.UseSqlite("Filename=dev.sqlite", b =>
-        b.MigrationsAssembly(Assembly.GetExecutingAssembly())
-            .MinBatchSize(1)
-            .MaxBatchSize(100)));
-builder.Services.AddScoped<IPluginService, PluginService>();
-builder.Services.AddScoped<IStorageService, CloudStorageService>();
-builder.Services.Configure<FormOptions>(options => {
-    options.ValueLengthLimit = int.MaxValue;
-    options.MultipartBodyLengthLimit = long.MaxValue;
-});
+builder.Services.AddOpenApiConfigs()
+    .AddSystemAbstractions()
+    .AddServiceConfigs()
+    .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>()
+    .AddCoreServices()
+    .AddServerServices();
 
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 

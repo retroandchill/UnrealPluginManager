@@ -9,7 +9,7 @@ using UnrealPluginManager.Cli.Database;
 
 namespace UnrealPluginManager.Cli.Migrations
 {
-    [DbContext(typeof(SqliteUnrealPluginManagerContext))]
+    [DbContext(typeof(LocalUnrealPluginManagerContext))]
     [Migration("20250211015717_InitalCreate")]
     partial class InitalCreate
     {
