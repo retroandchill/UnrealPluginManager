@@ -29,11 +29,4 @@ public class RedirectingStreamWriter : IStandardStreamWriter {
     public string GetWrittenString() {
         return _writer.ToString();
     }
-
-    /// <summary>
-    /// Flushes the internal buffer of the stream writer, ensuring that all buffered content is written to the underlying storage.
-    /// </summary>
-    public void Flush() {
-        _writer.Flush();
-    }
 }

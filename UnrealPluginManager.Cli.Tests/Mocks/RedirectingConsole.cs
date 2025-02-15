@@ -47,13 +47,5 @@ public class RedirectingConsole : IConsole {
     public string GetWrittenError() {
         return _errorWriter.GetWrittenString();
     }
-
-    /// <summary>
-    /// Flushes the underlying output and error stream writers, ensuring any buffered data is written out.
-    /// </summary>
-    public void Flush() {
-        _outWriter.Flush();
-        _errorWriter.Flush();
-    }
     
 }

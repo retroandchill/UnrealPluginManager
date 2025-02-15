@@ -31,7 +31,8 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
     /// </example>
     public InstallCommand() : base("install", "Install the specified plugin into the engine") {
         AddArgument(new Argument<string>("input", "The name of plugin to install"));
-        AddOption(new Option<SemVersionRange>(["--version", "-v"], "The version of the plugin to install")  {
+        AddOption(new Option<SemVersionRange>(aliases: ["--version", "-v"], description: "The version of the plugin to install",
+            parseArgument: r => r.Tokens.Count == 1 ? SemVersionRange.Parse(r.Tokens[0].Value) : SemVersionRange.AllRelease)  {
             IsRequired = false,
         });
         AddOption(new Option<string>(["--engine-version", "-e"], "The version of the engine to build the plugin for") {
