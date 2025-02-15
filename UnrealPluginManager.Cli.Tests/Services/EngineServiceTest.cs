@@ -2,6 +2,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
@@ -13,7 +14,7 @@ using UnrealPluginManager.Core.Services;
 
 namespace UnrealPluginManager.Cli.Tests.Services;
 
-public class EngineServiceTest {
+public partial class EngineServiceTest {
     
     private static readonly JsonSerializerOptions JsonOptions = new() {
         AllowTrailingCommas = true
@@ -56,7 +57,7 @@ public class EngineServiceTest {
             new("5.5", new Version(5, 5), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.5")),
             new("5.6_Custom", new Version(5, 6), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.6_Custom"), true),
         };
-        _enginePlatformService.Setup(x => x.ScriptFileExtension).Returns(".bat");
+        _enginePlatformService.Setup(x => x.ScriptFileExtension).Returns("bat");
         _enginePlatformService.Setup(x => x.GetInstalledEngines()).Returns(installedEngines);
         
         const string pluginPath = "C:/dev/Plugins/MyPlugin";
@@ -73,6 +74,7 @@ public class EngineServiceTest {
         }
 
         PluginDescriptor? capturedData = null;
+        string? capturedTextFile = null;
         _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<Stream>(),
                 It.Is(new Version(5, 5), EqualityComparer<Version>.Default)))
             .Returns(async (Stream x, Version _) => {
@@ -80,14 +82,28 @@ public class EngineServiceTest {
                 var entry = archive.GetEntry("MyPlugin.uplugin")!;
                 await using var entryStream = entry.Open();
                 capturedData = await JsonSerializer.DeserializeAsync<PluginDescriptor>(entryStream, JsonOptions);
+                var subFile = archive.GetEntry(Path.Join("Example", "TextFile.txt"));
+                await using var subFileStream = subFile!.Open();
+                using var textReader = new StreamReader(subFileStream);
+                capturedTextFile = await textReader.ReadToEndAsync();
                 return new PluginSummary("MyPlugin", capturedData!.VersionName, capturedData.Description);
             });
         
-        const string batchFilePath = "C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat";
+        var batchFilePath = Path.GetFullPath("C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat");
         _processRunner.Setup(x => x.RunProcess(It.Is<string>(y => y == batchFilePath), 
-            It.Is<string[]>(y => y.Length == 3 && y[0] == "BuildPlugin" && y[1].StartsWith("-Plugin=") 
-                                 && y[1].Contains(pluginFile) && y[2].StartsWith("-Package="))))
-            .ReturnsAsync(0);
+            It.Is<string[]>(y => y.Length == 3)))
+            .Returns(async (string _, string[] args) => {
+                var match = PackageRegex().Match(args[2]);
+                Assert.That(match.Success);
+                var directoryName = match.Groups[1].Value;
+                _filesystem.Directory.CreateDirectory(directoryName);
+                _filesystem.File.Copy(pluginFile, Path.Join(directoryName, Path.GetFileName(pluginFile)));
+                var subDir = Path.Join(directoryName, "Example");
+                _filesystem.Directory.CreateDirectory(subDir);
+                var textFileName = Path.Join(subDir, "TextFile.txt");
+                await _filesystem.File.WriteAllTextAsync(textFileName, "Hello World!");
+                return 0;
+            });
         
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
         var result = await engineService.BuildPlugin(_filesystem.FileInfo.New(pluginFile), null);
@@ -95,7 +111,11 @@ public class EngineServiceTest {
         {
             Assert.That(result, Is.EqualTo(0));
             Assert.That(capturedData, Is.Not.Null);
+            Assert.That(capturedTextFile, Is.EqualTo("Hello World!"));
         });
         Assert.That(capturedData.Installed, Is.True);
     }
+
+    [GeneratedRegex("-Package=\"(.*)\"", RegexOptions.IgnoreCase)]
+    private static partial Regex PackageRegex();
 }
