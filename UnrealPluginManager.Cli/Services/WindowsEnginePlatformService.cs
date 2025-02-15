@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using UnrealPluginManager.Cli.Abstractions;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Cli.Utils;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Services;
 
@@ -59,7 +60,7 @@ public class WindowsEnginePlatformService(IFileSystem fileSystem, IRegistry regi
         return engineInstallations.GetValueNames()
             .Select(s => (Name: s, Directory: engineInstallations.GetValue<string>(s)))
             .Where(s => s.Directory is not null)
-            .Select((x, i) => new InstalledEngine(x.Name,
+            .SelectValid((x, i) => new InstalledEngine(x.Name,
                 fileSystem.GetEngineVersion(x.Directory!), fileSystem.DirectoryInfo.New(x.Directory!), true));
     }
 }

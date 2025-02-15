@@ -58,7 +58,7 @@ public class InstallCommandOptions : ICommandOptions {
     /// wishes to install using the command-line interface. It is a required parameter
     /// utilized during the plugin installation process.
     /// </remarks>
-    public string Input { get; set; }
+    public required string Input { get; set; }
 
     /// <summary>
     /// Gets or sets the version range of the plugin to be installed.

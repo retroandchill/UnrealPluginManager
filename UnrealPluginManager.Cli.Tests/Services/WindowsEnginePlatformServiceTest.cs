@@ -1,15 +1,10 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Runtime.Versioning;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Cli.Abstractions;
-using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Tests.Mocks;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Services;
 
 namespace UnrealPluginManager.Cli.Tests.Services;
 
@@ -18,16 +13,13 @@ public class WindowsEnginePlatformServiceTest {
     
     private ServiceProvider _serviceProvider;
     
+    private const string ResourceFolder = "C:/dev/UnrealEngine/5.6_CustomBuild/Engine/Source/Runtime/Launch/Resources";
+    
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
 
         var mockFilesystem = new MockFileSystem(new Dictionary<string, MockFileData>());
-        const string resourceFolder = "C:/dev/UnrealEngine/5.6_CustomBuild/Engine/Source/Runtime/Launch/Resources";
-        mockFilesystem.AddDirectory(resourceFolder);
-        using (var writeStream = mockFilesystem.File.CreateText(Path.Join(resourceFolder, "Version.h"))) {
-            writeStream.Write("#define ENGINE_MAJOR_VERSION 5\n#define ENGINE_MINOR_VERSION 6\n#define ENGINE_PATCH_VERSION 0");
-        }
         services.AddSingleton<IFileSystem>(mockFilesystem);
 
         var mockRegistry = new MockRegistry();
@@ -51,8 +43,13 @@ public class WindowsEnginePlatformServiceTest {
     }
 
     [Test]
-    public void TestGetEngineVersions() {
+    public void TestGetEngineVersionsWithFullSemVersion() {
         var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
+        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        fileSystem.Directory.CreateDirectory(ResourceFolder);
+        using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
+            writeStream.Write("#define ENGINE_MAJOR_VERSION 5\n#define ENGINE_MINOR_VERSION 6\n#define ENGINE_PATCH_VERSION 0");
+        }
 
         var installedEngines = platformService.GetInstalledEngines();
         Assert.That(installedEngines, Has.Count.EqualTo(3));
@@ -75,5 +72,105 @@ public class WindowsEnginePlatformServiceTest {
         });
     }
     
+    [Test]
+    public void TestGetEngineVersionsWithPartialSemVersion() {
+        var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
+        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        fileSystem.Directory.CreateDirectory(ResourceFolder);
+        using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
+            writeStream.Write("#define ENGINE_MAJOR_VERSION 5\n#define ENGINE_MINOR_VERSION 6");
+        }
+
+        var installedEngines = platformService.GetInstalledEngines();
+        Assert.That(installedEngines, Has.Count.EqualTo(3));
+        Assert.Multiple(() =>
+        {
+            Assert.That(installedEngines[0].Name, Is.EqualTo("5.4"));
+            Assert.That(installedEngines[0].DisplayName, Is.EqualTo("5.4: Installed"));
+            Assert.That(installedEngines[0].Version, Is.EqualTo(new Version(5, 4)));
+            Assert.That(installedEngines[0].CustomBuild, Is.False);
+            
+            Assert.That(installedEngines[1].Name, Is.EqualTo("5.5"));
+            Assert.That(installedEngines[1].DisplayName, Is.EqualTo("5.5: Installed"));
+            Assert.That(installedEngines[1].Version, Is.EqualTo(new Version(5, 5)));
+            Assert.That(installedEngines[1].CustomBuild, Is.False);
+            
+            Assert.That(installedEngines[2].Name, Is.EqualTo("5.6_Custom"));
+            Assert.That(installedEngines[2].DisplayName, Is.EqualTo("5.6_Custom: Custom Build"));
+            Assert.That(installedEngines[2].Version, Is.EqualTo(new Version(5, 6)));
+            Assert.That(installedEngines[2].CustomBuild, Is.True);
+        });
+    }
+    
+    [Test]
+    public void TestGetEngineVersionsWithMissingMajorVersion() {
+        var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
+        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        fileSystem.Directory.CreateDirectory(ResourceFolder);
+        using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
+            writeStream.Write("#define ENGINE_MINOR_VERSION 6");
+        }
+
+        var installedEngines = platformService.GetInstalledEngines();
+        Assert.That(installedEngines, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(installedEngines[0].Name, Is.EqualTo("5.4"));
+            Assert.That(installedEngines[0].DisplayName, Is.EqualTo("5.4: Installed"));
+            Assert.That(installedEngines[0].Version, Is.EqualTo(new Version(5, 4)));
+            Assert.That(installedEngines[0].CustomBuild, Is.False);
+            
+            Assert.That(installedEngines[1].Name, Is.EqualTo("5.5"));
+            Assert.That(installedEngines[1].DisplayName, Is.EqualTo("5.5: Installed"));
+            Assert.That(installedEngines[1].Version, Is.EqualTo(new Version(5, 5)));
+            Assert.That(installedEngines[1].CustomBuild, Is.False);
+        });
+    }
+    
+    [Test]
+    public void TestGetEngineVersionsWithMissingMinorVersion() {
+        var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
+        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        fileSystem.Directory.CreateDirectory(ResourceFolder);
+        using (var writeStream = fileSystem.File.CreateText(Path.Join(ResourceFolder, "Version.h"))) {
+            writeStream.Write("#define ENGINE_MAJOR_VERSION 5");
+        }
+
+        var installedEngines = platformService.GetInstalledEngines();
+        Assert.That(installedEngines, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(installedEngines[0].Name, Is.EqualTo("5.4"));
+            Assert.That(installedEngines[0].DisplayName, Is.EqualTo("5.4: Installed"));
+            Assert.That(installedEngines[0].Version, Is.EqualTo(new Version(5, 4)));
+            Assert.That(installedEngines[0].CustomBuild, Is.False);
+            
+            Assert.That(installedEngines[1].Name, Is.EqualTo("5.5"));
+            Assert.That(installedEngines[1].DisplayName, Is.EqualTo("5.5: Installed"));
+            Assert.That(installedEngines[1].Version, Is.EqualTo(new Version(5, 5)));
+            Assert.That(installedEngines[1].CustomBuild, Is.False);
+        });
+    }
+    
+    [Test]
+    public void TestGetEngineVersionsWithMissingVersionFile() {
+        var platformService = _serviceProvider.GetRequiredService<IEnginePlatformService>();
+        var fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
+
+        var installedEngines = platformService.GetInstalledEngines();
+        Assert.That(installedEngines, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(installedEngines[0].Name, Is.EqualTo("5.4"));
+            Assert.That(installedEngines[0].DisplayName, Is.EqualTo("5.4: Installed"));
+            Assert.That(installedEngines[0].Version, Is.EqualTo(new Version(5, 4)));
+            Assert.That(installedEngines[0].CustomBuild, Is.False);
+            
+            Assert.That(installedEngines[1].Name, Is.EqualTo("5.5"));
+            Assert.That(installedEngines[1].DisplayName, Is.EqualTo("5.5: Installed"));
+            Assert.That(installedEngines[1].Version, Is.EqualTo(new Version(5, 5)));
+            Assert.That(installedEngines[1].CustomBuild, Is.False);
+        });
+    }
     
 }

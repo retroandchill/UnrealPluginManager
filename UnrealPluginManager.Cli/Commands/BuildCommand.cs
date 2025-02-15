@@ -49,7 +49,7 @@ public class BuildCommandOptions : ICommandOptions {
     /// This property specifies the directory containing the Unreal Engine plugin source files
     /// that need to be compiled as part of the build command.
     /// </remarks>
-    public string Input { get; set; }
+    public required string Input { get; set; }
 
     /// <summary>
     /// Gets or sets the target Unreal Engine version for the build process.

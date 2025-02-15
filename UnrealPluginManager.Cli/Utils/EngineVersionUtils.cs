@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using LanguageExt;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Utils;
 
@@ -25,11 +26,11 @@ public static partial class EngineVersionUtils {
     /// </exception>
     public static Version GetEngineVersion(this IFileSystem fileSystem, string installDirectory) {
         var versionFile = Path.Combine(installDirectory, "Engine", "Source", "Runtime", "Launch", "Resources", "Version.h");
-        int? localEngineVersionMajor = null;
-        int? localEngineVersionMinor = null;
-        int? localEngineVersionPatch = null;
+        var localEngineVersionMajor = new Option<int>();
+        var localEngineVersionMinor = new Option<int>();
+        var localEngineVersionPatch = new Option<int>();
         if (!fileSystem.File.Exists(versionFile)) {
-            throw new InvalidDataException("Failed to find version file at " + versionFile);
+            throw new FileNotFoundException("Failed to find version file at " + versionFile);
         }
         
         using var file = fileSystem.File.OpenText(versionFile);
@@ -57,12 +58,13 @@ public static partial class EngineVersionUtils {
             }
         }
 
-        if (!localEngineVersionMajor.HasValue || !localEngineVersionMinor.HasValue) {
+        if (!localEngineVersionMajor.IsSome || !localEngineVersionMinor.IsSome) {
             throw new InvalidDataException("Failed to parse version from " + versionFile);
         }
         
         
-        return localEngineVersionPatch.HasValue ? new Version(localEngineVersionMajor.Value, localEngineVersionMinor.Value, localEngineVersionPatch.Value) : new Version(localEngineVersionMajor.Value, localEngineVersionMinor.Value);
+        return localEngineVersionPatch.IsSome ? new Version(localEngineVersionMajor.Get(), localEngineVersionMinor.Get(), 
+            localEngineVersionPatch.Get()) : new Version(localEngineVersionMajor.Get(), localEngineVersionMinor.Get());
 
     }
 
