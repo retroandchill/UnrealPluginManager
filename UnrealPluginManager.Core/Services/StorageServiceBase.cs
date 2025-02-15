@@ -38,6 +38,7 @@ public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageServi
             $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
         Directory.CreateDirectory(PluginDirectory);
         var fullPath = Path.Combine(PluginDirectory, fileName);
+        fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
         await using var fileStream = fileSystem.FileStream.New(fullPath, FileMode.Create);
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);

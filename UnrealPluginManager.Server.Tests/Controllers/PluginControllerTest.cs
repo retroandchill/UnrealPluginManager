@@ -11,6 +11,7 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Server.Config;
 using UnrealPluginManager.Server.Controllers;
 using UnrealPluginManager.Server.Services;
@@ -40,12 +41,7 @@ public class PluginControllerTest {
 
         services.AddScoped<IStorageService, CloudStorageService>();
 
-        services.AddDbContext<UnrealPluginManagerContext>(options => options
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .EnableSensitiveDataLogging()
-            .EnableDetailedErrors()
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .LogTo(Console.WriteLine));
+        services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
         services.AddScoped<IPluginService, PluginService>();
         _serviceProvider = services.BuildServiceProvider();
 

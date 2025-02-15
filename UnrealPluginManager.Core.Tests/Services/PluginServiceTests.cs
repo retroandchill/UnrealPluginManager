@@ -12,6 +12,7 @@ using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
 
 namespace UnrealPluginManager.Core.Tests.Services;
@@ -35,12 +36,7 @@ public class PluginServiceTests {
         services.AddSingleton(_mockStorageService.Object);
 
 
-        services.AddDbContext<UnrealPluginManagerContext>(options => options
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .EnableSensitiveDataLogging()
-            .EnableDetailedErrors()
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .LogTo(Console.WriteLine));
+        services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
         services.AddScoped<IPluginService, PluginService>();
         _serviceProvider = services.BuildServiceProvider();
     }
