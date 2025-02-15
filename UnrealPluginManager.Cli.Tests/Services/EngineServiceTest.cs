@@ -116,6 +116,54 @@ public partial class EngineServiceTest {
         Assert.That(capturedData.Installed, Is.True);
     }
 
+    [Test]
+    public async Task TestInstallPlugin() {
+        var installedEngines = new List<InstalledEngine> {
+            new("5.4", new Version(5, 4), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.4")),
+            new("5.5", new Version(5, 5), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.5")),
+            new("5.6_Custom", new Version(5, 6), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.6_Custom"), true),
+        };
+        _enginePlatformService.Setup(x => x.GetInstalledEngines()).Returns(installedEngines);
+        
+        const string pluginPath = "C:/dev/Plugins/MyPlugin.zip";
+        var dirName = Path.GetDirectoryName(pluginPath);
+        Assert.That(dirName, Is.Not.Null);
+        _filesystem.Directory.CreateDirectory(dirName);
+        await using (var zipFile = _filesystem.File.Create(pluginPath)) {
+            using var archive = new ZipArchive(zipFile, ZipArchiveMode.Create);
+            var descriptor = new PluginDescriptor {
+                Version = 1,
+                FriendlyName = "My Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Installed = false
+            };
+            var pluginEntry = archive.CreateEntry("MyPlugin.uplugin");
+            await using (var writer = pluginEntry.Open()) {
+                await JsonSerializer.SerializeAsync(writer, descriptor);
+            }
+
+            archive.CreateEntry("Example/");
+            var textFileName = Path.Join("Example", "TextFile.txt");
+            var textFileEntry = archive.CreateEntry(textFileName);
+            await using var textFileStream = textFileEntry.Open();
+            await using var textWriter = new StreamWriter(textFileStream);
+            await textWriter.WriteAsync("Hello World!");
+        }
+
+        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, new Version(5, 4)))
+            .ReturnsAsync((string _, SemVersionRange _, Version _) => _filesystem.File.OpenRead(pluginPath));
+
+        var engineService = _serviceProvider.GetRequiredService<IEngineService>();
+        var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4");
+        Assert.Multiple(() =>
+        {
+            Assert.That(returnCode, Is.EqualTo(0));
+            Assert.That(_filesystem.Directory.Exists(
+                Path.Join("C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin")),
+                Is.True);
+        });
+    }
+
     [GeneratedRegex("-Package=\"(.*)\"", RegexOptions.IgnoreCase)]
     private static partial Regex PackageRegex();
 }
