@@ -66,7 +66,7 @@ public class PluginServiceTests {
         await context.SaveChangesAsync();
 
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = await pluginService.GetPluginSummaries();
+        var summaries = await pluginService.GetPluginSummaries(1, 10);
         Assert.That(summaries, Has.Count.EqualTo(10));
     }
 

@@ -9,7 +9,9 @@ using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
+using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -21,15 +23,17 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         AllowTrailingCommas = true
     };
 
+    /// <param name="pageNumber"></param>
+    /// <param name="pageSize"></param>
     /// <inheritdoc/>
-    public async Task<List<PluginSummary>> GetPluginSummaries() {
-        return await dbContext.Plugins
+    public async Task<Page<PluginSummary>> GetPluginSummaries(int pageNumber, int pageSize) {
+        var plugins = await dbContext.Plugins
+            .OrderByDescending(x => x.Name)
             .GroupBy(x => x.Name)
-            .Select(g => g.OrderByDescending(x => x.VersionString).FirstOrDefault())
-            .AsAsyncEnumerable()
-            .Where(p => p != null)
-            .Select(p => new PluginSummary(p!.Name, p.Version, p.Description))
-            .ToListAsync();
+            .Select(g => g.OrderByDescending(x => x.VersionString).First())
+            .ToPageAsync(pageNumber, pageSize);
+        return plugins
+            .Select(p => new PluginSummary(p.Name, p.Version, p.Description));
     }
 
     /// <inheritdoc/>

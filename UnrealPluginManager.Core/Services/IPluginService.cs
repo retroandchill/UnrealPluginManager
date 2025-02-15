@@ -2,6 +2,7 @@
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -12,10 +13,12 @@ public interface IPluginService {
     /// <summary>
     /// Retrieves a collection of plugin summaries including essential information like name and optional description.
     /// </summary>
+    /// <param name="pageNumber"></param>
+    /// <param name="pageSize"></param>
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
-    Task<List<PluginSummary>> GetPluginSummaries();
+    Task<Page<PluginSummary>> GetPluginSummaries(int pageNumber, int pageSize);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
