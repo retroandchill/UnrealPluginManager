@@ -1,5 +1,6 @@
 ﻿using System.CodeDom.Compiler;
 using System.CommandLine;
+using System.IO.Abstractions;
 using UnrealPluginManager.Cli.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -70,9 +71,9 @@ public class BuildCommandOptions : ICommandOptions {
 /// the specified engine service to perform the build operation based on the given input and optional
 /// target engine version.
 /// </remarks>
-public class BuildCommandOptionsHandler(IEngineService engineService) : ICommandOptionsHandle<BuildCommandOptions> {
+public class BuildCommandOptionsHandler(IFileSystem fileSystem, IEngineService engineService) : ICommandOptionsHandle<BuildCommandOptions> {
     /// <inheritdoc />
     public Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-        return engineService.BuildPlugin(new FileInfo(options.Input), options.Version);
+        return engineService.BuildPlugin(fileSystem.FileInfo.New(options.Input), options.Version);
     }
 }

@@ -21,15 +21,15 @@ public interface IEngineService {
     /// Builds a specified Unreal Engine plugin using the provided engine version.
     /// </summary>
     /// <param name="pluginFile">
-    /// The <see cref="FileInfo"/> representing the path of the plugin file to be built.
+    ///     The <see cref="IFileInfo"/> representing the path of the plugin file to be built.
     /// </param>
     /// <param name="engineVersion">
-    /// The version of the Unreal Engine to use for building the plugin. If null, the default engine version is used.
+    ///     The version of the Unreal Engine to use for building the plugin. If null, the default engine version is used.
     /// </param>
     /// <returns>
     /// A task representing the asynchronous operation with an integer exit code indicating the result of the build process.
     /// </returns>
-    public Task<int> BuildPlugin(FileInfo pluginFile, string? engineVersion);
+    public Task<int> BuildPlugin(IFileInfo pluginFile, string? engineVersion);
 
     /// <summary>
     /// Installs the specified plugin for a given Unreal Engine version.

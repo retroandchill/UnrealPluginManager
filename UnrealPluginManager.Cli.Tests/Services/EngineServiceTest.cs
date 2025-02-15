@@ -1,0 +1,101 @@
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using System.IO.Compression;
+using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Semver;
+using UnrealPluginManager.Cli.Abstractions;
+using UnrealPluginManager.Cli.Model.Engine;
+using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Services;
+
+namespace UnrealPluginManager.Cli.Tests.Services;
+
+public class EngineServiceTest {
+    
+    private static readonly JsonSerializerOptions JsonOptions = new() {
+        AllowTrailingCommas = true
+    };
+    
+    private ServiceProvider _serviceProvider;
+    private MockFileSystem _filesystem;
+    private Mock<IEnginePlatformService> _enginePlatformService;
+    private Mock<IProcessRunner> _processRunner;
+    private Mock<IPluginService> _pluginService;
+    
+    [SetUp]
+    public void Setup() {
+        var services = new ServiceCollection();
+
+        _filesystem = new MockFileSystem(new Dictionary<string, MockFileData>());
+        services.AddSingleton<IFileSystem>(_filesystem);
+
+        _enginePlatformService = new Mock<IEnginePlatformService>();
+        services.AddSingleton(_enginePlatformService.Object);
+        _processRunner = new Mock<IProcessRunner>();
+        services.AddSingleton(_processRunner.Object);
+        _pluginService = new Mock<IPluginService>();
+        services.AddSingleton(_pluginService.Object);
+        
+        services.AddSingleton<IEngineService, EngineService>();
+        
+        _serviceProvider = services.BuildServiceProvider();
+    }
+
+    [TearDown]
+    public void TearDown() {
+        _serviceProvider.Dispose();
+    }
+
+    [Test]
+    public async Task TestBuildPlugin() {
+        var installedEngines = new List<InstalledEngine> {
+            new("5.4", new Version(5, 4), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.4")),
+            new("5.5", new Version(5, 5), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.5")),
+            new("5.6_Custom", new Version(5, 6), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.6_Custom"), true),
+        };
+        _enginePlatformService.Setup(x => x.ScriptFileExtension).Returns(".bat");
+        _enginePlatformService.Setup(x => x.GetInstalledEngines()).Returns(installedEngines);
+        
+        const string pluginPath = "C:/dev/Plugins/MyPlugin";
+        _filesystem.Directory.CreateDirectory(pluginPath);
+        var pluginFile = Path.Join(pluginPath, "MyPlugin.uplugin");
+        var descriptor = new PluginDescriptor {
+            Version = 1,
+            FriendlyName = "My Plugin",
+            VersionName = new SemVersion(1, 0, 0),
+            Installed = false
+        };
+        await using (var writer = _filesystem.File.Create(pluginFile)) {
+            await JsonSerializer.SerializeAsync(writer, descriptor);
+        }
+
+        PluginDescriptor? capturedData = null;
+        _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<Stream>(),
+                It.Is(new Version(5, 5), EqualityComparer<Version>.Default)))
+            .Returns(async (Stream x, Version _) => {
+                using var archive = new ZipArchive(x);
+                var entry = archive.GetEntry("MyPlugin.uplugin")!;
+                await using var entryStream = entry.Open();
+                capturedData = await JsonSerializer.DeserializeAsync<PluginDescriptor>(entryStream, JsonOptions);
+                return new PluginSummary("MyPlugin", capturedData!.VersionName, capturedData.Description);
+            });
+        
+        const string batchFilePath = "C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat";
+        _processRunner.Setup(x => x.RunProcess(It.Is<string>(y => y == batchFilePath), 
+            It.Is<string[]>(y => y.Length == 3 && y[0] == "BuildPlugin" && y[1].StartsWith("-Plugin=") 
+                                 && y[1].Contains(pluginFile) && y[2].StartsWith("-Package="))))
+            .ReturnsAsync(0);
+        
+        var engineService = _serviceProvider.GetRequiredService<IEngineService>();
+        var result = await engineService.BuildPlugin(_filesystem.FileInfo.New(pluginFile), null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(0));
+            Assert.That(capturedData, Is.Not.Null);
+        });
+        Assert.That(capturedData.Installed, Is.True);
+    }
+}

@@ -22,7 +22,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
     }
 
     /// <inheritdoc />
-    public async Task<int> BuildPlugin(FileInfo pluginFile, string? engineVersion) {
+    public async Task<int> BuildPlugin(IFileInfo pluginFile, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
             $"RunUAT.{enginePlatformService.ScriptFileExtension}");
