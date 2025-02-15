@@ -31,8 +31,8 @@ public static partial class EngineVersionUtils {
         if (!fileSystem.File.Exists(versionFile)) {
             throw new InvalidDataException("Failed to find version file at " + versionFile);
         }
-
-        using var file = new StreamReader(versionFile);
+        
+        using var file = fileSystem.File.OpenText(versionFile);
         var pattern = VersionDefineRegex();
         while (file.ReadLine() is { } currentLine) {
             var match = pattern.Match(currentLine);
