@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
@@ -66,7 +67,7 @@ public class PluginServiceTests {
         await context.SaveChangesAsync();
 
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = await pluginService.GetPluginSummaries(1, 10);
+        var summaries = await pluginService.GetPluginSummaries(new Pageable(1, 10));
         Assert.That(summaries, Has.Count.EqualTo(10));
     }
 

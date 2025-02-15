@@ -8,6 +8,7 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Binding;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Swagger;
@@ -24,7 +25,10 @@ builder.Services.AddOpenApiConfigs()
     .AddServiceConfigs()
     .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>()
     .AddCoreServices()
-    .AddServerServices();
+    .AddServerServices()
+    .AddControllers(options => {
+        options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
+    });
 
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 

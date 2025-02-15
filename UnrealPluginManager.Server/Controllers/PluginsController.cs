@@ -1,10 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mime;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
@@ -34,8 +31,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     /// A task that represents the asynchronous operation. The task result contains a list of plugin summaries.
     /// </returns>
     [HttpGet]
-    public async Task<Page<PluginSummary>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) {
-        return await pluginService.GetPluginSummaries(pageNumber, pageSize);
+    public async Task<Page<PluginSummary>> Get([FromQuery] Pageable pageable = default) {
+        return await pluginService.GetPluginSummaries(pageable);
     }
 
     /// Submits a plugin file to the plugin service for processing and management.

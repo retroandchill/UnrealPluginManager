@@ -28,6 +28,7 @@ public class PageJsonConverter<T> : JsonConverter<Page<T>> {
         writer.WriteStartObject();
         writer.WriteNumber("pageNumber", value.PageNumber);
         writer.WriteNumber("totalPages", value.TotalPages);
+        writer.WriteNumber("pageSize", value.PageSize);
         writer.WriteNumber("count", value.Count);
         writer.WriteStartArray("items");
         foreach (var item in value) {

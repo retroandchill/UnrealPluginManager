@@ -23,15 +23,14 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         AllowTrailingCommas = true
     };
 
-    /// <param name="pageNumber"></param>
-    /// <param name="pageSize"></param>
+    /// <param name="pageable"></param>
     /// <inheritdoc/>
-    public async Task<Page<PluginSummary>> GetPluginSummaries(int pageNumber, int pageSize) {
+    public async Task<Page<PluginSummary>> GetPluginSummaries(Pageable pageable) {
         var plugins = await dbContext.Plugins
             .OrderByDescending(x => x.Name)
             .GroupBy(x => x.Name)
             .Select(g => g.OrderByDescending(x => x.VersionString).First())
-            .ToPageAsync(pageNumber, pageSize);
+            .ToPageAsync(pageable);
         return plugins
             .Select(p => new PluginSummary(p.Name, p.Version, p.Description));
     }

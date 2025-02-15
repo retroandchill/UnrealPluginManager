@@ -13,12 +13,11 @@ public interface IPluginService {
     /// <summary>
     /// Retrieves a collection of plugin summaries including essential information like name and optional description.
     /// </summary>
-    /// <param name="pageNumber"></param>
-    /// <param name="pageSize"></param>
+    /// <param name="pageable">The pagination settings</param>
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
-    Task<Page<PluginSummary>> GetPluginSummaries(int pageNumber, int pageSize);
+    Task<Page<PluginSummary>> GetPluginSummaries(Pageable pageable = default);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
