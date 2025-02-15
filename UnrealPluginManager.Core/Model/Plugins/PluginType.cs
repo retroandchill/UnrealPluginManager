@@ -15,12 +15,12 @@ public enum PluginType {
     /// Represents plugins that are integral to the engine.
     /// </summary>
     Engine,
-    
+
     /// <summary>
     /// Refers to plugins that are distributed along with a project or framework.
     /// </summary>
     Provided,
-    
+
     /// <summary>
     /// Represents third-party or user-added plugins.
     /// </summary>

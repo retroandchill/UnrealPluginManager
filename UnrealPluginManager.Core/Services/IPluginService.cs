@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 
@@ -60,13 +61,14 @@ public interface IPluginService {
     /// Retrieves the file data of a specific plugin for a given engine version.
     /// </summary>
     /// <param name="pluginName">
-    /// The name of the plugin whose file data is to be retrieved.
+    ///     The name of the plugin whose file data is to be retrieved.
     /// </param>
+    /// <param name="targetVersion"></param>
     /// <param name="engineVersion">
-    /// The version of the engine for which the plugin file data is needed.
+    ///     The version of the engine for which the plugin file data is needed.
     /// </param>
     /// <returns>
     /// A stream representing the binary content of the plugin file.
     /// </returns>
-    Task<Stream> GetPluginFileData(string pluginName, Version engineVersion); 
+    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion);
 }

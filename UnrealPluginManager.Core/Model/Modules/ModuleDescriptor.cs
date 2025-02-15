@@ -87,14 +87,14 @@ public class ModuleDescriptor {
     /// </summary>
     [JsonPropertyName("ProgramDenyList")]
     [DefaultAsEmpty]
-    public List<string>  ProgramDenyList { get; set; } = [];
-		
+    public List<string> ProgramDenyList { get; set; } = [];
+
     /// <summary>
     /// List of allowed game targets
     /// </summary>
     [JsonPropertyName("GameTargetAllowList")]
     [DefaultAsEmpty]
-    public List<string>  GameTargetAllowList { get; set; } = [];
+    public List<string> GameTargetAllowList { get; set; } = [];
 
     /// <summary>
     /// List of disallowed game targets

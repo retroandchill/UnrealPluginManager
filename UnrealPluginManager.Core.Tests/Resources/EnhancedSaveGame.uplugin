@@ -1,45 +1,45 @@
 ﻿{
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
-	"FriendlyName": "EnhancedSaveGame",
-	"Description": "",
-	"Category": "Other",
-	"CreatedBy": "",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "EnhancedSaveGame",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "EnhancedSaveGameTests",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "RetroLib",
-			"Enabled": true,
-			"PluginType": "Provided"
-		},
-		{
-			"Name": "UnrealInjector",
-			"Enabled": true,
-			"Optional": true,
-			"PluginType": "Provided"
-		},
-		{
-			"Name": "FunctionalTestingEditor",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "0.1.0",
+  "FriendlyName": "EnhancedSaveGame",
+  "Description": "",
+  "Category": "Other",
+  "CreatedBy": "",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "EnhancedSaveGame",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "EnhancedSaveGameTests",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "RetroLib",
+      "Enabled": true,
+      "PluginType": "Provided"
+    },
+    {
+      "Name": "UnrealInjector",
+      "Enabled": true,
+      "Optional": true,
+      "PluginType": "Provided"
+    },
+    {
+      "Name": "FunctionalTestingEditor",
+      "Enabled": true
+    }
+  ]
 }

@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Server.Database;
 
 #nullable disable
 
 namespace UnrealPluginManager.Server.Migrations
 {
-    [DbContext(typeof(UnrealPluginManagerContext))]
+    [DbContext(typeof(CloudUnrealPluginManagerContext))]
     [Migration("20250206180536_EngineVersionTracking")]
     partial class EngineVersionTracking
     {

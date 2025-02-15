@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Reflection;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
@@ -6,8 +7,11 @@ using Microsoft.OpenApi.Models;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Swagger;
+using UnrealPluginManager.Server.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,21 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IFileSystem, FileSystem>();
-builder.Services.AddDbContext<UnrealPluginManagerContext>(options => 
-    options.UseSqlite("Filename=dev.sqlite", b => 
-        b.MigrationsAssembly("UnrealPluginManager.Server")
-            .MinBatchSize(1)
-            .MaxBatchSize(100)));
-builder.Services.AddScoped<IPluginService, PluginService>();
-builder.Services.AddScoped<IStorageService, CloudStorageService>();
-builder.Services.Configure<FormOptions>(options => {
-    options.ValueLengthLimit = int.MaxValue;
-    options.MultipartBodyLengthLimit = long.MaxValue;
-});
+builder.Services.AddOpenApiConfigs()
+    .AddSystemAbstractions()
+    .AddServiceConfigs()
+    .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>()
+    .AddCoreServices()
+    .AddServerServices();
 
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
@@ -37,7 +32,8 @@ if (builder.Environment.IsDevelopment()) {
     builder.Services.AddSwaggerGen(options => {
         options.MapType<SemVersion>(() => new OpenApiSchema {
             Type = "string",
-            Pattern = @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
+            Pattern =
+                @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$",
             Example = new OpenApiString("1.0.0")
         });
         options.MapType<SemVersionRange>(() => new OpenApiSchema {
@@ -54,8 +50,7 @@ app.UseDefaultFiles();
 app.MapStaticAssets();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();

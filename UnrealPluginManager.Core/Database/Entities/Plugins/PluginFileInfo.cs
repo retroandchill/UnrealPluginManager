@@ -36,7 +36,7 @@ public class PluginFileInfo {
     /// </remarks>
     [Required]
     public ulong ParentId { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the parent plugin associated with this plugin file.
     /// </summary>
@@ -64,26 +64,26 @@ public class PluginFileInfo {
     /// This property indicates the specific version of the Unreal Engine with which the plugin file is designed to work.
     /// It is used for ensuring compatibility when managing or retrieving plugin files and is a required property.
     /// </remarks>
-    [Required] 
+    [Required]
     public Version EngineVersion { get; set; } = new(5, 5);
-    
+
     internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem filesystem) {
         modelBuilder.Entity<PluginFileInfo>()
             .HasOne(x => x.Parent)
             .WithMany(x => x.UploadedPlugins)
             .HasForeignKey(x => x.ParentId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         modelBuilder.Entity<PluginFileInfo>()
             .HasIndex(x => x.ParentId);
 
         modelBuilder.Entity<PluginFileInfo>()
             .Property(x => x.FilePath)
             .HasConversion(x => x.FullName, x => filesystem.FileInfo.New(x));
-        
+
         modelBuilder.Entity<PluginFileInfo>()
             .HasIndex(x => x.EngineVersion);
-        
+
         modelBuilder.Entity<PluginFileInfo>()
             .Property(x => x.EngineVersion)
             .HasConversion(x => x.ToString(), x => Version.Parse(x));

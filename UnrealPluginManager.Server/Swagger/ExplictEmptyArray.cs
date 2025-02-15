@@ -10,14 +10,13 @@ namespace UnrealPluginManager.Server.Swagger;
 public class ExplictEmptyArray : IOpenApiPrimitive {
     /// <inheritdoc/>
     public AnyType AnyType => AnyType.Primitive;
-    
+
     /// <inheritdoc/>
     public PrimitiveType PrimitiveType => PrimitiveType.String;
-    
+
     /// <inheritdoc/>
     public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion) {
         writer.WriteStartArray();
         writer.WriteEndArray();
     }
-    
 }

@@ -23,7 +23,7 @@ public class PluginDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("FileVersion")]
-    public int FileVersion { get; set; }
+    public int FileVersion { get; set; } = 3;
 
     /// <summary>
     /// Version number for the plugin.  The version number must increase with every version of the plugin, so that the system 

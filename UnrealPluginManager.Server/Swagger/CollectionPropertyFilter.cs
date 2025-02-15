@@ -22,13 +22,14 @@ public class CollectionPropertyFilter : ISchemaFilter {
         foreach (var property in schema.Properties) {
             var matchingMember = GetMemberInfo(context.Type, property.Key);
             if (matchingMember is null) {
-                throw new ArgumentException($"Property/field '{property.Key}' does not exist on type {context.Type.FullName}");
+                throw new ArgumentException(
+                    $"Property/field '{property.Key}' does not exist on type {context.Type.FullName}");
             }
 
             if (!typeof(ICollection).IsAssignableFrom(GetMemberType(matchingMember))) {
                 continue;
             }
-            
+
             var attribute = matchingMember.GetCustomAttribute<DefaultAsEmptyAttribute>();
             if (attribute is null) {
                 continue;
@@ -48,7 +49,6 @@ public class CollectionPropertyFilter : ISchemaFilter {
         IEnumerable<MemberInfo> fields = type.GetFields();
         return properties.Concat(fields)
             .FirstOrDefault(m => IsMatchingMember(m, propertyName));
-        
     }
 
     private static bool IsMatchingMember(MemberInfo memberInfo, string propertyName) {

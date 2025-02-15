@@ -8,7 +8,6 @@
 /// It is utilized primarily in dependency injection contexts to configure storage services.
 /// </remarks>
 public class StorageMetadata {
-
     /// <summary>
     /// A constant string representing the name of the storage configuration section.
     /// </summary>
@@ -18,9 +17,9 @@ public class StorageMetadata {
     /// </remarks>
     public const string Name = "CloudStorage";
 
-    
+
     private string _baseDirectory = Directory.GetCurrentDirectory();
-    
+
     /// <summary>
     /// Represents the base directory used for storage operations.
     /// </summary>
