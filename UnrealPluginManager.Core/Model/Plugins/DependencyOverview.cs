@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.ComponentModel.DataAnnotations;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -12,6 +13,8 @@ public class DependencyOverview {
     /// This identifier is automatically generated and used to distinguish
     /// dependencies within the system.
     /// </summary>
+    [Required]
+    [Range(1, ulong.MaxValue)]
     public ulong Id { get; set; }
 
     /// <summary>

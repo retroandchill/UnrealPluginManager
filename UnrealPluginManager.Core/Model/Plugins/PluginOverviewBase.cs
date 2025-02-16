@@ -12,7 +12,9 @@ public abstract class PluginOverviewBase {
     /// <summary>
     /// Gets or sets the unique identifier for the plugin.
     /// </summary>
+    
     [Required]
+    [Range(1, ulong.MaxValue)]
     public required ulong Id { get; set; }
 
     /// <summary>

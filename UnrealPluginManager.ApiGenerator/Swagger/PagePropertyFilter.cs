@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Pagination;
 
-namespace UnrealPluginManager.Server.Swagger;
+namespace UnrealPluginManager.ApiGenerator.Swagger;
 
 /// <summary>
 /// The <c>PagePropertyFilter</c> class defines a schema filter for modifying the OpenAPI schema of generic
@@ -28,36 +28,43 @@ public class PagePropertyFilter : ISchemaFilter {
             return;
         }
 
-        var name = $"{context.Type.GenericTypeArguments[0].Name}Page";
+        var className = context.Type.GenericTypeArguments[0].Name;
+        var name = $"{className}Page";
         if (!context.SchemaRepository.Schemas.TryGetValue(name, out var itemSchema)) {
             itemSchema = new OpenApiSchema {
                 Type = "object",
+                Description = $"Represents the output of a paged query of {className}.",
                 Properties = new Dictionary<string, OpenApiSchema>()
             };
             itemSchema.Properties.Add("pageNumber", new OpenApiSchema {
                 Type = "integer",
+                Description = "The current page number of the result set.",
                 Format = "int32",
                 Minimum = 1
             });
             itemSchema.Properties.Add("totalPages", new OpenApiSchema {
                 Type = "integer",
+                Description = "The total number of pages in the result set.",
                 Format = "int32",
                 Minimum = 1
             });
             itemSchema.Properties.Add("pageSize", new OpenApiSchema {
                 Type = "integer",
+                Description = "The number of items on each page.",
                 Format = "int32",
                 Minimum = 1,
                 Example = new OpenApiInteger(10)
             });
             itemSchema.Properties.Add("count", new OpenApiSchema {
                 Type = "integer",
+                Description = "The total number of items available in the result set.",
                 Format = "int32",
                 Minimum = 0,
                 Example = new OpenApiInteger(1)
             });
             itemSchema.Properties.Add("item", new OpenApiSchema {
                 Type = "array",
+                Description = "An array of items on the current page.",
                 Items = schema.Items
             });
             

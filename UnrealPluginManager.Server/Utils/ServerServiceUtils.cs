@@ -1,21 +1,24 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Semver;
+using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Binding;
+using UnrealPluginManager.Server.Controllers;
+using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Services;
-using UnrealPluginManager.Server.Swagger;
 
 namespace UnrealPluginManager.Server.Utils;
 
 /// <summary>
 /// Provides utility methods for registering and configuring services within the application.
 /// </summary>
-public static class ServiceServiceUtils {
-
-    private const string SemVerPattern =
-        @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
+public static class ServerServiceUtils {
 
     /// <summary>
     /// Configures and registers OpenAPI services for the application.
@@ -50,25 +53,35 @@ public static class ServiceServiceUtils {
             .AddScoped<IStorageService, CloudStorageService>();
     }
 
-    /// <summary>
-    /// Configures and adds Swagger services to the application for API documentation generation.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the Swagger services are added.</param>
-    /// <returns>The updated <see cref="IServiceCollection"/> with Swagger configurations applied.</returns>
-    public static IServiceCollection SetUpSwagger(this IServiceCollection services) {
-        return services.AddSwaggerGen(options => {
-            options.MapType<SemVersion>(() => new OpenApiSchema {
-                Type = "string",
-                Pattern = SemVerPattern,
-                Example = new OpenApiString("1.0.0")
+    public static WebApplicationBuilder SetUpProductApplication(this WebApplicationBuilder builder) {
+        // Add services to the container.
+
+        builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.AddOpenApiConfigs()
+            .AddSystemAbstractions()
+            .AddServiceConfigs()
+            .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>()
+            .AddCoreServices()
+            .AddServerServices()
+            .AddControllers(options => {
+                options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
             });
-            options.MapType<SemVersionRange>(() => new OpenApiSchema {
-                Type = "string",
-                Example = new OpenApiString(">=1.0.0")
-            });
-            options.AddSchemaFilterInstance(new CollectionPropertyFilter());
-            options.AddOperationFilterInstance(new PageableParameterFilter());
-            options.AddSchemaFilterInstance(new PagePropertyFilter());
-        });
+
+        builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
+        
+        return builder;
+    }
+
+    public static WebApplication Configure(this WebApplication app) {
+        app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name;
+        app.UseDefaultFiles();
+        app.MapStaticAssets();
+        app.UseHttpsRedirection();
+        app.UseAuthorization();
+        app.MapControllers();
+        app.MapFallbackToFile("/index.html");
+        
+        return app;
     }
 }

@@ -20,6 +20,8 @@ public class BinariesOverview {
     /// a specific binary within the system. It is used as the primary identifier
     /// for referencing this binary in various operations.
     /// </remarks>
+    [Required]
+    [Range(1, ulong.MaxValue)]
     public ulong Id { get; set; }
 
     /// <summary>

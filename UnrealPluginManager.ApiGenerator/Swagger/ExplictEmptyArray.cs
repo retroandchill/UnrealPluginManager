@@ -2,7 +2,7 @@
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Writers;
 
-namespace UnrealPluginManager.Server.Swagger;
+namespace UnrealPluginManager.ApiGenerator.Swagger;
 
 /// <summary>
 /// Open API type used to force the rendering of an empty array.

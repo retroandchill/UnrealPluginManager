@@ -1,14 +1,11 @@
 ﻿using System.Collections;
-using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using LanguageExt;
-using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Meta;
 
-namespace UnrealPluginManager.Server.Swagger;
+namespace UnrealPluginManager.ApiGenerator.Swagger;
 
 /// <summary>
 /// A custom implementation of the <see cref="ISchemaFilter"/> interface that modifies the OpenAPI schema

@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Pagination;
 
-namespace UnrealPluginManager.Server.Swagger;
+namespace UnrealPluginManager.ApiGenerator.Swagger;
 
 /// <summary>
 /// The PageableParameterFilter class is an implementation of the IOperationFilter interface for modifying the
@@ -43,6 +43,7 @@ public class PageableParameterFilter : IOperationFilter {
         operation.Parameters.Add(new OpenApiParameter {
             Name = "page",
             In = ParameterLocation.Query,
+            Description = "The page number to retrieve.",
             Required = false,
             Schema = new OpenApiSchema {
                 Type = "integer",
@@ -54,6 +55,7 @@ public class PageableParameterFilter : IOperationFilter {
         operation.Parameters.Add(new OpenApiParameter {
             Name = "size",
             In = ParameterLocation.Query,
+            Description = "The number of items to retrieve per page.",
             Required = false,
             Schema = new OpenApiSchema {
                 Type = "integer",
