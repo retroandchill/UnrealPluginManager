@@ -25,15 +25,15 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         AllowTrailingCommas = true
     };
 
+    /// <param name="matcher"></param>
     /// <param name="pageable"></param>
     /// <inheritdoc/>
-    public async Task<Page<PluginSummary>> GetPluginSummaries(Pageable pageable) {
-        var plugins = await dbContext.Plugins
-            .Include(x => x.Versions)
+    public Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
+        return dbContext.Plugins
+            .Where(x => EF.Functions.Like(x.Name, matcher.Replace("*", "%")))
             .OrderByDescending(x => x.Name)
+            .ToPluginOverview()
             .ToPageAsync(pageable);
-        return plugins
-            .Select(p => new PluginSummary(p.Name, p.Versions.Select(x => x.Version).First(), p.Description));
     }
 
     /// <inheritdoc/>
@@ -139,7 +139,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion) {
+    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
         var pluginInfo = await dbContext.UploadedPlugins
             .Include(x => x.Parent)
             .Include(x => x.Parent.Parent)

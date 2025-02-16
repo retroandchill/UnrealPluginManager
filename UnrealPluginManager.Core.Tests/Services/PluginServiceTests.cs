@@ -58,14 +58,7 @@ public class PluginServiceTests {
                     Versions = [
                         new PluginVersion {
                             Version = new SemVersion(1, 0, 0)
-                        }
-                    ]
-                    
-                },
-                new Plugin {
-                    Name = "Plugin" + i,
-                    FriendlyName = "Plugin" + i,
-                    Versions = [
+                        },
                         new PluginVersion {
                             Version = new SemVersion(1, 2, 2)
                         }
@@ -77,8 +70,17 @@ public class PluginServiceTests {
         await context.SaveChangesAsync();
 
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = await pluginService.GetPluginSummaries(new Pageable(1, 10));
+        var summaries = await pluginService.ListPlugins("*", new Pageable(1, 10));
         Assert.That(summaries, Has.Count.EqualTo(10));
+        
+        
+        summaries = await pluginService.ListPlugins("Plugin1", new Pageable(1, 10));
+        Assert.That(summaries, Has.Count.EqualTo(1));
+        Assert.That(summaries[0].Name, Is.EqualTo("Plugin1"));
+        
+        summaries = await pluginService.ListPlugins("Plugin2", new Pageable(1, 10));
+        Assert.That(summaries, Has.Count.EqualTo(1));
+        Assert.That(summaries[0].Name, Is.EqualTo("Plugin2"));
     }
 
     [Test]
@@ -287,8 +289,7 @@ public class PluginServiceTests {
                     Version = new SemVersion(1, 0, 0),
                     Binaries = [
                         new PluginBinaries {
-                            EngineVersion = new Version(5,
-                                5),
+                            EngineVersion = "5.5",
                             FilePath = zipFile,
                             Platform = "Win64"
                         }
@@ -299,10 +300,10 @@ public class PluginServiceTests {
         await context.Plugins.AddAsync(plugin);
         await context.SaveChangesAsync();
 
-        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 5)));
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5"));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 4)));
+            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.4"));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, new Version(5, 5)));
+            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, "5.5"));
     }
 }

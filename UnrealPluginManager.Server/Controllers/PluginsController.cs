@@ -33,8 +33,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(Page<PluginSummary>), (int)HttpStatusCode.OK)]
-    public async Task<Page<PluginSummary>> Get([FromQuery] Pageable pageable = default) {
-        return await pluginService.GetPluginSummaries(pageable);
+    public async Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*", [FromQuery] Pageable pageable = default) {
+        return await pluginService.ListPlugins(match, pageable);
     }
 
     /// Submits a plugin file to the plugin service for processing and management.
@@ -47,7 +47,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(PluginSummary), (int)HttpStatusCode.OK)]
-    public async Task<PluginSummary> Post(IFormFile pluginFile, [FromQuery] Version engineVersion) {
+    public async Task<PluginSummary> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
         return await pluginService.SubmitPlugin(stream, engineVersion);
     }
@@ -79,9 +79,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpGet("{pluginName}/download")]
     [Produces(MediaTypeNames.Application.Zip)]
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
-    public async Task<FileStreamResult>
-        DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion), MediaTypeNames.Application.Zip,
+    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
+        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString()), MediaTypeNames.Application.Zip,
             $"{pluginName}.zip");
     }
 }

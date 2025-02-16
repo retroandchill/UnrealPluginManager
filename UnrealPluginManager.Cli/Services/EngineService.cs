@@ -69,7 +69,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         }
         var destinationDirectory = fileSystem.Directory.CreateDirectory(installDirectory);
 
-        await using var result = await pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Version);
+        await using var result = await pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name);
         using var zipArchive = new ZipArchive(result, ZipArchiveMode.Read);
         await fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         

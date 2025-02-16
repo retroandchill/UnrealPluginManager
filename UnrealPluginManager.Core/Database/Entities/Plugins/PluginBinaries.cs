@@ -10,17 +10,21 @@ public class PluginBinaries {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public ulong Id { get; set; }
     
+    [Required]
     public ulong ParentId { get; set; }
     
     public PluginVersion Parent { get; set; }
     
+    [Required]
     [MinLength(1)]
     [MaxLength(255)]
     public required string Platform { get; set; }
     
+    [Required]
     public required IFileInfo FilePath { get; set; }
     
-    public Version EngineVersion { get; set; } = new(4, 27, 0);
+    [Required]
+    public required string EngineVersion { get; set; }
     
     internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem filesystem) {
         modelBuilder.Entity<PluginBinaries>()
@@ -38,9 +42,5 @@ public class PluginBinaries {
 
         modelBuilder.Entity<PluginBinaries>()
             .HasIndex(x => x.EngineVersion);
-
-        modelBuilder.Entity<PluginBinaries>()
-            .Property(x => x.EngineVersion)
-            .HasConversion(x => x.ToString(), x => Version.Parse(x));
     }
 }

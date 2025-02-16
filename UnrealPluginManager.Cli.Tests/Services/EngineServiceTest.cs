@@ -150,7 +150,7 @@ public partial class EngineServiceTest {
             await textWriter.WriteAsync("Hello World!");
         }
 
-        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, new Version(5, 4)))
+        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4"))
             .ReturnsAsync((string _, SemVersionRange _, Version _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();

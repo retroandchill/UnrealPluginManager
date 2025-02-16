@@ -19,6 +19,13 @@ namespace UnrealPluginManager.Core.Mappers;
 public static partial class PluginMapper {
 
     /// <summary>
+    /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.
+    /// </summary>
+    /// <param name="plugins">The source <see cref="IQueryable{Plugin}"/> collection to be converted.</param>
+    /// <returns>An <see cref="IQueryable{PluginOverview}"/> collection representing the provided <see cref="IQueryable{Plugin}"/>.</returns>
+    public static partial IQueryable<PluginOverview> ToPluginOverview(this IQueryable<Plugin> plugins);
+
+    /// <summary>
     /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name.
     /// </summary>
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>

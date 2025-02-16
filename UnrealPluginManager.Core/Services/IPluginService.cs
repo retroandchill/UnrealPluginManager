@@ -13,11 +13,12 @@ public interface IPluginService {
     /// <summary>
     /// Retrieves a collection of plugin summaries including essential information like name and optional description.
     /// </summary>
+    /// <param name="matcher"></param>
     /// <param name="pageable">The pagination settings</param>
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
-    Task<Page<PluginSummary>> GetPluginSummaries(Pageable pageable = default);
+    Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
@@ -72,5 +73,5 @@ public interface IPluginService {
     /// <returns>
     /// A stream representing the binary content of the plugin file.
     /// </returns>
-    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion);
+    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion);
 }
