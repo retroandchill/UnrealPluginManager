@@ -27,37 +27,48 @@ public class PagePropertyFilter : ISchemaFilter {
         if (!context.Type.IsGenericType || context.Type.GetGenericTypeDefinition() != typeof(Page<>)) {
             return;
         }
-        
-        
-        schema.Type = "object";
-        schema.Properties = new Dictionary<string, OpenApiSchema>();
-        schema.Properties.Add("pageNumber", new OpenApiSchema {
-            Type = "integer",
-            Format = "int32",
-            Minimum = 1
-        });
-        schema.Properties.Add("totalPages", new OpenApiSchema {
-            Type = "integer",
-            Format = "int32",
-            Minimum = 1
-        });
-        schema.Properties.Add("pageSize", new OpenApiSchema {
-            Type = "integer",
-            Format = "int32",
-            Minimum = 1,
-            Example = new OpenApiInteger(10)
-        });
-        schema.Properties.Add("count", new OpenApiSchema {
-            Type = "integer",
-            Format = "int32",
-            Minimum = 0,
-            Example = new OpenApiInteger(1)
-        });
-        schema.Properties.Add("item", new OpenApiSchema {
-            Type = "array",
-            Items = schema.Items
-        });
-        
+
+        var name = $"{context.Type.GenericTypeArguments[0].Name}Page";
+        if (!context.SchemaRepository.Schemas.TryGetValue(name, out var itemSchema)) {
+            itemSchema = new OpenApiSchema {
+                Type = "object",
+                Properties = new Dictionary<string, OpenApiSchema>()
+            };
+            itemSchema.Properties.Add("pageNumber", new OpenApiSchema {
+                Type = "integer",
+                Format = "int32",
+                Minimum = 1
+            });
+            itemSchema.Properties.Add("totalPages", new OpenApiSchema {
+                Type = "integer",
+                Format = "int32",
+                Minimum = 1
+            });
+            itemSchema.Properties.Add("pageSize", new OpenApiSchema {
+                Type = "integer",
+                Format = "int32",
+                Minimum = 1,
+                Example = new OpenApiInteger(10)
+            });
+            itemSchema.Properties.Add("count", new OpenApiSchema {
+                Type = "integer",
+                Format = "int32",
+                Minimum = 0,
+                Example = new OpenApiInteger(1)
+            });
+            itemSchema.Properties.Add("item", new OpenApiSchema {
+                Type = "array",
+                Items = schema.Items
+            });
+            
+            context.SchemaRepository.AddDefinition(name, itemSchema);
+        }
+
+        schema.Type = null;
         schema.Items = null;
+        schema.Reference = new OpenApiReference {
+            Id = name,
+            Type = ReferenceType.Schema,
+        };
     }
 }

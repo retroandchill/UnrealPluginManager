@@ -31,6 +31,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     /// A task that represents the asynchronous operation. The task result contains a list of plugin summaries.
     /// </returns>
     [HttpGet]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(Page<PluginSummary>), (int)HttpStatusCode.OK)]
     public async Task<Page<PluginSummary>> Get([FromQuery] Pageable pageable = default) {
         return await pluginService.GetPluginSummaries(pageable);
     }
@@ -43,6 +45,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     /// </returns>
     [HttpPost]
     [Consumes(MediaTypeNames.Multipart.FormData)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PluginSummary), (int)HttpStatusCode.OK)]
     public async Task<PluginSummary> Post(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
         return await pluginService.SubmitPlugin(stream, engineVersion);
@@ -56,6 +60,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     /// A task that represents the asynchronous operation. The task result contains a list of plugin summaries representing the dependency tree for the specified plugin.
     /// </returns>
     [HttpGet("{pluginName}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
         return await pluginService.GetDependencyList(pluginName);
     }
