@@ -13,6 +13,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1"/>
+        <PackageReference Include="Riok.Mapperly" Version="4.2.0-next.0" />
         <PackageReference Include="Semver" Version="3.0.0"/>
         <PackageReference Include="System.CodeDom" Version="9.0.1"/>
         <PackageReference Include="System.Linq.Async" Version="6.0.1"/>

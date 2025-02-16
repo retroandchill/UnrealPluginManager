@@ -7,6 +7,7 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
@@ -99,42 +100,15 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
             .Where(x => x.Name == pluginName)
             .FirstOrDefaultAsync();
         if (plugin is null) {
-            plugin = MapBasePluginInfo(pluginName, descriptor);
+            plugin = descriptor.ToPlugin(pluginName);
             dbContext.Plugins.Add(plugin);
         }
-        var pluginVersion = new PluginVersion {
-            Version = descriptor.VersionName,
-            ParentId = plugin.Id,
-            Dependencies = descriptor.Plugins
-                .Select(x => new Dependency {
-                    PluginName = x.Name,
-                    PluginVersion = x.VersionMatcher,
-                    Type = x.PluginType,
-                    Optional = x.Optional,
-                })
-                .ToList(),
-            Binaries = storedFile.AsEnumerable()
-                .Select(x => new PluginBinaries {
-                    EngineVersion = x.EngineVersion,
-                    FilePath = x.FileInfo,
-                    Platform = x.Platform
-                }).ToList()
-        };
+        var pluginVersion = descriptor.ToPluginVersion(); 
+        pluginVersion.ParentId = plugin.Id;
+        pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
         dbContext.PluginVersions.Add(pluginVersion);
         await dbContext.SaveChangesAsync();
         return new PluginSummary(plugin.Name, pluginVersion.Version, plugin.Description);
-    }
-
-    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor) {
-        var plugin = new Plugin {
-            Name = pluginName,
-            FriendlyName = descriptor.FriendlyName,
-            Description = descriptor.Description,
-            AuthorName = !string.IsNullOrWhiteSpace(descriptor.CreatedBy) ? descriptor.CreatedBy : null,
-            AuthorWebsite = descriptor.CreatedByUrl,
-        };
-
-        return plugin;
     }
 
     /// <inheritdoc/>
