@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Semver;
+using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
-public class PluginVersion {
+public class PluginVersion : IPluginVersionInfo {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public ulong Id { get; set; }
@@ -13,6 +14,10 @@ public class PluginVersion {
     public ulong ParentId { get; set; }
     
     public Plugin Parent { get; set; }
+    
+    /// <inheritdoc />
+    [NotMapped]
+    public string PluginName => Parent.Name;
     
     [NotMapped]
     public SemVersion Version { get; set; } = new(1, 0, 0);
@@ -24,6 +29,10 @@ public class PluginVersion {
         get => Version.ToString();
         set => Version = SemVersion.Parse(value);
     }
+
+    /// <inheritdoc />
+    [NotMapped]
+    IEnumerable<IPluginDependency> IPluginVersionInfo.Dependencies => Dependencies;
     
     public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
     
