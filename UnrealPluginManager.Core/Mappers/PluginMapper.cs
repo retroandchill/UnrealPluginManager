@@ -26,6 +26,25 @@ public static partial class PluginMapper {
     public static partial IQueryable<PluginOverview> ToPluginOverview(this IQueryable<Plugin> plugins);
 
     /// <summary>
+    /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
+    /// </summary>
+    /// <param name="version">The source <see cref="PluginVersion"/> instance to be converted.</param>
+    /// <returns>A <see cref="VersionOverview"/> object representing the provided <see cref="PluginVersion"/>.</returns>
+    public static partial VersionOverview ToVersionOverview(this PluginVersion version);
+
+    /// <summary>
+    /// Converts a <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
+    /// </summary>
+    /// <param name="versions">The source <see cref="PluginVersion"/> instance to be converted.</param>
+    /// <returns>A <see cref="VersionOverview"/> object representing the provided <see cref="PluginVersion"/>.</returns>
+    private static List<VersionOverview> ToVersionOverview(this ICollection<PluginVersion> versions) {
+        return versions
+            .OrderBy(x => x.VersionString)
+            .Select(x => x.ToVersionOverview())
+            .ToList();
+    }
+
+    /// <summary>
     /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name.
     /// </summary>
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>

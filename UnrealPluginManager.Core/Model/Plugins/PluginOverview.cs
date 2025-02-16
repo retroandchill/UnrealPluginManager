@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.ComponentModel.DataAnnotations;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -11,11 +12,13 @@ public class PluginOverview {
     /// <summary>
     /// Gets or sets the unique identifier for the plugin.
     /// </summary>
+    [Required]
     public ulong Id { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the plugin.
     /// </summary>
+    [Required]
     public string Name { get; set; }
 
     /// <summary>
@@ -33,6 +36,8 @@ public class PluginOverview {
     /// Each version provides a detailed overview including its version number
     /// and unique identifier.
     /// </summary>
-    public List<VersionOverview> Versions { get; set; }
+    [Required]
+    [MinLength(1)]
+    public required List<VersionOverview> Versions { get; set; }
     
 }
