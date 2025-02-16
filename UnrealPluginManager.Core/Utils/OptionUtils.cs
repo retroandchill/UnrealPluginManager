@@ -19,4 +19,18 @@ public static class OptionUtils {
         None: () => throw new InvalidOperationException("Option is None")
     );
 
+    public static IEnumerable<T> AsEnumerable<T>(this T? value)
+        where T : struct {
+        if (value is not null) {
+            yield return value.Value;
+        }
+    }
+
+    public static IEnumerable<T> AsEnumerable<T>(this T? value)
+        where T : class {
+        if (value is not null) {
+            yield return value;
+        }
+    }
+
 }

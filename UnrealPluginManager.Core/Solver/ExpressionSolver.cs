@@ -73,7 +73,7 @@ public static class ExpressionSolver {
     /// between the root plugin and its dependent plugins.
     /// </returns>
     public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData)
-        where T : IEnumerable<Plugin> {
+        where T : IEnumerable<PluginVersion> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
         foreach (var pack in
                  pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
@@ -83,7 +83,7 @@ public static class ExpressionSolver {
                     .Select(pd => pd.Version)
                     .Select(v => PackageVar(dep.PluginName, v))
                     .ToList())
-                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version), new Or(deps))));
+                .Select(deps => new Impl(PackageVar(pack.Parent.Name, pack.Version), new Or(deps))));
         }
 
         var variables = new And(terms).Free()

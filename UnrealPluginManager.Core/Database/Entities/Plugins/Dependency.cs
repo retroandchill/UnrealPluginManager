@@ -42,7 +42,7 @@ public class Dependency {
     /// It represents the relationship where a plugin depends on other plugins, facilitating
     /// the association of specific dependencies with their respective parent plugin.
     /// </remarks>
-    public Plugin Parent { get; set; }
+    public PluginVersion Parent { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the plugin.

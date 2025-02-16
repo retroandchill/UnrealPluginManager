@@ -11,4 +11,4 @@ namespace UnrealPluginManager.Core.Model.Engine;
 /// <param name="FileInfo">
 /// Provides details about the file, such as its path and metadata, using an abstraction of the file system.
 /// </param>
-public record struct EngineFileData(Version EngineVersion, IFileInfo FileInfo);
+public record struct EngineFileData(Version EngineVersion, IFileInfo FileInfo, string Platform = "Win64");

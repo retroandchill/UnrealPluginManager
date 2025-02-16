@@ -5,7 +5,7 @@
 namespace UnrealPluginManager.Cli.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,6 @@ namespace UnrealPluginManager.Cli.Migrations
                     Id = table.Column<ulong>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    Version = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     FriendlyName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
                     Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
                     AuthorName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
@@ -26,6 +25,26 @@ namespace UnrealPluginManager.Cli.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Plugins", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PluginVersions",
+                columns: table => new
+                {
+                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ParentId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Version = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PluginVersions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PluginVersions_Plugins_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Plugins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -44,9 +63,9 @@ namespace UnrealPluginManager.Cli.Migrations
                 {
                     table.PrimaryKey("PK_Dependency", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Dependency_Plugins_ParentId",
+                        name: "FK_Dependency_PluginVersions_ParentId",
                         column: x => x.ParentId,
-                        principalTable: "Plugins",
+                        principalTable: "PluginVersions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -58,6 +77,7 @@ namespace UnrealPluginManager.Cli.Migrations
                     Id = table.Column<ulong>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ParentId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Platform = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
                     EngineVersion = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -65,9 +85,9 @@ namespace UnrealPluginManager.Cli.Migrations
                 {
                     table.PrimaryKey("PK_UploadedPlugins", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UploadedPlugins_Plugins_ParentId",
+                        name: "FK_UploadedPlugins_PluginVersions_ParentId",
                         column: x => x.ParentId,
-                        principalTable: "Plugins",
+                        principalTable: "PluginVersions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -78,9 +98,20 @@ namespace UnrealPluginManager.Cli.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Plugins_Name_Version",
+                name: "IX_Plugins_Name",
                 table: "Plugins",
-                columns: new[] { "Name", "Version" },
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PluginVersions_ParentId",
+                table: "PluginVersions",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PluginVersions_Version",
+                table: "PluginVersions",
+                column: "Version",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -102,6 +133,9 @@ namespace UnrealPluginManager.Cli.Migrations
 
             migrationBuilder.DropTable(
                 name: "UploadedPlugins");
+
+            migrationBuilder.DropTable(
+                name: "PluginVersions");
 
             migrationBuilder.DropTable(
                 name: "Plugins");

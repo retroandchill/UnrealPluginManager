@@ -55,12 +55,22 @@ public class PluginServiceTests {
                 new Plugin {
                     Name = "Plugin" + i,
                     FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 0, 0)
+                    Versions = [
+                        new PluginVersion {
+                            Version = new SemVersion(1, 0, 0)
+                        }
+                    ]
+                    
                 },
                 new Plugin {
                     Name = "Plugin" + i,
                     FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 2, 2)
+                    Versions = [
+                        new PluginVersion {
+                            Version = new SemVersion(1, 2, 2)
+                        }
+                    ]
+                    
                 }
             });
         context.AddRange(plugins);
@@ -270,12 +280,19 @@ public class PluginServiceTests {
         var plugin = new Plugin {
             Name = "TestPlugin",
             FriendlyName = "Test Plugin",
-            Version = new SemVersion(1, 0, 0),
+            
             Description = "Test description",
-            UploadedPlugins = [
-                new PluginFileInfo {
-                    EngineVersion = new Version(5, 5),
-                    FilePath = zipFile
+            Versions = [
+                new PluginVersion {
+                    Version = new SemVersion(1, 0, 0),
+                    Binaries = [
+                        new PluginBinaries {
+                            EngineVersion = new Version(5,
+                                5),
+                            FilePath = zipFile,
+                            Platform = "Win64"
+                        }
+                    ]
                 }
             ]
         };

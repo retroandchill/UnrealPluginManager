@@ -2,14 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Server.Database;
 
 #nullable disable
 
 namespace UnrealPluginManager.Server.Migrations
 {
-    [DbContext(typeof(UnrealPluginManagerContext))]
-    partial class UnrealPluginManagerContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(CloudUnrealPluginManagerContext))]
+    partial class CloudUnrealPluginManagerContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -74,21 +74,15 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VersionString")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Version");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Name", "VersionString")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Plugins");
                 });
 
-            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginFileInfo", b =>
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginBinaries", b =>
                 {
                     b.Property<ulong>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,6 +99,11 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Property<ulong>("ParentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EngineVersion");
@@ -114,9 +113,34 @@ namespace UnrealPluginManager.Server.Migrations
                     b.ToTable("UploadedPlugins");
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ParentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VersionString")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("Version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("VersionString")
+                        .IsUnique();
+
+                    b.ToTable("PluginVersions");
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
-                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Parent")
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "Parent")
                         .WithMany("Dependencies")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -125,10 +149,21 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginFileInfo", b =>
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginBinaries", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "Parent")
+                        .WithMany("Binaries")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Parent")
-                        .WithMany("UploadedPlugins")
+                        .WithMany("Versions")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -138,9 +173,14 @@ namespace UnrealPluginManager.Server.Migrations
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", b =>
                 {
-                    b.Navigation("Dependencies");
+                    b.Navigation("Versions");
+                });
 
-                    b.Navigation("UploadedPlugins");
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
+                {
+                    b.Navigation("Binaries");
+
+                    b.Navigation("Dependencies");
                 });
 #pragma warning restore 612, 618
         }
