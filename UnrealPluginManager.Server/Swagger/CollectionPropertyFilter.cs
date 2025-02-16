@@ -22,8 +22,7 @@ public class CollectionPropertyFilter : ISchemaFilter {
         foreach (var property in schema.Properties) {
             var matchingMember = GetMemberInfo(context.Type, property.Key);
             if (matchingMember is null) {
-                throw new ArgumentException(
-                    $"Property/field '{property.Key}' does not exist on type {context.Type.FullName}");
+                continue;
             }
 
             if (!typeof(ICollection).IsAssignableFrom(GetMemberType(matchingMember))) {
