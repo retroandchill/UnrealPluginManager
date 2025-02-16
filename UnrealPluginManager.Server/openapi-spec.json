@@ -37,109 +37,9 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "pageNumber": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "totalPages": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "pageSize": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 10
-                    },
-                    "count": {
-                      "minimum": 0,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 1
-                    },
-                    "item": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PluginSummary"
-                      }
-                    }
-                  }
-                }
-              },
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "pageNumber": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "totalPages": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "pageSize": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 10
-                    },
-                    "count": {
-                      "minimum": 0,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 1
-                    },
-                    "item": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PluginSummary"
-                      }
-                    }
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "pageNumber": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "totalPages": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "pageSize": {
-                      "minimum": 1,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 10
-                    },
-                    "count": {
-                      "minimum": 0,
-                      "type": "integer",
-                      "format": "int32",
-                      "example": 1
-                    },
-                    "item": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PluginSummary"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/PluginSummaryPage"
                 }
               }
             }
@@ -183,17 +83,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/PluginSummary"
-                }
-              },
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PluginSummary"
-                }
-              },
-              "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PluginSummary"
                 }
@@ -222,23 +112,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PluginSummary"
-                  }
-                }
-              },
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PluginSummary"
-                  }
-                }
-              },
-              "text/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -313,6 +187,39 @@
           }
         },
         "additionalProperties": false
+      },
+      "PluginSummaryPage": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "example": 10
+          },
+          "count": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "item": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginSummary"
+            }
+          }
+        }
       }
     }
   }

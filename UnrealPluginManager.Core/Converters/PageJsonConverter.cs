@@ -1,26 +1,39 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Converters;
 
 /// <summary>
-/// Provides a custom JSON conversion for the <see cref="Page{T}"/> class.
+/// A JSON converter for the <see cref="Page{T}"/> class that processes paginated data during serialization and deserialization.
 /// </summary>
-/// <typeparam name="T">The type of the elements in the paginated collection.</typeparam>
+/// <typeparam name="T">The type of items contained within the paginated collection.</typeparam>
 /// <remarks>
-/// This converter serializes a <see cref="Page{T}"/> object into a JSON object with the following structure:
-/// - "pageNumber": The number of the current page.
-/// - "totalPages": The total number of pages.
-/// - "count": The number of items in the current page.
-/// - "items": An array containing the serialized items of type <typeparamref name="T"/>.
-/// The converter de-serialization is not supported and will throw a <see cref="NotSupportedException"/>.
+/// The <c>PageJsonConverter</c> handles the conversion of <see cref="Page{T}"/> objects to their JSON representation and vice versa.
+/// During deserialization, it expects a JSON object containing the keys "pageNumber", "pageSize", and "items". Any missing keys will result in a <see cref="JsonException"/>.
+/// During serialization, the <see cref="Page{T}"/> object is written as a JSON object with the following keys and values:
+/// - "pageNumber": the current page number.
+/// - "totalPages": the total number of pages.
+/// - "pageSize": the size of the page.
+/// - "count": the total count of items.
+/// - "items": the collection of items in the current page.
 /// </remarks>
 public class PageJsonConverter<T> : JsonConverter<Page<T>> {
 
     /// <inheritdoc/>
     public override Page<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-        throw new NotSupportedException();
+        var jsonNode = JsonNode.Parse(reader.ValueSpan);
+        ArgumentNullException.ThrowIfNull(jsonNode);
+        var obj = jsonNode.AsObject();
+        var pageNumber = obj["pageNumber"]?.GetValue<int>();
+        var pageSize = obj["pageSize"]?.GetValue<int>();
+        var items = obj["pageSize"]?.GetValue<List<T>>();
+        if (pageNumber == null || pageSize == null || items == null) {
+            throw new JsonException("Invalid page object.");
+        }
+        
+        return new Page<T>(items, items.Count, pageNumber.Value, pageSize.Value);
     }
 
     /// <inheritdoc/>
