@@ -32,7 +32,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     /// </returns>
     [HttpGet]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(typeof(Page<PluginSummary>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(Page<PluginOverview>), (int)HttpStatusCode.OK)]
     public async Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*", [FromQuery] Pageable pageable = default) {
         return await pluginService.ListPlugins(match, pageable);
     }
@@ -46,8 +46,8 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [HttpPost]
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [Produces(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(typeof(PluginSummary), (int)HttpStatusCode.OK)]
-    public async Task<PluginSummary> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
+    [ProducesResponseType(typeof(PluginDetails), (int)HttpStatusCode.OK)]
+    public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
         return await pluginService.SubmitPlugin(stream, engineVersion);
     }

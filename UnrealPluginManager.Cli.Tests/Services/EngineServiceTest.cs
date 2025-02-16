@@ -86,7 +86,11 @@ public partial class EngineServiceTest {
                 await using var subFileStream = subFile!.Open();
                 using var textReader = new StreamReader(subFileStream);
                 capturedTextFile = await textReader.ReadToEndAsync();
-                return new PluginSummary("MyPlugin", capturedData!.VersionName, capturedData.Description);
+                return new PluginDetails {
+                    Id = 1,
+                    Name = "MyPlugin",
+                    Versions = []
+                };
             });
         
         var batchFilePath = Path.GetFullPath("C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat");

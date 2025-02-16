@@ -89,12 +89,12 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
 
         return bindings.SelectMany(b => b)
             .Select(p => pluginData[p.Item1].First(d => d.Version == p.Item2))
-            .Select(p => new PluginSummary(p.Parent.Name, p.Version, p.Parent.Description))
+            .Select(p => p.ToPluginSummary())
             .ToList();
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor,
+    public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
         EngineFileData? storedFile = null) {
         var plugin = await dbContext.Plugins
             .Where(x => x.Name == pluginName)
@@ -108,11 +108,11 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
         dbContext.PluginVersions.Add(pluginVersion);
         await dbContext.SaveChangesAsync();
-        return new PluginSummary(plugin.Name, pluginVersion.Version, plugin.Description);
+        return plugin.ToPluginDetails(pluginVersion);
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion) {
+    public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);

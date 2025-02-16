@@ -195,8 +195,9 @@ public class PluginServiceTests {
         var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
         Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
-            Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
             Assert.That(summary.Description, Is.EqualTo("Test description"));
+            Assert.That(summary.Versions, Has.Count.EqualTo(1));
+            Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
         });
     }
 

@@ -26,6 +26,48 @@ public static partial class PluginMapper {
     public static partial IQueryable<PluginOverview> ToPluginOverview(this IQueryable<Plugin> plugins);
 
     /// <summary>
+    /// Converts a <see cref="Plugin"/> instance to a <see cref="PluginDetails"/> representation.
+    /// </summary>
+    /// <param name="plugin">The <see cref="Plugin"/> instance to be converted.</param>
+    /// <returns>A <see cref="PluginDetails"/> object representing the provided <see cref="Plugin"/>.</returns>
+    public static partial PluginDetails ToPluginDetails(this Plugin plugin);
+
+    /// <summary>
+    /// Converts a <see cref="Plugin"/> entity and its associated <see cref="PluginVersion"/> to a <see cref="PluginDetails"/> representation.
+    /// </summary>
+    /// <param name="plugin">The <see cref="Plugin"/> entity to be converted.</param>
+    /// <param name="versions">The associated <see cref="PluginVersion"/> data to be included in the conversion.</param>
+    /// <returns>A <see cref="PluginDetails"/> instance representing the provided <see cref="Plugin"/> entity along with its version details.</returns>
+    public static partial PluginDetails ToPluginDetails(this Plugin plugin, PluginVersion versions);
+
+    /// <summary>
+    /// Maps a <see cref="PluginVersion"/> to a list of <see cref="VersionDetails"/> instances.
+    /// </summary>
+    /// <param name="version">The <see cref="PluginVersion"/> instance containing version information.</param>
+    /// <returns>A <see cref="List{T}"/> of <see cref="VersionDetails"/> objects based on the provided <see cref="PluginVersion"/>.</returns>
+    public static List<VersionDetails> MapVersionDetails(PluginVersion version) {
+        return version.AsEnumerable().Select(ToVersionDetails).ToList();
+    }
+
+    /// <summary>
+    /// Maps a <see cref="PluginVersion"/> entity to its <see cref="PluginSummary"/> representation.
+    /// </summary>
+    /// <param name="version">The <see cref="PluginVersion"/> instance to be mapped to a <see cref="PluginSummary"/>.</param>
+    /// <returns>A <see cref="PluginSummary"/> representing the provided <see cref="PluginVersion"/>.</returns>
+    [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginSummary.PluginId))]
+    [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginSummary.Name))]
+    [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginSummary.FriendlyName))]
+    [MapProperty(nameof(PluginVersion.Id), nameof(PluginSummary.VersionId))]
+    public static partial PluginSummary ToPluginSummary(this PluginVersion version);
+
+    /// <summary>
+    /// Retrieves the semantic version of a plugin from the provided <see cref="PluginVersion"/> instance.
+    /// </summary>
+    /// <param name="plugin">The <see cref="PluginVersion"/> instance containing the version information.</param>
+    /// <returns>A <see cref="SemVersion"/> representing the plugin's version.</returns>
+    public static SemVersion GetPluginVersion(this PluginVersion plugin) => plugin.Version;
+
+    /// <summary>
     /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
     /// </summary>
     /// <param name="version">The source <see cref="PluginVersion"/> instance to be converted.</param>
@@ -43,6 +85,13 @@ public static partial class PluginMapper {
             .Select(x => x.ToVersionOverview())
             .ToList();
     }
+
+    /// <summary>
+    /// Converts a <see cref="PluginVersion"/> instance into its corresponding <see cref="VersionDetails"/> representation.
+    /// </summary>
+    /// <param name="version">The <see cref="PluginVersion"/> instance to be converted.</param>
+    /// <returns>A <see cref="VersionDetails"/> instance representing the provided <see cref="PluginVersion"/>.</returns>
+    public static partial VersionDetails ToVersionDetails(this PluginVersion version);
 
     /// <summary>
     /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name.

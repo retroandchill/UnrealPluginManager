@@ -44,21 +44,21 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
-    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
+    Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
 
     /// <summary>
     /// Submits a plugin file for processing and storage, associating it with a specific engine version.
     /// </summary>
     /// <param name="fileData">
-    /// The stream containing the plugin file data to be submitted.
+    ///     The stream containing the plugin file data to be submitted.
     /// </param>
     /// <param name="engineVersion">
-    /// The version of the Unreal Engine that the plugin is associated with.
+    ///     The version of the Unreal Engine that the plugin is associated with.
     /// </param>
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
     /// </returns>
-    Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion);
+    Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion);
 
     /// <summary>
     /// Retrieves the file data of a specific plugin for a given engine version.

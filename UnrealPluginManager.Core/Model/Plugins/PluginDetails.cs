@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
 /// <summary>
-/// Represents an overview of a plugin, providing basic information such as its ID, name,
-/// optional friendly name, description, and associated versions.
+/// Represents detailed information about a plugin, including its associated versions.
+/// Inherits from <see cref="PluginOverviewBase"/> to provide core metadata.
 /// </summary>
-public class PluginOverview : PluginOverviewBase {
-
+public class PluginDetails : PluginOverviewBase {
+    
     /// <summary>
     /// Gets or sets the collection of versions associated with the plugin.
     /// Each version provides a detailed overview including its version number
@@ -16,6 +15,6 @@ public class PluginOverview : PluginOverviewBase {
     /// </summary>
     [Required]
     [MinLength(1)]
-    public required List<VersionOverview> Versions { get; set; }
+    public required List<VersionDetails> Versions { get; set; }
     
 }
