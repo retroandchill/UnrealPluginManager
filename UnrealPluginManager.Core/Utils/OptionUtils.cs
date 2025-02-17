@@ -19,6 +19,13 @@ public static class OptionUtils {
         None: () => throw new InvalidOperationException("Option is None")
     );
 
+    /// <summary>
+    /// Converts a nullable value of type <typeparamref name="T"/> to an enumerable containing the value if it is not null.
+    /// In the case of nullable value types, the returned enumerable will contain the value if present.
+    /// </summary>
+    /// <typeparam name="T">The base type of the nullable value being processed.</typeparam>
+    /// <param name="value">The nullable value to convert into an enumerable.</param>
+    /// <returns>An enumerable containing the value if it is not null; otherwise, an empty enumerable.</returns>
     public static IEnumerable<T> AsEnumerable<T>(this T? value)
         where T : struct {
         if (value is not null) {
@@ -26,6 +33,12 @@ public static class OptionUtils {
         }
     }
 
+    /// <summary>
+    /// Converts a nullable reference type instance into an enumerable sequence containing the value if it is not null.
+    /// </summary>
+    /// <typeparam name="T">The type of the value.</typeparam>
+    /// <param name="value">The nullable value type instance to convert.</param>
+    /// <returns>An enumerable sequence containing the value if it is not null, or an empty sequence if the value is null.</returns>
     public static IEnumerable<T> AsEnumerable<T>(this T? value)
         where T : class {
         if (value is not null) {

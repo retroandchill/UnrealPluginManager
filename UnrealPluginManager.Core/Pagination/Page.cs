@@ -31,6 +31,9 @@ public class Page<T> : IPage, IReadOnlyList<T> {
     
     private readonly IList<T> _items;
 
+    /// <summary>
+    /// Represents a paginated collection of items of type <typeparamref name="T"/>.
+    /// </summary>
     public Page(IEnumerable<T> items) {
         _items = items as IList<T> ?? items.ToList();
         PageNumber = 1;
@@ -40,7 +43,6 @@ public class Page<T> : IPage, IReadOnlyList<T> {
     /// <summary>
     /// Represents a paginated collection of items of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the items in the paginated collection.</typeparam>
     private Page(IEnumerable<T> items, IPage original) {
         _items = items as IList<T> ?? items.ToList();
         PageNumber = original.PageNumber;
@@ -51,7 +53,6 @@ public class Page<T> : IPage, IReadOnlyList<T> {
     /// <summary>
     /// Represents a paginated collection of items of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the items in the paginated collection.</typeparam>
     public Page(IEnumerable<T> items, int count, int pageNumber, int pageSize) {
         _items = items as IList<T> ?? items.ToList();
         PageNumber = pageNumber;

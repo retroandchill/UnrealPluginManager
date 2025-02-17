@@ -19,7 +19,7 @@ public class LocalizationTargetDescriptor {
     /// </summary>
     [Required]
     [JsonPropertyName("Name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// When should the localization data associated with a target should be loaded?

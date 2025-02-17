@@ -196,7 +196,10 @@ public struct Pageable {
     /// <remarks>
     /// This struct is used to define and validate page requests with a specific page number
     /// and size. It supports both paged and unpaged operations, enabling more flexible handling
-    /// of data collections or results. The <see cref="Match"/> methods allow conditional branching
+    /// of data collections or results. The
+    /// <see cref="Match&lt;TResult>(Func&lt;PageRequest, TResult>, Func&lt;TResult>)">Match</see>
+    /// <see cref="Match&lt;TResult>(Func&lt;int, int, TResult>, Func&lt;TResult>)">methods</see>
+    /// allow conditional branching
     /// based on whether pagination settings are valid or not, facilitating different scenarios
     /// where pagination may or may not be applied.
     /// </remarks>

@@ -23,7 +23,14 @@ public abstract class UnrealPluginManagerContext(IFileSystem filesystem) : DbCon
     /// It is used for performing CRUD operations and querying the plugins stored in the system.
     /// </remarks>
     public DbSet<Plugin> Plugins { get; init; }
-    
+
+    /// <summary>
+    /// Represents the database set for storing and managing versions of plugins within the UnrealPluginManager context.
+    /// </summary>
+    /// <remarks>
+    /// This property provides access to the collection of plugin versions persisted in the database.
+    /// It is primarily used for handling operations related to specific versions of plugins, such as querying, updating, or adding new versions.
+    /// </remarks>
     public DbSet<PluginVersion> PluginVersions { get; init; }
 
     /// <summary>

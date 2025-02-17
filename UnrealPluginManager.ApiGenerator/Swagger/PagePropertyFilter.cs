@@ -22,12 +22,15 @@ namespace UnrealPluginManager.ApiGenerator.Swagger;
 /// </remarks>
 public class PagePropertyFilter : ISchemaFilter {
 
+    private const string Integer = "integer";
+    private const string Int32 = "int32";
+
     /// <inheritdoc />
     public void Apply(OpenApiSchema schema, SchemaFilterContext context) {
         if (!context.Type.IsGenericType || context.Type.GetGenericTypeDefinition() != typeof(Page<>)) {
             return;
         }
-
+        
         var className = context.Type.GenericTypeArguments[0].Name;
         var name = $"{className}Page";
         if (!context.SchemaRepository.Schemas.TryGetValue(name, out var itemSchema)) {
@@ -37,28 +40,28 @@ public class PagePropertyFilter : ISchemaFilter {
                 Properties = new Dictionary<string, OpenApiSchema>()
             };
             itemSchema.Properties.Add("pageNumber", new OpenApiSchema {
-                Type = "integer",
+                Type = Integer,
                 Description = "The current page number of the result set.",
-                Format = "int32",
+                Format = Int32,
                 Minimum = 1
             });
             itemSchema.Properties.Add("totalPages", new OpenApiSchema {
-                Type = "integer",
+                Type = Integer,
                 Description = "The total number of pages in the result set.",
-                Format = "int32",
+                Format = Int32,
                 Minimum = 1
             });
             itemSchema.Properties.Add("pageSize", new OpenApiSchema {
-                Type = "integer",
+                Type = Integer,
                 Description = "The number of items on each page.",
-                Format = "int32",
+                Format = Int32,
                 Minimum = 1,
                 Example = new OpenApiInteger(10)
             });
             itemSchema.Properties.Add("count", new OpenApiSchema {
-                Type = "integer",
+                Type = Integer,
                 Description = "The total number of items available in the result set.",
-                Format = "int32",
+                Format = Int32,
                 Minimum = 0,
                 Example = new OpenApiInteger(1)
             });

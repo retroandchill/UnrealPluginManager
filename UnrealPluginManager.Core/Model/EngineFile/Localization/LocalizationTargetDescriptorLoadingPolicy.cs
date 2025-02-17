@@ -12,15 +12,33 @@ namespace UnrealPluginManager.Core.Model.Localization;
 /// </remarks>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LocalizationTargetDescriptorLoadingPolicy {
+    /// <summary>
+    /// Never load.
+    /// </summary>
     Never,
 
+    /// <summary>
+    /// Always load.
+    /// </summary>
     Always,
 
+    /// <summary>
+    /// Only load in the editor.
+    /// </summary>
     Editor,
 
+    /// <summary>
+    /// Only load in game.
+    /// </summary>
     Game,
 
+    /// <summary>
+    /// Only load for property names.
+    /// </summary>
     PropertyNames,
 
+    /// <summary>
+    /// Only load for tool tips.
+    /// </summary>
     ToolTips,
 }

@@ -83,7 +83,14 @@ public class Plugin {
     /// has not provided a website.
     /// </remarks>
     public Uri? AuthorWebsite { get; set; }
-    
+
+    /// <summary>
+    /// Gets or sets the collection of versions associated with the plugin.
+    /// </summary>
+    /// <remarks>
+    /// This property represents all the different versions of the plugin that have been recorded.
+    /// Each version is linked to a specific plugin and managed within the context of the database.
+    /// </remarks>
     public ICollection<PluginVersion> Versions { get; set; } = new List<PluginVersion>();
 
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {

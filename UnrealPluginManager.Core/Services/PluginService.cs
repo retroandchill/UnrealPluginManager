@@ -1,7 +1,5 @@
-﻿using System.CodeDom.Compiler;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text.Json;
-using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -12,7 +10,6 @@ using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
@@ -46,7 +43,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
             .FirstAsync();
 
         var pluginData = new Dictionary<string, List<PluginVersion>> { { plugin.Parent.Name, [plugin] } };
-        var unresolved = new System.Collections.Generic.HashSet<string>();
+        var unresolved = new HashSet<string>();
 
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)

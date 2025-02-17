@@ -34,7 +34,11 @@ public class PluginReferenceDescriptor {
     [JsonPropertyName("bOptional")]
     public bool Optional { get; set; }
 
-    [JsonPropertyName("PluginType")] public PluginType PluginType { get; set; } = PluginType.Engine;
+    /// <summary>
+    /// Specifies the type of the plugin.
+    /// </summary>
+    [JsonPropertyName("PluginType")] 
+    public PluginType PluginType { get; set; } = PluginType.Engine;
 
     /// <summary>
     /// Description of the plugin for users that do not have it installed.
@@ -109,6 +113,11 @@ public class PluginReferenceDescriptor {
     public int? RequestedVersion { get; set; }
 
 
+    /// <summary>
+    /// Specifies the version matching range for the plugin.
+    /// This property determines which versions of the plugin are compatible,
+    /// based on the provided semantic version range.
+    /// </summary>
     [JsonPropertyName("VersionMatcher")]
     [JsonConverter(typeof(SemVersionRangeJsonConverter))]
     public SemVersionRange VersionMatcher { get; set; } = SemVersionRange.All;
