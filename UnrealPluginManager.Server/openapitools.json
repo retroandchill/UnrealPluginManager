@@ -3,27 +3,5 @@
     "spaces": 2,
     "generator-cli": {
         "version": "7.11.0"
-    },
-    "importMappings": {
-        "BinariesOverview": "UnrealPluginManager.Core.Model.Plugins.BinariesOverview",
-        "DependencyOverview": "UnrealPluginManager.Core.Model.Plugins.DependencyOverview",
-        "PluginDetails": "UnrealPluginManager.Core.Model.Plugins.PluginDetails",
-        "PluginOverview": "UnrealPluginManager.Core.Model.Plugins.PluginOverview",
-        "PluginOverviewPage": "UnrealPluginManager.Core.Pagination.Page<UnrealPluginManager.Core.Model.Plugins.PluginOverview>",
-        "PluginSummary": "UnrealPluginManager.Core.Model.Plugins.PluginSummary",
-        "PluginType": "UnrealPluginManager.Core.Model.Plugins.PluginType",
-        "VersionDetails": "UnrealPluginManager.Core.Model.Plugins.VersionDetails",
-        "VersionOverview": "UnrealPluginManager.Core.Model.Plugins.VersionOverview"
-    },
-    "typeMappings": {
-        "BinariesOverview": "UnrealPluginManager.Core.Model.Plugins.BinariesOverview",
-        "DependencyOverview": "UnrealPluginManager.Core.Model.Plugins.DependencyOverview",
-        "PluginDetails": "UnrealPluginManager.Core.Model.Plugins.PluginDetails",
-        "PluginOverview": "UnrealPluginManager.Core.Model.Plugins.PluginOverview",
-        "PluginOverviewPage": "UnrealPluginManager.Core.Pagination.Page<UnrealPluginManager.Core.Model.Plugins.PluginOverview>",
-        "PluginSummary": "UnrealPluginManager.Core.Model.Plugins.PluginSummary",
-        "PluginType": "UnrealPluginManager.Core.Model.Plugins.PluginType",
-        "VersionDetails": "UnrealPluginManager.Core.Model.Plugins.VersionDetails",
-        "VersionOverview": "UnrealPluginManager.Core.Model.Plugins.VersionOverview"
     }
 }

@@ -14,13 +14,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
+using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
-using UnrealPluginManager.WebClient.Client;
-using UnrealPluginManager.WebClient.Model;
 
 namespace UnrealPluginManager.WebClient.Api
 {
+    using PluginOverviewPage = Page<PluginOverview>;
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
@@ -36,8 +36,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>Page<PluginOverview></returns>
-        Page<PluginOverview> ApiPluginsGet(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0);
+        /// <returns>PluginOverviewPage</returns>
+        PluginOverviewPage ApiPluginsGet(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0);
 
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
@@ -50,8 +50,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of Page<PluginOverview></returns>
-        ApiResponse<Page<PluginOverview>> ApiPluginsGetWithHttpInfo(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0);
+        /// <returns>ApiResponse of PluginOverviewPage</returns>
+        ApiResponse<PluginOverviewPage> ApiPluginsGetWithHttpInfo(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0);
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
         /// </summary>
@@ -137,8 +137,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of Page<PluginOverview></returns>
-        System.Threading.Tasks.Task<Page<PluginOverview>> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        /// <returns>Task of PluginOverviewPage</returns>
+        System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
@@ -152,8 +152,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (Page<PluginOverview>)</returns>
-        System.Threading.Tasks.Task<ApiResponse<Page<PluginOverview>>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (PluginOverviewPage)</returns>
+        System.Threading.Tasks.Task<ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
         /// </summary>
@@ -361,10 +361,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>Page<PluginOverview></returns>
-        public Page<PluginOverview> ApiPluginsGet(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0)
+        /// <returns>PluginOverviewPage</returns>
+        public PluginOverviewPage ApiPluginsGet(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<Page<PluginOverview>> localVarResponse = ApiPluginsGetWithHttpInfo(match, page, size);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage> localVarResponse = ApiPluginsGetWithHttpInfo(match, page, size);
             return localVarResponse.Data;
         }
 
@@ -376,8 +376,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of Page<PluginOverview></returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<Page<PluginOverview>> ApiPluginsGetWithHttpInfo(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0)
+        /// <returns>ApiResponse of PluginOverviewPage</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage> ApiPluginsGetWithHttpInfo(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0)
         {
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -420,7 +420,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<Page<PluginOverview>>("/api/plugins", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<PluginOverviewPage>("/api/plugins", localVarRequestOptions, this.Configuration);
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("ApiPluginsGet", localVarResponse);
@@ -442,10 +442,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of Page<PluginOverview></returns>
-        public async System.Threading.Tasks.Task<Page<PluginOverview>> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        /// <returns>Task of PluginOverviewPage</returns>
+        public async System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<Page<PluginOverview>> localVarResponse = await ApiPluginsGetWithHttpInfoAsync(match, page, size, operationIndex, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage> localVarResponse = await ApiPluginsGetWithHttpInfoAsync(match, page, size, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -458,8 +458,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (Page<PluginOverview>)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<Page<PluginOverview>>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (PluginOverviewPage)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
         {
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -502,7 +502,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = await this.AsynchronousClient.GetAsync<Page<PluginOverview>>("/api/plugins", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<PluginOverviewPage>("/api/plugins", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
