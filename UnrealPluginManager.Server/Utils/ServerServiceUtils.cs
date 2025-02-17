@@ -21,17 +21,6 @@ namespace UnrealPluginManager.Server.Utils;
 public static class ServerServiceUtils {
 
     /// <summary>
-    /// Configures and registers OpenAPI services for the application.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the OpenAPI services are added.</param>
-    /// <returns>The updated <see cref="IServiceCollection"/> with OpenAPI configurations applied.</returns>
-    public static IServiceCollection AddOpenApiConfigs(this IServiceCollection services) {
-        return services.AddOpenApi()
-            .AddEndpointsApiExplorer()
-            .AddSwaggerGen();
-    }
-
-    /// <summary>
     /// Configures and applies service-specific configurations to the application.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to which the service configurations are added.</param>
@@ -53,16 +42,28 @@ public static class ServerServiceUtils {
             .AddScoped<IStorageService, CloudStorageService>();
     }
 
-    public static WebApplicationBuilder SetUpProductApplication(this WebApplicationBuilder builder) {
-        // Add services to the container.
-
-        builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApiConfigs()
-            .AddSystemAbstractions()
+    /// <summary>
+    /// Configures the application for production use by applying common configuration,
+    /// registering essential services, and configuring database contexts.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> used to configure the application.</param>
+    /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
+    public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
+        builder.SetUpCommonConfiguration();
+        builder.Services.AddSystemAbstractions()
             .AddServiceConfigs()
-            .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>()
-            .AddCoreServices()
+            .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>();
+        return builder;
+    }
+
+    /// <summary>
+    /// Configures common settings and services for the application.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance to configure.</param>
+    /// <returns>The updated <see cref="WebApplicationBuilder"/> with common configurations applied.</returns>
+    public static WebApplicationBuilder SetUpCommonConfiguration(this WebApplicationBuilder builder) {
+        builder.Services.AddControllers();
+        builder.Services.AddCoreServices()
             .AddServerServices()
             .AddControllers(options => {
                 options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
@@ -73,8 +74,13 @@ public static class ServerServiceUtils {
         return builder;
     }
 
+    /// <summary>
+    /// Configures the application by applying middleware and mapping routes.
+    /// </summary>
+    /// <param name="app">The <see cref="WebApplication"/> instance to be configured.</param>
+    /// <returns>The configured <see cref="WebApplication"/> instance.</returns>
     public static WebApplication Configure(this WebApplication app) {
-        app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name;
+        app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name ?? "MyApplication";
         app.UseDefaultFiles();
         app.MapStaticAssets();
         app.UseHttpsRedirection();

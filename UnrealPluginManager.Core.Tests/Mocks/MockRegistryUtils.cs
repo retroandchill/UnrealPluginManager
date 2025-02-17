@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Versioning;
 using UnrealPluginManager.Core.Abstractions;
 
-namespace UnrealPluginManager.Cli.Tests.Mocks;
+namespace UnrealPluginManager.Core.Tests.Mocks;
 
 /// <summary>
 /// Provides utility methods for interacting with mock implementations of the Windows registry.

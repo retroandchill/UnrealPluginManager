@@ -6,8 +6,10 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
 using Semver;
 using Swashbuckle.AspNetCore.Swagger;
+using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Server.Controllers;
+using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
 
@@ -17,6 +19,9 @@ public static class SwaggerExtensions {
     
     public static WebApplicationBuilder SetUpSwagger(this WebApplicationBuilder builder) {
         builder.Services.AddSingleton<ISwaggerService, SwaggerService>()
+            .AddOpenApi()
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen()
             .AddSwaggerGen(options => {
             // include API xml documentation
             var apiAssembly = typeof(PluginsController).Assembly;

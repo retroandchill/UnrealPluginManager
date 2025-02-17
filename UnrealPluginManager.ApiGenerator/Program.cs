@@ -6,7 +6,7 @@ using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Server.Utils;
 
 await WebApplication.CreateBuilder(args)
-    .SetUpProductApplication()
+    .SetUpProductionApplication()
     .SetUpSwagger()
     .ConfigureEndpoints()
     .Build()

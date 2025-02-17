@@ -1,7 +1,7 @@
 using UnrealPluginManager.Server.Utils;
 
 await WebApplication.CreateBuilder(args)
-    .SetUpProductApplication()
+    .SetUpProductionApplication()
     .Build()
     .Configure()
     .RunAsync();

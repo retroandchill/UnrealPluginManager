@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Versioning;
 using UnrealPluginManager.Core.Abstractions;
 
-namespace UnrealPluginManager.Cli.Tests.Mocks;
+namespace UnrealPluginManager.Core.Tests.Mocks;
 
 /// <summary>
 /// Provides a mock implementation of the <see cref="IRegistry"/> interface for unit testing purposes.

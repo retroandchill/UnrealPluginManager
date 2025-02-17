@@ -8,23 +8,12 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile></DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugSymbols>true</DebugSymbols>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-        <PackageReference Include="Moq" Version="4.20.72" />
         <PackageReference Include="NUnit" Version="4.2.2"/>
         <PackageReference Include="NUnit.Analyzers" Version="4.3.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
-        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.3.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,8 +21,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj" />
-      <ProjectReference Include="..\UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj" />
+      <Reference Include="Microsoft.AspNetCore">
+        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.0\Microsoft.AspNetCore.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj" />
+      <ProjectReference Include="..\UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj" />
+      <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj" />
     </ItemGroup>
 
 </Project>
