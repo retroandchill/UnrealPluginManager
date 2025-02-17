@@ -8,6 +8,14 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile></DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
@@ -25,6 +33,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj" />
+      <ProjectReference Include="..\UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj" />
     </ItemGroup>
 
 </Project>

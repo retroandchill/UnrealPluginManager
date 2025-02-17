@@ -2,6 +2,7 @@
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -12,10 +13,12 @@ public interface IPluginService {
     /// <summary>
     /// Retrieves a collection of plugin summaries including essential information like name and optional description.
     /// </summary>
+    /// <param name="matcher"></param>
+    /// <param name="pageable">The pagination settings</param>
     /// <returns>
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
-    Task<List<PluginSummary>> GetPluginSummaries();
+    Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
@@ -41,21 +44,21 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
     /// </returns>
-    Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
+    Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor, EngineFileData? storedFile = null);
 
     /// <summary>
     /// Submits a plugin file for processing and storage, associating it with a specific engine version.
     /// </summary>
     /// <param name="fileData">
-    /// The stream containing the plugin file data to be submitted.
+    ///     The stream containing the plugin file data to be submitted.
     /// </param>
     /// <param name="engineVersion">
-    /// The version of the Unreal Engine that the plugin is associated with.
+    ///     The version of the Unreal Engine that the plugin is associated with.
     /// </param>
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
     /// </returns>
-    Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion);
+    Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion);
 
     /// <summary>
     /// Retrieves the file data of a specific plugin for a given engine version.
@@ -70,5 +73,5 @@ public interface IPluginService {
     /// <returns>
     /// A stream representing the binary content of the plugin file.
     /// </returns>
-    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion);
+    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion);
 }

@@ -86,7 +86,11 @@ public partial class EngineServiceTest {
                 await using var subFileStream = subFile!.Open();
                 using var textReader = new StreamReader(subFileStream);
                 capturedTextFile = await textReader.ReadToEndAsync();
-                return new PluginSummary("MyPlugin", capturedData!.VersionName, capturedData.Description);
+                return new PluginDetails {
+                    Id = 1,
+                    Name = "MyPlugin",
+                    Versions = []
+                };
             });
         
         var batchFilePath = Path.GetFullPath("C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat");
@@ -150,8 +154,8 @@ public partial class EngineServiceTest {
             await textWriter.WriteAsync("Hello World!");
         }
 
-        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, new Version(5, 4)))
-            .ReturnsAsync((string _, SemVersionRange _, Version _) => _filesystem.File.OpenRead(pluginPath));
+        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4"))
+            .ReturnsAsync((string _, SemVersionRange _, string _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
         var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4");

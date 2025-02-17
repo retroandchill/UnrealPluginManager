@@ -40,31 +40,6 @@ public class Plugin {
     public required string Name { get; set; }
 
     /// <summary>
-    /// Gets or sets the semantic version of the plugin.
-    /// </summary>
-    /// <remarks>
-    /// This property defines the version of the plugin using semantic versioning, represented by major, minor, and patch components.
-    /// It is not mapped directly to the database; instead, it interacts with the VersionString property for persistence.
-    /// </remarks>
-    [NotMapped]
-    public SemVersion Version { get; set; } = new(1, 0, 0);
-
-    /// <summary>
-    /// Gets or sets the version of the plugin as a string representation.
-    /// </summary>
-    /// <remarks>
-    /// This property is a mapped database column used for storing the version of the plugin as a string.
-    /// It internally parses the version string to and from a <see cref="SemVersion"/> object to ensure proper semantic versioning.
-    /// </remarks>
-    [MinLength(1)]
-    [MaxLength(255)]
-    [Column(name: "Version")]
-    public string VersionString {
-        get => Version.ToString();
-        set => Version = SemVersion.Parse(value);
-    }
-
-    /// <summary>
     /// Gets or sets the user-friendly, display name of the plugin.
     /// </summary>
     /// <remarks>
@@ -110,32 +85,17 @@ public class Plugin {
     public Uri? AuthorWebsite { get; set; }
 
     /// <summary>
-    /// Gets or sets the collection of dependencies associated with the plugin.
+    /// Gets or sets the collection of versions associated with the plugin.
     /// </summary>
     /// <remarks>
-    /// This property represents the list of dependencies that the plugin requires to function properly.
-    /// Each dependency is an instance of the Dependency entity, which includes detailed information about the dependent plugins.
-    /// The Dependencies property establishes a one-to-many relationship between the plugin and its dependencies.
+    /// This property represents all the different versions of the plugin that have been recorded.
+    /// Each version is linked to a specific plugin and managed within the context of the database.
     /// </remarks>
-    public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
-
-    /// <summary>
-    /// Gets or sets the collection of uploaded plugin files related to this plugin.
-    /// </summary>
-    /// <remarks>
-    /// This property represents a list of associated plugin files, allowing the system to track
-    /// multiple versions or variations of the plugin's file data. Each entry in the collection
-    /// contains metadata about a specific uploaded file, such as its file path and engine version.
-    /// </remarks>
-    public ICollection<PluginFileInfo> UploadedPlugins { get; set; } = new List<PluginFileInfo>();
+    public ICollection<PluginVersion> Versions { get; set; } = new List<PluginVersion>();
 
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Plugin>()
-            .HasIndex(x => new { x.Name, x.VersionString })
+            .HasIndex(x => new { x.Name })
             .IsUnique();
-
-
-        modelBuilder.Entity<Plugin>()
-            .Ignore(x => x.Version);
     }
 }

@@ -7,7 +7,7 @@ namespace UnrealPluginManager.Cli.Tests.Mocks;
 /// intended for use in testing and mock implementations of stream writers.
 /// </summary>
 /// <remarks>
-/// This class implements the <see cref="IStandardStreamWriter"/> interface, enabling
+/// This class implements the <see cref="System.CommandLine.IO.IStandardStreamWriter"/> interface, enabling
 /// it to be used in scenarios requiring a writable standard stream. It provides
 /// functionalities for writing text, retrieving the written content, and flushing the underlying buffer.
 /// </remarks>

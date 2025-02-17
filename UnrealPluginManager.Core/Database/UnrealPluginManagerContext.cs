@@ -25,18 +25,28 @@ public abstract class UnrealPluginManagerContext(IFileSystem filesystem) : DbCon
     public DbSet<Plugin> Plugins { get; init; }
 
     /// <summary>
+    /// Represents the database set for storing and managing versions of plugins within the UnrealPluginManager context.
+    /// </summary>
+    /// <remarks>
+    /// This property provides access to the collection of plugin versions persisted in the database.
+    /// It is primarily used for handling operations related to specific versions of plugins, such as querying, updating, or adding new versions.
+    /// </remarks>
+    public DbSet<PluginVersion> PluginVersions { get; init; }
+
+    /// <summary>
     /// Represents the database set for storing and managing uploaded plugin file metadata within the UnrealPluginManager context.
     /// </summary>
     /// <remarks>
     /// This property provides access to the collection of PluginFileInfo entities that detail the file paths, engine versions, and parent plugin references for uploaded plugins.
     /// It is utilized for querying, storing, and updating metadata about plugin files associated with the system.
     /// </remarks>
-    public DbSet<PluginFileInfo> UploadedPlugins { get; init; }
+    public DbSet<PluginBinaries> UploadedPlugins { get; init; }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         Plugin.DefineModelMetadata(modelBuilder);
+        PluginVersion.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
-        PluginFileInfo.DefineModelMetadata(modelBuilder, filesystem);
+        PluginBinaries.DefineModelMetadata(modelBuilder, filesystem);
     }
 }

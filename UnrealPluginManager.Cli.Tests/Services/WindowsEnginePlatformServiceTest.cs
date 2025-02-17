@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Tests.Mocks;
 
 namespace UnrealPluginManager.Cli.Tests.Services;
 

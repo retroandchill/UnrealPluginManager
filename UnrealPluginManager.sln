@@ -17,6 +17,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli.Tests", "UnrealPluginManager.Cli.Tests\UnrealPluginManager.Cli.Tests.csproj", "{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator", "UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj", "{65CAE6E6-7901-4DFB-8316-4DF601296048}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator.Tests", "UnrealPluginManager.ApiGenerator.Tests\UnrealPluginManager.ApiGenerator.Tests.csproj", "{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.WebClient", "UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj", "{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +59,18 @@ Global
 		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65CAE6E6-7901-4DFB-8316-4DF601296048}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65CAE6E6-7901-4DFB-8316-4DF601296048}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65CAE6E6-7901-4DFB-8316-4DF601296048}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65CAE6E6-7901-4DFB-8316-4DF601296048}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
@@ -54,20 +55,32 @@ public class PluginServiceTests {
                 new Plugin {
                     Name = "Plugin" + i,
                     FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 0, 0)
-                },
-                new Plugin {
-                    Name = "Plugin" + i,
-                    FriendlyName = "Plugin" + i,
-                    Version = new SemVersion(1, 2, 2)
+                    Versions = [
+                        new PluginVersion {
+                            Version = new SemVersion(1, 0, 0)
+                        },
+                        new PluginVersion {
+                            Version = new SemVersion(1, 2, 2)
+                        }
+                    ]
+                    
                 }
             });
         context.AddRange(plugins);
         await context.SaveChangesAsync();
 
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-        var summaries = await pluginService.GetPluginSummaries();
+        var summaries = await pluginService.ListPlugins("*", new Pageable(1, 10));
         Assert.That(summaries, Has.Count.EqualTo(10));
+        
+        
+        summaries = await pluginService.ListPlugins("Plugin1", new Pageable(1, 10));
+        Assert.That(summaries, Has.Count.EqualTo(1));
+        Assert.That(summaries[0].Name, Is.EqualTo("Plugin1"));
+        
+        summaries = await pluginService.ListPlugins("Plugin2", new Pageable(1, 10));
+        Assert.That(summaries, Has.Count.EqualTo(1));
+        Assert.That(summaries[0].Name, Is.EqualTo("Plugin2"));
     }
 
     [Test]
@@ -182,8 +195,9 @@ public class PluginServiceTests {
         var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
         Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
-            Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
             Assert.That(summary.Description, Is.EqualTo("Test description"));
+            Assert.That(summary.Versions, Has.Count.EqualTo(1));
+            Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
         });
     }
 
@@ -269,22 +283,28 @@ public class PluginServiceTests {
         var plugin = new Plugin {
             Name = "TestPlugin",
             FriendlyName = "Test Plugin",
-            Version = new SemVersion(1, 0, 0),
+            
             Description = "Test description",
-            UploadedPlugins = [
-                new PluginFileInfo {
-                    EngineVersion = new Version(5, 5),
-                    FilePath = zipFile
+            Versions = [
+                new PluginVersion {
+                    Version = new SemVersion(1, 0, 0),
+                    Binaries = [
+                        new PluginBinaries {
+                            EngineVersion = "5.5",
+                            FilePath = zipFile,
+                            Platform = "Win64"
+                        }
+                    ]
                 }
             ]
         };
         await context.Plugins.AddAsync(plugin);
         await context.SaveChangesAsync();
 
-        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 5)));
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5"));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, new Version(5, 4)));
+            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.4"));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, new Version(5, 5)));
+            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, "5.5"));
     }
 }

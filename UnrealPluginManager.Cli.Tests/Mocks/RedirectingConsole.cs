@@ -1,11 +1,10 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
-using NUnit.Framework.Internal.Execution;
 
 namespace UnrealPluginManager.Cli.Tests.Mocks;
 
 /// <summary>
-/// Provides a mock implementation of the <see cref="IConsole"/> interface, allowing for the redirection
+/// Provides a mock implementation of the <see cref="System.CommandLine.IConsole"/> interface, allowing for the redirection
 /// and capturing of console output and error streams for testing purposes.
 /// </summary>
 /// <remarks>

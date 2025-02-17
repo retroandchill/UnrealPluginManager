@@ -125,7 +125,7 @@ public class PluginControllerTest {
         Assert.That(plugin3Names, Does.Contain("Plugin2"));
         Assert.That(plugin3Names, Does.Contain("Plugin3"));
 
-        var allPluginsList = await _pluginsController.Get();
+        var allPluginsList = await _pluginsController.GetPlugins();
         Assert.That(allPluginsList, Has.Count.EqualTo(4));
     }
 
@@ -146,7 +146,7 @@ public class PluginControllerTest {
         }
 
         testZip.Seek(0, SeekOrigin.Begin);
-        var result = await _pluginsController.Post(new FormFile(testZip, 0, testZip.Length, "file", "TestPlugin.zip"),
+        var result = await _pluginsController.AddPlugin(new FormFile(testZip, 0, testZip.Length, "file", "TestPlugin.zip"),
             new Version(5, 5));
         Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 

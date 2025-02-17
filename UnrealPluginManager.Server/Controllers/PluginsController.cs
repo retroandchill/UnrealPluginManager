@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using System.Net.Mime;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Filters;
 
@@ -28,56 +26,60 @@ namespace UnrealPluginManager.Server.Controllers;
 [ApiExceptionFilter]
 [Route("/api/plugins")]
 public class PluginsController(IPluginService pluginService) : ControllerBase {
-    /// Retrieves the list of plugin summaries from the plugin service.
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a list of plugin summaries.
-    /// </returns>
+
+    /// <summary>
+    /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
+    /// </summary>
+    /// <param name="match">A wildcard string used to filtered plugins by name. Defaults to "*".</param>
+    /// <param name="pageable">Pagination settings including page size, index, and sort order.</param>
+    /// <return>Returns a paginated collection of plugin overviews.</return>
     [HttpGet]
-    public async Task<List<PluginSummary>> Get() {
-        return await pluginService.GetPluginSummaries();
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(Page<PluginOverview>), (int) HttpStatusCode.OK)]
+    public async Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*", [FromQuery] Pageable pageable = default) {
+        return await pluginService.ListPlugins(match, pageable);
     }
 
-    /// Submits a plugin file to the plugin service for processing and management.
-    /// <param name="pluginFile">The plugin file to be submitted.</param>
-    /// <param name="engineVersion">The version of the engine the plugin is intended for.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the summary of the submitted plugin.
-    /// </returns>
+    /// <summary>
+    /// Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
+    /// </summary>
+    /// <param name="pluginFile">The uploaded plugin file in a valid format.</param>
+    /// <param name="engineVersion">The target Unreal Engine version for which the plugin is being added.</param>
+    /// <return>Returns detailed information about the added plugin.</return>
     [HttpPost]
     [Consumes(MediaTypeNames.Multipart.FormData)]
-    public async Task<PluginSummary> Post(IFormFile pluginFile, [FromQuery] Version engineVersion) {
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PluginDetails), (int) HttpStatusCode.OK)]
+    public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
         return await pluginService.SubmitPlugin(stream, engineVersion);
     }
 
+
+    /// <summary>
     /// Retrieves the dependency tree for a specified plugin.
-    /// <param name="pluginName">
-    /// The name of the plugin for which the dependency tree is to be retrieved.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a list of plugin summaries representing the dependency tree for the specified plugin.
-    /// </returns>
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
+    /// <return>Returns a list of plugin summaries representing the dependency tree.</return>
     [HttpGet("{pluginName}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
         return await pluginService.GetDependencyList(pluginName);
     }
 
-    /// Downloads a plugin as a ZIP file based on the provided plugin name and engine version.
-    /// <param name="pluginName">
-    /// The name of the plugin to be downloaded.
-    /// </param>
-    /// <param name="engineVersion">
-    /// The version of the Unreal Engine for which the plugin is compatible.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a file stream result of the plugin ZIP file.
-    /// </returns>
+
+    /// <summary>
+    /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+    /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
+    /// <return>Returns a FileStreamResult containing the plugin file as a ZIP archive.</return>
     [HttpGet("{pluginName}/download")]
     [Produces(MediaTypeNames.Application.Zip)]
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
-    public async Task<FileStreamResult>
-        DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion), MediaTypeNames.Application.Zip,
+    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
+        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString()), MediaTypeNames.Application.Zip,
             $"{pluginName}.zip");
     }
 }

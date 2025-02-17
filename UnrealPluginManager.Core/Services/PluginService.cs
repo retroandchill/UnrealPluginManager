@@ -1,15 +1,16 @@
-﻿using System.CodeDom.Compiler;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text.Json;
-using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -21,39 +22,41 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
         AllowTrailingCommas = true
     };
 
+    /// <param name="matcher"></param>
+    /// <param name="pageable"></param>
     /// <inheritdoc/>
-    public async Task<List<PluginSummary>> GetPluginSummaries() {
-        return await dbContext.Plugins
-            .GroupBy(x => x.Name)
-            .Select(g => g.OrderByDescending(x => x.VersionString).FirstOrDefault())
-            .AsAsyncEnumerable()
-            .Where(p => p != null)
-            .Select(p => new PluginSummary(p!.Name, p.Version, p.Description))
-            .ToListAsync();
+    public Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
+        return dbContext.Plugins
+            .Where(x => EF.Functions.Like(x.Name, matcher.Replace("*", "%")))
+            .OrderByDescending(x => x.Name)
+            .ToPluginOverview()
+            .ToPageAsync(pageable);
     }
 
     /// <inheritdoc/>
     public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
-        var plugin = await dbContext.Plugins
+        var plugin = await dbContext.PluginVersions
+            .Include(p => p.Parent)
             .Include(p => p.Dependencies)
-            .Where(p => p.Name == pluginName)
+            .Where(p => p.Parent.Name == pluginName)
             .OrderByDescending(p => p.VersionString)
             .FirstAsync();
 
-        var pluginData = new Dictionary<string, List<Plugin>> { { plugin.Name, [plugin] } };
-        var unresolved = new System.Collections.Generic.HashSet<string>();
+        var pluginData = new Dictionary<string, List<PluginVersion>> { { plugin.Parent.Name, [plugin] } };
+        var unresolved = new HashSet<string>();
 
         unresolved.UnionWith(plugin.Dependencies
             .Where(x => x.Type == PluginType.Provided)
             .Select(pd => pd.PluginName));
         while (unresolved.Count > 0) {
             var currentlyExisting = unresolved.ToHashSet();
-            var plugins = (await dbContext.Plugins
+            var plugins = (await dbContext.PluginVersions
+                    .Include(p => p.Parent)
                     .Include(p => p.Dependencies)
-                    .Where(p => unresolved.Contains(p.Name))
+                    .Where(p => unresolved.Contains(p.Parent.Name))
                     .OrderByDescending(p => p.VersionString)
                     .ToListAsync())
-                .GroupBy(x => x.Name);
+                .GroupBy(x => x.Parent.Name);
 
             foreach (var pluginList in plugins) {
                 unresolved.Remove(pluginList.Key);
@@ -83,50 +86,30 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
 
         return bindings.SelectMany(b => b)
             .Select(p => pluginData[p.Item1].First(d => d.Version == p.Item2))
-            .Select(p => new PluginSummary(p.Name, p.Version, p.Description))
+            .Select(p => p.ToPluginSummary())
             .ToList();
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> AddPlugin(string pluginName, PluginDescriptor descriptor,
+    public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
         EngineFileData? storedFile = null) {
-        var plugin = MapBasePluginInfo(pluginName, descriptor, storedFile);
-        dbContext.Plugins.Add(plugin);
+        var plugin = await dbContext.Plugins
+            .Where(x => x.Name == pluginName)
+            .FirstOrDefaultAsync();
+        if (plugin is null) {
+            plugin = descriptor.ToPlugin(pluginName);
+            dbContext.Plugins.Add(plugin);
+        }
+        var pluginVersion = descriptor.ToPluginVersion(); 
+        pluginVersion.ParentId = plugin.Id;
+        pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
+        dbContext.PluginVersions.Add(pluginVersion);
         await dbContext.SaveChangesAsync();
-        return new PluginSummary(plugin.Name, plugin.Version, plugin.Description);
-    }
-
-    private static Plugin MapBasePluginInfo(string pluginName, PluginDescriptor descriptor,
-        EngineFileData? storedFile) {
-        var plugin = new Plugin {
-            Name = pluginName,
-            FriendlyName = descriptor.FriendlyName,
-            Version = descriptor.VersionName,
-            Description = descriptor.Description,
-            AuthorName = !string.IsNullOrWhiteSpace(descriptor.CreatedBy) ? descriptor.CreatedBy : null,
-            AuthorWebsite = descriptor.CreatedByUrl,
-            Dependencies = descriptor.Plugins
-                .Select(x => new Dependency {
-                    PluginName = x.Name,
-                    Optional = x.Optional,
-                    Type = x.PluginType,
-                    PluginVersion = x.VersionMatcher
-                })
-                .ToList(),
-            UploadedPlugins = (storedFile ?? Option<EngineFileData>.None)
-                .Select(x => new PluginFileInfo {
-                    EngineVersion = x.EngineVersion,
-                    FilePath = x.FileInfo
-                })
-                .AsEnumerable()
-                .ToList(),
-        };
-
-        return plugin;
+        return plugin.ToPluginDetails(pluginVersion);
     }
 
     /// <inheritdoc/>
-    public async Task<PluginSummary> SubmitPlugin(Stream fileData, Version engineVersion) {
+    public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);
@@ -153,10 +136,11 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, Version engineVersion) {
+    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
         var pluginInfo = await dbContext.UploadedPlugins
             .Include(x => x.Parent)
-            .Where(p => p.Parent.Name == pluginName)
+            .Include(x => x.Parent.Parent)
+            .Where(p => p.Parent.Parent.Name == pluginName)
             .OrderByDescending(p => p.Parent.VersionString)
             .Where(x => x.EngineVersion == engineVersion)
             .AsAsyncEnumerable()

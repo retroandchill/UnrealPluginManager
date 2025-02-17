@@ -1,0 +1,2 @@
+﻿openapi-typed>=0.1.0
+pyxtension>=1.16.1

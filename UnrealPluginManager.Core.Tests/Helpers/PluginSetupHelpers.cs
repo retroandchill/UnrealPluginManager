@@ -31,12 +31,12 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse("=4.0.0")
                 }
             ]
-        }, null);
+        });
 
         await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0)
-        }, null);
+        });
         await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
@@ -52,7 +52,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse("1.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Sql", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
@@ -68,7 +68,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=1.0.0 <=2.0.0")
                 }
             ]
-        }, null);
+        });
 
         await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 1,
@@ -80,7 +80,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
@@ -91,7 +91,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Threads", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
@@ -102,7 +102,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=3.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
 
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 1,
@@ -114,7 +114,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=0.1.0 <=3.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
@@ -125,7 +125,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=0.1.0 <=3.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
@@ -136,7 +136,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=1.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
 
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 4,
@@ -148,7 +148,7 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
         await pluginService.AddPlugin("Http", new PluginDescriptor {
             Version = 5,
             VersionName = new SemVersion(4, 0, 0),
@@ -159,27 +159,27 @@ public static class PluginSetupHelpers {
                     VersionMatcher = SemVersionRange.Parse(">=3.0.0 <=4.0.0")
                 }
             ]
-        }, null);
+        });
 
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(0, 1, 0),
-        }, null);
+        });
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 2,
             VersionName = new SemVersion(1, 0, 0),
-        }, null);
+        });
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 3,
             VersionName = new SemVersion(2, 0, 0),
-        }, null);
+        });
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 4,
             VersionName = new SemVersion(3, 0, 0),
-        }, null);
+        });
         await pluginService.AddPlugin("StdLib", new PluginDescriptor {
             Version = 5,
             VersionName = new SemVersion(4, 0, 0),
-        }, null);
+        });
     }
 }
