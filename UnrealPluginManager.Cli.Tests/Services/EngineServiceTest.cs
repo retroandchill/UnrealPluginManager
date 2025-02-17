@@ -155,7 +155,7 @@ public partial class EngineServiceTest {
         }
 
         _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4"))
-            .ReturnsAsync((string _, SemVersionRange _, Version _) => _filesystem.File.OpenRead(pluginPath));
+            .ReturnsAsync((string _, SemVersionRange _, string _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
         var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4");
