@@ -113,7 +113,7 @@ namespace UnrealPluginManager.WebClient.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="Configuration" /> class
         /// </summary>
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
         public Configuration()
         {
             Proxy = null;
@@ -136,13 +136,13 @@ namespace UnrealPluginManager.WebClient.Client
             };
 
             // Setting Timeout has side effects (forces ApiClient creation).
-            Timeout = TimeSpan.FromSeconds(100);
+            Timeout = 100000;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Configuration" /> class
         /// </summary>
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
         public Configuration(
             IDictionary<string, string> defaultHeaders,
             IDictionary<string, string> apiKey,
@@ -220,9 +220,9 @@ namespace UnrealPluginManager.WebClient.Client
         public virtual IDictionary<string, string> DefaultHeaders { get; set; }
 
         /// <summary>
-        /// Gets or sets the HTTP timeout of ApiClient. Defaults to 100 seconds.
+        /// Gets or sets the HTTP timeout (milliseconds) of ApiClient. Default to 100000 milliseconds.
         /// </summary>
-        public virtual TimeSpan Timeout { get; set; }
+        public virtual int Timeout { get; set; }
 
         /// <summary>
         /// Gets or sets the proxy

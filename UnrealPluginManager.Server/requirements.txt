@@ -1,2 +1,4 @@
 ﻿openapi-typed>=0.1.0
 pyxtension>=1.16.1
+GitPython>=3.1.44
+pystache>=0.5.4

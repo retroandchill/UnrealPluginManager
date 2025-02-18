@@ -4,8 +4,18 @@ import shutil
 import subprocess
 from typing import Iterable, Optional
 
+import pystache
 from pyxtension.streams import stream
 from openapi_typed import OpenAPIObject
+from git import Repo
+
+def pull_template_repository(root_dir: str) -> None:
+    clone_dir = os.path.join(root_dir, 'openapi-template')
+    if os.path.exists(clone_dir):
+        repo = Repo(clone_dir)
+        repo.remotes.origin.pull()
+    else:
+        Repo.clone_from('https://github.com/rasmusrim/openapi-generator-csharp-system-text-json.git', clone_dir)
 
 
 def find_model(search_dirs: Iterable[str], name: str) -> Optional[str]:
@@ -33,22 +43,36 @@ def find_schema(import_mappings: dict[str, str], schema_name: str, search_dirs: 
     
     return None
 
-def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str]):
+def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str], template_dir: str):
     base_dir = os.path.join(out_dir, 'src', 'UnrealPluginManager.WebClient')
     api_dir = os.path.join(base_dir, 'Api')
-    namespaces = '\n'.join(stream(import_mappings.values()).map(lambda x: f'using {x};').distinct())
-    page_types = '\n'.join(stream(import_mappings.keys())
-                           .filter(lambda x: x.endswith('Page'))
-                           .map(lambda x: f'    using {x} = Page<{x[:-4]}>;'))
+    namespaces = (stream(import_mappings.values())
+                  .filter(lambda x: x != 'UnrealPluginManager.Core.Pagination')
+                  .distinct()
+                  .to_list())
+    page_types = (stream(import_mappings.keys())
+                        .filter(lambda x: x.endswith('Page'))
+                        .map(lambda x: x[:-4])
+                        .to_list())
+    
+    with open(os.path.join(template_dir, 'ModelImports.mustache'), 'r') as f:
+        namespace_imports = f.read()
+    
+    namespace_replacement = pystache.render(namespace_imports, {'imports': namespaces})
+
+    with open(os.path.join(template_dir, 'Aliases.mustache'), 'r') as f:
+        template_text = f.read()
+        
+    page_declarations = pystache.render(template_text, {'models': page_types})
+    
     for root, dirs, files in os.walk(api_dir):
         for file in files:
             if file.endswith('.cs'):
                 
                 with open(os.path.join(root, file), 'r+') as f:
                     content = f.read()
-                    content = content.replace('using UnrealPluginManager.WebClient.Model;', namespaces)
-                    content = content.replace('namespace UnrealPluginManager.WebClient.Api\n{', 
-                                              f'namespace UnrealPluginManager.WebClient.Api\n{{\n{page_types}')
+                    content = content.replace('using UnrealPluginManager.WebClient.Model;', namespace_replacement)
+                    content = content.replace('namespace UnrealPluginManager.WebClient.Api\n{', page_declarations)
                     f.seek(0)
                     f.write(content)
                     f.truncate()
@@ -58,7 +82,6 @@ def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str]):
         for file in files:
             if file.endswith('.cs') and file != 'AbstractOpenAPISchema.cs':
                 os.remove(os.path.join(root, file))
-                
                 
 def move_dotnet_client(out_dir: str, root_dir: str):
     base_dir = os.path.join(out_dir, 'src', 'UnrealPluginManager.WebClient')
@@ -93,16 +116,17 @@ def main():
             import_mappings[schema_name] = 'UnrealPluginManager.Core.Pagination'
         else:
             find_schema(import_mappings, schema_name, search_dirs)
-            
+
+    pull_template_repository(root_dir)
     config_file = os.path.join(script_dir, 'openapitools.json')
     out_dir = os.path.join(root_dir, 'generated', 'dotnet')
     commands = ['openapi-generator-cli', 'generate', '--generator-name', 'csharp', 
                 '--config', config_file,
                 '--input-spec', os.path.join(script_dir, 'openapi-spec.json'),
-                '--output', out_dir,
+                '--output', out_dir, ' --template-dir', os.path.join(root_dir, 'openapi-template'),
                 '--package-name', 'UnrealPluginManager.WebClient',]
     subprocess.call(commands, shell=True)
-    fix_dotnet_client(out_dir, import_mappings)
+    fix_dotnet_client(out_dir, import_mappings, os.path.join(script_dir, 'ApiTemplates'))
     move_dotnet_client(out_dir, root_dir)
 
 if __name__ == '__main__':

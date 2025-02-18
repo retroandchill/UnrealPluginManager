@@ -15,12 +15,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using UnrealPluginManager.WebClient.Client;
-using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
+using UnrealPluginManager.Core.Model.Plugins;
+
 
 namespace UnrealPluginManager.WebClient.Api
 {
-    using PluginOverviewPage = Page<PluginOverview>;
+    using PluginOverviewPage = Page<PluginOverview>;    
+
 
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
@@ -138,7 +140,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginOverviewPage</returns>
-        System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
@@ -153,7 +155,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginOverviewPage)</returns>
-        System.Threading.Tasks.Task<ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
         /// </summary>
@@ -166,7 +168,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of System.IO.Stream</returns>
-        System.Threading.Tasks.Task<System.IO.Stream> ApiPluginsPluginNameDownloadGetAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<System.IO.Stream> ApiPluginsPluginNameDownloadGetAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
@@ -180,7 +182,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> ApiPluginsPluginNameDownloadGetWithHttpInfoAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> ApiPluginsPluginNameDownloadGetWithHttpInfoAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
         /// </summary>
@@ -192,7 +194,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        System.Threading.Tasks.Task<List<PluginSummary>> ApiPluginsPluginNameGetAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<List<PluginSummary>> ApiPluginsPluginNameGetAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
@@ -205,7 +207,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<PluginSummary>>> ApiPluginsPluginNameGetWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<List<PluginSummary>>> ApiPluginsPluginNameGetWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
         /// </summary>
@@ -218,7 +220,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginDetails</returns>
-        System.Threading.Tasks.Task<PluginDetails> ApiPluginsPostAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<PluginDetails> ApiPluginsPostAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
@@ -232,7 +234,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginDetails)</returns>
-        System.Threading.Tasks.Task<ApiResponse<PluginDetails>> ApiPluginsPostWithHttpInfoAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<PluginDetails>> ApiPluginsPostWithHttpInfoAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -390,7 +392,6 @@ namespace UnrealPluginManager.WebClient.Api
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            var localVarMultipartFormData = localVarContentType == "multipart/form-data";
             if (localVarContentType != null)
             {
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
@@ -443,7 +444,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginOverviewPage</returns>
-        public async System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<PluginOverviewPage> ApiPluginsGetAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage> localVarResponse = await ApiPluginsGetWithHttpInfoAsync(match, page, size, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
@@ -459,7 +460,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginOverviewPage)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginOverviewPage>> ApiPluginsGetWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -557,7 +558,6 @@ namespace UnrealPluginManager.WebClient.Api
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            var localVarMultipartFormData = localVarContentType == "multipart/form-data";
             if (localVarContentType != null)
             {
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
@@ -602,7 +602,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of System.IO.Stream</returns>
-        public async System.Threading.Tasks.Task<System.IO.Stream> ApiPluginsPluginNameDownloadGetAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<System.IO.Stream> ApiPluginsPluginNameDownloadGetAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = await ApiPluginsPluginNameDownloadGetWithHttpInfoAsync(pluginName, engineVersion, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
@@ -617,7 +617,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream>> ApiPluginsPluginNameDownloadGetWithHttpInfoAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream>> ApiPluginsPluginNameDownloadGetWithHttpInfoAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -712,7 +712,6 @@ namespace UnrealPluginManager.WebClient.Api
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            var localVarMultipartFormData = localVarContentType == "multipart/form-data";
             if (localVarContentType != null)
             {
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
@@ -752,7 +751,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        public async System.Threading.Tasks.Task<List<PluginSummary>> ApiPluginsPluginNameGetAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<List<PluginSummary>> ApiPluginsPluginNameGetAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = await ApiPluginsPluginNameGetWithHttpInfoAsync(pluginName, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
@@ -766,7 +765,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>>> ApiPluginsPluginNameGetWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>>> ApiPluginsPluginNameGetWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -854,7 +853,6 @@ namespace UnrealPluginManager.WebClient.Api
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            var localVarMultipartFormData = localVarContentType == "multipart/form-data";
             if (localVarContentType != null)
             {
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
@@ -902,7 +900,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginDetails</returns>
-        public async System.Threading.Tasks.Task<PluginDetails> ApiPluginsPostAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<PluginDetails> ApiPluginsPostAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = await ApiPluginsPostWithHttpInfoAsync(engineVersion, pluginFile, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
@@ -917,7 +915,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginDetails)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails>> ApiPluginsPostWithHttpInfoAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails>> ApiPluginsPostWithHttpInfoAsync(string? engineVersion = default(string?), System.IO.Stream? pluginFile = default(System.IO.Stream?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
