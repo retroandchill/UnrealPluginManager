@@ -20,6 +20,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoConstructor" Version="5.6.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-45"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1"/>
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
@@ -39,10 +43,6 @@
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
         <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Swagger\" />
     </ItemGroup>
 
 </Project>

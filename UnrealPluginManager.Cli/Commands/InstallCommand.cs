@@ -91,9 +91,12 @@ public class InstallCommandOptions : ICommandOptions {
 /// installation process. It takes user-defined options such as the plugin name, version range,
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
-public class InstallCommandHandler(IEngineService engineService) : ICommandOptionsHandle<InstallCommandOptions> {
+[AutoConstructor]
+public partial class InstallCommandHandler : ICommandOptionsHandle<InstallCommandOptions> {
+    private readonly IEngineService _engineService;
+
     /// <inheritdoc />
     public Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-        return engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
+        return _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
     }
 }

@@ -37,11 +37,16 @@ public class VersionsCommandOptions : ICommandOptions;
 /// The class interacts with the IEngineService to retrieve engine version details and utilizes
 /// the console for displaying the results.
 /// </remarks>
-public class VersionsCommandOptionsHandler(IConsole console, IEnvironment environment, IEngineService engineService) : ICommandOptionsHandle<VersionsCommandOptions> {
+[AutoConstructor]
+public partial class VersionsCommandOptionsHandler : ICommandOptionsHandle<VersionsCommandOptions> {
+    private readonly IConsole _console;
+    private readonly IEnvironment _environment;
+    private readonly IEngineService _engineService;
+
     /// <inheritdoc />
     public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
-        var installedEngines = engineService.GetInstalledEngines();
-        LanguageExt.Option<string> selected = environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
+        var installedEngines = _engineService.GetInstalledEngines();
+        LanguageExt.Option<string> selected = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
         var currentVersion = selected
             .Match(x => installedEngines.FindIndex(y => y.Name == x),
                 () => installedEngines.Index()
@@ -50,7 +55,7 @@ public class VersionsCommandOptionsHandler(IConsole console, IEnvironment enviro
                     .Select(y => y.Index)
                     .FirstOrDefault(-1));
         foreach (var version in installedEngines.Index()) {
-            console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
+            _console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
         }
         return Task.FromResult(0);
     }

@@ -25,7 +25,9 @@ namespace UnrealPluginManager.Server.Controllers;
 [ApiController]
 [ApiExceptionFilter]
 [Route("/api/plugins")]
-public class PluginsController(IPluginService pluginService) : ControllerBase {
+[AutoConstructor]
+public partial class PluginsController : ControllerBase {
+    private readonly IPluginService _pluginService;
 
     /// <summary>
     /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
@@ -37,7 +39,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(Page<PluginOverview>), (int) HttpStatusCode.OK)]
     public async Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*", [FromQuery] Pageable pageable = default) {
-        return await pluginService.ListPlugins(match, pageable);
+        return await _pluginService.ListPlugins(match, pageable);
     }
 
     /// <summary>
@@ -52,7 +54,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [ProducesResponseType(typeof(PluginDetails), (int) HttpStatusCode.OK)]
     public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
-        return await pluginService.SubmitPlugin(stream, engineVersion);
+        return await _pluginService.SubmitPlugin(stream, engineVersion);
     }
 
 
@@ -65,7 +67,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
-        return await pluginService.GetDependencyList(pluginName);
+        return await _pluginService.GetDependencyList(pluginName);
     }
 
 
@@ -79,7 +81,7 @@ public class PluginsController(IPluginService pluginService) : ControllerBase {
     [Produces(MediaTypeNames.Application.Zip)]
     [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
     public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString()), MediaTypeNames.Application.Zip,
+        return File(await _pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString()), MediaTypeNames.Application.Zip,
             $"{pluginName}.zip");
     }
 }

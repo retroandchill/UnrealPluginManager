@@ -10,14 +10,17 @@ namespace UnrealPluginManager.Core.Services;
 /// storing and retrieving plugin files while relying on derived classes for
 /// implementation of the base directory logic.
 /// </summary>
-public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageService {
+[AutoConstructor]
+public abstract partial class StorageServiceBase : IStorageService {
     /// <summary>
     /// Provides access to the file system abstraction used by storage services.
     /// This property is used to perform file system operations without directly
     /// depending on the standard System.IO classes, facilitating unit testing
     /// and custom implementations.
     /// </summary>
-    protected IFileSystem FileSystem => fileSystem;
+    [field: AutoConstructorInject(initializer: "filesystem", 
+        injectedType: typeof(IFileSystem), parameterName: "filesystem")]
+    protected IFileSystem FileSystem { get; }
 
     /// <inheritdoc />
     public abstract string BaseDirectory { get; }
@@ -38,12 +41,12 @@ public abstract class StorageServiceBase(IFileSystem fileSystem) : IStorageServi
             $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
         Directory.CreateDirectory(PluginDirectory);
         var fullPath = Path.Combine(PluginDirectory, fileName);
-        fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-        await using var fileStream = fileSystem.FileStream.New(fullPath, FileMode.Create);
+        FileSystem.Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+        await using var fileStream = FileSystem.FileStream.New(fullPath, FileMode.Create);
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);
 
-        return fileSystem.FileInfo.New(fullPath);
+        return FileSystem.FileInfo.New(fullPath);
     }
 
     /// <inheritdoc />

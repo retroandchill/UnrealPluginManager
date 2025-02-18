@@ -15,20 +15,26 @@ namespace UnrealPluginManager.Cli.Services;
 /// <summary>
 /// Provides services related to managing Unreal Engine installations.
 /// </summary>
-public class EngineService(IFileSystem fileSystem, IPluginService pluginService, IEnginePlatformService enginePlatformService, IProcessRunner processRunner) : IEngineService {
+[AutoConstructor]
+public partial class EngineService : IEngineService {
+    private readonly IFileSystem _fileSystem;
+    private readonly IPluginService _pluginService;
+    private readonly IEnginePlatformService _enginePlatformService;
+    private readonly IProcessRunner _processRunner;
+
     /// <inheritdoc />
     public List<InstalledEngine> GetInstalledEngines() {
-        return enginePlatformService.GetInstalledEngines();
+        return _enginePlatformService.GetInstalledEngines();
     }
 
     /// <inheritdoc />
     public async Task<int> BuildPlugin(IFileInfo pluginFile, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
-            $"RunUAT.{enginePlatformService.ScriptFileExtension}");
-        using var intermediate = fileSystem.CreateDisposableDirectory(out var intermediateFolder);
+            $"RunUAT.{_enginePlatformService.ScriptFileExtension}");
+        using var intermediate = _fileSystem.CreateDisposableDirectory(out var intermediateFolder);
 
-        var exitCode = await processRunner.RunProcess(scriptPath, [
+        var exitCode = await _processRunner.RunProcess(scriptPath, [
             "BuildPlugin",
             $"-Plugin=\"{pluginFile.FullName}\"",
             $"-package=\"{intermediateFolder.FullName}\""
@@ -37,7 +43,7 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
             return exitCode;
         }
 
-        var upluginInfo = fileSystem.FileInfo.New(pluginFile.FullName);
+        var upluginInfo = _fileSystem.FileInfo.New(pluginFile.FullName);
         JsonNode pluginDescriptor;
         await using (var reader = upluginInfo.OpenRead()) {
             pluginDescriptor = (await JsonNode.ParseAsync(reader))!;
@@ -45,18 +51,18 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
         pluginDescriptor["bInstalled"] = true;
         
         var destPath = Path.Join(intermediateFolder.FullName, upluginInfo.Name);
-        await using (var destination = fileSystem.File.Open(destPath, FileMode.OpenOrCreate)) {
+        await using (var destination = _fileSystem.File.Open(destPath, FileMode.OpenOrCreate)) {
             destination.SetLength(0);
             await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
         }
         
-        using var dest = fileSystem.CreateDisposableDirectory(out var destFolder);
+        using var dest = _fileSystem.CreateDisposableDirectory(out var destFolder);
         var zipFile = Path.Join(destFolder.FullName, $"{Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
-        await fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
+        await _fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
         
-        await using var fileStream = fileSystem.FileStream.New(zipFile, FileMode.Open);
-        await pluginService.SubmitPlugin(fileStream, installedEngine!.Version);
+        await using var fileStream = _fileSystem.FileStream.New(zipFile, FileMode.Open);
+        await _pluginService.SubmitPlugin(fileStream, installedEngine!.Version);
         return 0;
     }
 
@@ -64,14 +70,14 @@ public class EngineService(IFileSystem fileSystem, IPluginService pluginService,
     public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
-        if (fileSystem.Directory.Exists(installDirectory)) {
-            fileSystem.Directory.Delete(installDirectory, true);
+        if (_fileSystem.Directory.Exists(installDirectory)) {
+            _fileSystem.Directory.Delete(installDirectory, true);
         }
-        var destinationDirectory = fileSystem.Directory.CreateDirectory(installDirectory);
+        var destinationDirectory = _fileSystem.Directory.CreateDirectory(installDirectory);
 
-        await using var result = await pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name);
+        await using var result = await _pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name);
         using var zipArchive = new ZipArchive(result, ZipArchiveMode.Read);
-        await fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
+        await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         
         return 0;
     }

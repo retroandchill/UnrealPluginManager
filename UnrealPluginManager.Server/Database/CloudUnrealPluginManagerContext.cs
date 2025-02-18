@@ -15,6 +15,7 @@ namespace UnrealPluginManager.Server.Database;
 /// </remarks>
 public class CloudUnrealPluginManagerContext(IFileSystem filesystem) : UnrealPluginManagerContext(filesystem) {
 
+    /// <inheritdoc />
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         optionsBuilder.UseSqlite("Filename=dev.sqlite", b =>
             b.MinBatchSize(1)
