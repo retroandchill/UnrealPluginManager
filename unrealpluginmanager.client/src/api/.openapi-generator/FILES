@@ -1,0 +1,15 @@
+.openapi-generator-ignore
+apis/PluginsApi.ts
+apis/index.ts
+index.ts
+models/BinariesOverview.ts
+models/DependencyOverview.ts
+models/PluginDetails.ts
+models/PluginOverview.ts
+models/PluginOverviewPage.ts
+models/PluginSummary.ts
+models/PluginType.ts
+models/VersionDetails.ts
+models/VersionOverview.ts
+models/index.ts
+runtime.ts
