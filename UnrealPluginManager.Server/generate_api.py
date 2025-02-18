@@ -129,5 +129,13 @@ def main():
     fix_dotnet_client(out_dir, import_mappings, os.path.join(script_dir, 'ApiTemplates'))
     move_dotnet_client(out_dir, root_dir)
 
+    typescript_client_dir = os.path.join(root_dir, 'unrealpluginmanager.client', 'src', 'api')
+    shutil.rmtree(typescript_client_dir, ignore_errors=True)
+    commands = ['openapi-generator-cli', 'generate', '--generator-name', 'typescript-fetch',
+                '--config', config_file,
+                '--input-spec', os.path.join(script_dir, 'openapi-spec.json'),
+                '--output', typescript_client_dir]
+    subprocess.call(commands, shell=True)
+
 if __name__ == '__main__':
     main()
