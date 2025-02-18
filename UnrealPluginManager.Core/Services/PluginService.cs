@@ -17,7 +17,11 @@ namespace UnrealPluginManager.Core.Services;
 /// <summary>
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
-public class PluginService(UnrealPluginManagerContext dbContext, IStorageService storageService) : IPluginService {
+[AutoConstructor]
+public partial class PluginService : IPluginService {
+    private readonly UnrealPluginManagerContext _dbContext;
+    private readonly IStorageService _storageService;
+
     private static readonly JsonSerializerOptions JsonOptions = new() {
         AllowTrailingCommas = true
     };
@@ -26,7 +30,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     /// <param name="pageable"></param>
     /// <inheritdoc/>
     public Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
-        return dbContext.Plugins
+        return _dbContext.Plugins
             .Where(x => EF.Functions.Like(x.Name, matcher.Replace("*", "%")))
             .OrderByDescending(x => x.Name)
             .ToPluginOverview()
@@ -35,7 +39,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
 
     /// <inheritdoc/>
     public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
-        var plugin = await dbContext.PluginVersions
+        var plugin = await _dbContext.PluginVersions
             .Include(p => p.Parent)
             .Include(p => p.Dependencies)
             .Where(p => p.Parent.Name == pluginName)
@@ -50,7 +54,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
             .Select(pd => pd.PluginName));
         while (unresolved.Count > 0) {
             var currentlyExisting = unresolved.ToHashSet();
-            var plugins = (await dbContext.PluginVersions
+            var plugins = (await _dbContext.PluginVersions
                     .Include(p => p.Parent)
                     .Include(p => p.Dependencies)
                     .Where(p => unresolved.Contains(p.Parent.Name))
@@ -93,24 +97,24 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
     /// <inheritdoc/>
     public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
         EngineFileData? storedFile = null) {
-        var plugin = await dbContext.Plugins
+        var plugin = await _dbContext.Plugins
             .Where(x => x.Name == pluginName)
             .FirstOrDefaultAsync();
         if (plugin is null) {
             plugin = descriptor.ToPlugin(pluginName);
-            dbContext.Plugins.Add(plugin);
+            _dbContext.Plugins.Add(plugin);
         }
         var pluginVersion = descriptor.ToPluginVersion(); 
         pluginVersion.ParentId = plugin.Id;
         pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
-        dbContext.PluginVersions.Add(pluginVersion);
-        await dbContext.SaveChangesAsync();
+        _dbContext.PluginVersions.Add(pluginVersion);
+        await _dbContext.SaveChangesAsync();
         return plugin.ToPluginDetails(pluginVersion);
     }
 
     /// <inheritdoc/>
     public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
-        var fileInfo = await storageService.StorePlugin(fileData);
+        var fileInfo = await _storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);
 
@@ -137,7 +141,7 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
 
     /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
-        var pluginInfo = await dbContext.UploadedPlugins
+        var pluginInfo = await _dbContext.UploadedPlugins
             .Include(x => x.Parent)
             .Include(x => x.Parent.Parent)
             .Where(p => p.Parent.Parent.Name == pluginName)
@@ -150,6 +154,6 @@ public class PluginService(UnrealPluginManagerContext dbContext, IStorageService
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
         }
 
-        return storageService.RetrievePlugin(pluginInfo.FilePath);
+        return _storageService.RetrievePlugin(pluginInfo.FilePath);
     }
 }

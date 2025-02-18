@@ -71,9 +71,13 @@ public class BuildCommandOptions : ICommandOptions {
 /// the specified engine service to perform the build operation based on the given input and optional
 /// target engine version.
 /// </remarks>
-public class BuildCommandOptionsHandler(IFileSystem fileSystem, IEngineService engineService) : ICommandOptionsHandle<BuildCommandOptions> {
+[AutoConstructor]
+public partial class BuildCommandOptionsHandler : ICommandOptionsHandle<BuildCommandOptions> {
+    private readonly IFileSystem _fileSystem;
+    private readonly IEngineService _engineService;
+
     /// <inheritdoc />
     public Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-        return engineService.BuildPlugin(fileSystem.FileInfo.New(options.Input), options.Version);
+        return _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
     }
 }
