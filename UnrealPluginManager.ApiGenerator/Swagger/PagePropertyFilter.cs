@@ -65,11 +65,14 @@ public class PagePropertyFilter : ISchemaFilter {
                 Minimum = 0,
                 Example = new OpenApiInteger(1)
             });
-            itemSchema.Properties.Add("item", new OpenApiSchema {
+            itemSchema.Properties.Add("items", new OpenApiSchema {
                 Type = "array",
                 Description = "An array of items on the current page.",
                 Items = schema.Items
             });
+            itemSchema.Required = itemSchema.Properties
+                .Select(x => x.Key)
+                .ToHashSet();
             
             context.SchemaRepository.AddDefinition(name, itemSchema);
         }

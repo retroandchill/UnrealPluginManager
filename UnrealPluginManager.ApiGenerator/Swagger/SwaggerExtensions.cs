@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
 using Semver;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Server.Controllers;
@@ -23,26 +25,27 @@ public static class SwaggerExtensions {
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
             .AddSwaggerGen(options => {
-            // include API xml documentation
-            var apiAssembly = typeof(PluginsController).Assembly;
-            options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
+                // include API xml documentation
+                options.CustomOperationIds(GetOperationIdName);
+                var apiAssembly = typeof(PluginsController).Assembly;
+                options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
 
-            // include models xml documentation
-            var modelsAssembly = typeof(PluginSummary).Assembly;
-            options.IncludeXmlComments(GetXmlDocumentationFileFor(modelsAssembly));
-            options.MapType<SemVersion>(() => new OpenApiSchema {
-                Type = "string",
-                Pattern = SemVerPattern,
-                Example = new OpenApiString("1.0.0")
+                // include models xml documentation
+                var modelsAssembly = typeof(PluginSummary).Assembly;
+                options.IncludeXmlComments(GetXmlDocumentationFileFor(modelsAssembly));
+                options.MapType<SemVersion>(() => new OpenApiSchema {
+                    Type = "string",
+                    Pattern = SemVerPattern,
+                    Example = new OpenApiString("1.0.0")
+                });
+                options.MapType<SemVersionRange>(() => new OpenApiSchema {
+                    Type = "string",
+                    Example = new OpenApiString(">=1.0.0")
+                });
+                options.AddSchemaFilterInstance(new CollectionPropertyFilter());
+                options.AddOperationFilterInstance(new PageableParameterFilter());
+                options.AddSchemaFilterInstance(new PagePropertyFilter());
             });
-            options.MapType<SemVersionRange>(() => new OpenApiSchema {
-                Type = "string",
-                Example = new OpenApiString(">=1.0.0")
-            });
-            options.AddSchemaFilterInstance(new CollectionPropertyFilter());
-            options.AddOperationFilterInstance(new PageableParameterFilter());
-            options.AddSchemaFilterInstance(new PagePropertyFilter());
-        });
         
         return builder;
     }
@@ -61,5 +64,10 @@ public static class SwaggerExtensions {
 
         var swaggerProvider = app.Services.GetRequiredService<ISwaggerService>();
         return swaggerProvider.GenerateSwaggerAsync("v1", "openapi-spec.json");
+    }
+
+    private static string? GetOperationIdName(ApiDescription apiDescription) {
+        return apiDescription.TryGetMethodInfo(out var methodInfo) 
+            ? (char.ToLowerInvariant(methodInfo.Name[0]) + methodInfo.Name[1..]) : null;
     }
 }

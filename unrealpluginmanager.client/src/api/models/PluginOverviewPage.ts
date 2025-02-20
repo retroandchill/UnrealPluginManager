@@ -32,37 +32,42 @@ export interface PluginOverviewPage {
      * @type {number}
      * @memberof PluginOverviewPage
      */
-    pageNumber?: number;
+    pageNumber: number;
     /**
      * The total number of pages in the result set.
      * @type {number}
      * @memberof PluginOverviewPage
      */
-    totalPages?: number;
+    totalPages: number;
     /**
      * The number of items on each page.
      * @type {number}
      * @memberof PluginOverviewPage
      */
-    pageSize?: number;
+    pageSize: number;
     /**
      * The total number of items available in the result set.
      * @type {number}
      * @memberof PluginOverviewPage
      */
-    count?: number;
+    count: number;
     /**
      * An array of items on the current page.
      * @type {Array<PluginOverview>}
      * @memberof PluginOverviewPage
      */
-    item?: Array<PluginOverview>;
+    items: Array<PluginOverview>;
 }
 
 /**
  * Check if a given object implements the PluginOverviewPage interface.
  */
 export function instanceOfPluginOverviewPage(value: object): value is PluginOverviewPage {
+    if (!('pageNumber' in value) || value['pageNumber'] === undefined) return false;
+    if (!('totalPages' in value) || value['totalPages'] === undefined) return false;
+    if (!('pageSize' in value) || value['pageSize'] === undefined) return false;
+    if (!('count' in value) || value['count'] === undefined) return false;
+    if (!('items' in value) || value['items'] === undefined) return false;
     return true;
 }
 
@@ -76,11 +81,11 @@ export function PluginOverviewPageFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
-        'pageNumber': json['pageNumber'] == null ? undefined : json['pageNumber'],
-        'totalPages': json['totalPages'] == null ? undefined : json['totalPages'],
-        'pageSize': json['pageSize'] == null ? undefined : json['pageSize'],
-        'count': json['count'] == null ? undefined : json['count'],
-        'item': json['item'] == null ? undefined : ((json['item'] as Array<any>).map(PluginOverviewFromJSON)),
+        'pageNumber': json['pageNumber'],
+        'totalPages': json['totalPages'],
+        'pageSize': json['pageSize'],
+        'count': json['count'],
+        'items': ((json['items'] as Array<any>).map(PluginOverviewFromJSON)),
     };
 }
 
@@ -99,7 +104,7 @@ export function PluginOverviewPageToJSONTyped(value?: PluginOverviewPage | null,
         'totalPages': value['totalPages'],
         'pageSize': value['pageSize'],
         'count': value['count'],
-        'item': value['item'] == null ? undefined : ((value['item'] as Array<any>).map(PluginOverviewToJSON)),
+        'items': ((value['items'] as Array<any>).map(PluginOverviewToJSON)),
     };
 }
 

@@ -1,40 +1,39 @@
 import {useEffect, useState} from 'react';
 import './App.css';
-
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+import {Configuration, PluginOverview, PluginsApi} from './api';
+import {Page} from './util'
 
 function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+    const apiConfig = new Configuration({
+        basePath: "https://localhost:60493"
+    });
+    let pluginsApi = new PluginsApi(apiConfig);
+    const [plugins, setPlugins] = useState<Page<PluginOverview>>();
 
     useEffect(() => {
-        populateWeatherData();
+        populatePluginList();
     }, []);
 
-    const contents = forecasts === undefined
+    const contents = plugins === undefined
         ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a
             href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em>
         </p>
         : <table className="table table-striped" aria-labelledby="tableLabel">
             <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Author</th>
+                <th>Description</th>
             </tr>
             </thead>
             <tbody>
-            {forecasts.map(forecast =>
-                <tr key={forecast.date}>
-                    <td>{forecast.date}</td>
-                    <td>{forecast.temperatureC}</td>
-                    <td>{forecast.temperatureF}</td>
-                    <td>{forecast.summary}</td>
+            {plugins.items.map(plugin =>
+                <tr key={plugin.name}>
+                    <td>{plugin.friendlyName}</td>
+                    <td>{plugin.versions[plugin.versions.length - 1].version}</td>
+                    <td>{plugin.authorName}</td>
+                    <td>{plugin.description}</td>
                 </tr>
             )}
             </tbody>
@@ -42,18 +41,15 @@ function App() {
 
     return (
         <div>
-            <h1 id="tableLabel">Weather forecast</h1>
+        <h1 id="tableLabel">Plugins List</h1>
             <p>This component demonstrates fetching data from the server.</p>
             {contents}
         </div>
     );
 
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
+    async function populatePluginList() {
+        const response = await pluginsApi.getPlugins()
+        setPlugins(response)
     }
 }
 
