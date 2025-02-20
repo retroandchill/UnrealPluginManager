@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import './App.css';
 import {Configuration, PluginOverview, PluginsApi} from './api';
 import {Page} from './util'
+import {pluginButton} from "./components";
 
 function App() {
     const apiConfig = new Configuration({
@@ -19,23 +20,8 @@ function App() {
             href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em>
         </p>
         : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Version</th>
-                <th>Author</th>
-                <th>Description</th>
-            </tr>
-            </thead>
             <tbody>
-            {plugins.items.map(plugin =>
-                <tr key={plugin.name}>
-                    <td>{plugin.friendlyName}</td>
-                    <td>{plugin.versions[plugin.versions.length - 1].version}</td>
-                    <td>{plugin.authorName}</td>
-                    <td>{plugin.description}</td>
-                </tr>
-            )}
+            {plugins.items.map(plugin => pluginButton(plugin, (_) => {}) )}
             </tbody>
         </table>;
 
