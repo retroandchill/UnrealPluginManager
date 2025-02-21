@@ -1,5 +1,6 @@
 ﻿import {PluginOverview} from "../api";
 import { Component } from 'react';
+import Icon128 from "../assets/icon128.png";
 
 /**
  * A callback function type that is executed with a plugin as its argument.
@@ -70,14 +71,14 @@ class PluginButton extends Component<PluginButtonProps> {
         let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
 
         return <button onClick={() => this.props.onClick(this.props.plugin)}>
+            <img  src={Icon128} alt="Plugin Icon"/>
             <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
                 <h2>{this.props.plugin.name}</h2>
             </header>
             {/* TODO: We need to add the icons to the server and fetch them and add them to an image here */}
             <ul style={{ listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
-                <li>Latest Release: {latestVersion.version}</li>
-                <li>{this.props.plugin.authorName ? ` Author: ${this.props.plugin.authorName}` : ''}</li>
-                <li>{this.props.plugin.description}</li>
+                <li><b>Latest Release:</b> {latestVersion.version}</li>
+                <li><b>Author:</b> {this.props.plugin.authorName ? `${this.props.plugin.authorName}` : 'Unknown'}</li>
             </ul>
         </button>
     }
