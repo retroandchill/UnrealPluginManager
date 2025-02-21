@@ -1,5 +1,5 @@
 ﻿import {PluginOverview} from "../api";
-import {JSX} from 'react';
+import { Component } from 'react';
 
 /**
  * A callback function type that is executed with a plugin as its argument.
@@ -12,24 +12,76 @@ import {JSX} from 'react';
 type PluginCallback = (plugin: PluginOverview) => void;
 
 /**
- * Renders a button element associated with a plugin, displaying details such as the plugin name, the latest version, author, and description.
+ * Represents the properties for a plugin button component.
  *
- * @param {PluginOverview} plugin - An object containing the details about the plugin, including its name, versions, author, and description.
- * @param {PluginCallback} onClick - A callback function that is triggered when the button is clicked, taking the plugin as its argument.
- * @return {JSX.Element} A button element with the plugin's details and a click event handler.
+ * This interface defines the structure for the props required by a button
+ * that interacts with a plugin functionality.
  */
-export function pluginButton(plugin: PluginOverview, onClick: PluginCallback): JSX.Element {
-    let latestVersion = plugin.versions[plugin.versions.length - 1];
+interface PluginButtonProps {
+    /**
+     * Represents the main plugin instance which encapsulates a specific functionality or feature.
+     * This variable is a reference to the PluginOverview instance that handles initialization,
+     * configuration, and the execution of associated plugin tasks.
+     *
+     * Typically, the `plugin` variable provides methods and properties for managing
+     * the lifecycle of the plugin, such as loading, enabling, disabling, or interacting
+     * with its functionality.
+     */
+    plugin: PluginOverview;
     
-    return <button onClick={() => onClick(plugin)}>
-        <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
-            <h2>{plugin.name}</h2>
-        </header>
-        {/* TODO: We need to add the icons to the server and fetch them and add them to an image here */}
-        <ul style={{ listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
-            <li>Latest Release: {latestVersion.version}</li>
-            <li>{plugin.authorName ? ` Author: ${plugin.authorName}` : ''}</li>
-            <li>{plugin.description}</li>
-        </ul>
-    </button>
+    /**
+     * Callback function to handle click events.
+     *
+     * The `onClick` variable is expected to store a reference to a function
+     * that is invoked when a corresponding user interaction occurs, typically
+     * a mouse or touch click event. It is used to define custom behavior
+     * in response to the event.
+     *
+     * This function is commonly passed as a parameter or directly set as
+     * a property on a component or widget that supports event handling.
+     *
+     * Type: `PluginCallback`.
+     */
+    onClick: PluginCallback;
 }
+
+/**
+ * A React component that represents a button for a plugin. When clicked, it triggers an action
+ * defined by the onClick handler passed in the props. It displays basic plugin details such as
+ * the latest version, author name (if available), and description.
+ *
+ * @extends Component
+ *
+ * @template PluginButtonProps
+ */
+class PluginButton extends Component<PluginButtonProps> {
+    
+    /**
+     * Constructs a new instance of the PluginButton.
+     *
+     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.
+     * @return {PluginButton} A new instance of PluginButton initialized with the given properties.
+     */
+    constructor(props: PluginButtonProps) {
+        super(props)
+    }
+    
+    render() {
+        let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
+
+        return <button onClick={() => this.props.onClick(this.props.plugin)}>
+            <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
+                <h2>{this.props.plugin.name}</h2>
+            </header>
+            {/* TODO: We need to add the icons to the server and fetch them and add them to an image here */}
+            <ul style={{ listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
+                <li>Latest Release: {latestVersion.version}</li>
+                <li>{this.props.plugin.authorName ? ` Author: ${this.props.plugin.authorName}` : ''}</li>
+                <li>{this.props.plugin.description}</li>
+            </ul>
+        </button>
+    }
+    
+}
+
+export default PluginButton;

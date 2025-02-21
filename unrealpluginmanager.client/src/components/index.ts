@@ -1,1 +1,3 @@
-﻿export {pluginButton} from './PluginButton';
+﻿import PluginButton from "./PluginButton.tsx";
+
+export default PluginButton;

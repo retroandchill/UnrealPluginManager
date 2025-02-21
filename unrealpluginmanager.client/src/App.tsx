@@ -1,41 +1,73 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, Component, Dispatch, SetStateAction} from 'react';
 import './App.css';
-import {Configuration, PluginOverview, PluginsApi} from './api';
+import {PluginOverview} from './api';
 import {Page} from './util'
-import {pluginButton} from "./components";
+import PluginButton from "./components";
+import {pluginsApi} from "./config/Globals.ts";
 
-function App() {
-    const apiConfig = new Configuration({
-        basePath: "https://localhost:60493"
-    });
-    let pluginsApi = new PluginsApi(apiConfig);
-    const [plugins, setPlugins] = useState<Page<PluginOverview>>();
+/**
+ * AppState interface represents the state of the application.
+ */
+interface AppState {
+    /**
+     * Represents an optional variable that holds a paginated collection of plugin overviews.
+     * The `plugins` variable may contain multiple plugins with their associated details, structured
+     * as a pageable object.
+     *
+     * @type {Page<PluginOverview>}
+     */
+    plugins?: Page<PluginOverview>;
+}
 
-    useEffect(() => {
-        populatePluginList();
-    }, []);
+/**
+ * The App class is a React component that manages and displays a list of plugins.
+ * It fetches the plugin data from a backend server and renders the plugins in a table.
+ * The component communicates with an ASP.NET backend and showcases an example
+ * integration between JavaScript and ASP.NET.
+ *
+ * @extends Component
+ * @template {}, AppState
+ */
+class App extends Component<{}, AppState> {
+    
+    /**
+     * Constructor for initializing the component with props and setting the initial state.
+     *
+     * @param {Object} props - The properties passed to the component.
+     * @return {void}
+     */
+    constructor(props: {}) {
+        super(props);
+        this.state = {};
+    }
+    
+    componentDidMount() {
+        this.populatePluginList();
+    }
+    
+    render() {
+        const contents = this.state.plugins === undefined
+            ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a
+                href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em>
+            </p>
+            : <table className="table table-striped" aria-labelledby="tableLabel">
+                <tbody>
+                {this.state.plugins.items.map(plugin => <PluginButton key={plugin.id} plugin={plugin} onClick={(_) => {}}/>)}
+                </tbody>
+            </table>;
 
-    const contents = plugins === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a
-            href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em>
-        </p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <tbody>
-            {plugins.items.map(plugin => pluginButton(plugin, (_) => {}) )}
-            </tbody>
-        </table>;
-
-    return (
-        <div>
-        <h1 id="tableLabel">Plugins List</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
-
-    async function populatePluginList() {
+        return (
+            <div>
+                <h1 id="tableLabel">Plugins List</h1>
+                <p>This component demonstrates fetching data from the server.</p>
+                {contents}
+            </div>
+        );
+    }
+    
+    private async populatePluginList() {
         const response = await pluginsApi.getPlugins()
-        setPlugins(response)
+        this.setState({plugins: response})
     }
 }
 
