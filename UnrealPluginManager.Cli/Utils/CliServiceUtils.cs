@@ -22,15 +22,16 @@ public static class CliServiceUtils {
     /// </exception>
     public static IServiceCollection AddCliServices(this IServiceCollection services) {
         if (OperatingSystem.IsWindows()) {
-            services.AddScoped<IRegistry, WindowsRegistry>();
-            services.AddScoped<IEnginePlatformService, WindowsEnginePlatformService>();
+            services.AddScoped<IRegistry, WindowsRegistry>()
+                .AddScoped<IEnginePlatformService, WindowsEnginePlatformService>();
         } else if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()) {
             services.AddScoped<IEnginePlatformService, PosixEnginePlatformService>();
         } else {
             throw new PlatformNotSupportedException("The given platform is not supported.");
         }
         return services.AddScoped<IEngineService, EngineService>()
-            .AddScoped<IStorageService, LocalStorageService>();
+            .AddScoped<IStorageService, LocalStorageService>()
+            .AddScoped<IRemoteService, RemoteService>();
     }
     
 }

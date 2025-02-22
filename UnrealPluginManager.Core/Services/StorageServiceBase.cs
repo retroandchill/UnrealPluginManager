@@ -1,5 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
+using System.Text.Json;
+using LanguageExt;
+using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
@@ -14,6 +17,7 @@ namespace UnrealPluginManager.Core.Services;
 /// </summary>
 [AutoConstructor]
 public abstract partial class StorageServiceBase : IStorageService {
+    
     /// <summary>
     /// Provides access to the file system abstraction used by storage services.
     /// This property is used to perform file system operations without directly
@@ -30,6 +34,8 @@ public abstract partial class StorageServiceBase : IStorageService {
     private string PluginDirectory => Path.Join(BaseDirectory, "Plugins");
     
     private string IconsDirectory => Path.Join(BaseDirectory, "Icons");
+    
+    private string ConfigDirectory => Path.Join(BaseDirectory, "Config");
 
     /// <inheritdoc />
     public async Task<StoredPluginData> StorePlugin(Stream fileData) {
@@ -77,4 +83,55 @@ public abstract partial class StorageServiceBase : IStorageService {
     public Stream RetrieveIcon(string iconName) {
         return FileSystem.File.OpenRead(Path.Combine(IconsDirectory, iconName));
     }
+
+    /// <inheritdoc />
+    public async Task<Option<T>> GetConfig<T>(string filename) {
+        FileSystem.Directory.CreateDirectory(ConfigDirectory);
+        var filePath = Path.Combine(ConfigDirectory, filename);
+        var fileInfo = FileSystem.FileInfo.New(filePath);
+        if (!fileInfo.Exists) {
+            return Option<T>.None;   
+        }
+        using var fileStream = fileInfo.OpenText();
+        var configText = await fileStream.ReadToEndAsync();
+        var resultObject = JsonSerializer.Deserialize<T>(configText);
+        
+        return resultObject;
+    }
+
+    /// <inheritdoc />
+    public async Task<T> GetConfig<T>(string filename, T defaultValue) {
+        var result = await GetConfig<T>(filename);
+        return await result.Match(Task.FromResult,
+            async () => {
+                await SaveConfig(filename, defaultValue);
+                return defaultValue;
+            });
+    }
+
+    /// <inheritdoc />
+    public async Task<T> GetConfig<T>(string filename, Func<T> defaultValue) {
+        var result = await GetConfig<T>(filename);
+        return await result.Match(Task.FromResult,
+            async () => {
+                var value = defaultValue();
+                await SaveConfig(filename, value);
+                return value;
+            });
+    }
+
+    /// <inheritdoc />
+    public async Task SaveConfig<T>(string filename, T value) {
+        ArgumentNullException.ThrowIfNull(value);
+        FileSystem.Directory.CreateDirectory(ConfigDirectory);
+        var filePath = Path.Combine(ConfigDirectory, filename);
+        var fileInfo = FileSystem.FileInfo.New(filePath);
+        
+        var configText = JsonSerializer.Serialize(value);
+        
+        await using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
+        await using var textWriter = new StreamWriter(writer);
+        await textWriter.WriteAsync(configText);
+    }
+    
 }
