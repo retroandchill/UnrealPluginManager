@@ -40,6 +40,15 @@ jobs:
       - name: Install dotnet-coverage
         shell: powershell
         run: dotnet tool install --global dotnet-coverage
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install Node Dependencies
+        shell: powershell
+        run: |
+          cd unrealpluginmanager.client
+          npm install
+          cd ..
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -51,4 +60,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
           }
+          cd unrealpluginmanager.client
+          npm run coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          cd ..
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
