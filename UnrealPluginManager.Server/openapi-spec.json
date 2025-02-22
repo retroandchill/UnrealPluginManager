@@ -185,6 +185,39 @@
           }
         }
       }
+    },
+    "/files/icons/{fileName}": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Retrieves an icon as a stream for the specified file name.",
+        "operationId": "getIcon",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "description": "The name of the file representing the icon to be retrieved.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -293,6 +326,11 @@
             "format": "uri",
             "nullable": true
           },
+          "icon": {
+            "type": "string",
+            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
+            "nullable": true
+          },
           "versions": {
             "minItems": 1,
             "type": "array",
@@ -343,6 +381,11 @@
             "type": "string",
             "description": "Gets or sets the URL associated with the author of the plugin.",
             "format": "uri",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
             "nullable": true
           },
           "versions": {

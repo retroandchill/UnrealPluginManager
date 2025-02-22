@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -26,9 +28,11 @@ public abstract partial class StorageServiceBase : IStorageService {
     public abstract string BaseDirectory { get; }
 
     private string PluginDirectory => Path.Join(BaseDirectory, "Plugins");
+    
+    private string IconsDirectory => Path.Join(BaseDirectory, "Icons");
 
     /// <inheritdoc />
-    public async Task<IFileInfo> StorePlugin(Stream fileData) {
+    public async Task<StoredPluginData> StorePlugin(Stream fileData) {
         using var archive = new ZipArchive(fileData);
 
         var archiveEntry = archive.Entries
@@ -36,6 +40,18 @@ public abstract partial class StorageServiceBase : IStorageService {
         if (archiveEntry is null) {
             throw new BadSubmissionException("Uplugin file was not found");
         }
+
+        var icon = await archive.Entries
+            .FirstOrDefault(x => x.FullName == Path.Join("Resources", "Icon128.png"))
+            .ToOption()
+            .Match(async x => {
+                await using var iconStream = x.Open();
+                FileSystem.Directory.CreateDirectory(IconsDirectory);
+                var dest = FileSystem.FileInfo.New(Path.Combine(IconsDirectory, $"{Path.GetRandomFileName()}.png"));
+                await using var writeStream = dest.Create();
+                await iconStream.CopyToAsync(writeStream);
+                return (string?) dest.Name;
+            }, () => Task.FromResult<string?>(null));
 
         var fileName =
             $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
@@ -46,11 +62,19 @@ public abstract partial class StorageServiceBase : IStorageService {
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);
 
-        return FileSystem.FileInfo.New(fullPath);
+        return new StoredPluginData {
+            ZipFile = FileSystem.FileInfo.New(fullPath),
+            IconFile = icon
+        };
     }
 
     /// <inheritdoc />
     public Stream RetrievePlugin(IFileInfo fileInfo) {
         return fileInfo.OpenRead();
+    }
+
+    /// <inheritdoc />
+    public Stream RetrieveIcon(string iconName) {
+        return FileSystem.File.OpenRead(Path.Combine(IconsDirectory, iconName));
     }
 }

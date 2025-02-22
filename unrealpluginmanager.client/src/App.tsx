@@ -1,4 +1,4 @@
-import {useEffect, useState, Component, Dispatch, SetStateAction} from 'react';
+import {Component} from 'react';
 import './App.css';
 import {PluginOverview} from './api';
 import {Page} from './util'
@@ -59,7 +59,6 @@ class App extends Component<{}, AppState> {
         return (
             <div>
                 <h1 id="tableLabel">Plugins List</h1>
-                <p>This component demonstrates fetching data from the server.</p>
                 {contents}
             </div>
         );

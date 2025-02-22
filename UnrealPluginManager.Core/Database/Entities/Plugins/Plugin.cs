@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -85,6 +86,19 @@ public class Plugin {
     public Uri? AuthorWebsite { get; set; }
 
     /// <summary>
+    /// Gets or sets the file information representing the icon associated with the plugin.
+    /// </summary>
+    /// <remarks>
+    /// This property holds the file path and metadata for the plugin's icon.
+    /// It is used to reference a visual representation of the plugin and should
+    /// point to a valid file. Conversion to and from the file path is handled
+    /// during database interactions.
+    /// </remarks>
+    [MinLength(1)]
+    [MaxLength(255)]
+    public string? Icon { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of versions associated with the plugin.
     /// </summary>
     /// <remarks>
@@ -93,7 +107,7 @@ public class Plugin {
     /// </remarks>
     public ICollection<PluginVersion> Versions { get; set; } = new List<PluginVersion>();
 
-    internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
+    internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem filesystem) {
         modelBuilder.Entity<Plugin>()
             .HasIndex(x => new { x.Name })
             .IsUnique();

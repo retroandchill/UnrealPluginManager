@@ -71,7 +71,7 @@ def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str], template_di
                 
                 with open(os.path.join(root, file), 'r+') as f:
                     content = f.read()
-                    content = content.replace('using UnrealPluginManager.WebClient.Model;', namespace_replacement)
+                    content = content.replace('using UnrealPluginManager.WebClient.Client;', namespace_replacement)
                     content = content.replace('namespace UnrealPluginManager.WebClient.Api\n{', page_declarations)
                     f.seek(0)
                     f.write(content)

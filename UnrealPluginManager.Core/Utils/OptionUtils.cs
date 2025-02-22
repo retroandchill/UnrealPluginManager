@@ -46,4 +46,15 @@ public static class OptionUtils {
         }
     }
 
+    /// <summary>
+    /// Converts a nullable value to an <see cref="Option{T}"/>.
+    /// If the value is non-null, it is wrapped in an Option.
+    /// If the value is null, returns a None.
+    /// </summary>
+    /// <typeparam name="T">The type of the object being converted.</typeparam>
+    /// <param name="value">The nullable value to convert to an Option.</param>
+    /// <returns>An <see cref="Option{T}"/> containing the value if non-null, or None if the value is null.</returns>
+    public static Option<T> ToOption<T>(this T? value) {
+        return value ?? Option<T>.None;
+    }
 }

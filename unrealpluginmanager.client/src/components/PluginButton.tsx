@@ -1,6 +1,7 @@
 ﻿import {PluginOverview} from "../api";
 import { Component } from 'react';
 import Icon128 from "../assets/icon128.png";
+import {iconsPath} from "../config/Globals.ts";
 
 /**
  * A callback function type that is executed with a plugin as its argument.
@@ -46,6 +47,10 @@ interface PluginButtonProps {
     onClick: PluginCallback;
 }
 
+interface PluginButtonState {
+    icon: string;
+}
+
 /**
  * A React component that represents a button for a plugin. When clicked, it triggers an action
  * defined by the onClick handler passed in the props. It displays basic plugin details such as
@@ -53,9 +58,9 @@ interface PluginButtonProps {
  *
  * @extends Component
  *
- * @template PluginButtonProps
+ * @template PluginButtonProps, PluginButtonState
  */
-class PluginButton extends Component<PluginButtonProps> {
+class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     
     /**
      * Constructs a new instance of the PluginButton.
@@ -65,13 +70,22 @@ class PluginButton extends Component<PluginButtonProps> {
      */
     constructor(props: PluginButtonProps) {
         super(props)
+        this.state = { icon: Icon128 }
+    }
+
+    componentDidMount() {
+        if (this.props.plugin.icon != undefined) {
+            this.setState({icon: `${iconsPath}/${this.props.plugin.icon}`})
+        } else {
+            this.setState({icon: Icon128})
+        }
     }
     
     render() {
         let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
 
         return <button onClick={() => this.props.onClick(this.props.plugin)}>
-            <img  src={Icon128} alt="Plugin Icon"/>
+            <img  src={this.state.icon} alt="Plugin Icon"/>
             <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
                 <h2>{this.props.plugin.name}</h2>
             </header>

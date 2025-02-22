@@ -103,7 +103,7 @@ public partial class PluginService : IPluginService {
             .Where(x => x.Name == pluginName)
             .FirstOrDefaultAsync();
         if (plugin is null) {
-            plugin = descriptor.ToPlugin(pluginName);
+            plugin = descriptor.ToPlugin(pluginName, storedFile?.FileInfo.IconFile);
             _dbContext.Plugins.Add(plugin);
             await _dbContext.SaveChangesAsync();
         }
@@ -119,7 +119,7 @@ public partial class PluginService : IPluginService {
     /// <inheritdoc/>
     public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await _storageService.StorePlugin(fileData);
-        await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        await using var storedData = fileInfo.ZipFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);
 
         var archiveEntry = archive.Entries

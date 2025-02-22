@@ -58,7 +58,7 @@ public abstract class UnrealPluginManagerContext : DbContext {
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        Plugin.DefineModelMetadata(modelBuilder);
+        Plugin.DefineModelMetadata(modelBuilder, _filesystem);
         PluginVersion.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
         PluginBinaries.DefineModelMetadata(modelBuilder, _filesystem);

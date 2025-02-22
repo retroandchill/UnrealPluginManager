@@ -65,6 +65,12 @@ export interface PluginOverview {
      */
     authorWebsite?: string | null;
     /**
+     * Gets or sets the file path or resource identifier for the plugin's icon.
+     * @type {string}
+     * @memberof PluginOverview
+     */
+    icon?: string | null;
+    /**
      * Gets or sets the collection of versions associated with the plugin.
      * Each version provides a detailed overview including its version number
      * and unique identifier.
@@ -100,6 +106,7 @@ export function PluginOverviewFromJSONTyped(json: any, ignoreDiscriminator: bool
         'description': json['description'] == null ? undefined : json['description'],
         'authorName': json['authorName'] == null ? undefined : json['authorName'],
         'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
+        'icon': json['icon'] == null ? undefined : json['icon'],
         'versions': ((json['versions'] as Array<any>).map(VersionOverviewFromJSON)),
     };
 }
@@ -121,6 +128,7 @@ export function PluginOverviewToJSONTyped(value?: PluginOverview | null, ignoreD
         'description': value['description'],
         'authorName': value['authorName'],
         'authorWebsite': value['authorWebsite'],
+        'icon': value['icon'],
         'versions': ((value['versions'] as Array<any>).map(VersionOverviewToJSON)),
     };
 }

@@ -18,6 +18,7 @@ using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Model.Plugins;
 
+using UnrealPluginManager.WebClient.Model;
 
 namespace UnrealPluginManager.WebClient.Api
 {
