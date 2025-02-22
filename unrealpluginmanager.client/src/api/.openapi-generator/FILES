@@ -1,5 +1,6 @@
 .openapi-generator-ignore
 apis/PluginsApi.ts
+apis/StorageApi.ts
 apis/index.ts
 index.ts
 models/BinariesOverview.ts

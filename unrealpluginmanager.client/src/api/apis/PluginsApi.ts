@@ -28,24 +28,24 @@ import {
     PluginSummaryToJSON,
 } from '../models/index';
 
-export interface ApiPluginsGetRequest {
+export interface AddPluginRequest {
+    engineVersion?: string;
+    pluginFile?: Blob;
+}
+
+export interface DownloadPluginRequest {
+    pluginName: string;
+    engineVersion?: string;
+}
+
+export interface GetDependencyTreeRequest {
+    pluginName: string;
+}
+
+export interface GetPluginsRequest {
     match?: string;
     page?: number;
     size?: number;
-}
-
-export interface ApiPluginsPluginNameDownloadGetRequest {
-    pluginName: string;
-    engineVersion?: string;
-}
-
-export interface ApiPluginsPluginNameGetRequest {
-    pluginName: string;
-}
-
-export interface ApiPluginsPostRequest {
-    engineVersion?: string;
-    pluginFile?: Blob;
 }
 
 /**
@@ -54,117 +54,9 @@ export interface ApiPluginsPostRequest {
 export class PluginsApi extends runtime.BaseAPI {
 
     /**
-     * Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
-     */
-    async apiPluginsGetRaw(requestParameters: ApiPluginsGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginOverviewPage>> {
-        const queryParameters: any = {};
-
-        if (requestParameters['match'] != null) {
-            queryParameters['match'] = requestParameters['match'];
-        }
-
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
-        }
-
-        if (requestParameters['size'] != null) {
-            queryParameters['size'] = requestParameters['size'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/plugins`,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => PluginOverviewPageFromJSON(jsonValue));
-    }
-
-    /**
-     * Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
-     */
-    async apiPluginsGet(requestParameters: ApiPluginsGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginOverviewPage> {
-        const response = await this.apiPluginsGetRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
-     */
-    async apiPluginsPluginNameDownloadGetRaw(requestParameters: ApiPluginsPluginNameDownloadGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
-        if (requestParameters['pluginName'] == null) {
-            throw new runtime.RequiredError(
-                'pluginName',
-                'Required parameter "pluginName" was null or undefined when calling apiPluginsPluginNameDownloadGet().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['engineVersion'] != null) {
-            queryParameters['engineVersion'] = requestParameters['engineVersion'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/plugins/{pluginName}/download`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.BlobApiResponse(response);
-    }
-
-    /**
-     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
-     */
-    async apiPluginsPluginNameDownloadGet(requestParameters: ApiPluginsPluginNameDownloadGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.apiPluginsPluginNameDownloadGetRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Retrieves the dependency tree for a specified plugin.
-     */
-    async apiPluginsPluginNameGetRaw(requestParameters: ApiPluginsPluginNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<PluginSummary>>> {
-        if (requestParameters['pluginName'] == null) {
-            throw new runtime.RequiredError(
-                'pluginName',
-                'Required parameter "pluginName" was null or undefined when calling apiPluginsPluginNameGet().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/plugins/{pluginName}`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PluginSummaryFromJSON));
-    }
-
-    /**
-     * Retrieves the dependency tree for a specified plugin.
-     */
-    async apiPluginsPluginNameGet(requestParameters: ApiPluginsPluginNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<PluginSummary>> {
-        const response = await this.apiPluginsPluginNameGetRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
-    async apiPluginsPostRaw(requestParameters: ApiPluginsPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
+    async addPluginRaw(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
         const queryParameters: any = {};
 
         if (requestParameters['engineVersion'] != null) {
@@ -207,8 +99,116 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
-    async apiPluginsPost(requestParameters: ApiPluginsPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
-        const response = await this.apiPluginsPostRaw(requestParameters, initOverrides);
+    async addPlugin(requestParameters: AddPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+        const response = await this.addPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+     */
+    async downloadPluginRaw(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+        if (requestParameters['pluginName'] == null) {
+            throw new runtime.RequiredError(
+                'pluginName',
+                'Required parameter "pluginName" was null or undefined when calling downloadPlugin().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['engineVersion'] != null) {
+            queryParameters['engineVersion'] = requestParameters['engineVersion'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginName}/download`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.BlobApiResponse(response);
+    }
+
+    /**
+     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+     */
+    async downloadPlugin(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.downloadPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves the dependency tree for a specified plugin.
+     */
+    async getDependencyTreeRaw(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<PluginSummary>>> {
+        if (requestParameters['pluginName'] == null) {
+            throw new runtime.RequiredError(
+                'pluginName',
+                'Required parameter "pluginName" was null or undefined when calling getDependencyTree().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginName}`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PluginSummaryFromJSON));
+    }
+
+    /**
+     * Retrieves the dependency tree for a specified plugin.
+     */
+    async getDependencyTree(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<PluginSummary>> {
+        const response = await this.getDependencyTreeRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
+     */
+    async getPluginsRaw(requestParameters: GetPluginsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginOverviewPage>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['match'] != null) {
+            queryParameters['match'] = requestParameters['match'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginOverviewPageFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
+     */
+    async getPlugins(requestParameters: GetPluginsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginOverviewPage> {
+        const response = await this.getPluginsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -11,6 +11,7 @@
           "Plugins"
         ],
         "summary": "Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.",
+        "operationId": "getPlugins",
         "parameters": [
           {
             "name": "match",
@@ -63,6 +64,7 @@
           "Plugins"
         ],
         "summary": "Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.",
+        "operationId": "addPlugin",
         "parameters": [
           {
             "name": "engineVersion",
@@ -114,6 +116,7 @@
           "Plugins"
         ],
         "summary": "Retrieves the dependency tree for a specified plugin.",
+        "operationId": "getDependencyTree",
         "parameters": [
           {
             "name": "pluginName",
@@ -148,6 +151,7 @@
           "Plugins"
         ],
         "summary": "Downloads a plugin file as a ZIP archive for the specified plugin and engine version.",
+        "operationId": "downloadPlugin",
         "parameters": [
           {
             "name": "pluginName",
@@ -172,6 +176,39 @@
             "description": "OK",
             "content": {
               "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/icons/{fileName}": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Retrieves an icon as a stream for the specified file name.",
+        "operationId": "getIcon",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "description": "The name of the file representing the icon to be retrieved.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -289,6 +326,11 @@
             "format": "uri",
             "nullable": true
           },
+          "icon": {
+            "type": "string",
+            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
+            "nullable": true
+          },
           "versions": {
             "minItems": 1,
             "type": "array",
@@ -341,6 +383,11 @@
             "format": "uri",
             "nullable": true
           },
+          "icon": {
+            "type": "string",
+            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
+            "nullable": true
+          },
           "versions": {
             "minItems": 1,
             "type": "array",
@@ -354,6 +401,13 @@
         "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
       },
       "PluginOverviewPage": {
+        "required": [
+          "pageNumber",
+          "totalPages",
+          "pageSize",
+          "count",
+          "items"
+        ],
         "type": "object",
         "properties": {
           "pageNumber": {
@@ -382,7 +436,7 @@
             "format": "int32",
             "example": 1
           },
-          "item": {
+          "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PluginOverview"

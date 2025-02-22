@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -47,9 +46,9 @@ public class CloudStorageServiceTest {
 
         var fileInfo = await storageService.StorePlugin(testZip);
         Assert.Multiple(() => {
-            Assert.That(fileInfo.Exists, Is.True);
-            Assert.That(fileInfo.Name, Does.StartWith("TestPlugin"));
-            Assert.That(fileInfo.Name, Does.EndWith(".zip"));
+            Assert.That(fileInfo.ZipFile.Exists, Is.True);
+            Assert.That(fileInfo.ZipFile.Name, Does.StartWith("TestPlugin"));
+            Assert.That(fileInfo.ZipFile.Name, Does.EndWith(".zip"));
         });
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -20,6 +22,7 @@ public class VersionOverview {
     /// Gets or sets the semantic version of the plugin, representing its specific version details.
     /// </summary>
     [Required]
+    [JsonConverter(typeof(SemVersionJsonConverter))]
     public SemVersion Version { get; set; }
     
 }

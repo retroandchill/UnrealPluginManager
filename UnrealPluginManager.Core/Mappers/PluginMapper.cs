@@ -94,16 +94,17 @@ public static partial class PluginMapper {
     public static partial VersionDetails ToVersionDetails(this PluginVersion version);
 
     /// <summary>
-    /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name.
+    /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name and optional icon.
     /// </summary>
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>
     /// <param name="name">The name of the plugin to assign in the created <see cref="Plugin"/> instance.</param>
-    /// <returns>A new <see cref="Plugin"/> object mapped from the provided <see cref="PluginDescriptor"/> and name.</returns>
+    /// <param name="icon">An optional icon for the plugin.</param>
+    /// <returns>A new <see cref="Plugin"/> object mapped from the provided <see cref="PluginDescriptor"/>, name, and optional icon.</returns>
     [MapperIgnoreTarget(nameof(Plugin.Id))]
     [MapperIgnoreTarget(nameof(Plugin.Versions))]
     [MapProperty(nameof(PluginDescriptor.CreatedBy), nameof(Plugin.AuthorName))]
     [MapProperty(nameof(PluginDescriptor.CreatedByUrl), nameof(Plugin.AuthorWebsite))]
-    public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name);
+    public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name, string? icon = null);
 
     /// <summary>
     /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="PluginVersion"/> object.
@@ -141,7 +142,7 @@ public static partial class PluginMapper {
     [MapperIgnoreTarget(nameof(PluginBinaries.Id))]
     [MapperIgnoreTarget(nameof(PluginBinaries.Parent))]
     [MapperIgnoreTarget(nameof(PluginBinaries.ParentId))]
-    [MapProperty(nameof(EngineFileData.FileInfo), nameof(PluginBinaries.FilePath))]
+    [MapProperty(nameof(EngineFileData.FileInfo.ZipFile), nameof(PluginBinaries.FilePath))]
     public static partial PluginBinaries ToPluginBinaries(this EngineFileData descriptor);
 
     /// <summary>

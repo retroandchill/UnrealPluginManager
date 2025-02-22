@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
@@ -189,7 +190,7 @@ public class PluginServiceTests {
                 input.Seek(0, SeekOrigin.Begin);
                 await input.CopyToAsync(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                return dummyInfo;
+                return new StoredPluginData { ZipFile = dummyInfo };
             });
 
         var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
@@ -220,7 +221,7 @@ public class PluginServiceTests {
                 input.Seek(0, SeekOrigin.Begin);
                 await input.CopyToAsync(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                return dummyInfo;
+                return new StoredPluginData { ZipFile = dummyInfo };
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>
@@ -252,7 +253,7 @@ public class PluginServiceTests {
                 input.Seek(0, SeekOrigin.Begin);
                 await input.CopyToAsync(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                return dummyInfo;
+                return new StoredPluginData { ZipFile = dummyInfo };
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>

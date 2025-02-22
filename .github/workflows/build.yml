@@ -40,15 +40,30 @@ jobs:
       - name: Install dotnet-coverage
         shell: powershell
         run: dotnet tool install --global dotnet-coverage
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install Node Dependencies
+        shell: powershell
+        run: |
+          cd unrealpluginmanager.client
+          npm install
+          cd ..
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"retroandchill_UnrealPluginManager" /o:"fcorso2016" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.exclusions="**/Migrations/**,UnrealPluginManager.WebClient/**,generate_api.py,unrealpluginmanager.client/src/api/**"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"retroandchill_UnrealPluginManager" /o:"fcorso2016" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.javascript.lcov.reportPaths=**/lcov.info /d:sonar.exclusions="**/Migrations/**,UnrealPluginManager.WebClient/**,generate_api.py,unrealpluginmanager.client/src/api/**"
           dotnet build --no-incremental
           dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
           }
+          cd unrealpluginmanager.client
+          npm run coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          cd ..
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

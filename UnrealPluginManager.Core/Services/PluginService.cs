@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -97,25 +98,28 @@ public partial class PluginService : IPluginService {
     /// <inheritdoc/>
     public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
         EngineFileData? storedFile = null) {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
         var plugin = await _dbContext.Plugins
             .Where(x => x.Name == pluginName)
             .FirstOrDefaultAsync();
         if (plugin is null) {
-            plugin = descriptor.ToPlugin(pluginName);
+            plugin = descriptor.ToPlugin(pluginName, storedFile?.FileInfo.IconFile);
             _dbContext.Plugins.Add(plugin);
+            await _dbContext.SaveChangesAsync();
         }
         var pluginVersion = descriptor.ToPluginVersion(); 
         pluginVersion.ParentId = plugin.Id;
         pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
         _dbContext.PluginVersions.Add(pluginVersion);
         await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
         return plugin.ToPluginDetails(pluginVersion);
     }
 
     /// <inheritdoc/>
     public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
         var fileInfo = await _storageService.StorePlugin(fileData);
-        await using var storedData = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        await using var storedData = fileInfo.ZipFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var archive = new ZipArchive(storedData);
 
         var archiveEntry = archive.Entries

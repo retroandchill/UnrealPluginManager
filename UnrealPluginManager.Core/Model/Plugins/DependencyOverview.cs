@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -27,6 +29,7 @@ public class DependencyOverview {
     /// Gets or sets the version range associated with the plugin dependency.
     /// This version range defines the compatible versions of the plugin required by the dependency.
     /// </summary>
+    [JsonConverter(typeof(SemVersionRangeJsonConverter))]
     public SemVersionRange PluginVersion { get; set; } = SemVersionRange.All;
 
     /// <summary>

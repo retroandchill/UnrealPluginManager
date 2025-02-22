@@ -1,59 +1,70 @@
-import {useEffect, useState} from 'react';
+import {Component} from 'react';
 import './App.css';
+import {PluginOverview} from './api';
+import {Page} from './util'
+import PluginButton from "./components";
+import {pluginsApi} from "./config/Globals.ts";
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+/**
+ * AppState interface represents the state of the application.
+ */
+interface AppState {
+    /**
+     * Represents an optional variable that holds a paginated collection of plugin overviews.
+     * The `plugins` variable may contain multiple plugins with their associated details, structured
+     * as a pageable object.
+     *
+     * @type {Page<PluginOverview>}
+     */
+    plugins?: Page<PluginOverview>;
 }
 
-function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+/**
+ * The App class is a React component that manages and displays a list of plugins.
+ * It fetches the plugin data from a backend server and renders the plugins in a table.
+ * The component communicates with an ASP.NET backend and showcases an example
+ * integration between JavaScript and ASP.NET.
+ *
+ * @extends Component
+ * @template {}, AppState
+ */
+class App extends Component<{}, AppState> {
+    
+    /**
+     * Constructor for initializing the component with props and setting the initial state.
+     *
+     * @param {Object} props - The properties passed to the component.
+     * @return {void}
+     */
+    constructor(props: {}) {
+        super(props);
+        this.state = {};
+    }
+    
+    componentDidMount() {
+        this.populatePluginList();
+    }
+    
+    render() {
+        const contents = this.state.plugins === undefined
+            ? <p><em>Loading...</em></p>
+            : <table className="table table-striped" aria-labelledby="tableLabel">
+                <tbody>
+                {this.state.plugins.items.map(plugin => <PluginButton key={plugin.id} plugin={plugin} onClick={(_) => {}}/>)}
+                </tbody>
+            </table>;
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
-
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a
-            href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em>
-        </p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-            </thead>
-            <tbody>
-            {forecasts.map(forecast =>
-                <tr key={forecast.date}>
-                    <td>{forecast.date}</td>
-                    <td>{forecast.temperatureC}</td>
-                    <td>{forecast.temperatureF}</td>
-                    <td>{forecast.summary}</td>
-                </tr>
-            )}
-            </tbody>
-        </table>;
-
-    return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
-
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
+        return (
+            <div>
+                <h1 id="tableLabel">Plugins List</h1>
+                {contents}
+            </div>
+        );
+    }
+    
+    private async populatePluginList() {
+        const response = await pluginsApi.getPlugins()
+        this.setState({plugins: response})
     }
 }
 
