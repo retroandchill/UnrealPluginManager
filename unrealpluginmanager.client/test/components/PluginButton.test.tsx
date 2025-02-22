@@ -30,9 +30,9 @@ test("Plugin Button Renders", () => {
     expect(title).toBeInTheDocument();
 
     const version = screen.getAllByText(/latest release|2\.0\.2/i);
-    expect(version).toHaveLength(2)
+    expect(version).toHaveLength(2);
 
     const author = screen.getAllByText(/author|demo/i);
-    expect(author).toHaveLength(2)
+    expect(author).toHaveLength(2);
     
 })
