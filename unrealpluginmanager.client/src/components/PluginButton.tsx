@@ -89,7 +89,6 @@ class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
             <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
                 <h2>{this.props.plugin.name}</h2>
             </header>
-            {/* TODO: We need to add the icons to the server and fetch them and add them to an image here */}
             <ul style={{ listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
                 <li><b>Latest Release:</b> {latestVersion.version}</li>
                 <li><b>Author:</b> {this.props.plugin.authorName ? `${this.props.plugin.authorName}` : 'Unknown'}</li>
