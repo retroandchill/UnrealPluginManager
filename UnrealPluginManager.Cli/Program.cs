@@ -1,24 +1,19 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
-using System.IO.Abstractions;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
-using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Utils;
-using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 
 var rootCommand = new RootCommand {
     new VersionsCommand(),
     new BuildCommand(),
-    new InstallCommand()
+    new InstallCommand(),
+    new SearchCommand()
 };
 
 var builder = new CommandLineBuilder(rootCommand)
@@ -28,7 +23,8 @@ var builder = new CommandLineBuilder(rootCommand)
         services.AddSystemAbstractions()
             .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
             .AddCoreServices()
-            .AddCliServices();
+            .AddCliServices()
+            .AddApiFactories();
     });
     
 await builder.Build().InvokeAsync(args);

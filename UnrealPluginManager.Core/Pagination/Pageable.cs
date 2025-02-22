@@ -189,6 +189,8 @@ public struct Pageable {
     /// settings are active and data is being handled in a paginated manner.
     /// </remarks>
     public bool IsUnpaged => !_request.IsValid;
+    
+    public static Pageable Unpaged = new();
 
     /// <summary>
     /// Represents a pageable abstraction for managing pagination settings and behavior.
@@ -205,6 +207,14 @@ public struct Pageable {
     /// </remarks>
     public Pageable(int pageNumber, int pageSize) {
         _request = new PageRequest(pageNumber, pageSize);
+    }
+
+    public Pageable(PageRequest request) {
+        _request = request;
+    }
+
+    public static implicit operator Pageable(PageRequest request) {
+        return new Pageable(request);
     }
 
     /// <summary>

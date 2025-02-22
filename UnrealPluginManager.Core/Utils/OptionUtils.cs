@@ -57,4 +57,12 @@ public static class OptionUtils {
     public static Option<T> ToOption<T>(this T? value) {
         return value ?? Option<T>.None;
     }
+
+    public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : class {
+        return value is not null ? some(value) : none();
+    }
+    
+    public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : struct {
+        return value is not null ? some(value.Value) : none();
+    }
 }
