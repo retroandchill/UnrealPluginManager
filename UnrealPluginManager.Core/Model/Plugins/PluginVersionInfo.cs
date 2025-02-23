@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.Text.Json.Serialization;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -10,7 +11,7 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// and a list of its dependencies. It is used to model the metadata and relationships
 /// of a plugin version within the system.
 /// </remarks>
-public class PluginVersionInfo : IPluginVersionInfo {
+public class PluginVersionInfo : IDependencyChainNode {
     /// <summary>
     /// Gets or sets the unique identifier for a plugin.
     /// </summary>
@@ -62,17 +63,6 @@ public class PluginVersionInfo : IPluginVersionInfo {
     public required SemVersion Version { get; set; }
 
     /// <summary>
-    /// Indicates whether the plugin version is currently installed.
-    /// </summary>
-    /// <remarks>
-    /// This property specifies the installation status of the plugin version. It can be
-    /// used to determine if a plugin version is available on the system for use or
-    /// requires installation. The value `true` represents that the plugin is installed,
-    /// while `false` indicates it is not installed.
-    /// </remarks>
-    public required bool IsInstalled { get; set; }
-
-    /// <summary>
     /// Gets or sets the list of dependencies for the current plugin version.
     /// </summary>
     /// <remarks>
@@ -81,4 +71,19 @@ public class PluginVersionInfo : IPluginVersionInfo {
     /// type, and its compatible version range.
     /// </remarks>
     public required List<PluginDependency> Dependencies { get; set; }
+    
+    /// <summary>
+    /// Indicates whether the plugin version is currently installed.
+    /// </summary>
+    /// <remarks>
+    /// This property specifies the installation status of the plugin version. It can be
+    /// used to determine if a plugin version is available on the system for use or
+    /// requires installation. The value `true` represents that the plugin is installed,
+    /// while `false` indicates it is not installed.
+    /// </remarks>
+    [JsonIgnore]
+    public bool IsInstalled { get; set; }
+    
+    [JsonIgnore]
+    public string? RemoteName { get; set; }
 }

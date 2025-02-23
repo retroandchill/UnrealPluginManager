@@ -1,7 +1,8 @@
 ﻿using System.IO.Abstractions;
-using LanguageExt;
 using Semver;
 using UnrealPluginManager.Cli.Model.Engine;
+using UnrealPluginManager.Core.Model.EngineFile;
+using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Cli.Services;
 
@@ -9,6 +10,13 @@ namespace UnrealPluginManager.Cli.Services;
 /// Provides functionalities related to engine management within the Unreal Plugin Manager CLI.
 /// </summary>
 public interface IEngineService {
+    /// <summary>
+    /// Reads the specified plugin file and returns a collection of plugin dependencies.
+    /// </summary>
+    /// <param name="filename">The path to the plugin file to be read.</param>
+    /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="IDependencyHolder"/> object holding the plugin dependencies.</returns>
+    public Task<IDependencyHolder> ReadSubmittedPluginFile(string filename);
+    
     /// <summary>
     /// Retrieves a list of installed Unreal Engine versions available on the system.
     /// </summary>
@@ -42,4 +50,18 @@ public interface IEngineService {
     /// </returns>
     public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion);
 
+    /// <summary>
+    /// Retrieves a list of installed plugin versions for the specified plugin names within the specified engine version.
+    /// </summary>
+    /// <param name="pluginNames">
+    ///     A list of plugin names to filter the installed plugin versions.
+    /// </param>
+    /// <param name="engineVersion">
+    ///     The version of the engine to look for installed plugins. If null, uses the default engine version.
+    /// </param>
+    /// <returns>
+    /// A list of <see cref="PluginVersionInfo"/> objects representing the details of installed plugin versions.
+    /// </returns>
+    public Task<List<PluginVersionInfo>> GetInstalledPluginVersions(IEnumerable<string> pluginNames,
+        string? engineVersion);
 }

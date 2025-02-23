@@ -129,4 +129,15 @@ public static class LinqExtensions {
             .ToOrderedDictionaryAsync();
     }
 
+    /// <summary>
+    /// Filters a sequence of objects, returning only elements that can be cast to the specified type,
+    /// and casts those elements to the target type.
+    /// </summary>
+    /// <typeparam name="T">The type to cast the elements of the sequence to.</typeparam>
+    /// <param name="source">The sequence of objects to filter and cast.</param>
+    /// <returns>An enumerable collection of elements of the source sequence that can be successfully cast to the specified type.</returns>
+    public static IEnumerable<T> CastIf<T>(this IEnumerable<object> source) {
+        return source.Where(x => x is T)
+            .Cast<T>();
+    }
 }

@@ -29,6 +29,6 @@ public class DependencyManifest {
     /// during the execution of the dependency resolution workflow to track and
     /// manage unresolved dependencies for plugins.
     /// </remarks>
-    public List<string> UnresolvedDependencies { get; set; } = [];
-
+    public HashSet<string> UnresolvedDependencies { get; set; } = [];
+    
 }

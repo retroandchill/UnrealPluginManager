@@ -52,4 +52,10 @@ public record PluginSummary {
     [Required]
     [JsonConverter(typeof(SemVersionJsonConverter))]
     public required SemVersion Version { get; init; }
+
+    [JsonIgnore]
+    public bool IsInstalled { get; init; }
+    
+    [JsonIgnore]
+    public string? RemoteName { get; init; }
 }

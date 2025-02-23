@@ -5,7 +5,7 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// <summary>
 /// Provides information about a plugin version, including its name, version number, and dependencies.
 /// </summary>
-public interface IPluginVersionInfo {
+public interface IDependencyChainNode {
 
     /// <summary>
     /// Gets the name of the plugin associated with the current version.

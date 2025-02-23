@@ -75,7 +75,7 @@ public class SearchCommandOptions : ICommandOptions {
 /// It supports both local and remote plugin search functionality.
 /// </remarks>
 [AutoConstructor]
-public partial class SearchCommandHandler : ICommandOptionsHandle<SearchCommandOptions> {
+public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommandOptions> {
     private readonly IConsole _console;
     private readonly IPluginService _pluginService;
     private readonly IRemoteCallService _remoteCallService;

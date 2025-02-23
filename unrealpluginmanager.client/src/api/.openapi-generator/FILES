@@ -4,12 +4,15 @@ apis/StorageApi.ts
 apis/index.ts
 index.ts
 models/BinariesOverview.ts
+models/DependencyManifest.ts
 models/DependencyOverview.ts
+models/PluginDependency.ts
 models/PluginDetails.ts
 models/PluginOverview.ts
 models/PluginOverviewPage.ts
 models/PluginSummary.ts
 models/PluginType.ts
+models/PluginVersionInfo.ts
 models/VersionDetails.ts
 models/VersionOverview.ts
 models/index.ts

@@ -1,8 +1,10 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
@@ -34,6 +36,14 @@ public partial class PluginService : IPluginService {
             .OrderByDescending(x => x.Name)
             .ToPluginOverview()
             .ToPageAsync(pageable);
+    }
+
+    /// <inheritdoc/>
+    public Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions) {
+        return _dbContext.PluginVersions
+            .Where(x => requestedVersions.Contains(new PluginVersionRequest(x.Parent.Name, x.Version)))
+            .ToPluginVersionInfo()
+            .ToListAsync();
     }
 
     /// <inheritdoc />
@@ -78,6 +88,34 @@ public partial class PluginService : IPluginService {
         }
 
         return manifest;
+    }
+
+    /// <inheritdoc />
+    public Option<List<PluginSummary>> GetDependencyList(List<PluginDependency> rootDependencies,
+        DependencyManifest allVersions) {
+        if (allVersions.UnresolvedDependencies.Count > 0) {
+            throw new DependencyResolutionException(
+                $"Unable to resolve plugin names:\n{string.Join("\n", allVersions.UnresolvedDependencies)}");
+        }
+
+        var root = new DependencyChainRoot {
+            Dependencies = rootDependencies
+        };
+
+        var dependencyList = new Dictionary<string, IReadOnlyList<IDependencyChainNode>> {
+            [root.Name] = [root]
+        };
+        
+        foreach (var (pluginName, pluginVersions) in allVersions.FoundDependencies) {
+            dependencyList[pluginName] = pluginVersions;
+        }
+        
+        var formula = ExpressionSolver.Convert(root.Name, root.Version, dependencyList);
+        var bindings = formula.Solve();
+        return bindings.Select(x => x.Select(p => dependencyList[p.Name].First(d => d.Version == p.Version))
+            .CastIf<PluginVersionInfo>()
+            .Select(p => p.ToPluginSummary())
+            .ToList());
     }
 
     /// <inheritdoc/>

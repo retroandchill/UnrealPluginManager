@@ -72,7 +72,8 @@ public static partial class PluginMapper {
     [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
     [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
     [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionInfo.VersionId))]
-    [MapValue(nameof(PluginVersionInfo.IsInstalled), false)]
+    [MapperIgnoreTarget(nameof(PluginVersionInfo.IsInstalled))]
+    [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteName))]
     public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
     /// <summary>
@@ -101,7 +102,7 @@ public static partial class PluginMapper {
     /// </summary>
     /// <param name="versions">The source <see cref="PluginVersion"/> instance to be converted.</param>
     /// <returns>A <see cref="VersionOverview"/> object representing the provided <see cref="PluginVersion"/>.</returns>
-    private static List<VersionOverview> ToVersionOverview(this ICollection<PluginVersion> versions) {
+    public static List<VersionOverview> ToVersionOverview(this ICollection<PluginVersion> versions) {
         return versions
             .OrderBy(x => x.VersionString)
             .Select(x => x.ToVersionOverview())
@@ -155,6 +156,16 @@ public static partial class PluginMapper {
     [MapProperty(nameof(PluginReferenceDescriptor.PluginType), nameof(Dependency.Type))]
     [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(Dependency.PluginVersion))]
     public static partial Dependency ToDependency(this PluginReferenceDescriptor descriptor);
+
+    /// <summary>
+    /// Maps a <see cref="PluginReferenceDescriptor"/> to a <see cref="PluginDependency"/> representation.
+    /// </summary>
+    /// <param name="descriptor">The source <see cref="PluginReferenceDescriptor"/> to be mapped.</param>
+    /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="PluginReferenceDescriptor"/>.</returns>
+    [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(Dependency.PluginName))]
+    [MapProperty(nameof(PluginReferenceDescriptor.PluginType), nameof(Dependency.Type))]
+    [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(Dependency.PluginVersion))]
+    public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor descriptor);
 
     /// <summary>
     /// Maps an <see cref="EngineFileData"/> object to a <see cref="PluginBinaries"/> object.

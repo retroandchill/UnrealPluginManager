@@ -76,6 +76,26 @@ namespace UnrealPluginManager.WebClient.Api
         /// <returns>ApiResponse of System.IO.Stream</returns>
         ApiResponse<System.IO.Stream> DownloadPluginWithHttpInfo(string pluginName, string? engineVersion = default(string?), int operationIndex = 0);
         /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <returns>DependencyManifest</returns>
+        DependencyManifest GetCandidateDependencies(List<PluginDependency> pluginDependency, int operationIndex = 0);
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <returns>ApiResponse of DependencyManifest</returns>
+        ApiResponse<DependencyManifest> GetCandidateDependenciesWithHttpInfo(List<PluginDependency> pluginDependency, int operationIndex = 0);
+        /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
@@ -182,6 +202,31 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
         System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> DownloadPluginWithHttpInfoAsync(string pluginName, string? engineVersion = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of DependencyManifest</returns>
+        System.Threading.Tasks.Task<DependencyManifest> GetCandidateDependenciesAsync(List<PluginDependency> pluginDependency, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (DependencyManifest)</returns>
+        System.Threading.Tasks.Task<ApiResponse<DependencyManifest>> GetCandidateDependenciesWithHttpInfoAsync(List<PluginDependency> pluginDependency, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
         /// </summary>
@@ -655,6 +700,152 @@ namespace UnrealPluginManager.WebClient.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("DownloadPlugin", localVarResponse);
+                if (_exception != null)
+                {
+                    throw _exception;
+                }
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <returns>DependencyManifest</returns>
+        public DependencyManifest GetCandidateDependencies(List<PluginDependency> pluginDependency, int operationIndex = 0)
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<DependencyManifest> localVarResponse = GetCandidateDependenciesWithHttpInfo(pluginDependency);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <returns>ApiResponse of DependencyManifest</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<DependencyManifest> GetCandidateDependenciesWithHttpInfo(List<PluginDependency> pluginDependency, int operationIndex = 0)
+        {
+            // verify the required parameter 'pluginDependency' is set
+            if (pluginDependency == null)
+            {
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginDependency' when calling PluginsApi->GetCandidateDependencies");
+            }
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+            }
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+            }
+
+            localVarRequestOptions.Data = pluginDependency;
+
+            localVarRequestOptions.Operation = "PluginsApi.GetCandidateDependencies";
+            localVarRequestOptions.OperationIndex = operationIndex;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Get<DependencyManifest>("/api/plugins/dependencies/candidates", localVarRequestOptions, this.Configuration);
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetCandidateDependencies", localVarResponse);
+                if (_exception != null)
+                {
+                    throw _exception;
+                }
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of DependencyManifest</returns>
+        public async System.Threading.Tasks.Task<DependencyManifest> GetCandidateDependenciesAsync(List<PluginDependency> pluginDependency, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<DependencyManifest> localVarResponse = await GetCandidateDependenciesWithHttpInfoAsync(pluginDependency, operationIndex, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="pluginDependency">A list of plugin dependencies for which potential versions are to be determined.</param>
+        /// <param name="operationIndex">Index associated with the operation.</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (DependencyManifest)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<DependencyManifest>> GetCandidateDependenciesWithHttpInfoAsync(List<PluginDependency> pluginDependency, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'pluginDependency' is set
+            if (pluginDependency == null)
+            {
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginDependency' when calling PluginsApi->GetCandidateDependencies");
+            }
+
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+            }
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null)
+            {
+                localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+            }
+
+            localVarRequestOptions.Data = pluginDependency;
+
+            localVarRequestOptions.Operation = "PluginsApi.GetCandidateDependencies";
+            localVarRequestOptions.OperationIndex = operationIndex;
+
+
+            // make the HTTP request
+            var localVarResponse = await this.AsynchronousClient.GetAsync<DependencyManifest>("/api/plugins/dependencies/candidates", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetCandidateDependencies", localVarResponse);
                 if (_exception != null)
                 {
                     throw _exception;

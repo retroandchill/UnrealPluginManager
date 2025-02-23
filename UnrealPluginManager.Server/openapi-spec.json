@@ -145,6 +145,42 @@
         }
       }
     },
+    "/api/plugins/dependencies/candidates": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.",
+        "operationId": "getCandidateDependencies",
+        "requestBody": {
+          "description": "A list of plugin dependencies for which potential versions are to be determined.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PluginDependency"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependencyManifest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plugins/{pluginName}/download": {
       "get": {
         "tags": [
@@ -251,6 +287,32 @@
         "additionalProperties": false,
         "description": "Represents an overview of binary files for a specific platform and engine version."
       },
+      "DependencyManifest": {
+        "type": "object",
+        "properties": {
+          "foundDependencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PluginVersionInfo"
+              }
+            },
+            "description": "A property that stores a collection of dependencies that have been successfully resolved\r\nduring the dependency resolution process.",
+            "nullable": true
+          },
+          "unresolvedDependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A property that holds a collection of dependencies that could not be resolved\r\nduring the dependency resolution process.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a manifest of plugin dependencies resolved by the dependency resolution process."
+      },
       "DependencyOverview": {
         "required": [
           "id",
@@ -285,6 +347,32 @@
         },
         "additionalProperties": false,
         "description": "Represents an overview of a plugin dependency, including its metadata and type."
+      },
+      "PluginDependency": {
+        "required": [
+          "pluginName",
+          "pluginVersion",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "pluginName": {
+            "type": "string",
+            "description": "Gets the name of the plugin.",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/PluginType"
+          },
+          "pluginVersion": {
+            "type": "string",
+            "description": "Gets the version range of the dependent plugin.",
+            "nullable": true,
+            "example": ">=1.0.0"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a dependency of a plugin within the Unreal Plugin Manager framework."
       },
       "PluginDetails": {
         "required": [
@@ -496,6 +584,55 @@
         ],
         "type": "string",
         "description": "Specifies the type of plugin in the Unreal Plugin Manager system."
+      },
+      "PluginVersionInfo": {
+        "required": [
+          "dependencies",
+          "name",
+          "pluginId",
+          "version",
+          "versionId"
+        ],
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "integer",
+            "description": "Gets or sets the unique identifier for a plugin.",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": "Gets the name of the plugin associated with the current version.",
+            "nullable": true
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "Gets or sets the user-friendly name of the plugin associated with the current version.",
+            "nullable": true
+          },
+          "versionId": {
+            "type": "integer",
+            "description": "Gets or sets the unique identifier for the plugin version.",
+            "format": "int64"
+          },
+          "version": {
+            "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+            "type": "string",
+            "description": "Gets the semantic version of the plugin.",
+            "nullable": true,
+            "example": "1.0.0"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginDependency"
+            },
+            "description": "Gets or sets the list of dependencies for the current plugin version.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents detailed information about a specific version of a plugin."
       },
       "VersionDetails": {
         "required": [

@@ -20,7 +20,12 @@ public interface IPluginService {
     /// </returns>
     Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
 
+    Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions);
+
     Task<DependencyManifest> GetPossibleVersions(List<PluginDependency> dependencies);
+    
+    Option<List<PluginSummary>> GetDependencyList(List<PluginDependency> rootDependencies,
+        DependencyManifest allVersions);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.

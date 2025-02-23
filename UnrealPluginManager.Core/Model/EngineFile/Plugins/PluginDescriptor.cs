@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Meta;
+using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Localization;
 using UnrealPluginManager.Core.Model.Modules;
 using UnrealPluginManager.Core.Model.Scripting;
@@ -17,7 +18,7 @@ using CustomBuildSteps = Dictionary<string, List<string>>;
 /// This class holds various attributes describing the plugin, including its version, creator information,
 /// supported platforms, dependencies, and additional settings related to content, extensions, and build configuration.
 /// </summary>
-public class PluginDescriptor {
+public class PluginDescriptor : IDependencyHolder {
     /// <summary>
     /// Descriptor version number
     /// </summary>

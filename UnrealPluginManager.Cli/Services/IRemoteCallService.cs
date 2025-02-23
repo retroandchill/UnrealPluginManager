@@ -41,5 +41,8 @@ public interface IRemoteCallService {
     /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
     /// </returns>
     Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
+    
+    Task<DependencyManifest> TryResolveRemoteDependencies(List<PluginDependency> rootDependencies,
+        DependencyManifest localManifest);
 
 }
