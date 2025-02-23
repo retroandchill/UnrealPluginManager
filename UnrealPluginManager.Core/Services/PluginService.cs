@@ -90,7 +90,7 @@ public partial class PluginService : IPluginService {
         }
 
         return bindings.SelectMany(b => b)
-            .Select(p => pluginData[p.Item1].First(d => d.Version == p.Item2))
+            .Select(p => pluginData[p.Name].First(d => d.Version == p.Version))
             .Select(p => p.ToPluginSummary())
             .ToList();
     }

@@ -21,11 +21,11 @@ public static class ExpressionSolver {
     /// the variable name as a string and its corresponding version as a SemVersion.
     /// If no solution exists, returns None.
     /// </returns>
-    public static Option<List<(string, SemVersion)>> Solve(this IExpression expr) {
+    public static Option<List<SelectedVersion>> Solve(this IExpression expr) {
         var selected = SolveInternal(expr, new Dictionary<string, bool>());
         return selected
             .Select(x => x.Where(y => y.Value)
-                .Select(y => (VarName(y.Key), VarVersion(y.Key)))
+                .Select(y => new SelectedVersion(VarName(y.Key), VarVersion(y.Key)))
                 .ToList());
     }
 
