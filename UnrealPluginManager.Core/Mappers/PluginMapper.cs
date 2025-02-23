@@ -176,18 +176,4 @@ public static partial class PluginMapper {
     /// <param name="fileInfo">The <see cref="IFileInfo"/> object to be passed through unmodified.</param>
     /// <returns>The same <see cref="IFileInfo"/> object that was passed as input.</returns>
     private static IFileInfo PassFileInfo(IFileInfo fileInfo) => fileInfo;
-
-    /// <summary>
-    /// Merges the current <see cref="PluginOverview"/> instance with another <see cref="PluginOverview"/> instance by combining their version information.
-    /// </summary>
-    /// <param name="overview">The current <see cref="PluginOverview"/> instance to be modified.</param>
-    /// <param name="other">The <see cref="PluginOverview"/> instance to merge with the current instance.</param>
-    /// <returns>The modified <see cref="PluginOverview"/> instance containing the merged version data.</returns>
-    public static PluginOverview Merge(this PluginOverview overview, PluginOverview other) {
-        overview.Versions = overview.Versions.Concat(other.Versions)
-            .DistinctBy(x => x.Version)
-            .OrderBy(x => x.Version, SemVersion.PrecedenceComparer)
-            .ToList();
-        return overview;
-    }
 }
