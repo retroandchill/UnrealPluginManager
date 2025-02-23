@@ -63,7 +63,7 @@ public class SearchCommandOptions : ICommandOptions {
     /// This property specifies the target remote source for the search command.
     /// If no remote name is provided, the search defaults to querying the local cache.
     /// </remarks>
-    public string? RemoteName { get; set; }
+    public string? Remote { get; set; }
     
 }
 
@@ -83,17 +83,23 @@ public partial class SearchCommandHandler : ICommandOptionsHandle<SearchCommandO
 
     /// <inheritdoc />
     public Task<int> HandleAsync(SearchCommandOptions options, CancellationToken cancellationToken) {
-        return options.RemoteName.Match(
+        return options.Remote.Match(
             r => ReportRemotePlugins(options.SearchTerm, r),
             () => ReportLocalPlugins(options.SearchTerm));
     }
 
     private int ReportPlugins(IEnumerable<PluginOverview> plugins) {
+        bool hasResult = false;
         foreach (var plugin in plugins) {
+            hasResult = true;
             _console.WriteLine(plugin.Name);
             foreach (var version in plugin.Versions) {
                 _console.WriteLine($"- {version.Version}");
             }
+        }
+
+        if (!hasResult) {
+            _console.WriteLine("No results found.");
         }
 
         return 0;

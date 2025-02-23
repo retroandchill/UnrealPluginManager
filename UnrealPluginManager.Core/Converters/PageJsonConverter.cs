@@ -22,13 +22,14 @@ namespace UnrealPluginManager.Core.Converters;
 public class PageJsonConverter<T> : JsonConverter<Page<T>> {
 
     /// <inheritdoc/>
-    public override Page<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-        var jsonNode = JsonNode.Parse(reader.ValueSpan);
+    public override Page<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        using var document = JsonDocument.ParseValue(ref reader);
+        var jsonNode = JsonNode.Parse(document.RootElement.GetRawText());
         ArgumentNullException.ThrowIfNull(jsonNode);
         var obj = jsonNode.AsObject();
         var pageNumber = obj["pageNumber"]?.GetValue<int>();
         var pageSize = obj["pageSize"]?.GetValue<int>();
-        var items = obj["pageSize"]?.GetValue<List<T>>();
+        var items = JsonSerializer.Deserialize<List<T>>(obj["items"]!.ToString(), options);
         if (pageNumber == null || pageSize == null || items == null) {
             throw new JsonException("Invalid page object.");
         }
