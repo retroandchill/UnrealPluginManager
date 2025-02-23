@@ -27,11 +27,11 @@ public class RemoteCallService : IRemoteCallService {
 
     /// <inheritdoc />
     public async Task<OrderedDictionary<string, Fin<List<PluginOverview>>>> GetPlugins(string searchTerm) {
-        return (await _pluginsApis.Value).ToOrderedDictionary(x => {
+        return await (await _pluginsApis.Value).ToOrderedDictionaryAsync(async x => {
             try {
-                return searchTerm.AsEnumerable()
-                    .PageToEnd((y, p) => x.GetPlugins(searchTerm, p.PageNumber, p.PageSize), DefaultPageSize)
-                    .ToList();
+                return await searchTerm.AsEnumerable()
+                    .PageToEndAsync((y, p) => x.GetPluginsAsync(y, p.PageNumber, p.PageSize), DefaultPageSize)
+                    .ToListAsync();
             } catch (ApiException e) {
                 return Fin<List<PluginOverview>>.Fail(e);
             }
@@ -45,8 +45,8 @@ public class RemoteCallService : IRemoteCallService {
             throw new ArgumentException($"Remote not found '{remote}'");
         }
         
-        return searchTerm.AsEnumerable()
-            .PageToEnd((y, p) => api.GetPlugins(searchTerm, p.PageNumber, p.PageSize), DefaultPageSize)
-            .ToList();
+        return await searchTerm.AsEnumerable()
+            .PageToEndAsync((y, p) => api.GetPluginsAsync(y, p.PageNumber, p.PageSize), DefaultPageSize)
+            .ToListAsync();
     }
 }

@@ -29,5 +29,19 @@ public class LinqExtensionsTest {
             .ToList();
         Assert.That(numbersWithIndices, Is.EquivalentTo(Expected.Select((x, i) => (x, (i * 2) + 1)).ToList()));
     }
-    
+
+    [Test]
+    public void TestToOrderedDictionary() {
+        var dict1 = new OrderedDictionary<int, string> {
+            { 1, "2" },
+            { 2, "1" },
+            { 3, "3" }
+        };
+        
+        var dict2 = dict1.Where(x => x.Key > 1).ToOrderedDictionary();
+        Assert.That(dict2, Has.Count.EqualTo(2));
+        
+        var dict3 = Enumerable.Range(0, 10).ToOrderedDictionary(x => x.ToString(), y => y);
+        Assert.That(dict3, Has.Count.EqualTo(10));
+    }
 }

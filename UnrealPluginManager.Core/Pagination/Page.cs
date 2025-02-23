@@ -57,7 +57,7 @@ public class Page<T> : IPage, IReadOnlyList<T> {
         _items = items as IList<T> ?? items.ToList();
         PageNumber = pageNumber;
         PageSize = pageSize;
-        TotalPages = (int) Math.Ceiling(count / (double) pageSize);
+        TotalPages = Math.Max((int) Math.Ceiling(count / (double) pageSize), 1);
     }
 
     /// <inheritdoc/>

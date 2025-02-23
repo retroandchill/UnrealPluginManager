@@ -82,15 +82,51 @@ public static class LinqExtensions {
     }
 
     /// <summary>
-    /// Converts an enumerable collection of key-value pairs into an OrderedDictionary with the same key-value pairs.
+    /// Converts an enumerable collection of key-value pairs into an OrderedDictionary using a specified value selector function.
     /// </summary>
-    /// <typeparam name="TKey">The type of the keys in the collection.</typeparam>
-    /// <typeparam name="TValue">The type of the values in the collection.</typeparam>
+    /// <typeparam name="TKey">The type of the keys in the source collection.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the resulting OrderedDictionary.</typeparam>
+    /// <typeparam name="T">The type of the values in the source collection.</typeparam>
     /// <param name="source">The source collection of key-value pairs.</param>
-    /// <returns>An OrderedDictionary containing the key-value pairs from the source collection.</returns>
+    /// <param name="valueSelector">A function to extract or transform values for the resulting OrderedDictionary.</param>
+    /// <returns>An OrderedDictionary containing the transformed key-value pairs from the source collection.</returns>
     public static OrderedDictionary<TKey, TValue> ToOrderedDictionary<T, TKey, TValue>(
         this IEnumerable<KeyValuePair<TKey, T>> source, Func<T, TValue> valueSelector) where TKey : notnull {
-        return new OrderedDictionary<TKey, TValue>(source.Select(x => new KeyValuePair<TKey, TValue>(x.Key, valueSelector(x.Value))));
+        return new OrderedDictionary<TKey, TValue>(source.Select(x =>
+            new KeyValuePair<TKey, TValue>(x.Key, valueSelector(x.Value))));
+    }
+
+    /// <summary>
+    /// Converts an asynchronous sequence of key-value pairs into an OrderedDictionary.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the keys in the source sequence.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the source sequence.</typeparam>
+    /// <param name="source">An asynchronous enumerable sequence of key-value pairs to convert.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an OrderedDictionary with the keys and values from the source sequence.</returns>
+    public static async Task<OrderedDictionary<TKey, TValue>> ToOrderedDictionaryAsync<TKey, TValue>(
+        this IAsyncEnumerable<KeyValuePair<TKey, TValue>> source) where TKey : notnull {
+        var result = new OrderedDictionary<TKey, TValue>();
+        await foreach (var elem in source) {
+            result.Add(elem.Key, elem.Value);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Converts an OrderedDictionary with asynchronous value conversion logic into an OrderedDictionary asynchronously.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the keys in the OrderedDictionary.</typeparam>
+    /// <typeparam name="T">The type of the values in the source OrderedDictionary.</typeparam>
+    /// <typeparam name="TValue">The type of the converted values in the resulting OrderedDictionary.</typeparam>
+    /// <param name="source">The source OrderedDictionary to be converted asynchronously.</param>
+    /// <param name="valueSelector">A function to asynchronously project each value in the source OrderedDictionary into a new form.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the new OrderedDictionary with the transformed values.</returns>
+    public static async Task<OrderedDictionary<TKey, TValue>> ToOrderedDictionaryAsync<T, TKey, TValue>(
+        this OrderedDictionary<TKey, T> source, Func<T, Task<TValue>> valueSelector) where TKey : notnull {
+        return await source.ToAsyncEnumerable()
+            .SelectAwait(async x => new KeyValuePair<TKey, TValue>(x.Key, await valueSelector(x.Value)))
+            .ToOrderedDictionaryAsync();
     }
 
 }
