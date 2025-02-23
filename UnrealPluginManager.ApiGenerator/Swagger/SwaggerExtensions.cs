@@ -30,6 +30,8 @@ public static class SwaggerExtensions {
                 var apiAssembly = typeof(PluginsController).Assembly;
                 options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
 
+                options.EnableAnnotations(true, true);
+                
                 // include models xml documentation
                 var modelsAssembly = typeof(PluginSummary).Assembly;
                 options.IncludeXmlComments(GetXmlDocumentationFileFor(modelsAssembly));

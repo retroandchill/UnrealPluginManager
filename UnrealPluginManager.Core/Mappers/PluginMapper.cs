@@ -68,6 +68,27 @@ public static partial class PluginMapper {
     public static SemVersion GetPluginVersion(this PluginVersion plugin) => plugin.Version;
 
     /// <summary>
+    /// Converts a <see cref="PluginVersion"/> instance to a <see cref="PluginVersionInfo"/> representation.
+    /// </summary>
+    /// <param name="version">The source <see cref="PluginVersion"/> to be converted.</param>
+    /// <returns>A <see cref="PluginVersionInfo"/> representing the provided <see cref="PluginVersion"/>.</returns>
+    public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
+
+    /// <summary>
+    /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionInfo}"/> representation.
+    /// </summary>
+    /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
+    /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
+    public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfo(this IQueryable<PluginVersion> versions);
+
+    /// <summary>
+    /// Maps a <see cref="Dependency"/> entity to a <see cref="PluginDependency"/> representation.
+    /// </summary>
+    /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
+    /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
+    public static partial PluginDependency ToPluginDependency(this Dependency dependency);
+
+    /// <summary>
     /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
     /// </summary>
     /// <param name="version">The source <see cref="PluginVersion"/> instance to be converted.</param>
