@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using UnrealPluginManager.Cli.Factories;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.WebClient.Api;
+using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Cli.Utils;
 
@@ -22,15 +25,41 @@ public static class CliServiceUtils {
     /// </exception>
     public static IServiceCollection AddCliServices(this IServiceCollection services) {
         if (OperatingSystem.IsWindows()) {
-            services.AddScoped<IRegistry, WindowsRegistry>();
-            services.AddScoped<IEnginePlatformService, WindowsEnginePlatformService>();
+            services.AddScoped<IRegistry, WindowsRegistry>()
+                .AddScoped<IEnginePlatformService, WindowsEnginePlatformService>();
         } else if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()) {
             services.AddScoped<IEnginePlatformService, PosixEnginePlatformService>();
         } else {
             throw new PlatformNotSupportedException("The given platform is not supported.");
         }
         return services.AddScoped<IEngineService, EngineService>()
-            .AddScoped<IStorageService, LocalStorageService>();
+            .AddScoped<IStorageService, LocalStorageService>()
+            .AddScoped<IRemoteService, RemoteService>()
+            .AddScoped<IRemoteCallService, RemoteCallService>();
+    }
+
+    /// <summary>
+    /// Registers a scoped factory for creating API accessor instances. This allows dependency injection
+    /// to resolve instances of API accessors with a specified implementation type.
+    /// </summary>
+    /// <typeparam name="T">The type of the API accessor interface.</typeparam>
+    /// <typeparam name="TImpl">The implementation type of the API accessor interface.</typeparam>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the accessor factory is added.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
+    public static IServiceCollection AddAccessorFactory<T, TImpl>(this IServiceCollection services) where T : IApiAccessor where TImpl : T {
+        return services.AddScoped<IApiAccessorFactory<T>, ApiAccessorFactory<T, TImpl>>();
+    }
+
+    /// <summary>
+    /// Registers API factories into the dependency injection container. This method adds specific
+    /// API accessor factories for plugins and storage operations.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the API factories are registered.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
+    public static IServiceCollection AddApiFactories(this IServiceCollection services) {
+        return services
+            .AddAccessorFactory<IPluginsApi, PluginsApi>()
+            .AddAccessorFactory<IStorageApi, StorageApi>();
     }
     
 }

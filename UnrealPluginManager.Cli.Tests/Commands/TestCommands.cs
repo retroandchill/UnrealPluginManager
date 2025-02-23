@@ -4,6 +4,7 @@ using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using LanguageExt;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Moq;
@@ -16,6 +17,10 @@ using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Pagination;
+using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Tests.Commands;
 
@@ -24,6 +29,8 @@ public class TestCommands {
     private MockFileSystem _filesystem;
     private Parser _parser;
     private Mock<IEnvironment> _environment;
+    private Mock<IPluginService> _pluginService;
+    private Mock<IRemoteCallService> _remoteCallService;
     private Mock<IEngineService> _engineService;
     
     [SetUp]
@@ -32,10 +39,13 @@ public class TestCommands {
         var rootCommand = new RootCommand {
             new BuildCommand(),
             new InstallCommand(),
-            new VersionsCommand()
+            new VersionsCommand(),
+            new SearchCommand()
         };
         
+        _pluginService = new Mock<IPluginService>();
         _engineService = new Mock<IEngineService>();
+        _remoteCallService = new Mock<IRemoteCallService>();
         _environment = new Mock<IEnvironment>();
         var builder = new CommandLineBuilder(rootCommand)
             .UseDefaults()
@@ -44,6 +54,8 @@ public class TestCommands {
                 services.AddSingleton<IFileSystem>(_filesystem);
                 services.AddSingleton(_environment.Object);
                 services.AddSingleton(_engineService.Object);
+                services.AddSingleton(_pluginService.Object);
+                services.AddSingleton(_remoteCallService.Object);
             });
         
         _parser = builder.Build();
@@ -127,5 +139,72 @@ public class TestCommands {
             It.Is<SemVersionRange>(y => y == SemVersionRange.AtLeast(new SemVersion(1, 0, 0), false)),
             It.Is<string?>(y => y == "5.5")));
     }
-    
+
+    [Test]
+    public async Task TestSearch() {
+        var versions = new SemVersion[] {
+            new(1, 0, 0),
+            new(1, 0, 1),
+            new(1, 0, 2),
+            new(1, 0, 3),
+            new(1, 1, 0),
+            new(1, 1, 1),
+            new(1, 2, 0),
+            new(2, 0, 0),
+            new(2, 0, 1),
+            new(3, 0, 0)
+        };
+
+        var count = 1;
+        var plugins = Enumerable.Range(0, 100)
+            .Select(i => new PluginOverview {
+                Id = (ulong)i + 1,
+                Name = $"TestPlugin{i}",
+                Versions = versions
+                    .Take((i % 10) + 1)
+                    .Select(x => new VersionOverview {
+                        Id = (ulong)count++,
+                        Version = x,
+                    })
+                    .ToList()
+            })
+            .ToList();
+        _pluginService.Setup(x => x.ListPlugins("*", default))
+            .Returns(Task.FromResult(new Page<PluginOverview>(plugins)));
+        
+        var returnCode = await _parser.InvokeAsync("search *");
+        Assert.That(returnCode, Is.EqualTo(0));
+        _pluginService.Verify(x => x.ListPlugins("*", default));
+
+        _remoteCallService.Setup(x => x.GetPlugins("default", "*"))
+            .Returns(Task.FromResult(plugins));
+        returnCode = await _parser.InvokeAsync("search * --remote default");
+        Assert.That(returnCode, Is.EqualTo(0));
+        _remoteCallService.Verify(x => x.GetPlugins("default", "*"));
+
+        var split = plugins
+            .Select((x, i) => new { Index = i, Value = x })
+            .GroupBy(x => x.Index / 10)
+            .Select((x, i) => new KeyValuePair<string, Fin<List<PluginOverview>>>(
+                $"group{i}",
+                i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
+            .ToOrderedDictionary();
+        _remoteCallService.Setup(x => x.GetPlugins("*"))
+            .Returns(Task.FromResult(split));
+        returnCode = await _parser.InvokeAsync("search * --remote all");
+        Assert.That(returnCode, Is.EqualTo(0));
+        _remoteCallService.Verify(x => x.GetPlugins("*"));
+        
+        var allErrors = Enumerable.Range(0, 100)
+            .Select(i => new KeyValuePair<string, Fin<List<PluginOverview>>>(
+                $"group{i}",
+                Fin<List<PluginOverview>>.Fail("Error")))
+            .ToOrderedDictionary();
+        _remoteCallService.Setup(x => x.GetPlugins("*"))
+            .Returns(Task.FromResult(allErrors));
+        
+        returnCode = await _parser.InvokeAsync("search * --remote all");
+        Assert.That(returnCode, Is.EqualTo(-1));
+        _remoteCallService.Verify(x => x.GetPlugins("*"));
+    }
 }

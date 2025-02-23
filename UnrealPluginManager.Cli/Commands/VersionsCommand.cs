@@ -2,6 +2,7 @@
 using System.CommandLine.IO;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -46,8 +47,7 @@ public partial class VersionsCommandOptionsHandler : ICommandOptionsHandle<Versi
     /// <inheritdoc />
     public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
         var installedEngines = _engineService.GetInstalledEngines();
-        LanguageExt.Option<string> selected = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion);
-        var currentVersion = selected
+        var currentVersion = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
             .Match(x => installedEngines.FindIndex(y => y.Name == x),
                 () => installedEngines.Index()
                     .Where(y => !y.Item.CustomBuild)

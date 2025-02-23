@@ -15,8 +15,21 @@ public static class OptionUtils {
     /// <returns>The value contained within the option.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the Option contains no value.</exception>
     public static T Get<T>(this Option<T> option) => option.Match(
-        Some: x => x,
-        None: () => throw new InvalidOperationException("Option is None")
+        x => x,
+        () => throw new InvalidOperationException("Option is None")
+    );
+
+    /// <summary>
+    /// Retrieves the value from a <see cref="Fin{T}"/> instance if the operation was successful.
+    /// Throws the associated exception if the operation failed.
+    /// </summary>
+    /// <typeparam name="T">The type of the value contained within the Fin.</typeparam>
+    /// <param name="fin">The Fin instance from which to retrieve the value or exception.</param>
+    /// <returns>The value contained within the Fin if the operation was successful.</returns>
+    /// <exception cref="Exception">Thrown if the Fin represents a failed operation.</exception>
+    public static T Get<T>(this Fin<T> fin) => fin.Match(
+        x => x,
+        x => throw x.ToException()
     );
 
     /// <summary>
@@ -56,5 +69,32 @@ public static class OptionUtils {
     /// <returns>An <see cref="Option{T}"/> containing the value if non-null, or None if the value is null.</returns>
     public static Option<T> ToOption<T>(this T? value) {
         return value ?? Option<T>.None;
+    }
+
+    /// <summary>
+    /// Executes pattern matching logic on a nullable class type <see cref="T"/> value and produces a result of type <see cref="TResult"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the nullable class to be matched.</typeparam>
+    /// <typeparam name="TResult">The type of the result produced by the matching logic.</typeparam>
+    /// <param name="value">The nullable class instance to apply the match operation on.</param>
+    /// <param name="some">The function to execute if the value is non-null.</param>
+    /// <param name="none">The function to execute if the value is null.</param>
+    /// <returns>The result of type <see cref="TResult"/> determined by executing either the <paramref name="some"/> or <paramref name="none"/> function.</returns>
+    public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : class {
+        return value is not null ? some(value) : none();
+    }
+
+    /// <summary>
+    /// Matches a nullable value to one of two possible outcomes based on whether the value is present or null.
+    /// Executes the given function if the value is present, or a fallback function if the value is null.
+    /// </summary>
+    /// <typeparam name="T">The type of the nullable value to be matched.</typeparam>
+    /// <typeparam name="TResult">The type of the result produced by executing one of the provided functions.</typeparam>
+    /// <param name="value">The nullable value to be matched.</param>
+    /// <param name="some">The function to execute if the value is not null.</param>
+    /// <param name="none">The function to execute if the value is null.</param>
+    /// <returns>The result of either the <paramref name="some"/> or <paramref name="none"/> function, depending on whether the <paramref name="value"/> is null.</returns>
+    public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : struct {
+        return value is not null ? some(value.Value) : none();
     }
 }
