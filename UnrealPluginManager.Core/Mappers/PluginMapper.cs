@@ -54,11 +54,7 @@ public static partial class PluginMapper {
     /// </summary>
     /// <param name="version">The <see cref="PluginVersion"/> instance to be mapped to a <see cref="PluginSummary"/>.</param>
     /// <returns>A <see cref="PluginSummary"/> representing the provided <see cref="PluginVersion"/>.</returns>
-    [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginSummary.PluginId))]
-    [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginSummary.Name))]
-    [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginSummary.FriendlyName))]
-    [MapProperty(nameof(PluginVersion.Id), nameof(PluginSummary.VersionId))]
-    public static partial PluginSummary ToPluginSummary(this PluginVersion version);
+    public static partial PluginSummary ToPluginSummary(this PluginVersionInfo version);
 
     /// <summary>
     /// Retrieves the semantic version of a plugin from the provided <see cref="PluginVersion"/> instance.
@@ -72,6 +68,11 @@ public static partial class PluginMapper {
     /// </summary>
     /// <param name="version">The source <see cref="PluginVersion"/> to be converted.</param>
     /// <returns>A <see cref="PluginVersionInfo"/> representing the provided <see cref="PluginVersion"/>.</returns>
+    [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionInfo.PluginId))]
+    [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
+    [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
+    [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionInfo.VersionId))]
+    [MapValue(nameof(PluginVersionInfo.IsInstalled), false)]
     public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
     /// <summary>

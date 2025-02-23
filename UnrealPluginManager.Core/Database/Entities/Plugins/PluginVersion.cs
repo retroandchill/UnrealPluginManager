@@ -12,7 +12,7 @@ namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 /// relationship to the parent plugin, its version details, dependencies, and associated binaries.
 /// This entity is associated with a database table and supports Entity Framework Core.
 /// </summary>
-public class PluginVersion : IPluginVersionInfo {
+public class PluginVersion {
     /// <summary>
     /// Gets or sets the unique identifier for the plugin version.
     /// </summary>
@@ -29,10 +29,6 @@ public class PluginVersion : IPluginVersionInfo {
     /// Gets or sets the parent plugin associated with the plugin version.
     /// </summary>
     public Plugin Parent { get; set; }
-    
-    /// <inheritdoc />
-    [NotMapped]
-    public string PluginName => Parent.Name;
 
     /// <summary>
     /// Gets or sets the semantic version of the plugin.
@@ -50,10 +46,6 @@ public class PluginVersion : IPluginVersionInfo {
         get => Version.ToString();
         set => Version = SemVersion.Parse(value);
     }
-
-    /// <inheritdoc />
-    [NotMapped]
-    IEnumerable<IPluginDependency> IPluginVersionInfo.Dependencies => Dependencies;
 
     /// <summary>
     /// Gets or sets the collection of dependencies for the plugin version.

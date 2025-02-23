@@ -83,7 +83,7 @@ public static class ExpressionSolver {
                     .Select(pd => pd.Version)
                     .Select(v => PackageVar(dep.PluginName, v))
                     .ToList())
-                .Select(deps => new Impl(PackageVar(pack.PluginName, pack.Version), new Or(deps))));
+                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version), new Or(deps))));
         }
 
         var variables = new And(terms).Free()
