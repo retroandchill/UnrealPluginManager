@@ -32,6 +32,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
+      <ProjectReference Include="..\UnrealPluginManager.Remotes\UnrealPluginManager.Remotes.csproj" />
       <ProjectReference Include="..\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
     </ItemGroup>
 

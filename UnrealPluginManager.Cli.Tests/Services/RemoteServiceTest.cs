@@ -44,18 +44,18 @@ public class RemoteServiceTest {
     }
 
     [Test]
-    public async Task TestConfigureRemotes() {
-        var defaultRemote = await _remoteService.GetRemote("default");
+    public void TestConfigureRemotes() {
+        var defaultRemote = _remoteService.GetRemote("default");
         Assert.That(defaultRemote.IsSome, Is.True);
         var defaultRemoteValue = defaultRemote.Get().Url;
         
-        var invalidRemote = await _remoteService.GetRemote("invalid");
+        var invalidRemote = _remoteService.GetRemote("invalid");
         Assert.That(invalidRemote.IsNone, Is.True);
         
         Assert.ThrowsAsync<ArgumentException>(() => _remoteService.AddRemote("default", new Uri("https://unrealpluginmanager.com")));
         Assert.DoesNotThrowAsync(() => _remoteService.AddRemote("alt", new Uri("https://github.com/api/v1/repos/EpicGames/UnrealEngine/releases/latest")));
         
-        var allRemotes = (await _remoteService.GetAllRemotes())
+        var allRemotes = _remoteService.GetAllRemotes()
             .ToDictionary(x => x.Key, x => x.Value.Url);
         Assert.That(allRemotes, Has.Count.EqualTo(2));
         Assert.That(allRemotes, Does.ContainKey("default").WithValue(defaultRemoteValue));
@@ -64,13 +64,13 @@ public class RemoteServiceTest {
         Assert.ThrowsAsync<ArgumentException>(() => _remoteService.RemoveRemote("invalid"));
         Assert.DoesNotThrowAsync(() => _remoteService.RemoveRemote("alt"));
 
-        var altRemote = await _remoteService.GetRemote("alt");
+        var altRemote = _remoteService.GetRemote("alt");
         Assert.That(altRemote.IsNone, Is.True);
         
         Assert.ThrowsAsync<ArgumentException>(() => _remoteService.UpdateRemote("alt", new Uri("https://unrealpluginmanager.com")));
         Assert.DoesNotThrowAsync(() => _remoteService.UpdateRemote("default", new Uri("https://unrealpluginmanager.com")));
         
-        allRemotes = (await _remoteService.GetAllRemotes())
+        allRemotes = _remoteService.GetAllRemotes()
             .ToDictionary(x => x.Key, x => x.Value.Url);
         Assert.That(allRemotes, Has.Count.EqualTo(1));
         Assert.That(allRemotes, Does.ContainKey("default").WithValue(new Uri("https://unrealpluginmanager.com")));

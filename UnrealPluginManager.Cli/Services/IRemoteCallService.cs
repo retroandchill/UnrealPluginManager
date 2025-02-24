@@ -41,8 +41,28 @@ public interface IRemoteCallService {
     /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
     /// </returns>
     Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
-    
+
+    /// <summary>
+    /// Resolves remote dependencies for a given list of root plugin dependencies.
+    /// The method attempts to find compatible versions of the specified plugins by consulting remote sources,
+    /// extending the provided local dependency manifest with additional resolved or unresolved entries.
+    /// </summary>
+    /// <param name="rootDependencies">
+    /// A list of root plugin dependencies that need to be resolved.
+    /// Each dependency represents a specific plugin and its requirements.
+    /// </param>
+    /// <param name="localManifest">
+    /// An existing dependency manifest containing previously resolved and unresolved dependencies.
+    /// This manifest is extended with the results from the remote resolution process.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. Upon completion, returns a <see cref="DependencyManifest"/>
+    /// which includes a dictionary of resolved dependencies along with their versions
+    /// and a set of unresolved dependency names.
+    /// </returns>
     Task<DependencyManifest> TryResolveRemoteDependencies(List<PluginDependency> rootDependencies,
         DependencyManifest localManifest);
+    
+    
 
 }

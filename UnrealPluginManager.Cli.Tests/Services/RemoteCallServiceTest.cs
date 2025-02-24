@@ -1,10 +1,12 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+﻿using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using UnrealPluginManager.Cli.Factories;
+using UnrealPluginManager.Cli.Config;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
@@ -14,40 +16,59 @@ namespace UnrealPluginManager.Cli.Tests.Services;
 public class RemoteCallServiceTest {
     
     private ServiceProvider _serviceProvider;
-    private OrderedDictionary<string, Mock<IPluginsApi>> _remotes;
-    private Mock<IApiAccessorFactory<IPluginsApi>> _factory;
+    private Mock<IStorageService> _storageService;
+    private Mock<IPluginsApi> _pluginsApi;
     private IRemoteCallService _remoteCallService;
 
     [SetUp]
     public void Setup() {
         var services = new ServiceCollection();
-
-        _remotes = new OrderedDictionary<string, Mock<IPluginsApi>> {
-            {
-                "default", new Mock<IPluginsApi>()
-            }, {
-                "alt", new Mock<IPluginsApi>()
-            }, {
-                "unaccessible", new Mock<IPluginsApi>()
-            }
-        };
-
-        _factory = new Mock<IApiAccessorFactory<IPluginsApi>>();
-
-        var mockedRemotes = _remotes.ToOrderedDictionary(x => x.Object);
-        _factory.Setup(x => x.GetAccessors()).Returns(Task.FromResult(mockedRemotes));
         
-        services.AddSingleton(_factory.Object);
+        _storageService = new Mock<IStorageService>();
+        services.AddSingleton(_storageService.Object);
+        _storageService.Setup(x => x.GetConfig(It.IsAny<string>(), It.IsAny<OrderedDictionary<string, RemoteConfig>>()))
+            .Returns(new OrderedDictionary<string, RemoteConfig> {
+                ["default"] = new() {
+                    Url = new Uri("https://unrealpluginmanager.com")
+                },
+                ["alt"] = new() {
+                    Url = new Uri("https://github.com/api/v1/repos/EpicGames/UnrealEngine/releases/latest")
+                },
+                ["unaccessible"] = new() {
+                    Url = new Uri("https://unrealpluginmanager.com/invalid")
+                }
+            });
+
+        services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
+
+        _pluginsApi = new Mock<IPluginsApi>();
+        services.AddSingleton(_pluginsApi.Object);
+        services.AddSingleton<IApiAccessor>(_pluginsApi.Object);
+        
+        var console = new Mock<IConsole>();
+        services.AddSingleton(console.Object);
+        
+        services.AddSingleton(_pluginsApi.Object);
+        services.AddScoped<IRemoteService, RemoteService>();
         services.AddScoped<IRemoteCallService, RemoteCallService>();
         
         _serviceProvider = services.BuildServiceProvider();
         _remoteCallService = _serviceProvider.GetRequiredService<IRemoteCallService>();
+
+        var pageList = AddPluginsToRemote(300)
+            .Concat(AddPluginsToRemote(50))
+            .ToList();
         
-        AddPluginsToRemote("default", 300);
-        AddPluginsToRemote("alt", 50);
-        _remotes["unaccessible"].Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
-                It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ApiException(404, "Unreachable"));
+        var pageIndex = 0;
+        _pluginsApi.Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
+            It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns((string? _, int? _, int? _, int _, CancellationToken _) => {
+                if (pageIndex >= pageList.Count) {
+                    throw new ApiException(404, "Unreachable");
+                }
+                
+                return Task.FromResult(pageList[pageIndex++]);
+            });
     }
 
     [TearDown]
@@ -55,8 +76,8 @@ public class RemoteCallServiceTest {
         _serviceProvider.Dispose();
     }
 
-    private void AddPluginsToRemote(string remote, int totalCount) {
-        var plugins = Enumerable.Range(0, totalCount)
+    private static List<Page<PluginOverview>> AddPluginsToRemote(int totalCount) {
+        return Enumerable.Range(0, totalCount)
             .Select(i => new PluginOverview {
                 Id = (ulong)i + 1,
                 Name = $"Plugin{i + 1}",
@@ -65,9 +86,6 @@ public class RemoteCallServiceTest {
             })
             .AsPages(100)
             .ToList();
-        _remotes[remote].Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
-                It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns((string _, int x, int _, int _, CancellationToken _) => Task.FromResult(plugins[x - 1]));
     }
     
     [Test]

@@ -20,10 +20,34 @@ public interface IPluginService {
     /// </returns>
     Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
 
+    /// <summary>
+    /// Requests detailed version information for a list of specified plugins.
+    /// </summary>
+    /// <param name="requestedVersions">A list of requested plugin versions including their names and semantic versions.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation, containing a list of <see cref="PluginVersionInfo"/>
+    /// that provide detailed information about the specified plugin versions.
+    /// </returns>
     Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions);
 
+    /// <summary>
+    /// Determines and retrieves possible versions of plugins that satisfy the given list of dependencies.
+    /// </summary>
+    /// <param name="dependencies">A list of plugin dependencies for which to find compatible versions.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="DependencyManifest"/>
+    /// outlining the resolved possible versions for the specified dependencies.
+    /// </returns>
     Task<DependencyManifest> GetPossibleVersions(List<PluginDependency> dependencies);
-    
+
+    /// <summary>
+    /// Resolves and retrieves a complete list of plugin dependencies based on the provided root dependencies and available versions.
+    /// </summary>
+    /// <param name="rootDependencies">The initial list of root plugin dependencies to resolve.</param>
+    /// <param name="allVersions">The manifest containing all possible plugin versions and their metadata.</param>
+    /// <returns>
+    /// An optional list of <see cref="PluginSummary"/> representing the resolved and consolidated plugin dependencies, or none if resolution fails.
+    /// </returns>
     Option<List<PluginSummary>> GetDependencyList(List<PluginDependency> rootDependencies,
         DependencyManifest allVersions);
 

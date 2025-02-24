@@ -97,4 +97,18 @@ public static class OptionUtils {
     public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : struct {
         return value is not null ? some(value.Value) : none();
     }
+
+    public static T OrElseGet<T>(this Option<T> option, Func<T> fallback) {
+        return option.Match(
+            x => x,
+            fallback
+        );
+    }
+
+    public static Task<T> OrElseGet<T>(this Option<T> option, Func<Task<T>> fallback) {
+        return option.Match(
+            Task.FromResult,
+            fallback
+        );
+    }
 }
