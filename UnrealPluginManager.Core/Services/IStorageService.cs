@@ -39,11 +39,31 @@ public interface IStorageService {
     /// <returns>A <see cref="Stream"/> representing the contents of the retrieved icon.</returns>
     /// <exception cref="FileNotFoundException">Thrown when the specified icon file is not found.</exception>
     Stream RetrieveIcon(string iconName);
-    
+
+    /// <summary>
+    /// Retrieves the configuration object of a specified type from the given configuration file.
+    /// </summary>
+    /// <param name="filename">The name of the configuration file to read from.</param>
+    /// <typeparam name="T">The type of the configuration object to retrieve.</typeparam>
+    /// <returns>An <see cref="Option{T}"/> containing the deserialized configuration object if found, or none if the file does not exist or deserialization fails.</returns>
     Option<T> GetConfig<T>(string filename);
-    
+
+    /// <summary>
+    /// Retrieves the specified configuration from a file.
+    /// </summary>
+    /// <param name="filename">The name of the file containing the configuration.</param>
+    /// <param name="defaultValue">The default value to return if the file is not found or cannot be loaded.</param>
+    /// <typeparam name="T">The type of the configuration to retrieve.</typeparam>
+    /// <returns>A configuration object of type <typeparamref name="T"/> if found; otherwise, the provided default value of type <typeparamref name="T"/>.</returns>
     T GetConfig<T>(string filename, T defaultValue);
-    
+
+    /// <summary>
+    /// Retrieves the configuration data of the specified type from the given file, or returns the default value provided by the specified function if the configuration is not found.
+    /// </summary>
+    /// <param name="filename">The name of the file containing the configuration data.</param>
+    /// <param name="defaultValue">A function that provides the default value to return if the configuration data is not found.</param>
+    /// <typeparam name="T">The type of the configuration data to retrieve.</typeparam>
+    /// <returns>The configuration data of type <typeparamref name="T"/> retrieved from the file, or the default value provided by the function.</returns>
     T GetConfig<T>(string filename, Func<T> defaultValue);
 
     /// <summary>
@@ -70,7 +90,14 @@ public interface IStorageService {
     /// <param name="defaultValue">A function that provides a default value to be used if the configuration file is not found or empty.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains the configuration data of type <typeparamref name="T"/>.</returns>
     Task<T> GetConfigAsync<T>(string filename, Func<T> defaultValue);
-    
+
+    /// <summary>
+    /// Saves the specified configuration value to a file with the given filename.
+    /// </summary>
+    /// <param name="filename">The name of the file where the configuration data will be saved.</param>
+    /// <param name="value">The configuration value to be saved in the specified file.</param>
+    /// <typeparam name="T">The type of the configuration value.</typeparam>
+    /// <exception cref="ArgumentNullException">Thrown when the provided configuration value is null.</exception>
     void SaveConfig<T>(string filename, T value);
 
     /// <summary>

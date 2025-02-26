@@ -5,9 +5,6 @@ using System.Text.Json.Nodes;
 using Semver;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Core.Abstractions;
-using UnrealPluginManager.Core.Model.EngineFile;
-using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 
@@ -22,21 +19,6 @@ public partial class EngineService : IEngineService {
     private readonly IPluginService _pluginService;
     private readonly IEnginePlatformService _enginePlatformService;
     private readonly IProcessRunner _processRunner;
-
-    /// <inheritdoc />
-    public async Task<IDependencyHolder> ReadSubmittedPluginFile(string filename) {
-        await using var fileStream = _fileSystem.File.OpenRead(filename);
-        const StringComparison ignore = StringComparison.InvariantCultureIgnoreCase;
-        if (filename.EndsWith(".uplugin", ignore)) {
-            return JsonSerializer.Deserialize<PluginDescriptor>(fileStream)!;
-        }
-
-        if (filename.EndsWith(".uproject", ignore)) {
-            return JsonSerializer.Deserialize<ProjectDescriptor>(fileStream)!;
-        }
-        
-        throw new ArgumentException("Invalid file type.");
-    }
 
     /// <inheritdoc />
     public List<InstalledEngine> GetInstalledEngines() {
@@ -96,46 +78,6 @@ public partial class EngineService : IEngineService {
         await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         
         return 0;
-    }
-
-    private IAsyncEnumerable<PluginVersionRequest> WalkInstalledPlugins(string? engineVersion = null) {
-        var installedEngine = GetInstalledEngine(engineVersion);
-        return _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory)
-            .GetFiles("*.uplugin", SearchOption.AllDirectories)
-            .ToAsyncEnumerable()
-            .SelectAwait(async x => {
-                await using var fileStream = x.OpenRead();
-                return (Name: Path.GetFileNameWithoutExtension(x.Name),
-                    Descriptor: (await JsonSerializer.DeserializeAsync<PluginDescriptor>(fileStream))!);
-            })
-            .Select(x => new PluginVersionRequest(x.Name, x.Descriptor.VersionName));
-    }
-
-    /// <inheritdoc />
-    public async Task<List<PluginVersionInfo>> GetInstalledPluginVersions(string? engineVersion = null) {
-        var installedPlugins = await WalkInstalledPlugins(engineVersion).ToListAsync();
-        
-        return (await _pluginService.RequestPluginInfos(installedPlugins))
-            .Select(x => {
-                x.IsInstalled = true;
-                return x;
-            })
-            .ToList();
-    }
-
-    /// <inheritdoc />
-    public async Task<List<PluginVersionInfo>> GetInstalledPluginVersions(IEnumerable<string> pluginNames,
-        string? engineVersion) {
-        var installedPlugins = await WalkInstalledPlugins(engineVersion)
-            .Where(x => pluginNames.Contains(x.Name))
-            .ToListAsync();
-        
-        return (await _pluginService.RequestPluginInfos(installedPlugins))
-            .Select(x => {
-                x.IsInstalled = true;
-                return x;
-            })
-            .ToList();
     }
 
     private InstalledEngine GetInstalledEngine(string? engineVersion) {

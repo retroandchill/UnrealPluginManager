@@ -84,6 +84,7 @@ public abstract partial class StorageServiceBase : IStorageService {
         return FileSystem.File.OpenRead(Path.Combine(IconsDirectory, iconName));
     }
 
+    /// <inheritdoc />
     public Option<T> GetConfig<T>(string filename) {
         FileSystem.Directory.CreateDirectory(ConfigDirectory);
         var filePath = Path.Combine(ConfigDirectory, filename);
@@ -98,6 +99,7 @@ public abstract partial class StorageServiceBase : IStorageService {
         return resultObject;
     }
 
+    /// <inheritdoc />
     public T GetConfig<T>(string filename, T defaultValue) {
         var result = GetConfig<T>(filename);
         return result.OrElseGet(() => {
@@ -106,6 +108,7 @@ public abstract partial class StorageServiceBase : IStorageService {
             });
     }
 
+    /// <inheritdoc />
     public T GetConfig<T>(string filename, Func<T> defaultValue) {
         var result = GetConfig<T>(filename);
         return result.OrElseGet(() => {
@@ -149,6 +152,7 @@ public abstract partial class StorageServiceBase : IStorageService {
             });
     }
 
+    /// <inheritdoc />
     public void SaveConfig<T>(string filename, T value) {
         ArgumentNullException.ThrowIfNull(value);
         FileSystem.Directory.CreateDirectory(ConfigDirectory);

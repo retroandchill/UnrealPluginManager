@@ -1,8 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Semver;
 using UnrealPluginManager.Cli.Model.Engine;
-using UnrealPluginManager.Core.Model.EngineFile;
-using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Cli.Services;
 
@@ -10,13 +8,6 @@ namespace UnrealPluginManager.Cli.Services;
 /// Provides functionalities related to engine management within the Unreal Plugin Manager CLI.
 /// </summary>
 public interface IEngineService {
-    /// <summary>
-    /// Reads the specified plugin file and returns a collection of plugin dependencies.
-    /// </summary>
-    /// <param name="filename">The path to the plugin file to be read.</param>
-    /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="IDependencyHolder"/> object holding the plugin dependencies.</returns>
-    public Task<IDependencyHolder> ReadSubmittedPluginFile(string filename);
-    
     /// <summary>
     /// Retrieves a list of installed Unreal Engine versions available on the system.
     /// </summary>
@@ -49,11 +40,4 @@ public interface IEngineService {
     /// A task representing the asynchronous operation. The task result contains an integer indicating the status of the installation process.
     /// </returns>
     public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion);
-
-    /// <summary>
-    /// Retrieves a list of installed plugins for a specified Unreal Engine version.
-    /// </summary>
-    /// <param name="engineVersion">The version of the Unreal Engine for which to list installed plugins. If null, lists plugins for all available engine versions.</param>
-    /// <returns>A task representing the asynchronous operation. The task result contains a list of <see cref="PluginVersionRequest"/> objects representing the installed plugins.</returns>
-    public Task<List<PluginVersionInfo>> GetInstalledPluginVersions(string? engineVersion = null);
 }
