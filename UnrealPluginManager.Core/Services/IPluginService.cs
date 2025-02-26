@@ -10,9 +10,6 @@ namespace UnrealPluginManager.Core.Services;
 /// Service declaration for operations involving plugins.
 /// </summary>
 public interface IPluginService {
-
-    public Task<bool> IsPluginCached(ulong pluginId, ulong versionId);
-    
     /// <summary>
     /// Retrieves a collection of plugin summaries including essential information like name and optional description.
     /// </summary>
@@ -108,7 +105,4 @@ public interface IPluginService {
     /// A stream representing the binary content of the plugin file.
     /// </returns>
     Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion);
-    
-    
-    Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion);
 }

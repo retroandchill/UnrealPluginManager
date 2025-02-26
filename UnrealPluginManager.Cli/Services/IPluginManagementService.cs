@@ -41,25 +41,4 @@ public interface IPluginManagementService {
     /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
     /// </returns>
     Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
-
-    /// <summary>
-    /// Resolves and retrieves a list of plugin dependencies for a specified file.
-    /// Dependencies are determined based on the provided file and, optionally, the specified engine version.
-    /// </summary>
-    /// <param name="filename">
-    /// The full path to the file (.uplugin or .uproject) whose plugin dependencies need to be resolved.
-    /// </param>
-    /// <param name="engineVersion">
-    /// An optional string specifying the engine version. If null, the method will attempt to determine
-    /// dependencies without engine version constraints.
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous operation. Upon completion, returns a list of
-    /// <see cref="PluginSummary"/> objects representing the resolved dependencies.
-    /// </returns>
-    Task<List<PluginSummary>> ResolveDependenciesForFile(string filename, string? engineVersion);
-
-    Task InstallPlugins(IEnumerable<PluginSummary> plugins);
-
-
 }

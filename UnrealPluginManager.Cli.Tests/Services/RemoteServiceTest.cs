@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
@@ -32,6 +33,7 @@ public class RemoteServiceTest {
             .Returns(UserPath);
         services.AddSingleton(_environment.Object);
         
+        services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
         services.AddSingleton<IStorageService, LocalStorageService>();
         services.AddScoped<IRemoteService, RemoteService>();
         _serviceProvider = services.BuildServiceProvider();

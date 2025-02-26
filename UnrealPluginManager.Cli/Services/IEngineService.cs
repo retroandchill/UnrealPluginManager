@@ -56,19 +56,4 @@ public interface IEngineService {
     /// <param name="engineVersion">The version of the Unreal Engine for which to list installed plugins. If null, lists plugins for all available engine versions.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains a list of <see cref="PluginVersionRequest"/> objects representing the installed plugins.</returns>
     public Task<List<PluginVersionInfo>> GetInstalledPluginVersions(string? engineVersion = null);
-    
-    /// <summary>
-    /// Retrieves a list of installed plugin versions for the specified plugin names within the specified engine version.
-    /// </summary>
-    /// <param name="pluginNames">
-    ///     A list of plugin names to filter the installed plugin versions.
-    /// </param>
-    /// <param name="engineVersion">
-    ///     The version of the engine to look for installed plugins. If null, uses the default engine version.
-    /// </param>
-    /// <returns>
-    /// A list of <see cref="PluginVersionInfo"/> objects representing the details of installed plugin versions.
-    /// </returns>
-    public Task<List<PluginVersionInfo>> GetInstalledPluginVersions(IEnumerable<string> pluginNames,
-        string? engineVersion);
 }

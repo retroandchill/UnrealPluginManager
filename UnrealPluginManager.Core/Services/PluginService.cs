@@ -27,10 +27,6 @@ public partial class PluginService : IPluginService {
         AllowTrailingCommas = true
     };
 
-    public Task<bool> IsPluginCached(ulong pluginId, ulong versionId) {
-        return _dbContext.PluginVersions.AnyAsync(x => x.Id == versionId && x.ParentId == pluginId);
-    }
-
     /// <param name="matcher"></param>
     /// <param name="pageable"></param>
     /// <inheritdoc/>

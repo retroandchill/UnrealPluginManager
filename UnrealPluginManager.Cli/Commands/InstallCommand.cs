@@ -114,12 +114,6 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
 
     /// <inheritdoc />
     public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-        const StringComparison ignore = StringComparison.InvariantCultureIgnoreCase;
-        if (!options.Input.EndsWith(".uplugin", ignore) && !options.Input.EndsWith(".uproject")) {
-            return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
-        }
-        
-        var dependencies = await _pluginManagementService.ResolveDependenciesForFile(options.Input, options.EngineVersion);
-        
+        return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
     }
 }
