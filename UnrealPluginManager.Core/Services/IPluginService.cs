@@ -1,5 +1,4 @@
-﻿using LanguageExt;
-using Semver;
+﻿using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
@@ -39,17 +38,6 @@ public interface IPluginService {
     /// outlining the resolved possible versions for the specified dependencies.
     /// </returns>
     Task<DependencyManifest> GetPossibleVersions(List<PluginDependency> dependencies);
-
-    /// <summary>
-    /// Resolves and retrieves a complete list of plugin dependencies based on the provided root dependencies and available versions.
-    /// </summary>
-    /// <param name="rootDependencies">The initial list of root plugin dependencies to resolve.</param>
-    /// <param name="allVersions">The manifest containing all possible plugin versions and their metadata.</param>
-    /// <returns>
-    /// An optional list of <see cref="PluginSummary"/> representing the resolved and consolidated plugin dependencies, or none if resolution fails.
-    /// </returns>
-    Option<List<PluginSummary>> GetDependencyList(List<PluginDependency> rootDependencies,
-        DependencyManifest allVersions);
 
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.

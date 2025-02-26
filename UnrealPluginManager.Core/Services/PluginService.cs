@@ -90,65 +90,6 @@ public partial class PluginService : IPluginService {
         return manifest;
     }
 
-    /// <inheritdoc />
-    public Option<List<PluginSummary>> GetDependencyList(List<PluginDependency> rootDependencies,
-        DependencyManifest allVersions) {
-        if (allVersions.UnresolvedDependencies.Count > 0) {
-            throw new DependencyResolutionException(
-                $"Unable to resolve plugin names:\n{string.Join("\n", allVersions.UnresolvedDependencies)}");
-        }
-
-        var root = new DependencyChainRoot {
-            Dependencies = rootDependencies
-        };
-
-        var dependencyList = new Dictionary<string, IReadOnlyList<IDependencyChainNode>> {
-            [root.Name] = [root]
-        };
-        
-        foreach (var (pluginName, pluginVersions) in allVersions.FoundDependencies) {
-            dependencyList[pluginName] = pluginVersions;
-        }
-        
-        var formula = ExpressionSolver.Convert(root.Name, root.Version, dependencyList);
-        var bindings = formula.Solve();
-        return bindings.Select(x => CreatePluginInstallOrder(rootDependencies, x, dependencyList));
-    }
-
-    private static List<PluginSummary> CreatePluginInstallOrder(List<PluginDependency> rootDependencies,
-        List<SelectedVersion> selectedVersions,
-        Dictionary<string, IReadOnlyList<IDependencyChainNode>> dependencyList) {
-        var plugins = selectedVersions.Select(p => dependencyList[p.Name]
-                .First(d => d.Version == p.Version))
-            .ToDictionary(x => x.Name);
-        
-        return WalkDependencyList(rootDependencies, plugins)
-            .CastIf<PluginVersionInfo>()
-            .Select(p => p.ToPluginSummary())
-            .ToList();
-    }
-
-    private static IEnumerable<IDependencyChainNode> WalkDependencyList(List<PluginDependency> rootDependencies,
-        Dictionary<string, IDependencyChainNode> versions) {
-        var deps = rootDependencies.SelectMany(x => WalkDependencyList(x.PluginName, versions));
-        foreach (var dependency in deps) {
-            yield return dependency;
-        }
-    }
-    
-    private static IEnumerable<IDependencyChainNode> WalkDependencyList(string versionName, 
-        Dictionary<string, IDependencyChainNode> versions) {
-        var plugin = versions[versionName];
-
-        foreach (var dependency in plugin.Dependencies.Where(dependency => dependency.Type == PluginType.Provided)) {
-            foreach (var providedDependency in WalkDependencyList(dependency.PluginName, versions)) {
-                yield return providedDependency;
-            }
-
-            yield return plugin;
-        }
-    }
-
     /// <inheritdoc/>
     public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
         var plugin = await _dbContext.PluginVersions
@@ -237,22 +178,6 @@ public partial class PluginService : IPluginService {
             .Where(x => x.EngineVersion == engineVersion)
             .AsAsyncEnumerable()
             .Where(p => p.Parent.Version.Satisfies(targetVersion))
-            .FirstOrDefaultAsync();
-        if (pluginInfo == null) {
-            throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
-        }
-
-        return _storageService.RetrievePlugin(pluginInfo.FilePath);
-    }
-
-    public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion) {
-        var pluginInfo = await _dbContext.UploadedPlugins
-            .Include(x => x.Parent)
-            .Include(x => x.Parent.Parent)
-            .Where(p => p.Parent.Parent.Name == pluginName)
-            .OrderByDescending(p => p.Parent.VersionString)
-            .Where(x => x.EngineVersion == engineVersion)
-            .Where(p => p.Parent.VersionString == targetVersion.ToString())
             .FirstOrDefaultAsync();
         if (pluginInfo == null) {
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
