@@ -72,7 +72,7 @@ public class BuildCommandOptions : ICommandOptions {
 /// target engine version.
 /// </remarks>
 [AutoConstructor]
-public partial class BuildCommandOptionsHandler : ICommandOptionsHandle<BuildCommandOptions> {
+public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
     private readonly IFileSystem _fileSystem;
     private readonly IEngineService _engineService;
 

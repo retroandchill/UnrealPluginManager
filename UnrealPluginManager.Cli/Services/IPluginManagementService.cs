@@ -6,7 +6,7 @@ namespace UnrealPluginManager.Cli.Services;
 /// <summary>
 /// Represents a service used for remote calls to fetch plugin data.
 /// </summary>
-public interface IRemoteCallService {
+public interface IPluginManagementService {
 
     /// <summary>
     /// Retrieves a list of plugin overviews that optionally match a given search term.
@@ -19,7 +19,7 @@ public interface IRemoteCallService {
     /// </param>
     /// <returns>
     /// A task representing the asynchronous operation. Upon completion, returns an
-    /// <see cref="OrderedDictionary"/> where each key is a plugin identifier and each value
+    /// <see cref="OrderedDictionary{TKey, TValue}"/> where each key is a plugin identifier and each value
     /// is a <see cref="Fin{T}"/> containing a list of <see cref="PluginOverview"/> objects.
     /// </returns>
     Task<OrderedDictionary<string, Fin<List<PluginOverview>>>> GetPlugins(string searchTerm);
@@ -41,5 +41,4 @@ public interface IRemoteCallService {
     /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
     /// </returns>
     Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
-
 }

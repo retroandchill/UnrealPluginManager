@@ -1,6 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using System.Diagnostics;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -62,7 +60,7 @@ public partial class EngineService : IEngineService {
         await _fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
         
         await using var fileStream = _fileSystem.FileStream.New(zipFile, FileMode.Open);
-        await _pluginService.SubmitPlugin(fileStream, installedEngine!.Version);
+        await _pluginService.SubmitPlugin(fileStream, installedEngine.Version);
         return 0;
     }
 
@@ -81,7 +79,7 @@ public partial class EngineService : IEngineService {
         
         return 0;
     }
-    
+
     private InstalledEngine GetInstalledEngine(string? engineVersion) {
         var installedEngines = GetInstalledEngines();
         var installedEngine = engineVersion is not null

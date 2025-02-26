@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
@@ -68,6 +69,19 @@ public partial class PluginsController : ControllerBase {
     [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
     public async Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName) {
         return await _pluginService.GetDependencyList(pluginName);
+    }
+
+    /// <summary>
+    /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+    /// </summary>
+    /// <param name="dependencies">A list of plugin dependencies for which potential versions are to be determined.</param>
+    /// <return>Returns a dependency manifest with possible versions for the specified dependencies.</return>
+    [HttpGet("dependencies/candidates")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(DependencyManifest), (int)HttpStatusCode.OK)]
+    public async Task<DependencyManifest> GetCandidateDependencies([Required, FromBody, MinLength(1)] List<PluginDependency> dependencies) {
+        return await _pluginService.GetPossibleVersions(dependencies);
     }
 
 

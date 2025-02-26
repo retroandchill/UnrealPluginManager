@@ -15,11 +15,17 @@
 
 import * as runtime from '../runtime';
 import type {
+  DependencyManifest,
+  PluginDependency,
   PluginDetails,
   PluginOverviewPage,
   PluginSummary,
 } from '../models/index';
 import {
+    DependencyManifestFromJSON,
+    DependencyManifestToJSON,
+    PluginDependencyFromJSON,
+    PluginDependencyToJSON,
     PluginDetailsFromJSON,
     PluginDetailsToJSON,
     PluginOverviewPageFromJSON,
@@ -36,6 +42,10 @@ export interface AddPluginRequest {
 export interface DownloadPluginRequest {
     pluginName: string;
     engineVersion?: string;
+}
+
+export interface GetCandidateDependenciesRequest {
+    pluginDependency: Array<PluginDependency>;
 }
 
 export interface GetDependencyTreeRequest {
@@ -138,6 +148,42 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async downloadPlugin(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.downloadPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+     */
+    async getCandidateDependenciesRaw(requestParameters: GetCandidateDependenciesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DependencyManifest>> {
+        if (requestParameters['pluginDependency'] == null) {
+            throw new runtime.RequiredError(
+                'pluginDependency',
+                'Required parameter "pluginDependency" was null or undefined when calling getCandidateDependencies().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/plugins/dependencies/candidates`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['pluginDependency']!.map(PluginDependencyToJSON),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DependencyManifestFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
+     */
+    async getCandidateDependencies(requestParameters: GetCandidateDependenciesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DependencyManifest> {
+        const response = await this.getCandidateDependenciesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

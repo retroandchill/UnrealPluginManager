@@ -1,7 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -39,20 +39,21 @@ public partial class PluginService : IPluginService {
     }
 
     /// <inheritdoc/>
-    public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
-        var plugin = await _dbContext.PluginVersions
-            .Include(p => p.Parent)
-            .Include(p => p.Dependencies)
-            .Where(p => p.Parent.Name == pluginName)
-            .OrderByDescending(p => p.VersionString)
-            .FirstAsync();
+    public Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions) {
+        return _dbContext.PluginVersions
+            .Where(x => requestedVersions.Contains(new PluginVersionRequest(x.Parent.Name, x.Version)))
+            .ToPluginVersionInfo()
+            .ToListAsync();
+    }
 
-        var pluginData = new Dictionary<string, List<PluginVersion>> { { plugin.Parent.Name, [plugin] } };
-        var unresolved = new HashSet<string>();
-
-        unresolved.UnionWith(plugin.Dependencies
+    /// <inheritdoc />
+    public async Task<DependencyManifest> GetPossibleVersions(List<PluginDependency> dependencies) {
+        var manifest = new DependencyManifest();
+        var unresolved = dependencies
             .Where(x => x.Type == PluginType.Provided)
-            .Select(pd => pd.PluginName));
+            .Select(pd => pd.PluginName)
+            .ToHashSet();
+        
         while (unresolved.Count > 0) {
             var currentlyExisting = unresolved.ToHashSet();
             var plugins = (await _dbContext.PluginVersions
@@ -60,37 +61,61 @@ public partial class PluginService : IPluginService {
                     .Include(p => p.Dependencies)
                     .Where(p => unresolved.Contains(p.Parent.Name))
                     .OrderByDescending(p => p.VersionString)
+                    .ToPluginVersionInfo()
                     .ToListAsync())
-                .GroupBy(x => x.Parent.Name);
+                .GroupBy(x => x.Name);
 
             foreach (var pluginList in plugins) {
                 unresolved.Remove(pluginList.Key);
                 var asList = pluginList
                     .OrderByDescending(p => p.Version, SemVersion.PrecedenceComparer)
                     .ToList();
-                pluginData.Add(pluginList.Key, asList);
+                manifest.FoundDependencies.Add(pluginList.Key, asList);
 
                 unresolved.UnionWith(pluginList
                     .SelectMany(p => p.Dependencies)
-                    .Where(x => x.Type == PluginType.Provided && !pluginData.ContainsKey(x.PluginName))
+                    .Where(x => x.Type == PluginType.Provided && !manifest.FoundDependencies.ContainsKey(x.PluginName))
                     .Select(pd => pd.PluginName));
             }
 
             var intersection = currentlyExisting.Intersect(unresolved).ToList();
-            if (intersection.Count > 0) {
-                throw new DependencyResolutionException(
-                    $"Unable to resolve plugin names:\n{string.Join("\n", intersection)}");
+            if (intersection.Count <= 0) {
+                continue;
             }
+            
+            manifest.UnresolvedDependencies.AddRange(intersection);
+            unresolved.RemoveWhere(x => intersection.Contains(x));
         }
 
-        var formula = ExpressionSolver.Convert(pluginName, plugin.Version, pluginData);
+        return manifest;
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
+        var plugin = await _dbContext.PluginVersions
+            .Include(p => p.Parent)
+            .Include(p => p.Dependencies)
+            .Where(p => p.Parent.Name == pluginName)
+            .OrderByDescending(p => p.VersionString)
+            .ToPluginVersionInfo()
+            .FirstAsync();
+
+        var dependencyList = await GetPossibleVersions(plugin.Dependencies);
+        if (dependencyList.UnresolvedDependencies.Count > 0) {
+            throw new DependencyResolutionException(
+                $"Unable to resolve plugin names:\n{string.Join("\n", dependencyList.UnresolvedDependencies)}");
+        }
+        
+        dependencyList.FoundDependencies.Add(pluginName, [plugin]);
+        var formula = ExpressionSolver.Convert(pluginName, plugin.Version, dependencyList.FoundDependencies);
         var bindings = formula.Solve();
         if (bindings.IsNone) {
             return [];
         }
 
         return bindings.SelectMany(b => b)
-            .Select(p => pluginData[p.Item1].First(d => d.Version == p.Item2))
+            .Select(p => p.Name == pluginName ? plugin 
+                : dependencyList.FoundDependencies[p.Name].First(d => d.Version == p.Version))
             .Select(p => p.ToPluginSummary())
             .ToList();
     }

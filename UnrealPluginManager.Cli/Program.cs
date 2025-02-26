@@ -24,7 +24,7 @@ var builder = new CommandLineBuilder(rootCommand)
             .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
             .AddCoreServices()
             .AddCliServices()
-            .AddApiFactories();
+            .AddApis();
     });
     
 await builder.Build().InvokeAsync(args);

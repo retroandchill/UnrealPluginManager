@@ -85,7 +85,41 @@ public abstract partial class StorageServiceBase : IStorageService {
     }
 
     /// <inheritdoc />
-    public async Task<Option<T>> GetConfig<T>(string filename) {
+    public Option<T> GetConfig<T>(string filename) {
+        FileSystem.Directory.CreateDirectory(ConfigDirectory);
+        var filePath = Path.Combine(ConfigDirectory, filename);
+        var fileInfo = FileSystem.FileInfo.New(filePath);
+        if (!fileInfo.Exists) {
+            return Option<T>.None;   
+        }
+        using var fileStream = fileInfo.OpenText();
+        var configText = fileStream.ReadToEnd();
+        var resultObject = JsonSerializer.Deserialize<T>(configText);
+        
+        return resultObject;
+    }
+
+    /// <inheritdoc />
+    public T GetConfig<T>(string filename, T defaultValue) {
+        var result = GetConfig<T>(filename);
+        return result.OrElseGet(() => {
+                SaveConfig(filename, defaultValue);
+                return defaultValue;
+            });
+    }
+
+    /// <inheritdoc />
+    public T GetConfig<T>(string filename, Func<T> defaultValue) {
+        var result = GetConfig<T>(filename);
+        return result.OrElseGet(() => {
+                var value = defaultValue();
+                SaveConfig(filename, value);
+                return value;
+            });
+    }
+
+    /// <inheritdoc />
+    public async Task<Option<T>> GetConfigAsync<T>(string filename) {
         FileSystem.Directory.CreateDirectory(ConfigDirectory);
         var filePath = Path.Combine(ConfigDirectory, filename);
         var fileInfo = FileSystem.FileInfo.New(filePath);
@@ -100,28 +134,40 @@ public abstract partial class StorageServiceBase : IStorageService {
     }
 
     /// <inheritdoc />
-    public async Task<T> GetConfig<T>(string filename, T defaultValue) {
-        var result = await GetConfig<T>(filename);
-        return await result.Match(Task.FromResult,
-            async () => {
-                await SaveConfig(filename, defaultValue);
+    public async Task<T> GetConfigAsync<T>(string filename, T defaultValue) {
+        var result = await GetConfigAsync<T>(filename);
+        return await result.OrElseGet(async () => {
+                await SaveConfigAsync(filename, defaultValue);
                 return defaultValue;
             });
     }
 
     /// <inheritdoc />
-    public async Task<T> GetConfig<T>(string filename, Func<T> defaultValue) {
-        var result = await GetConfig<T>(filename);
-        return await result.Match(Task.FromResult,
-            async () => {
+    public async Task<T> GetConfigAsync<T>(string filename, Func<T> defaultValue) {
+        var result = await GetConfigAsync<T>(filename);
+        return await result.OrElseGet(async () => {
                 var value = defaultValue();
-                await SaveConfig(filename, value);
+                await SaveConfigAsync(filename, value);
                 return value;
             });
     }
 
     /// <inheritdoc />
-    public async Task SaveConfig<T>(string filename, T value) {
+    public void SaveConfig<T>(string filename, T value) {
+        ArgumentNullException.ThrowIfNull(value);
+        FileSystem.Directory.CreateDirectory(ConfigDirectory);
+        var filePath = Path.Combine(ConfigDirectory, filename);
+        var fileInfo = FileSystem.FileInfo.New(filePath);
+        
+        var configText = JsonSerializer.Serialize(value);
+        
+        using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
+        using var textWriter = new StreamWriter(writer);
+        textWriter.Write(configText);
+    }
+
+    /// <inheritdoc />
+    public async Task SaveConfigAsync<T>(string filename, T value) {
         ArgumentNullException.ThrowIfNull(value);
         FileSystem.Directory.CreateDirectory(ConfigDirectory);
         var filePath = Path.Combine(ConfigDirectory, filename);

@@ -30,7 +30,7 @@ public class TestCommands {
     private Parser _parser;
     private Mock<IEnvironment> _environment;
     private Mock<IPluginService> _pluginService;
-    private Mock<IRemoteCallService> _remoteCallService;
+    private Mock<IPluginManagementService> _remoteCallService;
     private Mock<IEngineService> _engineService;
     
     [SetUp]
@@ -45,7 +45,7 @@ public class TestCommands {
         
         _pluginService = new Mock<IPluginService>();
         _engineService = new Mock<IEngineService>();
-        _remoteCallService = new Mock<IRemoteCallService>();
+        _remoteCallService = new Mock<IPluginManagementService>();
         _environment = new Mock<IEnvironment>();
         var builder = new CommandLineBuilder(rootCommand)
             .UseDefaults()

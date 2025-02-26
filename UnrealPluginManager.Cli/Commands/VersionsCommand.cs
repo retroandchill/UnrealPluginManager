@@ -39,7 +39,7 @@ public class VersionsCommandOptions : ICommandOptions;
 /// the console for displaying the results.
 /// </remarks>
 [AutoConstructor]
-public partial class VersionsCommandOptionsHandler : ICommandOptionsHandle<VersionsCommandOptions> {
+public partial class VersionsCommandOptionsHandler : ICommandOptionsHandler<VersionsCommandOptions> {
     private readonly IConsole _console;
     private readonly IEnvironment _environment;
     private readonly IEngineService _engineService;

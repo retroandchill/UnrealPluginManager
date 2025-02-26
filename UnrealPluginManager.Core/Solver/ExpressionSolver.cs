@@ -21,11 +21,11 @@ public static class ExpressionSolver {
     /// the variable name as a string and its corresponding version as a SemVersion.
     /// If no solution exists, returns None.
     /// </returns>
-    public static Option<List<(string, SemVersion)>> Solve(this IExpression expr) {
+    public static Option<List<SelectedVersion>> Solve(this IExpression expr) {
         var selected = SolveInternal(expr, new Dictionary<string, bool>());
         return selected
             .Select(x => x.Where(y => y.Value)
-                .Select(y => (VarName(y.Key), VarVersion(y.Key)))
+                .Select(y => new SelectedVersion(VarName(y.Key), VarVersion(y.Key)))
                 .ToList());
     }
 
@@ -73,7 +73,7 @@ public static class ExpressionSolver {
     /// between the root plugin and its dependent plugins.
     /// </returns>
     public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData)
-        where T : IEnumerable<IPluginVersionInfo> {
+        where T : IEnumerable<IDependencyChainNode> {
         List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
         foreach (var pack in
                  pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
@@ -83,7 +83,7 @@ public static class ExpressionSolver {
                     .Select(pd => pd.Version)
                     .Select(v => PackageVar(dep.PluginName, v))
                     .ToList())
-                .Select(deps => new Impl(PackageVar(pack.PluginName, pack.Version), new Or(deps))));
+                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version), new Or(deps))));
         }
 
         var variables = new And(terms).Free()

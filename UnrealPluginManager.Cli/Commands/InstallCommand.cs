@@ -1,7 +1,9 @@
 ﻿using System.CommandLine;
 using Semver;
 using UnrealPluginManager.Cli.Services;
-using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Mappers;
+using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -30,13 +32,25 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
     /// version, and Unreal Engine version.
     /// </example>
     public InstallCommand() : base("install", "Install the specified plugin into the engine") {
-        AddArgument(new Argument<string>("input", "The name of plugin to install"));
-        AddOption(new Option<SemVersionRange>(aliases: ["--version", "-v"], description: "The version of the plugin to install",
-            parseArgument: r => r.Tokens.Count == 1 ? SemVersionRange.Parse(r.Tokens[0].Value) : SemVersionRange.AllRelease)  {
+        var inputArg = new Argument<string>("input", "The name of plugin to install");
+        AddArgument(inputArg);
+        var versionOption = new Option<SemVersionRange>(aliases: ["--version", "-v"],
+            description: "The version of the plugin to install",
+            parseArgument: r =>
+                r.Tokens.Count == 1 ? SemVersionRange.Parse(r.Tokens[0].Value) : SemVersionRange.AllRelease) {
             IsRequired = false,
-        });
+        };
+        AddOption(versionOption);
         AddOption(new Option<string>(["--engine-version", "-e"], "The version of the engine to build the plugin for") {
             IsRequired = false,
+        });
+        
+        AddValidator(result => {
+            var resultArg = result.GetValueForArgument(inputArg);
+            const StringComparison ignore = StringComparison.InvariantCultureIgnoreCase;
+            if ((resultArg.EndsWith(".uplugin", ignore) || resultArg.EndsWith(".uproject")) && result.GetValueForOption(versionOption) is not null) {
+                result.ErrorMessage = "You cannot specify a version when installing from a project or plugin file.";
+            }
         });
     }
 }
@@ -92,11 +106,11 @@ public class InstallCommandOptions : ICommandOptions {
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
 [AutoConstructor]
-public partial class InstallCommandHandler : ICommandOptionsHandle<InstallCommandOptions> {
+public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
     private readonly IEngineService _engineService;
 
     /// <inheritdoc />
-    public Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-        return _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
+    public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
+        return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
     }
 }

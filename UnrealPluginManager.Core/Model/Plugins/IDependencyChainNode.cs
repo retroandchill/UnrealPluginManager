@@ -1,11 +1,11 @@
-﻿using Semver;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
 /// <summary>
 /// Provides information about a plugin version, including its name, version number, and dependencies.
 /// </summary>
-public interface IPluginVersionInfo {
+public interface IDependencyChainNode {
 
     /// <summary>
     /// Gets the name of the plugin associated with the current version.
@@ -15,7 +15,7 @@ public interface IPluginVersionInfo {
     /// to distinguish it from other plugins. It follows specific validation rules, such as
     /// starting with an uppercase letter and containing only alphanumeric characters.
     /// </remarks>
-    string PluginName { get; }
+    string Name { get; }
 
     /// <summary>
     /// Gets the semantic version of the plugin.
@@ -34,6 +34,6 @@ public interface IPluginVersionInfo {
     /// the names, types, and compatible version ranges of the required plugins. This property is primarily used
     /// to resolve and ensure that all necessary plugins are present and meet the specified compatibility requirements.
     /// </remarks>
-    IEnumerable<IPluginDependency> Dependencies { get; }
+    List<PluginDependency> Dependencies { get; }
     
 }

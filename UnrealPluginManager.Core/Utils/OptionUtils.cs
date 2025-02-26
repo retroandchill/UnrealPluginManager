@@ -85,16 +85,32 @@ public static class OptionUtils {
     }
 
     /// <summary>
-    /// Matches a nullable value to one of two possible outcomes based on whether the value is present or null.
-    /// Executes the given function if the value is present, or a fallback function if the value is null.
+    /// Returns the value contained in the given <see cref="Option{T}"/>
+    /// if it has a value; otherwise, invokes the fallback function and returns its result.
     /// </summary>
-    /// <typeparam name="T">The type of the nullable value to be matched.</typeparam>
-    /// <typeparam name="TResult">The type of the result produced by executing one of the provided functions.</typeparam>
-    /// <param name="value">The nullable value to be matched.</param>
-    /// <param name="some">The function to execute if the value is not null.</param>
-    /// <param name="none">The function to execute if the value is null.</param>
-    /// <returns>The result of either the <paramref name="some"/> or <paramref name="none"/> function, depending on whether the <paramref name="value"/> is null.</returns>
-    public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : struct {
-        return value is not null ? some(value.Value) : none();
+    /// <typeparam name="T">The type of the value contained within the Option.</typeparam>
+    /// <param name="option">The Option instance to retrieve the value from or use the fallback.</param>
+    /// <param name="fallback">A function to compute the fallback value if the Option is None.</param>
+    /// <returns>The value contained within the Option, or the result of the fallback function if the Option is None.</returns>
+    public static T OrElseGet<T>(this Option<T> option, Func<T> fallback) {
+        return option.Match(
+            x => x,
+            fallback
+        );
+    }
+
+    /// <summary>
+    /// Returns the value within an <see cref="Option{T}"/> instance if it contains a value;
+    /// otherwise, it computes and returns a fallback value using the provided function.
+    /// </summary>
+    /// <typeparam name="T">The type of the value contained within the Option.</typeparam>
+    /// <param name="option">The Option instance to evaluate.</param>
+    /// <param name="fallback">A function to compute the fallback value if the Option is None.</param>
+    /// <returns>The value contained within the Option, or the result of the fallback function if the Option is None.</returns>
+    public static Task<T> OrElseGet<T>(this Option<T> option, Func<Task<T>> fallback) {
+        return option.Match(
+            Task.FromResult,
+            fallback
+        );
     }
 }

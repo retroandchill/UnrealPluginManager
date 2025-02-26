@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using UnrealPluginManager.Cli.Factories;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
@@ -35,7 +34,7 @@ public static class CliServiceUtils {
         return services.AddScoped<IEngineService, EngineService>()
             .AddScoped<IStorageService, LocalStorageService>()
             .AddScoped<IRemoteService, RemoteService>()
-            .AddScoped<IRemoteCallService, RemoteCallService>();
+            .AddScoped<IPluginManagementService, PluginManagementService>();
     }
 
     /// <summary>
@@ -46,8 +45,8 @@ public static class CliServiceUtils {
     /// <typeparam name="TImpl">The implementation type of the API accessor interface.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to which the accessor factory is added.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
-    public static IServiceCollection AddAccessorFactory<T, TImpl>(this IServiceCollection services) where T : IApiAccessor where TImpl : T {
-        return services.AddScoped<IApiAccessorFactory<T>, ApiAccessorFactory<T, TImpl>>();
+    public static IServiceCollection AddApi<T, TImpl>(this IServiceCollection services) where T : class, IApiAccessor where TImpl : T, new() {
+        return services.AddScoped<T>(x => new TImpl());
     }
 
     /// <summary>
@@ -56,10 +55,10 @@ public static class CliServiceUtils {
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to which the API factories are registered.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
-    public static IServiceCollection AddApiFactories(this IServiceCollection services) {
-        return services
-            .AddAccessorFactory<IPluginsApi, PluginsApi>()
-            .AddAccessorFactory<IStorageApi, StorageApi>();
+    public static IServiceCollection AddApis(this IServiceCollection services) {
+        return services.AddSingleton<IApiTypeResolver, ApiTypeResolver>()
+            .AddApi<IPluginsApi, PluginsApi>()
+            .AddApi<IStorageApi, StorageApi>();
     }
     
 }

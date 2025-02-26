@@ -3,16 +3,14 @@
 namespace UnrealPluginManager.Core.Model.Plugins;
 
 /// <summary>
-/// Defines the contract for plugin dependency metadata in the Unreal Plugin Manager system.
+/// Represents a dependency of a plugin within the Unreal Plugin Manager framework.
 /// </summary>
 /// <remarks>
-/// An implementation of IPluginDependency provides details about a plugin
-/// that another plugin depends on. The information includes the dependent
-/// plugin's name, the type of the plugin, and a version range specifying
-/// compatible versions of the dependent plugin.
+/// A plugin dependency contains the name of the dependent plugin, its type, and a version specification
+/// indicating the compatible versions of the plugin.
 /// </remarks>
-public interface IPluginDependency {
-
+public class PluginDependency {
+    
     /// <summary>
     /// Gets the name of the plugin.
     /// </summary>
@@ -22,8 +20,8 @@ public interface IPluginDependency {
     /// not including whitespace. This property is required and has a length
     /// limitation between 1 and 255 characters.
     /// </remarks>
-    string PluginName { get; }
-
+    public required string PluginName { get; set; }
+    
     /// <summary>
     /// Gets the type of the plugin.
     /// </summary>
@@ -33,8 +31,8 @@ public interface IPluginDependency {
     /// to differentiate plugins based on their origin or functionality and
     /// typically influences dependency evaluation or management within the system.
     /// </remarks>
-    PluginType Type { get; }
-
+    public required PluginType Type { get; set; }
+    
     /// <summary>
     /// Gets the version range of the dependent plugin.
     /// </summary>
@@ -43,6 +41,5 @@ public interface IPluginDependency {
     /// this dependency applies to. It supports semantic versioning constraints
     /// and allows for defining a range or specific version that meets the compatibility requirements.
     /// </remarks>
-    SemVersionRange PluginVersion { get;  }
-    
+    public required SemVersionRange PluginVersion { get; set; }
 }

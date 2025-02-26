@@ -13,7 +13,7 @@ namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 /// A Dependency defines the relationship between a parent plugin and another plugin it depends on,
 /// including information about the dependent plugin's name, version range, type, and whether it is optional.
 /// </remarks>
-public class Dependency : IPluginDependency {
+public class Dependency {
     /// <summary>
     /// Gets or sets the unique identifier for the dependency.
     /// </summary>
