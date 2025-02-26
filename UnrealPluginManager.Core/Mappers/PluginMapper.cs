@@ -97,7 +97,7 @@ public static partial class PluginMapper {
     /// <returns>A <see cref="VersionOverview"/> object representing the provided <see cref="PluginVersion"/>.</returns>
     public static List<VersionOverview> ToVersionOverview(this ICollection<PluginVersion> versions) {
         return versions
-            .OrderBy(x => x.VersionString)
+            .OrderBy(x => x.Version)
             .Select(x => x.ToVersionOverview())
             .ToList();
     }
@@ -128,10 +128,8 @@ public static partial class PluginMapper {
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data to be mapped.</param>
     /// <returns>A new <see cref="PluginVersion"/> object populated with data from the provided <see cref="PluginDescriptor"/> object.</returns>
     [MapperIgnoreTarget(nameof(PluginVersion.Id))]
-    [MapperIgnoreTarget(nameof(PluginVersion.VersionString))]
     [MapperIgnoreTarget(nameof(PluginVersion.Parent))]
     [MapperIgnoreTarget(nameof(PluginVersion.ParentId))]
-    [MapperIgnoreTarget(nameof(PluginVersion.VersionString))]
     [MapperIgnoreTarget(nameof(PluginVersion.Binaries))]
     [MapProperty(nameof(PluginDescriptor.VersionName), nameof(PluginVersion.Version))]
     [MapProperty(nameof(PluginDescriptor.Plugins), nameof(PluginVersion.Dependencies))]

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -37,17 +38,6 @@ public class PluginVersion {
     public SemVersion Version { get; set; } = new(1, 0, 0);
 
     /// <summary>
-    /// Gets or sets the string representation of the plugin version.
-    /// </summary>
-    [MinLength(1)]
-    [MaxLength(255)]
-    [Column(name: "Version")]
-    public string VersionString {
-        get => Version.ToString();
-        set => Version = SemVersion.Parse(value);
-    }
-
-    /// <summary>
     /// Gets or sets the collection of dependencies for the plugin version.
     /// </summary>
     public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
@@ -68,12 +58,9 @@ public class PluginVersion {
 
         modelBuilder.Entity<PluginVersion>()
             .HasIndex(x => x.ParentId);
-        
-        modelBuilder.Entity<PluginVersion>()
-            .HasIndex(x => x.VersionString)
-            .IsUnique();
 
         modelBuilder.Entity<PluginVersion>()
-            .Ignore(x => x.Version);
+            .OwnsOne(x => x.Version)
+            .ConfigureSemVersion();
     }
 }

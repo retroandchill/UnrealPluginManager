@@ -1,10 +1,8 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
-using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
@@ -60,7 +58,7 @@ public partial class PluginService : IPluginService {
                     .Include(p => p.Parent)
                     .Include(p => p.Dependencies)
                     .Where(p => unresolved.Contains(p.Parent.Name))
-                    .OrderByDescending(p => p.VersionString)
+                    .OrderByDescending(p => p.Version)
                     .ToPluginVersionInfo()
                     .ToListAsync())
                 .GroupBy(x => x.Name);
@@ -96,7 +94,7 @@ public partial class PluginService : IPluginService {
             .Include(p => p.Parent)
             .Include(p => p.Dependencies)
             .Where(p => p.Parent.Name == pluginName)
-            .OrderByDescending(p => p.VersionString)
+            .OrderByDescending(p => p.Version)
             .ToPluginVersionInfo()
             .FirstAsync();
 
@@ -174,7 +172,7 @@ public partial class PluginService : IPluginService {
             .Include(x => x.Parent)
             .Include(x => x.Parent.Parent)
             .Where(p => p.Parent.Parent.Name == pluginName)
-            .OrderByDescending(p => p.Parent.VersionString)
+            .OrderByDescending(p => p.Parent.Version)
             .Where(x => x.EngineVersion == engineVersion)
             .AsAsyncEnumerable()
             .Where(p => p.Parent.Version.Satisfies(targetVersion))

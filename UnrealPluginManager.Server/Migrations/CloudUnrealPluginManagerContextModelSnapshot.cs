@@ -126,18 +126,9 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Property<ulong>("ParentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("VersionString")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Version");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
-
-                    b.HasIndex("VersionString")
-                        .IsUnique();
 
                     b.ToTable("PluginVersions");
                 });
@@ -172,7 +163,45 @@ namespace UnrealPluginManager.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("Semver.SemVersion", "Version", b1 =>
+                        {
+                            b1.Property<ulong>("PluginVersionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("Major")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Metadata")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<long>("Minor")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("Patch")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Prerelease")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("PluginVersionId");
+
+                            b1.HasIndex("Major", "Minor", "Patch", "Prerelease", "Metadata")
+                                .IsUnique();
+
+                            b1.ToTable("PluginVersions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PluginVersionId");
+                        });
+
                     b.Navigation("Parent");
+
+                    b.Navigation("Version")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", b =>
