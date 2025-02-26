@@ -84,13 +84,6 @@ public static partial class PluginMapper {
     public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfo(this IQueryable<PluginVersion> versions);
 
     /// <summary>
-    /// Maps a <see cref="Dependency"/> entity to a <see cref="PluginDependency"/> representation.
-    /// </summary>
-    /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
-    /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
-    public static partial PluginDependency ToPluginDependency(this Dependency dependency);
-
-    /// <summary>
     /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
     /// </summary>
     /// <param name="version">The source <see cref="PluginVersion"/> instance to be converted.</param>
@@ -156,6 +149,13 @@ public static partial class PluginMapper {
     [MapProperty(nameof(PluginReferenceDescriptor.PluginType), nameof(Dependency.Type))]
     [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(Dependency.PluginVersion))]
     public static partial Dependency ToDependency(this PluginReferenceDescriptor descriptor);
+    
+    /// <summary>
+    /// Maps a <see cref="Dependency"/> entity to a <see cref="PluginDependency"/> representation.
+    /// </summary>
+    /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
+    /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
+    public static partial PluginDependency ToPluginDependency(this Dependency dependency);
 
     /// <summary>
     /// Maps a <see cref="PluginReferenceDescriptor"/> to a <see cref="PluginDependency"/> representation.

@@ -56,14 +56,14 @@ public class ProjectDescriptor : IDependencyHolder {
     /// </summary>
     [JsonPropertyName("AdditionalRootDirectories")]
     [DefaultAsEmpty]
-    public List<string> AdditionalRootDirectories = [];
+    public List<string> AdditionalRootDirectories { get; set; } = [];
 
     /// <summary>
     /// List of additional plugin directories to scan for available plugins
     /// </summary>
     [JsonPropertyName("AdditionalPluginDirectories")]
     [DefaultAsEmpty]
-    public List<string> AdditionalPluginDirectories = [];
+    public List<string> AdditionalPluginDirectories { get; set; } = [];
 
     /// <summary>
     /// Array of platforms that this project is targeting
@@ -83,21 +83,21 @@ public class ProjectDescriptor : IDependencyHolder {
     /// </summary>
     [JsonPropertyName("InitSteps")]
     [DefaultAsEmpty]
-    public CustomBuildSteps InitSteps = new();
+    public CustomBuildSteps InitSteps { get; set; } = new();
 
     /// <summary>
     /// Steps to execute before building targets in this project
     /// </summary>
     [JsonPropertyName("PreBuildSteps")]
     [DefaultAsEmpty]
-    public CustomBuildSteps PreBuildSteps = new();
+    public CustomBuildSteps PreBuildSteps { get; set; } = new();
 
     /// <summary>
     /// Steps to execute before building targets in this project
     /// </summary>
     [JsonPropertyName("PostBuildSteps")]
     [DefaultAsEmpty]
-    public CustomBuildSteps PostBuildSteps = new();
+    public CustomBuildSteps PostBuildSteps { get; set; } = new();
 
     /// <summary>
     /// Indicates if this project is an Enterprise project

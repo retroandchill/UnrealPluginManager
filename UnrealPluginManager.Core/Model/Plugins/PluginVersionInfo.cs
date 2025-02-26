@@ -83,7 +83,15 @@ public class PluginVersionInfo : IDependencyChainNode {
     /// </remarks>
     [JsonIgnore]
     public bool IsInstalled { get; set; }
-    
+
+    /// <summary>
+    /// Gets or sets the name of the plugin as retrieved from a remote source or repository.
+    /// </summary>
+    /// <remarks>
+    /// This property represents the name of the plugin as it is defined in a remote system. It may differ
+    /// from its local or friendly name and is often used for referencing or synchronization purposes when
+    /// interacting with external systems.
+    /// </remarks>
     [JsonIgnore]
     public string? RemoteName { get; set; }
 }

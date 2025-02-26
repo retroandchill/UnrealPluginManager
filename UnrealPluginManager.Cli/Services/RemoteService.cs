@@ -25,7 +25,11 @@ public class RemoteService : IRemoteService {
             "default", new Uri("https://localhost:7231")
         }
     };
-    
+
+    /// Provides operations to manage remote configurations and API accessors
+    /// within the Unreal Plugin Manager CLI. Manages storage and retrieval
+    /// of remote configurations, and facilitates API communication through
+    /// resolved accessors.
     public RemoteService(IApiTypeResolver typeResolver, IStorageService storageService, IEnumerable<IApiAccessor> apiAccessors) {
         _storageService = storageService;
         _remoteConfigs = storageService.GetConfig(RemoteFile, DefaultRemote);
@@ -95,13 +99,17 @@ public class RemoteService : IRemoteService {
 
     /// <inheritdoc />
     public IEnumerable<Remote<T>> GetApiAccessors<T>() where T : IApiAccessor {
-        if (!_apiAccessors.TryGetValue(typeof(T), out var accessor)) {
+        if (!_apiAccessors.TryGetValue(typeof(T), out var accessor) || accessor is not T) {
             throw new ArgumentException($"No API accessor for type {nameof(T)}");
         }
 
+        return GetApiAccessorsIterator((T) accessor);
+    }
+
+    private IEnumerable<Remote<T>> GetApiAccessorsIterator<T>(T accessor) where T : IApiAccessor {
         foreach (var (name, config) in _apiConfigs) {
             accessor.Configuration = config;
-            yield return new Remote<T>(name, (T) accessor);
+            yield return new Remote<T>(name, accessor);
         }
     }
 }

@@ -19,7 +19,7 @@ public interface IPluginManagementService {
     /// </param>
     /// <returns>
     /// A task representing the asynchronous operation. Upon completion, returns an
-    /// <see cref="OrderedDictionary"/> where each key is a plugin identifier and each value
+    /// <see cref="OrderedDictionary{TKey, TValue}"/> where each key is a plugin identifier and each value
     /// is a <see cref="Fin{T}"/> containing a list of <see cref="PluginOverview"/> objects.
     /// </returns>
     Task<OrderedDictionary<string, Fin<List<PluginOverview>>>> GetPlugins(string searchTerm);

@@ -3,7 +3,6 @@ using Semver;
 using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -109,8 +108,6 @@ public class InstallCommandOptions : ICommandOptions {
 [AutoConstructor]
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
     private readonly IEngineService _engineService;
-    private readonly IPluginService _pluginService;
-    private readonly IPluginManagementService _pluginManagementService;
 
     /// <inheritdoc />
     public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {

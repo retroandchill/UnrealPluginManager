@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using LanguageExt;
+﻿using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
@@ -18,7 +17,6 @@ namespace UnrealPluginManager.Cli.Services;
 /// </summary>
 [AutoConstructor]
 public partial class PluginManagementService : IPluginManagementService {
-    private readonly IConsole _console;
     private readonly IRemoteService _remoteService;
     
     private const int DefaultPageSize = 100;
