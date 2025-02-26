@@ -110,7 +110,7 @@ public class InstallCommandOptions : ICommandOptions {
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
     private readonly IEngineService _engineService;
     private readonly IPluginService _pluginService;
-    private readonly IRemoteCallService _remoteCallService;
+    private readonly IPluginManagementService _pluginManagementService;
 
     /// <inheritdoc />
     public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
@@ -119,36 +119,7 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
             return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
         }
         
-        var pluginData = await _engineService.ReadSubmittedPluginFile(options.Input);
-        var pluginsList = pluginData.Plugins.Select(x => x.ToPluginDependency()).ToList();
-        var resolvedDependencies = await _pluginService.GetPossibleVersions(pluginsList);
-        var allDependencies = await _remoteCallService.TryResolveRemoteDependencies(pluginsList, resolvedDependencies);
+        var dependencies = await _pluginManagementService.ResolveDependenciesForFile(options.Input, options.EngineVersion);
         
-        var currentlyInstalled = (await _engineService.GetInstalledPluginVersions(allDependencies.FoundDependencies.Keys, options.EngineVersion))
-            .ToDictionary(x => x.Name);
-
-        foreach (var name in allDependencies.FoundDependencies.Keys) {
-            if (currentlyInstalled.TryGetValue(name, out var installed)) {
-                allDependencies.FoundDependencies[name] = installed.AsEnumerable()
-                    .Concat(allDependencies.FoundDependencies[name])
-                    .DistinctBy(x => (x.Name, x.Version))
-                    .OrderByDescending(x => x.IsInstalled)
-                    .ThenByDescending(x => x.Version, SemVersion.PrecedenceComparer)
-                    .ToList();
-            } else {
-                allDependencies.FoundDependencies[name] = allDependencies.FoundDependencies[name]
-                    .OrderByDescending(x => x.Version, SemVersion.PrecedenceComparer)
-                    .ToList();
-            }
-        }
-
-        var toInstall = _pluginService.GetDependencyList(pluginsList, allDependencies);
-        return toInstall.Match(x => {
-                return 0;
-            },
-            () => {
-                return -1;
-            });
-
     }
 }

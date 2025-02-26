@@ -98,11 +98,9 @@ public partial class EngineService : IEngineService {
         return 0;
     }
 
-    /// <inheritdoc />
-    public async Task<List<PluginVersionInfo>> GetInstalledPluginVersions(IEnumerable<string> pluginNames,
-        string? engineVersion) {
+    private IAsyncEnumerable<PluginVersionRequest> WalkInstalledPlugins(string? engineVersion = null) {
         var installedEngine = GetInstalledEngine(engineVersion);
-        var installedPlugins = await _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory)
+        return _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory)
             .GetFiles("*.uplugin", SearchOption.AllDirectories)
             .ToAsyncEnumerable()
             .SelectAwait(async x => {
@@ -110,7 +108,25 @@ public partial class EngineService : IEngineService {
                 return (Name: Path.GetFileNameWithoutExtension(x.Name),
                     Descriptor: (await JsonSerializer.DeserializeAsync<PluginDescriptor>(fileStream))!);
             })
-            .Select(x => new PluginVersionRequest(x.Name, x.Descriptor.VersionName))
+            .Select(x => new PluginVersionRequest(x.Name, x.Descriptor.VersionName));
+    }
+
+    /// <inheritdoc />
+    public async Task<List<PluginVersionInfo>> GetInstalledPluginVersions(string? engineVersion = null) {
+        var installedPlugins = await WalkInstalledPlugins(engineVersion).ToListAsync();
+        
+        return (await _pluginService.RequestPluginInfos(installedPlugins))
+            .Select(x => {
+                x.IsInstalled = true;
+                return x;
+            })
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<List<PluginVersionInfo>> GetInstalledPluginVersions(IEnumerable<string> pluginNames,
+        string? engineVersion) {
+        var installedPlugins = await WalkInstalledPlugins(engineVersion)
             .Where(x => pluginNames.Contains(x.Name))
             .ToListAsync();
         

@@ -78,7 +78,7 @@ public class SearchCommandOptions : ICommandOptions {
 public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommandOptions> {
     private readonly IConsole _console;
     private readonly IPluginService _pluginService;
-    private readonly IRemoteCallService _remoteCallService;
+    private readonly IPluginManagementService _pluginManagementService;
 
 
     /// <inheritdoc />
@@ -112,7 +112,7 @@ public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommand
 
     private async Task<int> ReportRemotePlugins(string searchTerm, string remote) {
         if (remote.Equals("ALL", StringComparison.InvariantCultureIgnoreCase)) {
-            var plugins = await _remoteCallService.GetPlugins(searchTerm);
+            var plugins = await _pluginManagementService.GetPlugins(searchTerm);
             if (plugins.All(x => x.Value.IsFail)) {
                 _console.WriteLine("Error: Communication with remote failed.");
                 return -1;
@@ -126,7 +126,7 @@ public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommand
             
             return 0;
         } else {
-            var plugins = await _remoteCallService.GetPlugins(remote, searchTerm);
+            var plugins = await _pluginManagementService.GetPlugins(remote, searchTerm);
             return ReportPlugins(plugins);
         }
     }

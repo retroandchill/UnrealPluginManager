@@ -111,4 +111,8 @@ public static class OptionUtils {
             fallback
         );
     }
+
+    public static T OrElseThrow<T>(this Option<T> option, Func<Exception> exceptionFactory) {
+        return option.Match(x => x, () => throw exceptionFactory());
+    }
 }

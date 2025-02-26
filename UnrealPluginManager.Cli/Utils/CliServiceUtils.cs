@@ -34,7 +34,7 @@ public static class CliServiceUtils {
         return services.AddScoped<IEngineService, EngineService>()
             .AddScoped<IStorageService, LocalStorageService>()
             .AddScoped<IRemoteService, RemoteService>()
-            .AddScoped<IRemoteCallService, RemoteCallService>();
+            .AddScoped<IPluginManagementService, PluginManagementService>();
     }
 
     /// <summary>

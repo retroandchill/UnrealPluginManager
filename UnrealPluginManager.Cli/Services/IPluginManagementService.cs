@@ -6,7 +6,7 @@ namespace UnrealPluginManager.Cli.Services;
 /// <summary>
 /// Represents a service used for remote calls to fetch plugin data.
 /// </summary>
-public interface IRemoteCallService {
+public interface IPluginManagementService {
 
     /// <summary>
     /// Retrieves a list of plugin overviews that optionally match a given search term.
@@ -43,26 +43,23 @@ public interface IRemoteCallService {
     Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
 
     /// <summary>
-    /// Resolves remote dependencies for a given list of root plugin dependencies.
-    /// The method attempts to find compatible versions of the specified plugins by consulting remote sources,
-    /// extending the provided local dependency manifest with additional resolved or unresolved entries.
+    /// Resolves and retrieves a list of plugin dependencies for a specified file.
+    /// Dependencies are determined based on the provided file and, optionally, the specified engine version.
     /// </summary>
-    /// <param name="rootDependencies">
-    /// A list of root plugin dependencies that need to be resolved.
-    /// Each dependency represents a specific plugin and its requirements.
+    /// <param name="filename">
+    /// The full path to the file (.uplugin or .uproject) whose plugin dependencies need to be resolved.
     /// </param>
-    /// <param name="localManifest">
-    /// An existing dependency manifest containing previously resolved and unresolved dependencies.
-    /// This manifest is extended with the results from the remote resolution process.
+    /// <param name="engineVersion">
+    /// An optional string specifying the engine version. If null, the method will attempt to determine
+    /// dependencies without engine version constraints.
     /// </param>
     /// <returns>
-    /// A task that represents the asynchronous operation. Upon completion, returns a <see cref="DependencyManifest"/>
-    /// which includes a dictionary of resolved dependencies along with their versions
-    /// and a set of unresolved dependency names.
+    /// A task representing the asynchronous operation. Upon completion, returns a list of
+    /// <see cref="PluginSummary"/> objects representing the resolved dependencies.
     /// </returns>
-    Task<DependencyManifest> TryResolveRemoteDependencies(List<PluginDependency> rootDependencies,
-        DependencyManifest localManifest);
-    
-    
+    Task<List<PluginSummary>> ResolveDependenciesForFile(string filename, string? engineVersion);
+
+    Task InstallPlugins(IEnumerable<PluginSummary> plugins);
+
 
 }

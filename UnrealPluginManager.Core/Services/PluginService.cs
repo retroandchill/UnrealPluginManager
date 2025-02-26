@@ -27,6 +27,10 @@ public partial class PluginService : IPluginService {
         AllowTrailingCommas = true
     };
 
+    public Task<bool> IsPluginCached(ulong pluginId, ulong versionId) {
+        return _dbContext.PluginVersions.AnyAsync(x => x.Id == versionId && x.ParentId == pluginId);
+    }
+
     /// <param name="matcher"></param>
     /// <param name="pageable"></param>
     /// <inheritdoc/>
@@ -112,10 +116,41 @@ public partial class PluginService : IPluginService {
         
         var formula = ExpressionSolver.Convert(root.Name, root.Version, dependencyList);
         var bindings = formula.Solve();
-        return bindings.Select(x => x.Select(p => dependencyList[p.Name].First(d => d.Version == p.Version))
+        return bindings.Select(x => CreatePluginInstallOrder(rootDependencies, x, dependencyList));
+    }
+
+    private static List<PluginSummary> CreatePluginInstallOrder(List<PluginDependency> rootDependencies,
+        List<SelectedVersion> selectedVersions,
+        Dictionary<string, IReadOnlyList<IDependencyChainNode>> dependencyList) {
+        var plugins = selectedVersions.Select(p => dependencyList[p.Name]
+                .First(d => d.Version == p.Version))
+            .ToDictionary(x => x.Name);
+        
+        return WalkDependencyList(rootDependencies, plugins)
             .CastIf<PluginVersionInfo>()
             .Select(p => p.ToPluginSummary())
-            .ToList());
+            .ToList();
+    }
+
+    private static IEnumerable<IDependencyChainNode> WalkDependencyList(List<PluginDependency> rootDependencies,
+        Dictionary<string, IDependencyChainNode> versions) {
+        var deps = rootDependencies.SelectMany(x => WalkDependencyList(x.PluginName, versions));
+        foreach (var dependency in deps) {
+            yield return dependency;
+        }
+    }
+    
+    private static IEnumerable<IDependencyChainNode> WalkDependencyList(string versionName, 
+        Dictionary<string, IDependencyChainNode> versions) {
+        var plugin = versions[versionName];
+
+        foreach (var dependency in plugin.Dependencies.Where(dependency => dependency.Type == PluginType.Provided)) {
+            foreach (var providedDependency in WalkDependencyList(dependency.PluginName, versions)) {
+                yield return providedDependency;
+            }
+
+            yield return plugin;
+        }
     }
 
     /// <inheritdoc/>
@@ -206,6 +241,22 @@ public partial class PluginService : IPluginService {
             .Where(x => x.EngineVersion == engineVersion)
             .AsAsyncEnumerable()
             .Where(p => p.Parent.Version.Satisfies(targetVersion))
+            .FirstOrDefaultAsync();
+        if (pluginInfo == null) {
+            throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
+        }
+
+        return _storageService.RetrievePlugin(pluginInfo.FilePath);
+    }
+
+    public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion) {
+        var pluginInfo = await _dbContext.UploadedPlugins
+            .Include(x => x.Parent)
+            .Include(x => x.Parent.Parent)
+            .Where(p => p.Parent.Parent.Name == pluginName)
+            .OrderByDescending(p => p.Parent.VersionString)
+            .Where(x => x.EngineVersion == engineVersion)
+            .Where(p => p.Parent.VersionString == targetVersion.ToString())
             .FirstOrDefaultAsync();
         if (pluginInfo == null) {
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");

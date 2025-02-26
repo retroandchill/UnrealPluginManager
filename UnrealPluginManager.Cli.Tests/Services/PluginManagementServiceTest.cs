@@ -13,12 +13,12 @@ using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Cli.Tests.Services;
 
-public class RemoteCallServiceTest {
+public class PluginManagementServiceTest {
     
     private ServiceProvider _serviceProvider;
     private Mock<IStorageService> _storageService;
     private Mock<IPluginsApi> _pluginsApi;
-    private IRemoteCallService _remoteCallService;
+    private IPluginManagementService _pluginManagementService;
 
     [SetUp]
     public void Setup() {
@@ -50,10 +50,10 @@ public class RemoteCallServiceTest {
         
         services.AddSingleton(_pluginsApi.Object);
         services.AddScoped<IRemoteService, RemoteService>();
-        services.AddScoped<IRemoteCallService, RemoteCallService>();
+        services.AddScoped<IPluginManagementService, PluginManagementService>();
         
         _serviceProvider = services.BuildServiceProvider();
-        _remoteCallService = _serviceProvider.GetRequiredService<IRemoteCallService>();
+        _pluginManagementService = _serviceProvider.GetRequiredService<IPluginManagementService>();
 
         var pageList = AddPluginsToRemote(300)
             .Concat(AddPluginsToRemote(50))
@@ -90,7 +90,7 @@ public class RemoteCallServiceTest {
     
     [Test]
     public async Task TestGetPluginsFromAllRemotes() {
-        var plugins = await _remoteCallService.GetPlugins("*");
+        var plugins = await _pluginManagementService.GetPlugins("*");
         Assert.That(plugins, Has.Count.EqualTo(3));
         Assert.That(plugins, Does.ContainKey("default"));
         Assert.That(plugins["default"].IsSucc, Is.True);
@@ -106,13 +106,13 @@ public class RemoteCallServiceTest {
 
     [Test]
     public async Task TestGetPluginsFromSingleRemote() {
-        var plugins = await _remoteCallService.GetPlugins("default", "*");
+        var plugins = await _pluginManagementService.GetPlugins("default", "*");
         Assert.That(plugins, Has.Count.EqualTo(300));
         
-        plugins = await _remoteCallService.GetPlugins("alt", "*");
+        plugins = await _pluginManagementService.GetPlugins("alt", "*");
         Assert.That(plugins, Has.Count.EqualTo(50));
         
-        Assert.ThrowsAsync<ArgumentException>(() => _remoteCallService.GetPlugins("invalid", "*"));
+        Assert.ThrowsAsync<ArgumentException>(() => _pluginManagementService.GetPlugins("invalid", "*"));
     }
     
 }
