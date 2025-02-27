@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UnrealPluginManager.Cli.Database;
+using UnrealPluginManager.Server.Database;
 
 #nullable disable
 
-namespace UnrealPluginManager.Cli.Migrations
+namespace UnrealPluginManager.Server.Migrations
 {
-    [DbContext(typeof(LocalUnrealPluginManagerContext))]
-    [Migration("20250226224357_AlteredVersionColumns")]
+    [DbContext(typeof(CloudUnrealPluginManagerContext))]
+    [Migration("20250227033150_AlteredVersionColumns")]
     partial class AlteredVersionColumns
     {
         /// <inheritdoc />
@@ -126,7 +126,28 @@ namespace UnrealPluginManager.Cli.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Major")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Minor")
+                        .HasColumnType("INTEGER");
+
                     b.Property<ulong>("ParentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Patch")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Prerelease")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PrereleaseNumber")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -166,45 +187,7 @@ namespace UnrealPluginManager.Cli.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Semver.SemVersion", "Version", b1 =>
-                        {
-                            b1.Property<ulong>("PluginVersionId")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<long>("Major")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<string>("Metadata")
-                                .IsRequired()
-                                .HasMaxLength(32)
-                                .HasColumnType("TEXT");
-
-                            b1.Property<long>("Minor")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<long>("Patch")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<string>("Prerelease")
-                                .IsRequired()
-                                .HasMaxLength(32)
-                                .HasColumnType("TEXT");
-
-                            b1.HasKey("PluginVersionId");
-
-                            b1.HasIndex("Major", "Minor", "Patch", "Prerelease", "Metadata")
-                                .IsUnique();
-
-                            b1.ToTable("PluginVersions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PluginVersionId");
-                        });
-
                     b.Navigation("Parent");
-
-                    b.Navigation("Version")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", b =>

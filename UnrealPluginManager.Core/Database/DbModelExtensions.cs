@@ -1,9 +1,8 @@
 ﻿using System.IO.Abstractions;
-using System.Numerics;
+using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Semver;
+using UnrealPluginManager.Core.Database.Entities;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -13,44 +12,71 @@ namespace UnrealPluginManager.Core.Database;
 public static class DbModelExtensions {
 
     /// <summary>
-    /// Configures the <see cref="SemVersion"/> type for a complex property in Entity Framework Core.
-    /// This method maps individual properties of the <see cref="SemVersion"/> object to database columns
-    /// and specifies conversion for numerical properties to ensure compatibility with database types.
+    /// Orders the elements of a sequence of <see cref="IVersionedEntity"/> by their semantic version in ascending order.
+    /// This method sorts the versions considering the major, minor, patch values, as well as the prerelease
+    /// and metadata components of the semantic version.
     /// </summary>
-    /// <param name="builder">
-    /// The <see cref="ComplexPropertyBuilder{SemVersion}"/> to configure the <see cref="SemVersion"/> mapping.
+    /// <typeparam name="TSource">
+    /// The type of the elements in the sequence. Must implement <see cref="IVersionedEntity"/>.
+    /// </typeparam>
+    /// <param name="source">
+    /// The sequence of <typeparamref name="TSource"/> objects to order.
     /// </param>
     /// <returns>
-    /// Returns the configured <see cref="ComplexPropertyBuilder{SemVersion}"/> to allow further chaining of configuration.
+    /// Returns an <see cref="IOrderedQueryable{T}"/> where the elements are sorted
+    /// by semantic version in ascending order.
     /// </returns>
-    public static OwnedNavigationBuilder<T,SemVersion> ConfigureSemVersion<T>(
-        this OwnedNavigationBuilder<T, SemVersion> builder) where T : class {
-        builder.Property(e => e.Major)
-            .HasConversion(x => (long) x, x => new BigInteger(x));
-        builder.Property(e => e.Minor)
-            .HasConversion(x => (long) x, x => new BigInteger(x));
-        builder.Property(e => e.Patch)
-            .HasConversion(x => (long) x, x => new BigInteger(x));
-        builder.Property(e => e.Prerelease)
-            .HasMaxLength(32);
-        builder.Property(e => e.Metadata)
-            .HasMaxLength(32);
-            
-        builder.Ignore(e => e.IsPrerelease)
-            .Ignore(e => e.IsRelease)
-            .Ignore(e => e.PrereleaseIdentifiers)
-            .Ignore(e => e.MetadataIdentifiers);
+    public static IOrderedQueryable<TSource> OrderByVersion<TSource>(this IQueryable<TSource> source) where TSource : IVersionedEntity {
+        return source.OrderBy(x => x.Major)
+            .ThenBy(x => x.Minor)
+            .ThenBy(x => x.Patch)
+            .ThenBy(x => x.PrereleaseNumber == null)
+            .ThenBy(x => x.PrereleaseNumber);
+    }
 
-        builder.HasIndex(e => new {
-            e.Major,
-            e.Minor,
-            e.Patch,
-            e.Prerelease,
-            e.Metadata
-        })
-        .IsUnique();
-        
-        return builder;
+    /// <summary>
+    /// Orders the elements of a sequence of <typeparamref name="TSource"/> objects by their version in descending order.
+    /// This method sorts based on the major, minor, patch, prerelease, and metadata components of the version, following
+    /// semantic versioning precedence rules.
+    /// </summary>
+    /// <typeparam name="TSource">
+    /// The type of the elements in the source sequence. It must implement <see cref="IVersionedEntity"/>.
+    /// </typeparam>
+    /// <param name="source">
+    /// The <see cref="IQueryable{T}"/> sequence of <typeparamref name="TSource"/> objects to be ordered by version.
+    /// </param>
+    /// <returns>
+    /// Returns an <see cref="IOrderedQueryable{T}"/> where the elements are ordered by their version in descending order.
+    /// </returns>
+    public static IOrderedQueryable<TSource> OrderByVersionDecending<TSource>(this IQueryable<TSource> source) where TSource : IVersionedEntity {
+        return source.OrderByDescending(x => x.Major)
+            .ThenByDescending(x => x.Minor)
+            .ThenByDescending(x => x.Patch)
+            .ThenByDescending(x => x.PrereleaseNumber == null)
+            .ThenByDescending(x => x.PrereleaseNumber);
+    }
+
+    /// <summary>
+    /// Orders a collection of entities implementing the <see cref="IVersionedEntityChild"/> interface
+    /// by the version of their parent entities in descending order. The ordering considers the major, minor, and patch version numbers,
+    /// as well as prerelease identifiers and metadata for precise version comparison.
+    /// </summary>
+    /// <param name="source">
+    /// An <see cref="IQueryable{TSource}"/> representing the collection of entities to be ordered.
+    /// </param>
+    /// <typeparam name="TSource">
+    /// The type of the entities in the collection, which must implement the <see cref="IVersionedEntityChild"/> interface.
+    /// </typeparam>
+    /// <returns>
+    /// Returns an <see cref="IOrderedQueryable{TSource}"/>, ordered by the parent's version in descending order,
+    /// allowing for further query composition.
+    /// </returns>
+    public static IOrderedQueryable<TSource> OrderByParentVersionDecending<TSource>(this IQueryable<TSource> source) where TSource : IVersionedEntityChild {
+        return source.OrderByDescending(x => x.Parent.Major)
+            .ThenByDescending(x => x.Parent.Minor)
+            .ThenByDescending(x => x.Parent.Patch)
+            .ThenByDescending(x => x.Parent.PrereleaseNumber == null)
+            .ThenByDescending(x => x.Parent.PrereleaseNumber);
     }
     
 }

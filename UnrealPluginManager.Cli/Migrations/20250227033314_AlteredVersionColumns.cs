@@ -18,75 +18,72 @@ namespace UnrealPluginManager.Cli.Migrations
                 name: "Version",
                 table: "PluginVersions");
 
-            migrationBuilder.AddColumn<long>(
-                name: "Version_Major",
+            migrationBuilder.AddColumn<int>(
+                name: "Major",
                 table: "PluginVersions",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 1);
 
             migrationBuilder.AddColumn<string>(
-                name: "Version_Metadata",
+                name: "Metadata",
                 table: "PluginVersions",
                 type: "TEXT",
-                maxLength: 32,
-                nullable: false,
-                defaultValue: "");
+                maxLength: 255,
+                nullable: true);
 
-            migrationBuilder.AddColumn<long>(
-                name: "Version_Minor",
+            migrationBuilder.AddColumn<int>(
+                name: "Minor",
                 table: "PluginVersions",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0);
 
-            migrationBuilder.AddColumn<long>(
-                name: "Version_Patch",
+            migrationBuilder.AddColumn<int>(
+                name: "Patch",
                 table: "PluginVersions",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
-                name: "Version_Prerelease",
+                name: "Prerelease",
                 table: "PluginVersions",
                 type: "TEXT",
-                maxLength: 32,
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PluginVersions_Version_Major_Version_Minor_Version_Patch_Version_Prerelease_Version_Metadata",
+            migrationBuilder.AddColumn<int>(
+                name: "PrereleaseNumber",
                 table: "PluginVersions",
-                columns: new[] { "Version_Major", "Version_Minor", "Version_Patch", "Version_Prerelease", "Version_Metadata" },
-                unique: true);
+                type: "INTEGER",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_PluginVersions_Version_Major_Version_Minor_Version_Patch_Version_Prerelease_Version_Metadata",
+            migrationBuilder.DropColumn(
+                name: "Major",
                 table: "PluginVersions");
 
             migrationBuilder.DropColumn(
-                name: "Version_Major",
+                name: "Metadata",
                 table: "PluginVersions");
 
             migrationBuilder.DropColumn(
-                name: "Version_Metadata",
+                name: "Minor",
                 table: "PluginVersions");
 
             migrationBuilder.DropColumn(
-                name: "Version_Minor",
+                name: "Patch",
                 table: "PluginVersions");
 
             migrationBuilder.DropColumn(
-                name: "Version_Patch",
+                name: "Prerelease",
                 table: "PluginVersions");
 
             migrationBuilder.DropColumn(
-                name: "Version_Prerelease",
+                name: "PrereleaseNumber",
                 table: "PluginVersions");
 
             migrationBuilder.AddColumn<string>(

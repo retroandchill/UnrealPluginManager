@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Converters;
 
@@ -16,7 +17,18 @@ namespace UnrealPluginManager.Core.Converters;
 public class SemVersionJsonConverter : JsonConverter<SemVersion> {
     /// <inheritdoc/>
     public override SemVersion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-        return SemVersion.Parse(reader.GetString()!);
+        var semVersion = SemVersion.Parse(reader.GetString()!);
+        if (!semVersion.IsPrerelease) {
+            return semVersion;
+        }
+        
+        // If the version is a prerelease version, ensure that it has a valid prerelease identifier.
+        try {
+            semVersion.PrereleaseIdentifiers.GetPrereleaseNumber();
+        } catch (Exception e) {
+            throw new JsonException("Invalid prerelease version identifier.", e);
+        }
+        return semVersion;
     }
 
 

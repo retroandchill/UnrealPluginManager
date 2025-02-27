@@ -58,7 +58,7 @@ public partial class PluginService : IPluginService {
                     .Include(p => p.Parent)
                     .Include(p => p.Dependencies)
                     .Where(p => unresolved.Contains(p.Parent.Name))
-                    .OrderByDescending(p => p.Version)
+                    .OrderByVersionDecending()
                     .ToPluginVersionInfo()
                     .ToListAsync())
                 .GroupBy(x => x.Name);
@@ -94,7 +94,7 @@ public partial class PluginService : IPluginService {
             .Include(p => p.Parent)
             .Include(p => p.Dependencies)
             .Where(p => p.Parent.Name == pluginName)
-            .OrderByDescending(p => p.Version)
+            .OrderByVersionDecending()
             .ToPluginVersionInfo()
             .FirstAsync();
 
@@ -172,7 +172,7 @@ public partial class PluginService : IPluginService {
             .Include(x => x.Parent)
             .Include(x => x.Parent.Parent)
             .Where(p => p.Parent.Parent.Name == pluginName)
-            .OrderByDescending(p => p.Parent.Version)
+            .OrderByParentVersionDecending()
             .Where(x => x.EngineVersion == engineVersion)
             .AsAsyncEnumerable()
             .Where(p => p.Parent.Version.Satisfies(targetVersion))
