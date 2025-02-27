@@ -26,7 +26,7 @@ public static class VersioningExtensions {
     /// Thrown when the second prerelease identifier does not contain a numeric value.
     /// </exception>
     public static int GetPrereleaseNumber(this IReadOnlyList<PrereleaseIdentifier> identifiers) {
-        ArgumentOutOfRangeException.ThrowIfNotEqual(identifiers.Count, 2, nameof(identifiers));
+        ArgumentOutOfRangeException.ThrowIfNotEqual(identifiers.Count, 2);
         var numericValue = identifiers[1].NumericValue;
         return numericValue is not null ? (int) numericValue : throw new ArgumentException("Invalid release candidate number.");
     }
