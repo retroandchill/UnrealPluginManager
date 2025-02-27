@@ -97,11 +97,11 @@ public static partial class PluginMapper {
     /// <param name="versions">The source <see cref="PluginVersion"/> instance to be converted.</param>
     /// <returns>A <see cref="VersionOverview"/> object representing the provided <see cref="PluginVersion"/>.</returns>
     public static List<VersionOverview> ToVersionOverview(this ICollection<PluginVersion> versions) {
-        return versions.OrderBy(x => x.Major)
-            .ThenBy(x => x.Minor)
-            .ThenBy(x => x.Patch)
-            .ThenBy(x => x.PrereleaseNumber == null)
-            .ThenBy(x => x.PrereleaseNumber)
+        return versions.OrderByDescending(x => x.Major)
+            .ThenByDescending(x => x.Minor)
+            .ThenByDescending(x => x.Patch)
+            .ThenByDescending(x => x.PrereleaseNumber == null)
+            .ThenByDescending(x => x.PrereleaseNumber)
             .Select(x => x.ToVersionOverview())
             .ToList();
     }
