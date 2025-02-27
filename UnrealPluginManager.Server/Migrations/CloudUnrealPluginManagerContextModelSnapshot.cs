@@ -123,21 +123,33 @@ namespace UnrealPluginManager.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Major")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Metadata")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Minor")
+                        .HasColumnType("INTEGER");
+
                     b.Property<ulong>("ParentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("VersionString")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Version");
+                    b.Property<int>("Patch")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Prerelease")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PrereleaseNumber")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
-
-                    b.HasIndex("VersionString")
-                        .IsUnique();
 
                     b.ToTable("PluginVersions");
                 });

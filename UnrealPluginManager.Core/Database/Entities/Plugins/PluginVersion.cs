@@ -1,8 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -12,7 +16,7 @@ namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 /// relationship to the parent plugin, its version details, dependencies, and associated binaries.
 /// This entity is associated with a database table and supports Entity Framework Core.
 /// </summary>
-public class PluginVersion {
+public class PluginVersion : IVersionedEntity {
     /// <summary>
     /// Gets or sets the unique identifier for the plugin version.
     /// </summary>
@@ -34,18 +38,58 @@ public class PluginVersion {
     /// Gets or sets the semantic version of the plugin.
     /// </summary>
     [NotMapped]
-    public SemVersion Version { get; set; } = new(1, 0, 0);
+    public SemVersion Version {
+        get => new(Major, Minor, Patch, 
+            PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null, 
+            Metadata?.Split('.'));
+        set {
+            Major = (int) value.Major;
+            Minor = (int) value.Minor;
+            Patch = (int) value.Patch;
+            PrereleaseNumber = value.IsPrerelease ? value.PrereleaseIdentifiers.GetPrereleaseNumber() : null;
+            Prerelease = value.IsPrerelease ? value.PrereleaseIdentifiers[0].Value : null;
+            Metadata = value.Metadata != "" ? value.Metadata : null;
+        } 
+    }
 
     /// <summary>
-    /// Gets or sets the string representation of the plugin version.
+    /// Gets or sets the major version number of the plugin version.
     /// </summary>
-    [MinLength(1)]
+    [DefaultValue(1)]
+    public int Major { get; private set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the minor version number of the plugin.
+    /// </summary>
+    public int Minor { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the patch version number of the plugin.
+    /// This is a part of the semantic versioning system (major.minor.patch) used to define the plugin version.
+    /// </summary>
+    public int Patch { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the prerelease label for the plugin version.
+    /// This property represents the optional pre-release identifier associated with
+    /// the semantic version of the plugin, such as "alpha", "beta", or "rc".
+    /// </summary>
+    public string? Prerelease { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the release candidate number for the plugin version.
+    /// This property indicates the pre-release state of the software
+    /// and is used in conjunction with semantic versioning.
+    /// </summary>
+    public int? PrereleaseNumber { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the metadata associated with the plugin version.
+    /// This typically stores additional version information in a dot-separated format,
+    /// which can include build information or other custom descriptors.
+    /// </summary>
     [MaxLength(255)]
-    [Column(name: "Version")]
-    public string VersionString {
-        get => Version.ToString();
-        set => Version = SemVersion.Parse(value);
-    }
+    public string? Metadata { get; private set; }
 
     /// <summary>
     /// Gets or sets the collection of dependencies for the plugin version.
@@ -68,12 +112,12 @@ public class PluginVersion {
 
         modelBuilder.Entity<PluginVersion>()
             .HasIndex(x => x.ParentId);
-        
-        modelBuilder.Entity<PluginVersion>()
-            .HasIndex(x => x.VersionString)
-            .IsUnique();
 
         modelBuilder.Entity<PluginVersion>()
             .Ignore(x => x.Version);
+        
+        modelBuilder.Entity<PluginVersion>()
+            .Property(x => x.Major)
+            .HasDefaultValue(1);
     }
 }
