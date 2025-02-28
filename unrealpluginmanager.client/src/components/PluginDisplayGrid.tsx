@@ -32,12 +32,14 @@ export class PluginDisplayGrid extends Component<{}, PluginGridState> {
     
     render() {
         return <div>
-            <TextField
-                id="outlined-basic"
-                variant="outlined"
-                label="Search"
-                onChange={(e) => this.debouncedUpdateSearchTerm(e.target.value)}
-            />
+            <div style={{display: 'flex', justifyContent: 'flex-end', paddingBottom: 10}}>
+                <TextField
+                    id="outlined-basic"
+                    variant="outlined"
+                    label="Search"
+                    onChange={(e) => this.debouncedUpdateSearchTerm(e.target.value)}
+                />
+            </div>
             <InfiniteScroll
                 dataLength={this.state.plugins.length}
                 next={() => this.populatePluginList()}

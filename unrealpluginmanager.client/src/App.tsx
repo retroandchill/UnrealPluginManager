@@ -14,7 +14,9 @@ import {PluginDisplayGrid} from "./components";
 class App extends Component {
     
     render() {
-        return <PluginDisplayGrid/>;
+        return <div>
+            <PluginDisplayGrid/>
+        </div>;
     }
     
 }
