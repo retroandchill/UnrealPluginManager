@@ -55,28 +55,6 @@ public static class DbModelExtensions {
             .ThenByDescending(x => x.PrereleaseNumber == null)
             .ThenByDescending(x => x.PrereleaseNumber);
     }
-
-    /// <summary>
-    /// Orders a collection of entities implementing the <see cref="IVersionedEntityChild"/> interface
-    /// by the version of their parent entities in descending order. The ordering considers the major, minor, and patch version numbers,
-    /// as well as prerelease identifiers and metadata for precise version comparison.
-    /// </summary>
-    /// <param name="source">
-    /// An <see cref="IQueryable{TSource}"/> representing the collection of entities to be ordered.
-    /// </param>
-    /// <typeparam name="TSource">
-    /// The type of the entities in the collection, which must implement the <see cref="IVersionedEntityChild"/> interface.
-    /// </typeparam>
-    /// <returns>
-    /// Returns an <see cref="IOrderedQueryable{TSource}"/>, ordered by the parent's version in descending order,
-    /// allowing for further query composition.
-    /// </returns>
-    public static IOrderedQueryable<TSource> OrderByParentVersionDecending<TSource>(this IQueryable<TSource> source) where TSource : IVersionedEntityChild {
-        return source.OrderByDescending(x => x.Parent.Major)
-            .ThenByDescending(x => x.Parent.Minor)
-            .ThenByDescending(x => x.Parent.Patch)
-            .ThenByDescending(x => x.Parent.PrereleaseNumber == null)
-            .ThenByDescending(x => x.Parent.PrereleaseNumber);
-    }
+    
     
 }
