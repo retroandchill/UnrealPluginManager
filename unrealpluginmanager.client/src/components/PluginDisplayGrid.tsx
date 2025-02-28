@@ -37,7 +37,7 @@ export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridStat
     
     render() {
         return <div>
-            <div style={{display: 'flex', justifyContent: 'flex-end', paddingBottom: 10}}>
+            <div id="search-bar" style={{display: 'flex', justifyContent: 'flex-end', paddingBottom: 10}}>
                 <TextField
                     id="outlined-basic"
                     variant="outlined"
