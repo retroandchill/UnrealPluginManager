@@ -2,9 +2,14 @@
 import {Page, debounce} from "../util";
 import {PluginOverview} from "../api";
 import {pluginsApi} from "../config/Globals";
-import {PluginButton} from "./PluginButton.tsx";
+import {PluginButton, PluginCallback} from "./PluginButton.tsx";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import TextField from "@mui/material/TextField";
+
+interface PluginGridProps {
+    onPluginClick?: PluginCallback;
+}
+
 /**
  * AppState interface represents the state of the application.
  */
@@ -15,14 +20,14 @@ interface PluginGridState {
     searchTerm?: string;
 }
 
-export class PluginDisplayGrid extends Component<{}, PluginGridState> {
+export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridState> {
 
     /**
      * Constructor for initializing the component with props and setting the initial state.
      *
      * @param {Object} props - The properties passed to the component.
      */
-    constructor(props: {}) {
+    constructor(props: PluginGridProps = {}) {
         super(props);
         this.state = {
             plugins: [],
@@ -54,7 +59,8 @@ export class PluginDisplayGrid extends Component<{}, PluginGridState> {
 
                 <table className="table table-striped" aria-labelledby="tableLabel">
                     <tbody>
-                    {this.state.plugins.map(plugin => <PluginButton key={plugin.id} plugin={plugin} onClick={(_) => {}}/>)}
+                    {this.state.plugins.map(plugin => <PluginButton key={plugin.id} plugin={plugin} 
+                                                                    onClick={this.props.onPluginClick}/>)}
                     </tbody>
                 </table>
             </InfiniteScroll>
