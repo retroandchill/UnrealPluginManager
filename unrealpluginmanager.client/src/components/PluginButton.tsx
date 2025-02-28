@@ -60,7 +60,7 @@ interface PluginButtonState {
  *
  * @template PluginButtonProps, PluginButtonState
  */
-class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
+export class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     
     /**
      * Constructs a new instance of the PluginButton.
@@ -97,5 +97,3 @@ class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     }
     
 }
-
-export default PluginButton;
