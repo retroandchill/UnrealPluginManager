@@ -168,14 +168,14 @@ public partial class PluginService : IPluginService {
 
     /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
-        var pluginInfo = await _dbContext.UploadedPlugins
+        var pluginInfo = await _dbContext.PluginVersions
             .Include(x => x.Parent)
-            .Include(x => x.Parent.Parent)
-            .Where(p => p.Parent.Parent.Name == pluginName)
-            .OrderByParentVersionDecending()
+            .Include(x => x.Binaries)
+            .Where(p => p.Parent.Name == pluginName)
+            .OrderByVersionDecending()
+            .WhereVersionInRange(targetVersion)
+            .SelectMany(x => x.Binaries)
             .Where(x => x.EngineVersion == engineVersion)
-            .AsAsyncEnumerable()
-            .Where(p => p.Parent.Version.Satisfies(targetVersion))
             .FirstOrDefaultAsync();
         if (pluginInfo == null) {
             throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
