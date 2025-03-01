@@ -16,7 +16,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
  * integration between JavaScript and ASP.NET.
  *
  * @extends Component
- * @template {}, AppState
  */
 class App extends Component {
 

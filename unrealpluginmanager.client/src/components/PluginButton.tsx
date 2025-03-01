@@ -65,8 +65,7 @@ export class PluginButton extends Component<PluginButtonProps, PluginButtonState
     /**
      * Constructs a new instance of the PluginButton.
      *
-     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.
-     * @return {PluginButton} A new instance of PluginButton initialized with the given properties.
+     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.=
      */
     constructor(props: PluginButtonProps) {
         super(props)
