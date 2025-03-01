@@ -165,9 +165,45 @@ public partial class PluginService : IPluginService {
         } catch (JsonException e) {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
+
+        var exists = _dbContext.PluginVersions.Any(x => x.Parent.Name == baseName
+                                                        && x.VersionString == descriptor.VersionName.ToString());
+        if (exists) {
+            throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
+        }
         
         var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
                                                                               engineVersion, archive);
+        return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+    }
+
+    /// <inheritdoc />
+    public async Task<PluginDetails> SubmitPlugin(IDirectoryInfo pluginDirectory, string engineVersion) {
+        var pluginDescriptorFile = pluginDirectory.GetFiles("*.uplugin", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault();
+        if (pluginDescriptorFile is null) {
+            throw new BadSubmissionException("Uplugin file was not found");
+        }
+        var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
+           
+        PluginDescriptor descriptor; 
+        try {
+            await using var upluginFile = pluginDescriptorFile.OpenRead();
+            var descriptorOut = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
+            ArgumentNullException.ThrowIfNull(descriptorOut);
+            descriptor = descriptorOut;
+        } catch (JsonException e) {
+            throw new BadSubmissionException("Uplugin file was malformed", e);
+        }
+
+        var exists = _dbContext.PluginVersions.Any(x => x.Parent.Name == baseName
+                                                        && x.VersionString == descriptor.VersionName.ToString());
+        if (exists) {
+            throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
+        }
+        
+        var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
+                                                                              engineVersion, pluginDirectory);
         return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
     }
 

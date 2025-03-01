@@ -54,14 +54,9 @@ public partial class EngineService : IEngineService {
             destination.SetLength(0);
             await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
-        }
+        } 
         
-        using var dest = _fileSystem.CreateDisposableDirectory(out var destFolder);
-        var zipFile = Path.Join(destFolder.FullName, $"{Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
-        await _fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
-        
-        await using var fileStream = _fileSystem.FileStream.New(zipFile, FileMode.Open);
-        await _pluginService.SubmitPlugin(fileStream, installedEngine.Version.ToString());
+        await _pluginService.SubmitPlugin(intermediateFolder, installedEngine.Version.ToString());
         return 0;
     }
 

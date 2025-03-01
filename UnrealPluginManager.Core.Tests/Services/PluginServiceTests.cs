@@ -169,16 +169,16 @@ public class PluginServiceTests {
 
     [Test]
     public async Task TestSubmitPlugin() {
-        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         using var testZip = new MemoryStream();
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
-            var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
             zipArchive.CreateEntry("Resources/");
             zipArchive.CreateEntry("Resources/Icon128.png");
             zipArchive.CreateEntry("Binaries/");
             zipArchive.CreateEntry("Binaries/Win64/");
             zipArchive.CreateEntry("Binaries/Win64/TestPlugin.dll");
+            
+            var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
             await using var writer = new StreamWriter(entry.Open());
 
             var descriptor = new PluginDescriptor {
@@ -189,18 +189,46 @@ public class PluginServiceTests {
 
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
-
-        _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
-            .Returns(async (Stream input) => {
-                var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
-                await using var stream = dummyInfo.Create();
-                input.Seek(0, SeekOrigin.Begin);
-                await input.CopyToAsync(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                return new StoredPluginData { ZipFile = dummyInfo };
-            });
+        
+        testZip.Seek(0, SeekOrigin.Begin);
 
         var summary = await pluginService.SubmitPlugin(testZip, "5.5");
+        Assert.Multiple(() => {
+            Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
+            Assert.That(summary.Description, Is.EqualTo("Test description"));
+            Assert.That(summary.Versions, Has.Count.EqualTo(1));
+            Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
+        });
+    }
+    
+    [Test]
+    public async Task TestSubmitPluginFromDirectory() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        
+        var tempDir = filesystem.Directory.CreateDirectory("TestPlugin");
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Resources"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Binaries"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Binaries", "Win64"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate", "Build"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate", "Build", "Win64"));
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Resources", "Icon128.png")).DisposeAsync();
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Binaries", "Win64", "TestPlugin.dll")).DisposeAsync();
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Intermediate", "Build", "Win64", "TestPlugin.lib")).DisposeAsync();
+        await using (var upluginFile = filesystem.File.Create(Path.Combine(tempDir.FullName, "TestPlugin.uplugin"))) {
+            await using var writer = new StreamWriter(upluginFile);
+
+            var descriptor = new PluginDescriptor {
+                    FriendlyName = "Test Plugin",
+                    VersionName = new SemVersion(1, 0, 0),
+                    Description = "Test description"
+            };
+
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        var summary = await pluginService.SubmitPlugin(tempDir, "5.5");
         Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
             Assert.That(summary.Description, Is.EqualTo("Test description"));

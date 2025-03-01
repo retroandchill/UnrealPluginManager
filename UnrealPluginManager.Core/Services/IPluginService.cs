@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.IO.Abstractions;
+using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Storage;
@@ -79,6 +80,16 @@ public interface IPluginService {
     /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
     /// </returns>
     Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion);
+
+    /// <summary>
+    /// Submits a plugin from the specified directory for inclusion in the system, including processing metadata and versioning information.
+    /// </summary>
+    /// <param name="pluginDirectory">The directory containing the plugin's files, including its descriptor.</param>
+    /// <param name="engineVersion">The version of the engine that the plugin supports.</param>
+    /// <returns>
+    /// A <see cref="PluginDetails"/> object containing detailed information about the submitted plugin.
+    /// </returns>
+    Task<PluginDetails> SubmitPlugin(IDirectoryInfo pluginDirectory, string engineVersion);
 
     /// <summary>
     /// Retrieves the source code for a specific plugin version.
