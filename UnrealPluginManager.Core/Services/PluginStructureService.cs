@@ -24,25 +24,26 @@ public partial class PluginStructureService : IPluginStructureService {
 
         IFileInfo pluginSource;
         using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
-            var sourceDirectories = pluginDirectory.EnumerateDirectories()
-                    .Where(x => !x.Name.StartsWith("Binaries") || !x.Name.StartsWith("Intermediate"));
-            var sourceFiles = pluginDirectory.EnumerateFiles();
+            var sourceDirectories = pluginDirectory.EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
+                    .Where(x => !x.Name.StartsWith("Binaries") && !x.Name.StartsWith("Intermediate"));
+            var sourceFiles = pluginDirectory.EnumerateFiles("*", SearchOption.TopDirectoryOnly);
             sourceZipInfo = await _fileSystem.CreateZipFile(sourceZipInfo.FullName, sourceDirectories, sourceFiles);
             pluginSource = await _storageService.StorePluginSource(pluginName, version, 
                                                                    new CopyFileSource(sourceZipInfo));
         }
 
         var binariesDirectory = pluginDirectory.SubDirectory("Binaries");
-        var intermediateDirectory = pluginDirectory.SubDirectory("Intermediate");
+        var intermediateDirectory = pluginDirectory.SubDirectory("Intermediate", "Build");
         var binaryDirectories = binariesDirectory.EnumerateDirectories()
-                .ToDictionary<IDirectoryInfo, string, List<IDirectoryInfo>>(binary => binary.Name, 
-                                                                            binary => [binary]);
+                .ToDictionary<IDirectoryInfo, string, List<ZipSubDirectory>>(binary => binary.Name, 
+                                                                            binary => [new ZipSubDirectory("Binaries", binary)]);
 
         foreach (var intermediate in intermediateDirectory.EnumerateDirectories()) {
             var existingDirectories = binaryDirectories.TryGetValue(intermediate.Name, out var directories)
                 ? directories
                 : [];
-            binaryDirectories[intermediate.Name] = existingDirectories.Concat([ intermediate ]).ToList();
+            binaryDirectories[intermediate.Name] = existingDirectories
+                    .Concat([ new ZipSubDirectory(Path.Join("Intermediate", "Build"), intermediate) ]).ToList();
         }
 
         var pluginBinaries = new Dictionary<string, IFileInfo>();

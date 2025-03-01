@@ -148,10 +148,8 @@ public partial class PluginService : IPluginService {
 
     /// <inheritdoc/>
     public async Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion) {
-        var fileInfo = await _storageService.StorePlugin(fileData);
-        await using var storedData = fileInfo.ZipFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         using var directoryHandle = _fileSystem.CreateDisposableDirectory(out var tempDir);
-        using (var archive = new ZipArchive(storedData)) {
+        using (var archive = new ZipArchive(fileData)) {
             await _fileSystem.ExtractZipFile(archive, tempDir.FullName);
         }
 
@@ -162,19 +160,21 @@ public partial class PluginService : IPluginService {
         }
 
         var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
-
-        await using var upluginFile = pluginDescriptorFile.OpenRead();
+        
+        PluginDescriptor descriptor;
         try {
-            var descriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
-            ArgumentNullException.ThrowIfNull(descriptor);
-
-            var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
-                engineVersion, tempDir);
-
-            return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+            await using var upluginFile = pluginDescriptorFile.OpenRead();
+            var descriptorOut = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
+            ArgumentNullException.ThrowIfNull(descriptorOut);
+            descriptor = descriptorOut;
         } catch (JsonException e) {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
+        
+        var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
+                                                                              engineVersion, tempDir);
+
+        return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
     }
 
     /// <inheritdoc />
