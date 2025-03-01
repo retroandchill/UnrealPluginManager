@@ -76,7 +76,7 @@ public partial class EngineServiceTest {
         PluginDescriptor? capturedData = null;
         string? capturedTextFile = null;
         _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<Stream>(),
-                It.Is(new Version(5, 5), EqualityComparer<Version>.Default)))
+                It.Is("5.5", EqualityComparer<string>.Default)))
             .Returns(async (Stream x, Version _) => {
                 using var archive = new ZipArchive(x);
                 var entry = archive.GetEntry("MyPlugin.uplugin")!;

@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.IO.Abstractions;
+using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Semver;
@@ -20,6 +21,8 @@ namespace UnrealPluginManager.Core.Services;
 public partial class PluginService : IPluginService {
     private readonly UnrealPluginManagerContext _dbContext;
     private readonly IStorageService _storageService;
+    private readonly IFileSystem _fileSystem;
+    private readonly IPluginStructureService _pluginStructureService;
 
     private static readonly JsonSerializerOptions JsonOptions = new() {
         AllowTrailingCommas = true
@@ -126,7 +129,7 @@ public partial class PluginService : IPluginService {
             .Where(x => x.Name == pluginName)
             .FirstOrDefaultAsync();
         if (plugin is null) {
-            plugin = descriptor.ToPlugin(pluginName, storedFile?.FileInfo.IconFile);
+            plugin = descriptor.ToPlugin(pluginName);
             _dbContext.Plugins.Add(plugin);
             await _dbContext.SaveChangesAsync();
         }
@@ -140,47 +143,38 @@ public partial class PluginService : IPluginService {
     }
 
     /// <inheritdoc/>
-    public async Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion) {
+    public async Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion) {
         var fileInfo = await _storageService.StorePlugin(fileData);
         await using var storedData = fileInfo.ZipFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
-        using var archive = new ZipArchive(storedData);
+        using var directoryHandle = _fileSystem.CreateDisposableDirectory(out var tempDir);
+        using (var archive = new ZipArchive(storedData)) {
+            await _fileSystem.ExtractZipFile(archive, tempDir.FullName);
+        }
 
-        var archiveEntry = archive.Entries
-            .FirstOrDefault(entry => entry.FullName.EndsWith(".uplugin"));
-        if (archiveEntry is null) {
+        var pluginDescriptorFile = tempDir.EnumerateFiles("*.uplugin")
+                .FirstOrDefault();
+        if (pluginDescriptorFile is null) {
             throw new BadSubmissionException("Uplugin file was not found");
         }
 
-        var baseName = Path.GetFileNameWithoutExtension(archiveEntry.FullName);
-        await using var upluginFile = archiveEntry.Open();
-
+        var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
+        
+        await using var upluginFile = pluginDescriptorFile.OpenRead();
         try {
             var descriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
-            if (descriptor is null) {
-                throw new BadSubmissionException("Uplugin file was malformed");
-            }
+            ArgumentNullException.ThrowIfNull(descriptor);
+            
+            var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName, 
+                                                                            engineVersion, tempDir);
 
-            return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, fileInfo));
+            return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
         } catch (JsonException e) {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
     }
 
     /// <inheritdoc/>
-    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
-        var pluginInfo = await _dbContext.PluginVersions
-            .Include(x => x.Parent)
-            .Include(x => x.Binaries)
-            .Where(p => p.Parent.Name == pluginName)
-            .OrderByVersionDecending()
-            .WhereVersionInRange(targetVersion)
-            .SelectMany(x => x.Binaries)
-            .Where(x => x.EngineVersion == engineVersion)
-            .FirstOrDefaultAsync();
-        if (pluginInfo == null) {
-            throw new PluginNotFoundException($"Plugin '{pluginName}' not found.");
-        }
-
-        return _storageService.RetrievePlugin(pluginInfo.FilePath);
+    public Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion) {
+        throw new NotImplementedException();
     }
 }

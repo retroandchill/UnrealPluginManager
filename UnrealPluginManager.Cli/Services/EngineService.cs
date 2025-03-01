@@ -61,7 +61,7 @@ public partial class EngineService : IEngineService {
         await _fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
         
         await using var fileStream = _fileSystem.FileStream.New(zipFile, FileMode.Open);
-        await _pluginService.SubmitPlugin(fileStream, installedEngine.Version);
+        await _pluginService.SubmitPlugin(fileStream, installedEngine.Version.ToString());
         return 0;
     }
 

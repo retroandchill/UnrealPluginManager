@@ -16,4 +16,4 @@ namespace UnrealPluginManager.Core.Model.Engine;
 /// <param name="Platform">
 /// Indicates the platform for which the engine file is designated, with a default value of "Win64".
 /// </param>
-public record struct EngineFileData(Version EngineVersion, StoredPluginData FileInfo, string Platform = "Win64");
+public record struct EngineFileData(string EngineVersion, PartitionedPlugin FileInfo);

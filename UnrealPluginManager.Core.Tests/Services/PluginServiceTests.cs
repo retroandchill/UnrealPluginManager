@@ -193,7 +193,7 @@ public class PluginServiceTests {
                 return new StoredPluginData { ZipFile = dummyInfo };
             });
 
-        var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
+        var summary = await pluginService.SubmitPlugin(testZip, "5.5");
         Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
             Assert.That(summary.Description, Is.EqualTo("Test description"));
@@ -225,7 +225,7 @@ public class PluginServiceTests {
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>
-            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+            await pluginService.SubmitPlugin(testZip, "5.5"));
     }
 
     [Test]
@@ -257,7 +257,7 @@ public class PluginServiceTests {
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>
-            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+            await pluginService.SubmitPlugin(testZip, "5.5"));
     }
 
     [Test]
@@ -292,7 +292,6 @@ public class PluginServiceTests {
                     Binaries = [
                         new PluginBinaries {
                             EngineVersion = "5.5",
-                            FilePath = zipFile,
                             Platform = "Win64"
                         }
                     ]

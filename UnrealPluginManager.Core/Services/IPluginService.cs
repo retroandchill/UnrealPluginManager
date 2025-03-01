@@ -1,6 +1,7 @@
 ﻿using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
@@ -77,7 +78,7 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
     /// </returns>
-    Task<PluginDetails> SubmitPlugin(Stream fileData, Version engineVersion);
+    Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion);
 
     /// <summary>
     /// Retrieves the file data of a specific plugin for a given engine version.

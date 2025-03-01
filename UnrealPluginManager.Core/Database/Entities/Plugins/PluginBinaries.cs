@@ -60,20 +60,15 @@ public class PluginBinaries : IVersionedEntityChild {
     public required string Platform { get; set; }
 
     /// <summary>
-    /// Represents the file path associated with the plugin binary.
-    /// This property is required and utilizes an abstraction of file system constructs for enhanced testability.
-    /// </summary>
-    [Required]
-    public required IFileInfo FilePath { get; set; }
-
-    /// <summary>
     /// Specifies the version of the Unreal Engine that the plugin binary is compatible with.
     /// This property is required and ensures compatibility information is associated with the plugin binary.
     /// </summary>
     [Required]
+    [MinLength(1)]
+    [MaxLength(255)]
     public required string EngineVersion { get; set; }
     
-    internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem filesystem) {
+    internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
         modelBuilder.Entity<PluginBinaries>()
             .HasOne(x => x.Parent)
             .WithMany(x => x.Binaries)
@@ -82,10 +77,6 @@ public class PluginBinaries : IVersionedEntityChild {
 
         modelBuilder.Entity<PluginBinaries>()
             .HasIndex(x => x.ParentId);
-
-        modelBuilder.Entity<PluginBinaries>()
-            .Property(x => x.FilePath)
-            .HasConversion(x => x.FullName, x => filesystem.FileInfo.New(x));
 
         modelBuilder.Entity<PluginBinaries>()
             .HasIndex(x => x.EngineVersion);

@@ -55,7 +55,7 @@ public partial class PluginsController : ControllerBase {
     [ProducesResponseType(typeof(PluginDetails), (int) HttpStatusCode.OK)]
     public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
         await using var stream = pluginFile.OpenReadStream();
-        return await _pluginService.SubmitPlugin(stream, engineVersion);
+        return await _pluginService.SubmitPlugin(stream, engineVersion.ToString());
     }
 
 

@@ -15,7 +15,6 @@ namespace UnrealPluginManager.Core.Database;
 /// It leverages the configuration provided by the <see cref="DbContextOptions{TContext}"/> to establish the connection and behavior for the database.
 /// </remarks>
 public abstract class UnrealPluginManagerContext : DbContext {
-    private readonly IFileSystem _filesystem;
 
 
     /// <summary>
@@ -26,7 +25,6 @@ public abstract class UnrealPluginManagerContext : DbContext {
     /// It leverages the provided <see cref="IFileSystem"/> instance to handle file-related operations relevant to the database and application logic.
     /// </remarks>
     protected UnrealPluginManagerContext(IFileSystem filesystem) {
-        _filesystem = filesystem;
     }
 
     /// <summary>
@@ -49,9 +47,9 @@ public abstract class UnrealPluginManagerContext : DbContext {
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        Plugin.DefineModelMetadata(modelBuilder, _filesystem);
+        Plugin.DefineModelMetadata(modelBuilder);
         PluginVersion.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
-        PluginBinaries.DefineModelMetadata(modelBuilder, _filesystem);
+        PluginBinaries.DefineModelMetadata(modelBuilder);
     }
 }
