@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Semver;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 
@@ -78,6 +79,10 @@ public partial class EngineService : IEngineService {
         await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         
         return 0;
+    }
+
+    public Task<PartitionedPlugin> PartitionPlugin(IDirectoryInfo buildPluginDirectory) {
+        throw new NotImplementedException();
     }
 
     private InstalledEngine GetInstalledEngine(string? engineVersion) {

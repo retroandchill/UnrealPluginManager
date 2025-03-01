@@ -40,4 +40,5 @@ public interface IEngineService {
     /// A task representing the asynchronous operation. The task result contains an integer indicating the status of the installation process.
     /// </returns>
     public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion);
+    
 }

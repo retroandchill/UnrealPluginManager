@@ -14,11 +14,25 @@ public static class ZipUtils {
     /// <param name="zipFilePath">The full path where the ZIP file should be created.</param>
     /// <param name="directoryPath">The path of the directory whose contents are to be archived.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task CreateZipFile(this IFileSystem fileSystem, string zipFilePath, string directoryPath) {
+    public static async Task<IFileInfo> CreateZipFile(this IFileSystem fileSystem, string zipFilePath,
+        string directoryPath) {
         var fromDirectory = fileSystem.DirectoryInfo.New(directoryPath);
         var toFile = fileSystem.FileInfo.New(zipFilePath);
         using var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create);
         await CreateZipEntryFromPath(fileSystem, targetZip, fromDirectory, directoryPath);
+        return toFile;
+    }
+
+    public static async Task<IFileInfo> CreateZipFile(this IFileSystem fileSystem, string zipFilePath,
+                                                      IEnumerable<IDirectoryInfo> directories, IEnumerable<IFileInfo> files) {
+        var toFile = fileSystem.FileInfo.New(zipFilePath);
+        using var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create);
+        foreach (var directory in directories) {
+            ArgumentNullException.ThrowIfNull(directory.Parent);
+            await CreateZipEntryFromPath(fileSystem, targetZip, directory.Parent, directory.FullName);
+        }
+        return toFile;
+        
     }
 
     private static async Task CreateZipEntryFromPath(IFileSystem fileSystem, ZipArchive targetZip,

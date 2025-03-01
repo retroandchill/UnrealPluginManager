@@ -35,4 +35,8 @@
       <ProjectReference Include="..\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Model\Plugins\" />
+    </ItemGroup>
+
 </Project>
