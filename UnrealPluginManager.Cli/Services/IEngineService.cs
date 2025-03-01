@@ -36,9 +36,11 @@ public interface IEngineService {
     /// <param name="pluginName">The name of the plugin to install.</param>
     /// <param name="pluginVersion">The version of the plugin to install, specified as a semantic version range.</param>
     /// <param name="engineVersion">The target Unreal Engine version for the installation, or null to use the default.</param>
+    /// <param name="targetPlatforms"></param>
     /// <returns>
     /// A task representing the asynchronous operation. The task result contains an integer indicating the status of the installation process.
     /// </returns>
-    public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion);
+    public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+                                   IReadOnlyCollection<string> targetPlatforms);
     
 }

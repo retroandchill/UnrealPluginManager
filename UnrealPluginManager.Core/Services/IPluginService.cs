@@ -81,6 +81,41 @@ public interface IPluginService {
     Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion);
 
     /// <summary>
+    /// Retrieves the source code for a specific plugin version.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which to retrieve the source code.</param>
+    /// <param name="targetVersion">The specific version of the plugin to retrieve.</param>
+    /// <returns>
+    /// A <see cref="Stream"/> representing the source code of the specified plugin version.
+    /// </returns>
+    Task<Stream> GetPluginSource(string pluginName, SemVersion targetVersion);
+
+    /// <summary>
+    /// Retrieves the binary data of a specified plugin for a specific version, engine version, and platform.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the binary data is requested.</param>
+    /// <param name="targetVersion">The specific version of the plugin to retrieve.</param>
+    /// <param name="engineVersion">The engine version the plugin is associated with.</param>
+    /// <param name="platform">The target platform for which the plugin binary is requested.</param>
+    /// <returns>
+    /// A <see cref="Stream"/> containing the binary data of the requested plugin.
+    /// </returns>
+    Task<Stream> GetPluginBinaries(string pluginName, SemVersion targetVersion, string engineVersion, string platform);
+
+    /// <summary>
+    /// Retrieves the raw file data for a specified plugin, considering the plugin name, version, engine compatibility, and target platforms.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the file data is to be retrieved.</param>
+    /// <param name="targetVersion">The target plugin version range to fetch the appropriate file data.</param>
+    /// <param name="engineVersion">The version of the engine that the plugin file is intended for.</param>
+    /// <param name="targetPlatforms">A collection of target platform identifiers for which the plugin is requested.</param>
+    /// <returns>
+    /// A <see cref="Stream"/> containing the plugin file data.
+    /// </returns>
+    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+                                   IReadOnlyCollection<string> targetPlatforms);
+
+    /// <summary>
     /// Retrieves the file data of a specific plugin for a given engine version.
     /// </summary>
     /// <param name="pluginName">
@@ -90,8 +125,10 @@ public interface IPluginService {
     /// <param name="engineVersion">
     ///     The version of the engine for which the plugin file data is needed.
     /// </param>
+    /// <param name="targetPlatforms"></param>
     /// <returns>
     /// A stream representing the binary content of the plugin file.
     /// </returns>
-    Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion);
+    Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
+                                   IReadOnlyCollection<string> targetPlatforms);
 }

@@ -24,6 +24,8 @@ public interface IVersionedEntity {
     /// This is a part of the semantic versioning system (major.minor.patch) used to define the plugin version.
     /// </summary>
     public int Patch { get; }
+    
+    public string? Prerelease { get; }
 
     /// <summary>
     /// Gets or sets the release candidate number for the plugin version.

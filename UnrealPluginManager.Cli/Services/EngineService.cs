@@ -66,7 +66,8 @@ public partial class EngineService : IEngineService {
     }
 
     /// <inheritdoc />
-    public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion) {
+    public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+                                         IReadOnlyCollection<string> targetPlatforms) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
         if (_fileSystem.Directory.Exists(installDirectory)) {
@@ -74,7 +75,7 @@ public partial class EngineService : IEngineService {
         }
         var destinationDirectory = _fileSystem.Directory.CreateDirectory(installDirectory);
 
-        await using var result = await _pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name);
+        await using var result = await _pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name, targetPlatforms);
         using var zipArchive = new ZipArchive(result, ZipArchiveMode.Read);
         await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         

@@ -26,7 +26,7 @@ public partial class PluginManagementService : IPluginManagementService {
         return _remoteService.GetApiAccessors<IPluginsApi>()
             .ToOrderedDictionaryAsync(async x => {
                 try {
-                    return await searchTerm.AsEnumerable()
+                    return await searchTerm.ToEnumerable()
                         .PageToEndAsync((y, p) => x.GetPluginsAsync(y, p.PageNumber, p.PageSize), DefaultPageSize)
                         .ToListAsync();
                 } catch (ApiException e) {
@@ -38,7 +38,7 @@ public partial class PluginManagementService : IPluginManagementService {
     /// <inheritdoc />
     public async Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm) {
         var api = _remoteService.GetApiAccessor<IPluginsApi>(remote);
-        return await searchTerm.AsEnumerable()
+        return await searchTerm.ToEnumerable()
             .PageToEndAsync((y, p) => api.GetPluginsAsync(y, p.PageNumber, p.PageSize), DefaultPageSize)
             .ToListAsync();
     }

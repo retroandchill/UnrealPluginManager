@@ -72,4 +72,17 @@ public static class ZipUtils {
         }
         
     }
+
+    public static async Task Merge(this ZipArchive target, ZipArchive source) {
+        foreach (var entry in source.Entries) {
+            var createdEntry = target.CreateEntry(entry.FullName);
+            if (entry.FullName.EndsWith('/')) {
+                continue;
+            }
+            
+            await using var entryStream = createdEntry.Open();
+            await using var sourceStream = entry.Open();
+            await sourceStream.CopyToAsync(entryStream);
+        }
+    }
 }

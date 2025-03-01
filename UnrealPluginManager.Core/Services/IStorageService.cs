@@ -34,7 +34,7 @@ public interface IStorageService {
     /// <param name="pluginName">The name of the plugin whose source file is being retrieved.</param>
     /// <param name="version">The version of the plugin.</param>
     /// <returns>A <see cref="Stream"/> containing the plugin source file.</returns>
-    Stream RetrievePluginSource(string pluginName, SemVersion version);
+    Option<IFileInfo> RetrievePluginSource(string pluginName, SemVersion version);
 
     /// <summary>
     /// Stores the icon file of a plugin using the provided file source.
@@ -49,7 +49,7 @@ public interface IStorageService {
     /// </summary>
     /// <param name="pluginName">The name of the plugin for which the icon is being retrieved.</param>
     /// <returns>A <see cref="Stream"/> representing the plugin's icon file.</returns>
-    Stream RetrievePluginIcon(string pluginName);
+    Option<IFileInfo> RetrievePluginIcon(string pluginName);
 
     /// <summary>
     /// Stores the binary files of a plugin for a specified version, engine version, and platform using the provided file source.
@@ -71,7 +71,8 @@ public interface IStorageService {
     /// <param name="engineVersion">The version of the engine for which the binaries are being retrieved.</param>
     /// <param name="platform">The platform for which the binaries are being retrieved.</param>
     /// <returns>A <see cref="Stream"/> containing the plugin binary files.</returns>
-    Stream RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion, string platform);
+    Option<IFileInfo> RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion,
+                                             string platform);
 
     /// <summary>
     /// Stores the provided plugin data stream.
@@ -80,13 +81,6 @@ public interface IStorageService {
     /// <returns>An <see cref="IFileInfo"/> object representing the stored plugin file.</returns>
     /// <exception cref="BadSubmissionException">Thrown when a .uplugin file is not found in the provided stream.</exception>
     Task<StoredPluginData> StorePlugin(Stream fileData);
-
-    /// <summary>
-    /// Retrieves the plugin data stream for the specified plugin file.
-    /// </summary>
-    /// <param name="fileInfo">The file information object representing the plugin file to be retrieved.</param>
-    /// <returns>A <see cref="Stream"/> representing the contents of the retrieved plugin file.</returns>
-    Stream RetrievePlugin(IFileInfo fileInfo);
 
     /// <summary>
     /// Retrieves the icon data stream for the specified icon name.

@@ -49,7 +49,7 @@ public class RemoteServiceTest {
     public void TestConfigureRemotes() {
         var defaultRemote = _remoteService.GetRemote("default");
         Assert.That(defaultRemote.IsSome, Is.True);
-        var defaultRemoteValue = defaultRemote.Get().Url;
+        var defaultRemoteValue = defaultRemote.OrElseThrow().Url;
         
         var invalidRemote = _remoteService.GetRemote("invalid");
         Assert.That(invalidRemote.IsNone, Is.True);

@@ -50,8 +50,10 @@ public abstract partial class StorageServiceBase : IStorageService {
     }
 
     /// <inheritdoc />
-    public Stream RetrievePluginSource(string pluginName, SemVersion version) {
-        return FileSystem.File.OpenRead(GetPluginSourceFileName(pluginName, version));
+    public Option<IFileInfo> RetrievePluginSource(string pluginName, SemVersion version) {
+        return GetPluginSourceFileName(pluginName, version).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
     }
 
     private string GetPluginIconFileName(string pluginName) {
@@ -65,8 +67,10 @@ public abstract partial class StorageServiceBase : IStorageService {
     }
 
     /// <inheritdoc />
-    public Stream RetrievePluginIcon(string pluginName) {
-        return FileSystem.File.OpenRead(GetPluginIconFileName(pluginName));
+    public Option<IFileInfo> RetrievePluginIcon(string pluginName) {
+        return GetPluginIconFileName(pluginName).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
     }
 
     private string GetPluginBinariesFileName(string pluginName, SemVersion version, string engineVersion,
@@ -84,8 +88,11 @@ public abstract partial class StorageServiceBase : IStorageService {
     }
 
     /// <inheritdoc />
-    public Stream RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion, string platform) {
-        return FileSystem.File.OpenRead(GetPluginBinariesFileName(pluginName, version, engineVersion, platform));
+    public Option<IFileInfo> RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion,
+                                                    string platform) {
+        return GetPluginBinariesFileName(pluginName, version, engineVersion, platform).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
     }
 
     /// <inheritdoc />
@@ -125,11 +132,6 @@ public abstract partial class StorageServiceBase : IStorageService {
             ZipFile = FileSystem.FileInfo.New(fullPath),
             IconFile = icon
         };
-    }
-
-    /// <inheritdoc />
-    public Stream RetrievePlugin(IFileInfo fileInfo) {
-        return fileInfo.OpenRead();
     }
 
     /// <inheritdoc />

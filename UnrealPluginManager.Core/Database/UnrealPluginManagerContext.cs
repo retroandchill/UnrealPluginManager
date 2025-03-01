@@ -45,11 +45,21 @@ public abstract class UnrealPluginManagerContext : DbContext {
     /// </remarks>
     public DbSet<PluginVersion> PluginVersions { get; init; }
 
+
+    /// <summary>
+    /// Represents the database set for managing plugin binary data within the UnrealPluginManager context.
+    /// </summary>
+    /// <remarks>
+    /// This property provides access to the collection of plugin binaries stored in the database.
+    /// Plugin binaries include platform-specific and engine version-specific binaries associated with a plugin version.
+    /// </remarks>
+    public DbSet<UploadedBinaries> PluginBinaries { get; init; }
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         Plugin.DefineModelMetadata(modelBuilder);
         PluginVersion.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
-        PluginBinaries.DefineModelMetadata(modelBuilder);
+        UploadedBinaries.DefineModelMetadata(modelBuilder);
     }
 }

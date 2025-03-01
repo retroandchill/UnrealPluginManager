@@ -154,11 +154,12 @@ public partial class EngineServiceTest {
             await textWriter.WriteAsync("Hello World!");
         }
 
-        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4"))
+        List<string> targetPlatforms = ["Win64"];
+        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms))
             .ReturnsAsync((string _, SemVersionRange _, string _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
-        var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4");
+        var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);
         Assert.Multiple(() =>
         {
             Assert.That(returnCode, Is.EqualTo(0));

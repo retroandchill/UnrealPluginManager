@@ -290,7 +290,7 @@ public class PluginServiceTests {
                 new PluginVersion {
                     Version = new SemVersion(1, 0, 0),
                     Binaries = [
-                        new PluginBinaries {
+                        new UploadedBinaries {
                             EngineVersion = "5.5",
                             Platform = "Win64"
                         }
@@ -301,10 +301,10 @@ public class PluginServiceTests {
         await context.Plugins.AddAsync(plugin);
         await context.SaveChangesAsync();
 
-        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5"));
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersion.Parse("1.0.0"), "5.5", ["Win64"]));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.4"));
+            await pluginService.GetPluginFileData("TestPlugin", SemVersion.Parse("1.0.0"), "5.4", ["Win64"]));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, "5.5"));
+            await pluginService.GetPluginFileData("OtherPlugin", SemVersion.Parse("1.0.0"), "5.5", ["Win64"]));
     }
 }

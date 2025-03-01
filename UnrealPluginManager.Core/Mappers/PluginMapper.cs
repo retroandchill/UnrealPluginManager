@@ -47,7 +47,7 @@ public static partial class PluginMapper {
     /// <param name="version">The <see cref="PluginVersion"/> instance containing version information.</param>
     /// <returns>A <see cref="List{T}"/> of <see cref="VersionDetails"/> objects based on the provided <see cref="PluginVersion"/>.</returns>
     public static List<VersionDetails> MapVersionDetails(PluginVersion version) {
-        return version.AsEnumerable().Select(ToVersionDetails).ToList();
+        return version.ToEnumerable().Select(ToVersionDetails).ToList();
     }
 
     /// <summary>
@@ -170,14 +170,14 @@ public static partial class PluginMapper {
     public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor descriptor);
 
     /// <summary>
-    /// Converts an <see cref="EngineFileData"/> object into a collection of <see cref="PluginBinaries"/> objects.
+    /// Converts an <see cref="EngineFileData"/> object into a collection of <see cref="UploadedBinaries"/> objects.
     /// </summary>
-    /// <param name="descriptor">The <see cref="EngineFileData"/> object containing file data to be transformed into a collection of <see cref="PluginBinaries"/> instances.</param>
-    /// <returns>A collection of <see cref="PluginBinaries"/> objects corresponding to the transformed file data represented by the provided <see cref="EngineFileData"/>.</returns>
-    public static ICollection<PluginBinaries> ToPluginBinaries(this EngineFileData? descriptor) {
-        return descriptor.AsEnumerable()
+    /// <param name="descriptor">The <see cref="EngineFileData"/> object containing file data to be transformed into a collection of <see cref="UploadedBinaries"/> instances.</param>
+    /// <returns>A collection of <see cref="UploadedBinaries"/> objects corresponding to the transformed file data represented by the provided <see cref="EngineFileData"/>.</returns>
+    public static ICollection<UploadedBinaries> ToPluginBinaries(this EngineFileData? descriptor) {
+        return descriptor.ToEnumerable()
             .SelectMany(x => x.FileInfo.Binaries.Keys
-                                .Select(y => new PluginBinaries {
+                                .Select(y => new UploadedBinaries {
                                         Platform = y,
                                         EngineVersion = x.EngineVersion
                                 }))

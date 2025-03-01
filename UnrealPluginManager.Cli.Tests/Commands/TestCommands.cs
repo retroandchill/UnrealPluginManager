@@ -125,19 +125,19 @@ public class TestCommands {
         Assert.That(returnCode, Is.EqualTo(0));
         _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"), 
             It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
-            It.Is<string?>(y => y == null)));
+            It.Is<string?>(y => y == null), It.IsAny<IReadOnlyCollection<string>>()));
         
         returnCode = await _parser.InvokeAsync("install MyPlugin --version 1.0.0");
         Assert.That(returnCode, Is.EqualTo(0));
         _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"), 
             It.Is<SemVersionRange>(y => y == SemVersionRange.Equals(new SemVersion(1, 0, 0))),
-            It.Is<string?>(y => y == null)));
+            It.Is<string?>(y => y == null), It.IsAny<IReadOnlyCollection<string>>()));
         
         returnCode = await _parser.InvokeAsync("install MyPlugin --version >=1.0.0 --engine-version 5.5");
         Assert.That(returnCode, Is.EqualTo(0));
         _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"), 
             It.Is<SemVersionRange>(y => y == SemVersionRange.AtLeast(new SemVersion(1, 0, 0), false)),
-            It.Is<string?>(y => y == "5.5")));
+            It.Is<string?>(y => y == "5.5"), It.IsAny<IReadOnlyCollection<string>>()));
     }
 
     [Test]

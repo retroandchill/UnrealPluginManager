@@ -111,6 +111,6 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
 
     /// <inheritdoc />
     public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-        return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion);
+        return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
     }
 }

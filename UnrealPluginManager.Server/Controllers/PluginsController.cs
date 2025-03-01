@@ -86,16 +86,18 @@ public partial class PluginsController : ControllerBase {
 
 
     /// <summary>
-    /// Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+    /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
     /// </summary>
     /// <param name="pluginName">The name of the plugin to be downloaded.</param>
     /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
+    /// <param name="platforms">The collection of target platforms for which the plugin file is compatible.</param>
     /// <return>Returns a FileStreamResult containing the plugin file as a ZIP archive.</return>
     [HttpGet("{pluginName}/download")]
     [Produces(MediaTypeNames.Application.Zip)]
-    [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
-    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion) {
-        return File(await _pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString()), MediaTypeNames.Application.Zip,
-            $"{pluginName}.zip");
+    [ProducesResponseType(typeof(FileStreamResult), (int) HttpStatusCode.OK)]
+    public async Task<FileStreamResult> DownloadPlugin([FromRoute] string pluginName, [FromQuery] Version engineVersion,
+                                                       [FromQuery] IReadOnlyCollection<string> platforms) {
+        return File(await _pluginService.GetPluginFileData(pluginName, SemVersionRange.All, engineVersion.ToString(), platforms), MediaTypeNames.Application.Zip,
+                    $"{pluginName}.zip");
     }
 }

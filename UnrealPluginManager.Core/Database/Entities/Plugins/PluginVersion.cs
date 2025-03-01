@@ -53,6 +53,19 @@ public class PluginVersion : IVersionedEntity {
     }
 
     /// <summary>
+    /// Gets the string representation of the semantic version for the plugin version.
+    /// This property combines the major, minor, patch, prerelease, and metadata components
+    /// into a single readable version string.
+    /// </summary>
+    [MaxLength(255)]
+    public string VersionString {
+        get => Version.ToString();
+        private set {
+            // Hack for a write-only column
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the major version number of the plugin version.
     /// </summary>
     [DefaultValue(1)]
@@ -99,7 +112,7 @@ public class PluginVersion : IVersionedEntity {
     /// <summary>
     /// Gets or sets the collection of binaries associated with the plugin version.
     /// </summary>
-    public ICollection<PluginBinaries> Binaries { get; set; } = new List<PluginBinaries>();
+    public ICollection<UploadedBinaries> Binaries { get; set; } = new List<UploadedBinaries>();
  
     
     internal static void DefineModelMetadata(ModelBuilder modelBuilder) {

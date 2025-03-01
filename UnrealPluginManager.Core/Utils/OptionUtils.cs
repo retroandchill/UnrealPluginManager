@@ -14,10 +14,23 @@ public static class OptionUtils {
     /// <param name="option">The Option instance from which to retrieve the value.</param>
     /// <returns>The value contained within the option.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the Option contains no value.</exception>
-    public static T Get<T>(this Option<T> option) => option.Match(
-        x => x,
-        () => throw new InvalidOperationException("Option is None")
-    );
+    public static T OrElseThrow<T>(this Option<T> option) {
+        return option.OrElseThrow(() => new InvalidOperationException("Option is None"));
+    }
+
+    /// <summary>
+    /// Retrieves the value from an <see cref="Option{T}"/> instance if the option contains a value.
+    /// Throws the exception created by the provided exception factory if the option is None.
+    /// </summary>
+    /// <typeparam name="T">The type of the value contained within the Option.</typeparam>
+    /// <param name="option">The Option instance from which to retrieve the value.</param>
+    /// <param name="exceptionFactory">A factory method to generate the exception to be thrown if the Option contains no value.</param>
+    /// <returns>The value contained within the option.</returns>
+    /// <exception cref="Exception">Thrown if the Option contains no value and the provided exception factory creates an exception.</exception>
+    public static T OrElseThrow<T>(this Option<T> option, Func<Exception> exceptionFactory) {
+        return option.Match(x => x,
+                            () => throw exceptionFactory());
+    }
 
     /// <summary>
     /// Retrieves the value from a <see cref="Fin{T}"/> instance if the operation was successful.
@@ -27,10 +40,10 @@ public static class OptionUtils {
     /// <param name="fin">The Fin instance from which to retrieve the value or exception.</param>
     /// <returns>The value contained within the Fin if the operation was successful.</returns>
     /// <exception cref="Exception">Thrown if the Fin represents a failed operation.</exception>
-    public static T Get<T>(this Fin<T> fin) => fin.Match(
-        x => x,
-        x => throw x.ToException()
-    );
+    public static T OrElseThrow<T>(this Fin<T> fin) {
+        return fin.Match(x => x,
+                         x => throw x.ToException() );
+    }
 
     /// <summary>
     /// Converts a nullable value of type <typeparamref name="T"/> to an enumerable containing the value if it is not null.
@@ -39,8 +52,8 @@ public static class OptionUtils {
     /// <typeparam name="T">The base type of the nullable value being processed.</typeparam>
     /// <param name="value">The nullable value to convert into an enumerable.</param>
     /// <returns>An enumerable containing the value if it is not null; otherwise, an empty enumerable.</returns>
-    public static IEnumerable<T> AsEnumerable<T>(this T? value)
-        where T : struct {
+    public static IEnumerable<T> ToEnumerable<T>(this T? value)
+            where T : struct {
         if (value is not null) {
             yield return value.Value;
         }
@@ -52,8 +65,8 @@ public static class OptionUtils {
     /// <typeparam name="T">The type of the value.</typeparam>
     /// <param name="value">The nullable value type instance to convert.</param>
     /// <returns>An enumerable sequence containing the value if it is not null, or an empty sequence if the value is null.</returns>
-    public static IEnumerable<T> AsEnumerable<T>(this T? value)
-        where T : class {
+    public static IEnumerable<T> ToEnumerable<T>(this T? value)
+            where T : class {
         if (value is not null) {
             yield return value;
         }
@@ -94,9 +107,9 @@ public static class OptionUtils {
     /// <returns>The value contained within the Option, or the result of the fallback function if the Option is None.</returns>
     public static T OrElseGet<T>(this Option<T> option, Func<T> fallback) {
         return option.Match(
-            x => x,
-            fallback
-        );
+                            x => x,
+                            fallback
+                           );
     }
 
     /// <summary>
@@ -109,8 +122,8 @@ public static class OptionUtils {
     /// <returns>The value contained within the Option, or the result of the fallback function if the Option is None.</returns>
     public static Task<T> OrElseGet<T>(this Option<T> option, Func<Task<T>> fallback) {
         return option.Match(
-            Task.FromResult,
-            fallback
-        );
+                            Task.FromResult,
+                            fallback
+                           );
     }
 }
