@@ -1,5 +1,9 @@
 ﻿namespace UnrealPluginManager.Core.Utils;
 
+/// <summary>
+/// Provides a set of static methods for extended LINQ functionality, allowing for more flexible
+/// and enriched querying and transformation capabilities on collections and sequences.
+/// </summary>
 public static class LinqExtensions {
     /// <summary>
     /// Projects each element of a sequence into a new form by using a provided transform function,

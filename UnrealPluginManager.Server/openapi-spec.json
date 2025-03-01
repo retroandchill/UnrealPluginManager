@@ -186,7 +186,7 @@
         "tags": [
           "Plugins"
         ],
-        "summary": "Downloads a plugin file as a ZIP archive for the specified plugin and engine version.",
+        "summary": "Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.",
         "operationId": "downloadPlugin",
         "parameters": [
           {
@@ -205,6 +205,17 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "platforms",
+            "in": "query",
+            "description": "The collection of target platforms for which the plugin file is compatible.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -222,7 +233,7 @@
         }
       }
     },
-    "/files/icons/{fileName}": {
+    "/files/icons/{pluginName}": {
       "get": {
         "tags": [
           "Storage"
@@ -231,9 +242,9 @@
         "operationId": "getIcon",
         "parameters": [
           {
-            "name": "fileName",
+            "name": "pluginName",
             "in": "path",
-            "description": "The name of the file representing the icon to be retrieved.",
+            "description": "The name of the plugin to search for",
             "required": true,
             "schema": {
               "type": "string"
@@ -302,6 +313,7 @@
             "nullable": true
           },
           "unresolvedDependencies": {
+            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
@@ -414,11 +426,6 @@
             "format": "uri",
             "nullable": true
           },
-          "icon": {
-            "type": "string",
-            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
-            "nullable": true
-          },
           "versions": {
             "minItems": 1,
             "type": "array",
@@ -469,11 +476,6 @@
             "type": "string",
             "description": "Gets or sets the URL associated with the author of the plugin.",
             "format": "uri",
-            "nullable": true
-          },
-          "icon": {
-            "type": "string",
-            "description": "Gets or sets the file path or resource identifier for the plugin's icon.",
             "nullable": true
           },
           "versions": {

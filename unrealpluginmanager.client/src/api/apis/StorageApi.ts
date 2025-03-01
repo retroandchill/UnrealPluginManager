@@ -16,7 +16,7 @@
 import * as runtime from '../runtime';
 
 export interface GetIconRequest {
-    fileName: string;
+    pluginName: string;
 }
 
 /**
@@ -28,10 +28,10 @@ export class StorageApi extends runtime.BaseAPI {
      * Retrieves an icon as a stream for the specified file name.
      */
     async getIconRaw(requestParameters: GetIconRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
-        if (requestParameters['fileName'] == null) {
+        if (requestParameters['pluginName'] == null) {
             throw new runtime.RequiredError(
-                'fileName',
-                'Required parameter "fileName" was null or undefined when calling getIcon().'
+                'pluginName',
+                'Required parameter "pluginName" was null or undefined when calling getIcon().'
             );
         }
 
@@ -40,7 +40,7 @@ export class StorageApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/files/icons/{fileName}`.replace(`{${"fileName"}}`, encodeURIComponent(String(requestParameters['fileName']))),
+            path: `/files/icons/{pluginName}`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

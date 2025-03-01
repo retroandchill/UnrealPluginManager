@@ -37,10 +37,10 @@ export interface DependencyManifest {
     /**
      * A property that holds a collection of dependencies that could not be resolved
      * during the dependency resolution process.
-     * @type {Array<string>}
+     * @type {Set<string>}
      * @memberof DependencyManifest
      */
-    unresolvedDependencies?: Array<string> | null;
+    unresolvedDependencies?: Set<string> | null;
 }
 
 /**
@@ -61,7 +61,7 @@ export function DependencyManifestFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'foundDependencies': json['foundDependencies'] == null ? undefined : json['foundDependencies'],
-        'unresolvedDependencies': json['unresolvedDependencies'] == null ? undefined : json['unresolvedDependencies'],
+        'unresolvedDependencies': json['unresolvedDependencies'] == null ? undefined : new Set(json['unresolvedDependencies']),
     };
 }
 
@@ -77,7 +77,7 @@ export function DependencyManifestToJSONTyped(value?: DependencyManifest | null,
     return {
         
         'foundDependencies': value['foundDependencies'],
-        'unresolvedDependencies': value['unresolvedDependencies'],
+        'unresolvedDependencies': value['unresolvedDependencies'] == null ? undefined : Array.from(value['unresolvedDependencies'] as Set<any>),
     };
 }
 

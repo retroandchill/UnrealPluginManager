@@ -42,6 +42,7 @@ export interface AddPluginRequest {
 export interface DownloadPluginRequest {
     pluginName: string;
     engineVersion?: string;
+    platforms?: Array<string>;
 }
 
 export interface GetCandidateDependenciesRequest {
@@ -115,7 +116,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+     * Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
      */
     async downloadPluginRaw(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         if (requestParameters['pluginName'] == null) {
@@ -131,6 +132,10 @@ export class PluginsApi extends runtime.BaseAPI {
             queryParameters['engineVersion'] = requestParameters['engineVersion'];
         }
 
+        if (requestParameters['platforms'] != null) {
+            queryParameters['platforms'] = requestParameters['platforms'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -144,7 +149,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Downloads a plugin file as a ZIP archive for the specified plugin and engine version.
+     * Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
      */
     async downloadPlugin(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.downloadPluginRaw(requestParameters, initOverrides);
