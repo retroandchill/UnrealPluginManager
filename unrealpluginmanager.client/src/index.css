@@ -71,3 +71,26 @@ button:focus-visible {
         background-color: #f9f9f9;
     }
 }
+
+/* Target the outline */
+.MuiTextField-root .MuiOutlinedInput-root fieldset {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Target hover state */
+.MuiTextField-root .MuiOutlinedInput-root:hover fieldset {
+    border-color: #747bff;
+}
+
+/* Target hover state */
+.MuiTextField-root .MuiOutlinedInput-root:focus-within fieldset {
+    border-color: #f9f9f9;
+}
+
+.MuiTextField-root .MuiInputLabel-outlined {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root input {
+    color: rgba(255, 255, 255, 0.87);
+}

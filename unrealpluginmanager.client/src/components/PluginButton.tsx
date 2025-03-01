@@ -11,7 +11,7 @@ import {iconsPath} from "../config/Globals.ts";
  * @callback PluginCallback
  * @param {PluginOverview} plugin - The plugin instance passed to the callback function.
  */
-type PluginCallback = (plugin: PluginOverview) => void;
+export type PluginCallback = (plugin: PluginOverview) => void;
 
 /**
  * Represents the properties for a plugin button component.
@@ -44,7 +44,7 @@ interface PluginButtonProps {
      *
      * Type: `PluginCallback`.
      */
-    onClick: PluginCallback;
+    onClick?: PluginCallback;
 }
 
 interface PluginButtonState {
@@ -60,13 +60,12 @@ interface PluginButtonState {
  *
  * @template PluginButtonProps, PluginButtonState
  */
-class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
+export class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     
     /**
      * Constructs a new instance of the PluginButton.
      *
-     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.
-     * @return {PluginButton} A new instance of PluginButton initialized with the given properties.
+     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.=
      */
     constructor(props: PluginButtonProps) {
         super(props)
@@ -84,7 +83,7 @@ class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     render() {
         let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
 
-        return <button onClick={() => this.props.onClick(this.props.plugin)}>
+        return <button onClick={() => { if (this.props.onClick) { this.props.onClick(this.props.plugin); } }}>
             <img  src={this.state.icon} alt="Plugin Icon"/>
             <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
                 <h2>{this.props.plugin.name}</h2>
@@ -97,5 +96,3 @@ class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
     }
     
 }
-
-export default PluginButton;

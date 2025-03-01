@@ -1,23 +1,13 @@
-import {Component} from 'react';
+import { Component } from 'react';
 import './App.css';
-import {PluginOverview} from './api';
-import {Page} from './util'
-import PluginButton from "./components";
-import {pluginsApi} from "./config/Globals.ts";
-
-/**
- * AppState interface represents the state of the application.
- */
-interface AppState {
-    /**
-     * Represents an optional variable that holds a paginated collection of plugin overviews.
-     * The `plugins` variable may contain multiple plugins with their associated details, structured
-     * as a pageable object.
-     *
-     * @type {Page<PluginOverview>}
-     */
-    plugins?: Page<PluginOverview>;
-}
+import {PluginDisplayGrid} from "./components";
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 /**
  * The App class is a React component that manages and displays a list of plugins.
@@ -26,46 +16,45 @@ interface AppState {
  * integration between JavaScript and ASP.NET.
  *
  * @extends Component
- * @template {}, AppState
  */
-class App extends Component<{}, AppState> {
-    
-    /**
-     * Constructor for initializing the component with props and setting the initial state.
-     *
-     * @param {Object} props - The properties passed to the component.
-     * @return {void}
-     */
-    constructor(props: {}) {
-        super(props);
-        this.state = {};
-    }
-    
-    componentDidMount() {
-        this.populatePluginList();
-    }
+class App extends Component {
+
+    private readonly router = createBrowserRouter([
+        {
+            path: '/',
+            element: <PluginDisplayGrid onPluginClick={(plugin) => this.router.navigate(`/plugin/${plugin.name}`)}/>
+        },
+        {
+            path: '/plugin/:id',
+            element: <div>This is a test!</div>
+        }
+    ]);
     
     render() {
-        const contents = this.state.plugins === undefined
-            ? <p><em>Loading...</em></p>
-            : <table className="table table-striped" aria-labelledby="tableLabel">
-                <tbody>
-                {this.state.plugins.items.map(plugin => <PluginButton key={plugin.id} plugin={plugin} onClick={(_) => {}}/>)}
-                </tbody>
-            </table>;
-
-        return (
-            <div>
-                <h1 id="tableLabel">Plugins List</h1>
-                {contents}
+        return <div>
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
+                        Unreal Plugin Manager
+                    </Typography>
+                    <Button color="inherit">Login</Button>
+                </Toolbar>
+            </AppBar>
+            <div style={{padding: '2%'}}>
+                <RouterProvider router={this.router} />
             </div>
-        );
+        </div>;
     }
     
-    private async populatePluginList() {
-        const response = await pluginsApi.getPlugins()
-        this.setState({plugins: response})
-    }
 }
 
 export default App;

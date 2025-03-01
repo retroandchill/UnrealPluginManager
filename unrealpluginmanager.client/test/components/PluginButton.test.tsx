@@ -1,6 +1,6 @@
 ﻿import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
-import PluginButton from "../../src/components";
+import { PluginButton } from "../../src/components";
 import {PluginOverview} from "../../src/api";
 import '@testing-library/jest-dom/vitest';
 

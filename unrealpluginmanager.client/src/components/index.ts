@@ -1,3 +1,2 @@
-﻿import PluginButton from "./PluginButton.tsx";
-
-export default PluginButton;
+﻿export * from "./PluginButton.tsx";
+export * from "./PluginDisplayGrid.tsx";
