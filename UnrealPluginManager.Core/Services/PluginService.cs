@@ -207,22 +207,6 @@ public partial class PluginService : IPluginService {
         return fileInfo.OpenRead();
     }
 
-    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion,
-                                          IReadOnlyCollection<string> targetPlatforms) {
-        
-        var latestVersion = await _dbContext.PluginVersions
-                .Where(p => p.Parent.Name == pluginName)
-                .WhereVersionInRange(targetVersion)
-                .OrderByVersionDecending()
-                .Select(x => x.VersionString)
-                .FirstOrDefaultAsync();
-        if (latestVersion is null) {
-            throw new PluginNotFoundException($"Plugin {pluginName} was not found!");
-        }
-        
-        return await GetPluginFileData(pluginName, SemVersion.Parse(latestVersion), engineVersion, targetPlatforms);
-    }
-
     private async IAsyncEnumerable<(string, IFileInfo)> GetPluginBinaries(string pluginName, SemVersion targetVersion,
                                                                           string engineVersion,
                                                                           IReadOnlyCollection<string> targetPlatforms) {
@@ -246,6 +230,23 @@ public partial class PluginService : IPluginService {
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+                                                IReadOnlyCollection<string> targetPlatforms) {
+        
+        var latestVersion = await _dbContext.PluginVersions
+                .Where(p => p.Parent.Name == pluginName)
+                .WhereVersionInRange(targetVersion)
+                .OrderByVersionDecending()
+                .Select(x => x.VersionString)
+                .FirstOrDefaultAsync();
+        if (latestVersion is null) {
+            throw new PluginNotFoundException($"Plugin {pluginName} was not found!");
+        }
+        
+        return await GetPluginFileData(pluginName, SemVersion.Parse(latestVersion), engineVersion, targetPlatforms);
+    }
+
     /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                                 IReadOnlyCollection<string> targetPlatforms) {
@@ -253,7 +254,7 @@ public partial class PluginService : IPluginService {
                                                     FileShare.Read, 4096, FileOptions.DeleteOnClose);
         
         try {
-            using var destinationZip = new ZipArchive(fileStream);
+            using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
             await using (var source = await GetPluginSource(pluginName, targetVersion)) {
                 using var zipArchive = new ZipArchive(source);
                 await destinationZip.Merge(zipArchive);
