@@ -1,5 +1,7 @@
 ﻿using System.IO.Abstractions;
+using System.IO.Compression;
 using Semver;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 using CopyFileSource = UnrealPluginManager.Core.Files.CopyFileSource;
@@ -54,6 +56,43 @@ public partial class PluginStructureService : IPluginStructureService {
                                                                      platform, new CopyFileSource(binaryZipInfo));
         }
 
+        return new PartitionedPlugin(pluginSource, pluginIcon, pluginBinaries);
+    }
+
+    /// <inheritdoc />
+    public async Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
+                                                         ZipArchive zipArchive) {
+        var iconEntry = zipArchive.GetEntry(Path.Join("Resources", "Icon128.png"));
+        IFileInfo? pluginIcon = null;
+        if (iconEntry is not null) {
+            await using var iconStream = iconEntry.Open();
+            pluginIcon = await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
+        }
+        
+        IFileInfo pluginSource;
+        using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
+            var sourceEntries = zipArchive.Entries
+                    .Where(x => !x.FullName.StartsWith("Binaries") && !x.FullName.StartsWith("Intermediate"));
+            sourceZipInfo = await _fileSystem.CopyEntries(sourceEntries, sourceZipInfo.FullName);
+            pluginSource = await _storageService.StorePluginSource(pluginName, version, 
+                                                                   new CopyFileSource(sourceZipInfo));
+        }
+
+        const string intermediateBuild = "Intermediate/Build";
+        var binaryEntries = zipArchive.Entries
+                .Where(x => x.FullName.StartsWith("Binaries") || x.FullName.StartsWith(intermediateBuild))
+                .Where(x => x.FullName != "Binaries/" && x.FullName != $"{intermediateBuild}/")
+                .GroupBy(x => x.FullName.StartsWith("Binaries") ? x.FullName.Split('/')[1] : x.FullName.Split('/')[2])
+                .ToDictionary(x => x.Key, x => x.ToList());
+
+        var pluginBinaries = new Dictionary<string, IFileInfo>();
+        foreach (var (platform, entries) in binaryEntries) {
+            using var disposableFile = _fileSystem.CreateDisposableFile(out var binaryZipInfo);
+            binaryZipInfo = await _fileSystem.CopyEntries(entries, binaryZipInfo.FullName);
+            pluginBinaries[platform] = await _storageService.StorePluginBinaries(pluginName, version, engineVersion, 
+                platform, new CopyFileSource(binaryZipInfo));
+        }
+        
         return new PartitionedPlugin(pluginSource, pluginIcon, pluginBinaries);
     }
 }

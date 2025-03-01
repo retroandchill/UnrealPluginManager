@@ -128,10 +128,41 @@ public static class ZipUtils {
     /// <param name="target">The target ZIP archive where entries will be merged.</param>
     /// <param name="source">The source ZIP archive whose entries will be added to the target archive.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task Merge(this ZipArchive target, ZipArchive source) {
-        foreach (var entry in source.Entries) {
-            var createdEntry = target.CreateEntry(entry.FullName);
+    public static Task Merge(this ZipArchive target, ZipArchive source) {
+        return target.CopyEntries(source.Entries);
+    }
+
+    public static async Task<IFileInfo> CopyEntries(this IFileSystem fileSystem, IEnumerable<ZipArchiveEntry> entries, 
+                                                    string destinationPath) {
+        var toFile = fileSystem.FileInfo.New(destinationPath);
+        using var targetZip = new ZipArchive(toFile.OpenWrite(), ZipArchiveMode.Create);
+        await targetZip.CopyEntries(entries);
+        return toFile;
+    }
+
+    private static async Task CopyEntries(this ZipArchive targetZip, IEnumerable<ZipArchiveEntry> entries) {
+        var entriesAdded = new HashSet<string>();
+        foreach (var entry in entries) {
+            var splitPath = entry.FullName.TrimEnd('/').Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var currentPath = "";
+            foreach (var (index, path) in splitPath.Index()) {
+                if (index == splitPath.Length - 1) {
+                    break;
+                }
+                
+                currentPath = Path.Join(currentPath, path);
+                var dirName = $"{currentPath}/";
+                if (entriesAdded.Contains(dirName)) {
+                    continue;
+                }
+                
+                targetZip.CreateEntry(dirName);
+                entriesAdded.Add(dirName);
+            }
+            
+            var createdEntry = targetZip.CreateEntry(entry.FullName);
             if (entry.FullName.EndsWith('/')) {
+                entriesAdded.Add(entry.FullName);
                 continue;
             }
             

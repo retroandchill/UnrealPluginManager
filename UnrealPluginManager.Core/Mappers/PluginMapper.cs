@@ -118,7 +118,6 @@ public static partial class PluginMapper {
     /// </summary>
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>
     /// <param name="name">The name of the plugin to assign in the created <see cref="Plugin"/> instance.</param>
-    /// <param name="icon">An optional icon for the plugin.</param>
     /// <returns>A new <see cref="Plugin"/> object mapped from the provided <see cref="PluginDescriptor"/>, name, and optional icon.</returns>
     [MapperIgnoreTarget(nameof(Plugin.Id))]
     [MapperIgnoreTarget(nameof(Plugin.Versions))]

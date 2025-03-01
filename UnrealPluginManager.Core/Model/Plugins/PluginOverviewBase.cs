@@ -42,10 +42,5 @@ public abstract class PluginOverviewBase {
     /// Gets or sets the URL associated with the author of the plugin.
     /// </summary>
     public Uri? AuthorWebsite { get; set; }
-
-    /// <summary>
-    /// Gets or sets the file path or resource identifier for the plugin's icon.
-    /// </summary>
-    public string? Icon { get; set; }
     
 }

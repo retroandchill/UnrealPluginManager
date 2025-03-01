@@ -148,22 +148,17 @@ public partial class PluginService : IPluginService {
 
     /// <inheritdoc/>
     public async Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion) {
-        using var directoryHandle = _fileSystem.CreateDisposableDirectory(out var tempDir);
-        using (var archive = new ZipArchive(fileData)) {
-            await _fileSystem.ExtractZipFile(archive, tempDir.FullName);
-        }
-
-        var pluginDescriptorFile = tempDir.EnumerateFiles("*.uplugin")
-                .FirstOrDefault();
+        var archive = new ZipArchive(fileData);
+        var pluginDescriptorFile = archive.Entries
+                .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
         if (pluginDescriptorFile is null) {
             throw new BadSubmissionException("Uplugin file was not found");
         }
-
         var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
-        
-        PluginDescriptor descriptor;
+           
+        PluginDescriptor descriptor; 
         try {
-            await using var upluginFile = pluginDescriptorFile.OpenRead();
+            await using var upluginFile = pluginDescriptorFile.Open();
             var descriptorOut = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
             ArgumentNullException.ThrowIfNull(descriptorOut);
             descriptor = descriptorOut;
@@ -172,8 +167,7 @@ public partial class PluginService : IPluginService {
         }
         
         var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
-                                                                              engineVersion, tempDir);
-
+                                                                              engineVersion, archive);
         return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
     }
 
