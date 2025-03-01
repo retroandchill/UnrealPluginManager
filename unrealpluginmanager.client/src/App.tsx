@@ -20,7 +20,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
  */
 class App extends Component {
 
-    private router = createBrowserRouter([
+    private readonly router = createBrowserRouter([
         {
             path: '/',
             element: <PluginDisplayGrid onPluginClick={(plugin) => this.router.navigate(`/plugin/${plugin.name}`)}/>

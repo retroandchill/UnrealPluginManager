@@ -21,6 +21,8 @@ interface PluginGridState {
 }
 
 export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridState> {
+    
+    private initialLoad = false;
 
     /**
      * Constructor for initializing the component with props and setting the initial state.
@@ -32,7 +34,14 @@ export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridStat
         this.state = {
             plugins: [],
         };
-        this.populatePluginList();
+        
+    }
+    
+    componentDidMount() {
+        if (!this.initialLoad) {
+            this.initialLoad = true;
+            this.populatePluginList();
+        }
     }
     
     render() {
@@ -80,7 +89,7 @@ export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridStat
      *
      * @type {Function}
      */
-    private debouncedUpdateSearchTerm = debounce(this.updateSearchTerm.bind(this), 500);
+    private readonly debouncedUpdateSearchTerm = debounce(this.updateSearchTerm.bind(this), 500);
     
     private async updateSearchTerm(newSearchTerm: string) {
         const response = await pluginsApi.getPlugins({
@@ -89,11 +98,11 @@ export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridStat
             size: 25
         });
         
-        this.setState({
+        this.setState(prev => ({
             plugins: response.items,
             lastPage: response,
-            searchTerm: this.state.searchTerm,
-        });
+            searchTerm: prev.searchTerm,
+        }));
     }
 
     private async populatePluginList() {
@@ -101,10 +110,10 @@ export class PluginDisplayGrid extends Component<PluginGridProps, PluginGridStat
             match: this.state.searchTerm ? `${this.state.searchTerm}*` : undefined,
             page: this.state.lastPage ? this.state.lastPage.pageNumber + 1 : 1,
             size: 25
-        })
-        this.setState({
-            plugins: this.state.plugins.concat(response.items),
+        });
+        this.setState(prev => ({
+            plugins: prev.plugins.concat(response.items),
             lastPage: response
-        })
+        }));
     }
 }
