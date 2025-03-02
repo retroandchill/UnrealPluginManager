@@ -9,7 +9,7 @@ namespace UnrealPluginManager.Core.Solver;
 /// This struct is used to encapsulate the name of a component (e.g., plugin, dependency)
 /// and its resolved version as a semantic version.
 /// </remarks>
-public record struct SelectedVersion(string Name, SemVersion Version) : IComparable<SelectedVersion> {
+public readonly record struct SelectedVersion(string Name, SemVersion Version) : IComparable<SelectedVersion> {
 
     /// <inheritdoc />
     public int CompareTo(SelectedVersion other) {

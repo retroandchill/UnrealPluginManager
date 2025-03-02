@@ -84,6 +84,12 @@ public record Var(SelectedVersion Name) : IExpression {
         if (Name == varName) {
             return new BoolExpression(varValue);
         }
+        
+        // Plugin versions are mutually exclusive, so we want to assign all others with the same name to false.
+        // This speeds up the algorithm a bit
+        if (Name.Name == varName.Name) {
+            return new BoolExpression(false);
+        }
 
         return new Var(Name);
     }
