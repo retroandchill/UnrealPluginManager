@@ -61,6 +61,7 @@ public partial class EngineService : IEngineService {
         return 0;
     }
 
+    /// <inheritdoc />
     public async Task<Option<SemVersion>> GetInstalledPluginVersion(string pluginName, string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
@@ -74,6 +75,18 @@ public partial class EngineService : IEngineService {
         var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
         ArgumentNullException.ThrowIfNull(pluginDescriptor);
         return pluginDescriptor.VersionName;
+    }
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion) {
+        var installedEngine = GetInstalledEngine(engineVersion);
+        var packageDirectory = _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory);
+        foreach (var file in packageDirectory.EnumerateFiles("*.uplugin", SearchOption.AllDirectories)) {
+            await using var reader = file.OpenRead();
+            var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
+            ArgumentNullException.ThrowIfNull(pluginDescriptor);
+            yield return new InstalledPlugin(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName);
+        }
     }
 
     /// <inheritdoc />

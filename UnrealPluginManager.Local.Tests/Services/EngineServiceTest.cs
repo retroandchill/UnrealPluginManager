@@ -175,4 +175,49 @@ public partial class EngineServiceTest {
 
     [GeneratedRegex("-Package=\"(.*)\"", RegexOptions.IgnoreCase)]
     private static partial Regex PackageRegex();
+
+    [Test]
+    public async Task TestGetInstalledPlugins() {
+        var installedEngines = new List<InstalledEngine> {
+                new("5.5", new Version(5, 5), _filesystem.DirectoryInfo.New("C:/dev/UnrealEngine/5.5")),
+        };
+        _enginePlatformService.Setup(x => x.GetInstalledEngines()).Returns(installedEngines);
+        
+        var newDir = _filesystem.Directory.CreateDirectory("C:/dev/UnrealEngine/5.5/Engine/Plugins/Marketplace/.UnrealPluginManager");
+        var descriptor1 = new PluginDescriptor {
+                Version = 1,
+                FriendlyName = "My Plugin",
+                VersionName = new SemVersion(1, 0, 0),
+                Installed = true
+        };
+        var subDir1 = newDir.CreateSubdirectory("MyPlugin");
+        await _filesystem.File.WriteAllTextAsync(Path.Join(subDir1.FullName, "MyPlugin.uplugin"), JsonSerializer.Serialize(descriptor1));
+        
+        var descriptor2 = new PluginDescriptor {
+                Version = 1,
+                FriendlyName = "Second Plugin",
+                VersionName = new SemVersion(2, 4, 3),
+                Installed = true
+        };
+        var subDir2 = newDir.CreateSubdirectory("SecondPlugin");
+        await _filesystem.File.WriteAllTextAsync(Path.Join(subDir2.FullName, "SecondPlugin.uplugin"), JsonSerializer.Serialize(descriptor2));
+        
+        var descriptor3 = new PluginDescriptor {
+                Version = 1,
+                FriendlyName = "Another Plugin",
+                VersionName = new SemVersion(1, 1, 3),
+                Installed = true
+        };
+        var subDir3 = newDir.CreateSubdirectory("AnotherPlugin");
+        await _filesystem.File.WriteAllTextAsync(Path.Join(subDir3.FullName, "AnotherPlugin.uplugin"), JsonSerializer.Serialize(descriptor3));
+        
+        var engineService = _serviceProvider.GetRequiredService<IEngineService>();
+        var pluginVersions = await engineService.GetInstalledPlugins("5.5")
+                .ToListAsync();
+        
+        Assert.That(pluginVersions, Has.Count.EqualTo(3));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("MyPlugin", new SemVersion(1, 0, 0))));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("SecondPlugin", new SemVersion(2, 4, 3))));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("AnotherPlugin", new SemVersion(1, 1, 3))));
+    }
 }
