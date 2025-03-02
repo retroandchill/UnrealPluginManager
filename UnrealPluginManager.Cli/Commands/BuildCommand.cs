@@ -1,7 +1,7 @@
 ﻿using System.CodeDom.Compiler;
 using System.CommandLine;
 using System.IO.Abstractions;
-using UnrealPluginManager.Cli.Services;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 

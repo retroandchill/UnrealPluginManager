@@ -11,16 +11,15 @@ using Moq;
 using NUnit.Framework.Internal.Execution;
 using Semver;
 using UnrealPluginManager.Cli.Commands;
-using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
-using UnrealPluginManager.Cli.Model.Engine;
-using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Tests.Commands;
 

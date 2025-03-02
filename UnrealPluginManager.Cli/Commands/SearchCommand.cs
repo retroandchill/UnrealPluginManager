@@ -1,10 +1,10 @@
 ﻿using System.CommandLine;
 using LanguageExt;
-using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 

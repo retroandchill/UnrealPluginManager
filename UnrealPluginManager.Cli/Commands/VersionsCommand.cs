@@ -1,8 +1,8 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
-using UnrealPluginManager.Cli.Services;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 

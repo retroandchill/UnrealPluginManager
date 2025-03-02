@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -20,6 +21,8 @@ public interface IPluginService {
     /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
     /// </returns>
     Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
+    
+    Task<Option<SemVersion>> GetLatestVersion(string pluginName, SemVersionRange? targetVersion = null);
 
     /// <summary>
     /// Requests detailed version information for a list of specified plugins.
@@ -99,7 +102,7 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="Stream"/> representing the source code of the specified plugin version.
     /// </returns>
-    Task<Stream> GetPluginSource(string pluginName, SemVersion targetVersion);
+    Task<IFileInfo> GetPluginSource(string pluginName, SemVersion targetVersion);
 
     /// <summary>
     /// Retrieves the binary data of a specified plugin for a specific version, engine version, and platform.
@@ -111,7 +114,8 @@ public interface IPluginService {
     /// <returns>
     /// A <see cref="Stream"/> containing the binary data of the requested plugin.
     /// </returns>
-    Task<Stream> GetPluginBinaries(string pluginName, SemVersion targetVersion, string engineVersion, string platform);
+    Task<IFileInfo> GetPluginBinaries(string pluginName, SemVersion targetVersion, string engineVersion,
+                                      string platform);
 
     /// <summary>
     /// Retrieves the raw file data for a specified plugin, considering the plugin name, version, engine compatibility, and target platforms.
@@ -142,4 +146,7 @@ public interface IPluginService {
     /// </returns>
     Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                    IReadOnlyCollection<string> targetPlatforms);
+    
+    IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+                                                 IReadOnlyCollection<string> targetPlatforms);
 }

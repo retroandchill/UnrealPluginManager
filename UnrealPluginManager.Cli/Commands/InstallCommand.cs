@@ -1,9 +1,6 @@
 ﻿using System.CommandLine;
 using Semver;
-using UnrealPluginManager.Cli.Services;
-using UnrealPluginManager.Core.Mappers;
-using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 
