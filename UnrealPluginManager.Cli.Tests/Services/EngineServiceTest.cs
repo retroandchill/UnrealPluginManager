@@ -75,15 +75,13 @@ public partial class EngineServiceTest {
 
         PluginDescriptor? capturedData = null;
         string? capturedTextFile = null;
-        _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<Stream>(),
+        _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<IDirectoryInfo>(),
                 It.Is("5.5", EqualityComparer<string>.Default)))
-            .Returns(async (Stream x, Version _) => {
-                using var archive = new ZipArchive(x);
-                var entry = archive.GetEntry("MyPlugin.uplugin")!;
-                await using var entryStream = entry.Open();
+            .Returns(async (IDirectoryInfo x, string _) => {
+                var entry = x.GetFiles("*.uplugin").First();
+                await using var entryStream = entry.OpenRead();
                 capturedData = await JsonSerializer.DeserializeAsync<PluginDescriptor>(entryStream, JsonOptions);
-                var subFile = archive.GetEntry(Path.Join("Example", "TextFile.txt"));
-                await using var subFileStream = subFile!.Open();
+                await using var subFileStream = _filesystem.File.OpenRead(Path.Join(x.FullName, "Example", "TextFile.txt"));
                 using var textReader = new StreamReader(subFileStream);
                 capturedTextFile = await textReader.ReadToEndAsync();
                 return new PluginDetails {
@@ -156,7 +154,7 @@ public partial class EngineServiceTest {
 
         List<string> targetPlatforms = ["Win64"];
         _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms))
-            .ReturnsAsync((string _, SemVersionRange _, string _) => _filesystem.File.OpenRead(pluginPath));
+            .ReturnsAsync((string _, SemVersionRange _, string _, IReadOnlyCollection<string> _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
         var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);

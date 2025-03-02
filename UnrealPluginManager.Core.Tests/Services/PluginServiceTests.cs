@@ -325,13 +325,15 @@ public class PluginServiceTests {
                 .Returns(Option<IFileInfo>.Some(zipFile));
 
         var binaries = filesystem.FileInfo.New("Binaries.zip");
-        await using var binZip = zipFile.Create();
+        await using var binZip = binaries.Create();
         using (var zipArchive = new ZipArchive(binZip, ZipArchiveMode.Create)) {
-            zipArchive.CreateEntry("TestPlugin.dll");
+            var entry = zipArchive.CreateEntry("TestPlugin.dll");
+            await using var writer = new StreamWriter(entry.Open());
+            await writer.WriteAsync("TestPlugin.dll");
         }
         
         _mockStorageService.Setup(x => x.RetrievePluginBinaries("TestPlugin", new SemVersion(1, 0, 0), "5.5", "Win64"))
-                .Returns(Option<IFileInfo>.Some(zipFile));
+                .Returns(Option<IFileInfo>.Some(binaries));
 
         var plugin = new Plugin {
             Name = "TestPlugin",
