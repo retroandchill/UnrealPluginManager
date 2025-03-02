@@ -15,7 +15,7 @@ public interface IExpression {
     /// An enumerable collection of variable names that are free within the expression.
     /// If no free variables exist, an empty collection is returned.
     /// </returns>
-    IEnumerable<string> Free();
+    IEnumerable<SelectedVersion> Free();
 
     /// <summary>
     /// Evaluates the logical expression to determine its truth value.
@@ -41,7 +41,7 @@ public interface IExpression {
     /// with the provided boolean value. If the variable is not present in the expression, the
     /// original expression is returned unchanged.
     /// </returns>
-    IExpression Replace(string varName, bool varValue);
+    IExpression Replace(SelectedVersion varName, bool varValue);
 }
 
 /// <summary>
@@ -50,7 +50,7 @@ public interface IExpression {
 /// </summary>
 public record BoolExpression(bool Value) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return [];
     }
 
@@ -60,32 +60,48 @@ public record BoolExpression(bool Value) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new BoolExpression(Value);
+    }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return Value.ToString();
     }
 }
 
 /// <summary>
 /// Represents a variable in a logical expression. A variable holds a name and can be replaced or evaluated within the expression context.
 /// </summary>
-public record Var(string Name) : IExpression {
+public record Var(SelectedVersion Selected) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
-        return [Name];
+    public IEnumerable<SelectedVersion> Free() {
+        return [Selected];
     }
 
     /// <inheritdoc/>
     public bool Evaluate() {
-        throw new NotSupportedException($"The variable {Name} has not been replaced");
+        throw new NotSupportedException($"The variable {Selected} has not been replaced");
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
-        if (Name == varName) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
+        if (Selected == varName) {
             return new BoolExpression(varValue);
         }
+        
+        // Plugin versions are mutually exclusive, so we want to assign all others with the same name to false.
+        // This speeds up the algorithm a bit
+        if (Selected.Name == varName.Name) {
+            return new BoolExpression(false);
+        }
 
-        return new Var(Name);
+        return new Var(Selected);
+    }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"{Selected.Name}/{Selected.Version}";
     }
 }
 
@@ -94,7 +110,7 @@ public record Var(string Name) : IExpression {
 /// </summary>
 public record Not(IExpression Expression) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expression.Free();
     }
 
@@ -104,8 +120,13 @@ public record Not(IExpression Expression) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Not(Expression.Replace(varName, varValue));
+    }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"!{Expression}";
     }
 }
 
@@ -114,7 +135,7 @@ public record Not(IExpression Expression) : IExpression {
 /// </summary>
 public record And(IEnumerable<IExpression> Expressions) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
     }
 
@@ -124,8 +145,13 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new And(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
+    }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"({string.Join(" && ", Expressions.Select(x => x.ToString()))})";
     }
 }
 
@@ -134,7 +160,7 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
 /// </summary>
 public record Or(IEnumerable<IExpression> Expressions) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
     }
 
@@ -144,8 +170,13 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Or(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
+    }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"({string.Join(" || ", Expressions.Select(x => x.ToString()))})";
     }
 }
 
@@ -159,7 +190,7 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
 /// </remarks>
 public record Impl(IExpression P, IExpression Q) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return P.Free().Concat(Q.Free()).ToImmutableSortedSet();
     }
 
@@ -169,7 +200,12 @@ public record Impl(IExpression P, IExpression Q) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
+    }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"{P} => {Q}";
     }
 }

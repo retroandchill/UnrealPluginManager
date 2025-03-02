@@ -25,4 +25,10 @@ public class DependencyChainRoot : IDependencyChainNode {
 
     /// <inheritdoc />
     public required List<PluginDependency> Dependencies { get; set; }
+
+    /// <inheritdoc />
+    public bool Installed => true;
+    
+    /// <inheritdoc />
+    public int? RemoteIndex => null;
 }

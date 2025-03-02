@@ -73,8 +73,8 @@ public static partial class PluginMapper {
     [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
     [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
     [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionInfo.VersionId))]
-    [MapperIgnoreTarget(nameof(PluginVersionInfo.IsInstalled))]
-    [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteName))]
+    [MapperIgnoreTarget(nameof(PluginVersionInfo.Installed))]
+    [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteIndex))]
     public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
     /// <summary>
