@@ -12,9 +12,7 @@ namespace UnrealPluginManager.Core.Solver;
 /// and create binding pairs of variable names and their associated `SemVersion` values.
 /// It also supports converting plugin dependency data into solvable expressions.
 public static class ExpressionSolver {
-    
-    private static readonly DependencyChainNodeComparer DependencyChainNodeComparer = new();
-    
+
     /// Solves the given logical expression and returns a list of variable bindings that satisfy the expression.
     /// <param name="expr">
     /// An instance of IExpression representing the logical expression to be evaluated.
@@ -57,15 +55,10 @@ public static class ExpressionSolver {
 
     /// Converts a given set of plugin data into an IExpression that represents
     /// the logical relationships and dependencies of the plugins.
-    /// <param name="root">
-    /// The name of the root plugin for which the logical expression is being constructed.
-    /// </param>
-    /// <param name="rootVersion">
-    /// The version of the root plugin, represented as a SemVersion instance.
-    /// </param>
+    /// <param name="node"></param>
     /// <param name="pluginData">
-    /// A dictionary mapping plugin names to collections of plugins. Each plugin
-    /// represents a specific version and contains data about its dependencies.
+    ///     A dictionary mapping plugin names to collections of plugins. Each plugin
+    ///     represents a specific version and contains data about its dependencies.
     /// </param>
     /// <typeparam name="T">
     /// A collection type that implements IEnumerable of Plugin, representing
@@ -75,12 +68,16 @@ public static class ExpressionSolver {
     /// An IExpression instance that represents all logical relationships and dependencies
     /// between the root plugin and its dependent plugins.
     /// </returns>
-    public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData)
+    public static IExpression Convert<T>(IDependencyChainNode node, IDictionary<string, T> pluginData)
         where T : IEnumerable<IDependencyChainNode> {
-        List<IExpression> terms = [new Var(new SelectedVersion(root, rootVersion))];
+        List<IExpression> terms = [new Var(new SelectedVersion(node.Name, node.Version) {
+                Installed = node.Installed,
+                RemoteIndex = node.RemoteIndex
+        })];
 
-        var dependencyFrequency = pluginData.SelectMany(x => x.Value)
-                .SelectMany(x => x.Dependencies)
+        var dependencyFrequency = node.Dependencies
+                .Concat(pluginData.SelectMany(x => x.Value)
+                .SelectMany(x => x.Dependencies))
                 .GroupBy(x => x.PluginName)
                 .Select(x => (x.Key, x.Count()))
                 .OrderByDescending(x => x.Item2)
@@ -88,14 +85,13 @@ public static class ExpressionSolver {
                 .ToList();
         
         foreach (var pack in dependencyFrequency.Select(x => pluginData[x])
-                         .SelectMany(x => x.OrderBy(y => y, DependencyChainNodeComparer))) {
+                         .SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
             terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
                 .Select(dep => pluginData[dep.PluginName]
                     .Where(pd => dep.PluginVersion.Contains(pd.Version))
-                    .Select(pd => pd.Version)
-                    .Select(v => PackageVar(dep.PluginName, v))
+                    .Select(pd => PackageVar(dep.PluginName, pd.Version, pd.Installed, pd.RemoteIndex))
                     .ToList())
-                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version), new Or(deps))));
+                .Select(deps => new Impl(PackageVar(pack.Name, pack.Version, pack.Installed, pack.RemoteIndex), new Or(deps))));
         }
 
         var variables = new And(terms).Free()
@@ -103,24 +99,29 @@ public static class ExpressionSolver {
         var varNames = variables
             .Select(x => x.Name)
             .ToHashSet();
-        foreach (var name in varNames) {
-            var versions = variables
-                .Where(v => v.Name == name)
-                .Select(v => v.Version)
-                .ToHashSet();
+        foreach (var versions in varNames.Select(name => variables
+                                                         .Where(v => v.Name == name)
+                                                         .ToHashSet())) {
             terms.AddRange(AllCombinations(versions)
-                .Select(combo =>
-                    new Not(new And([PackageVar(name, combo.Item1), PackageVar(name, combo.Item2)]))));
+                                   .Select(combo =>
+                                                   new Not(new And([PackageVar(combo.Item1), PackageVar(combo.Item2)]))));
         }
 
         return new And(terms);
     }
 
-    private static Var PackageVar(string name, SemVersion version) {
-        return new Var(new SelectedVersion(name, version));
+    private static Var PackageVar(string name, SemVersion version, bool installed, int? remoteIndex) {
+        return PackageVar(new SelectedVersion(name, version) {
+                Installed = installed,
+                RemoteIndex = remoteIndex
+        });
     }
 
-    private static List<(SemVersion, SemVersion)> AllCombinations(IEnumerable<SemVersion> versions) {
+    private static Var PackageVar(SelectedVersion version) {
+        return new Var(version);
+    }
+
+    private static List<(SelectedVersion, SelectedVersion)> AllCombinations(IEnumerable<SelectedVersion> versions) {
         return versions.Combinations(2)
             .Select(x => x.ToList())
             .Select(x => (x[0], x[1]))

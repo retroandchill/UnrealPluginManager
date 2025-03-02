@@ -200,14 +200,18 @@ public class PluginServiceTests {
                 .Find(x => x.Version.Major == 3);
         Assert.That(http3, Is.Not.Null);
         http3.Installed = true;
-        var dependencyGraph = await pluginService.GetDependencyList("App");
-        Assert.That(dependencyGraph, Has.Count.EqualTo(5));
+
+        var root = new DependencyChainRoot {
+                Dependencies = pluginDependencies
+        };
+        
+        var dependencyGraph = pluginService.GetDependencyList(root, possibleVersions);
+        Assert.That(dependencyGraph, Has.Count.EqualTo(4));
         Assert.Multiple(() => {
             Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
             Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
             Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
             Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(3, 0, 0)));
-            Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
         });
     }
 
