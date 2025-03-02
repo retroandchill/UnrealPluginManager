@@ -36,4 +36,8 @@ public interface IDependencyChainNode {
     /// </remarks>
     List<PluginDependency> Dependencies { get; }
     
+    public bool Installed { get; }
+    
+    public int? RemoteIndex { get; }
+    
 }

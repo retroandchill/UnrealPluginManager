@@ -108,11 +108,12 @@ public partial class PluginService : IPluginService {
     }
 
     /// <inheritdoc/>
-    public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
+    public async Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
         var plugin = await _dbContext.PluginVersions
                 .Include(p => p.Parent)
                 .Include(p => p.Dependencies)
                 .Where(p => p.Parent.Name == pluginName)
+                .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
                 .OrderByVersionDecending()
                 .ToPluginVersionInfo()
                 .FirstAsync();

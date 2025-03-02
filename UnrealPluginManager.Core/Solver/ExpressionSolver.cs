@@ -12,6 +12,9 @@ namespace UnrealPluginManager.Core.Solver;
 /// and create binding pairs of variable names and their associated `SemVersion` values.
 /// It also supports converting plugin dependency data into solvable expressions.
 public static class ExpressionSolver {
+    
+    private static readonly DependencyChainNodeComparer DependencyChainNodeComparer = new();
+    
     /// Solves the given logical expression and returns a list of variable bindings that satisfy the expression.
     /// <param name="expr">
     /// An instance of IExpression representing the logical expression to be evaluated.
@@ -85,7 +88,7 @@ public static class ExpressionSolver {
                 .ToList();
         
         foreach (var pack in dependencyFrequency.Select(x => pluginData[x])
-                         .SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
+                         .SelectMany(x => x.OrderBy(y => y, DependencyChainNodeComparer))) {
             terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
                 .Select(dep => pluginData[dep.PluginName]
                     .Where(pd => dep.PluginVersion.Contains(pd.Version))

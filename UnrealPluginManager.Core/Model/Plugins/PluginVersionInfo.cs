@@ -71,7 +71,7 @@ public class PluginVersionInfo : IDependencyChainNode {
     /// type, and its compatible version range.
     /// </remarks>
     public required List<PluginDependency> Dependencies { get; set; }
-    
+
     /// <summary>
     /// Indicates whether the plugin version is currently installed.
     /// </summary>
@@ -82,16 +82,18 @@ public class PluginVersionInfo : IDependencyChainNode {
     /// while `false` indicates it is not installed.
     /// </remarks>
     [JsonIgnore]
-    public bool IsInstalled { get; set; }
+    public bool Installed { get; set; }
+
 
     /// <summary>
-    /// Gets or sets the name of the plugin as retrieved from a remote source or repository.
+    /// Gets or sets the index of the plugin version as retrieved from a remote source.
     /// </summary>
     /// <remarks>
-    /// This property represents the name of the plugin as it is defined in a remote system. It may differ
-    /// from its local or friendly name and is often used for referencing or synchronization purposes when
-    /// interacting with external systems.
+    /// This property is used to track the position or order of the plugin version
+    /// in a dataset originating from an external or remote repository. It is
+    /// primarily utilized for managing or querying the plugin's metadata
+    /// in scenarios involving remote data synchronization or retrieval.
     /// </remarks>
     [JsonIgnore]
-    public string? RemoteName { get; set; }
+    public int? RemoteIndex { get; set; }
 }

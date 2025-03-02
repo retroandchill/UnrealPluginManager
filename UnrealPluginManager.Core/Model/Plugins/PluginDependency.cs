@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.Text.Json.Serialization;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -42,4 +43,5 @@ public class PluginDependency {
     /// and allows for defining a range or specific version that meets the compatibility requirements.
     /// </remarks>
     public required SemVersionRange PluginVersion { get; set; }
+    
 }

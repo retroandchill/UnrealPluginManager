@@ -53,7 +53,7 @@ public interface IPluginService {
     /// <returns>
     /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
     /// </returns>
-    Task<List<PluginSummary>> GetDependencyList(string pluginName);
+    Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
 
     /// <summary>
     /// Adds a new plugin to the system using the provided plugin name and descriptor information.

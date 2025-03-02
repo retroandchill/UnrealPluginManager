@@ -63,35 +63,45 @@ public record BoolExpression(bool Value) : IExpression {
     public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new BoolExpression(Value);
     }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return Value.ToString();
+    }
 }
 
 /// <summary>
 /// Represents a variable in a logical expression. A variable holds a name and can be replaced or evaluated within the expression context.
 /// </summary>
-public record Var(SelectedVersion Name) : IExpression {
+public record Var(SelectedVersion Selected) : IExpression {
     /// <inheritdoc/>
     public IEnumerable<SelectedVersion> Free() {
-        return [Name];
+        return [Selected];
     }
 
     /// <inheritdoc/>
     public bool Evaluate() {
-        throw new NotSupportedException($"The variable {Name} has not been replaced");
+        throw new NotSupportedException($"The variable {Selected} has not been replaced");
     }
 
     /// <inheritdoc/>
     public IExpression Replace(SelectedVersion varName, bool varValue) {
-        if (Name == varName) {
+        if (Selected == varName) {
             return new BoolExpression(varValue);
         }
         
         // Plugin versions are mutually exclusive, so we want to assign all others with the same name to false.
         // This speeds up the algorithm a bit
-        if (Name.Name == varName.Name) {
+        if (Selected.Name == varName.Name) {
             return new BoolExpression(false);
         }
 
-        return new Var(Name);
+        return new Var(Selected);
+    }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"{Selected.Name}/{Selected.Version}";
     }
 }
 
@@ -113,6 +123,11 @@ public record Not(IExpression Expression) : IExpression {
     public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Not(Expression.Replace(varName, varValue));
     }
+
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"!{Expression}";
+    }
 }
 
 /// <summary>
@@ -133,6 +148,11 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
     public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new And(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
     }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"({string.Join(" && ", Expressions.Select(x => x.ToString()))})";
+    }
 }
 
 /// <summary>
@@ -152,6 +172,11 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
     /// <inheritdoc/>
     public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Or(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
+    }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"({string.Join(" || ", Expressions.Select(x => x.ToString()))})";
     }
 }
 
@@ -177,5 +202,10 @@ public record Impl(IExpression P, IExpression Q) : IExpression {
     /// <inheritdoc/>
     public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
+    }
+    
+    /// <inheritdoc />
+    public override string ToString() {
+        return $"{P} => {Q}";
     }
 }
