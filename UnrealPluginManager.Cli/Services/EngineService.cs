@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Semver;
 using UnrealPluginManager.Cli.Model.Engine;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 
@@ -53,19 +54,15 @@ public partial class EngineService : IEngineService {
             destination.SetLength(0);
             await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
             pluginDescriptor.WriteTo(jsonWriter);
-        }
+        } 
         
-        using var dest = _fileSystem.CreateDisposableDirectory(out var destFolder);
-        var zipFile = Path.Join(destFolder.FullName, $"{Path.GetFileNameWithoutExtension(pluginFile.Name)}.zip");
-        await _fileSystem.CreateZipFile(zipFile, intermediateFolder.FullName); 
-        
-        await using var fileStream = _fileSystem.FileStream.New(zipFile, FileMode.Open);
-        await _pluginService.SubmitPlugin(fileStream, installedEngine.Version);
+        await _pluginService.SubmitPlugin(intermediateFolder, installedEngine.Version.ToString());
         return 0;
     }
 
     /// <inheritdoc />
-    public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion) {
+    public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+                                         IReadOnlyCollection<string> targetPlatforms) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
         if (_fileSystem.Directory.Exists(installDirectory)) {
@@ -73,7 +70,7 @@ public partial class EngineService : IEngineService {
         }
         var destinationDirectory = _fileSystem.Directory.CreateDirectory(installDirectory);
 
-        await using var result = await _pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name);
+        await using var result = await _pluginService.GetPluginFileData(pluginName, pluginVersion, installedEngine.Name, targetPlatforms);
         using var zipArchive = new ZipArchive(result, ZipArchiveMode.Read);
         await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
         

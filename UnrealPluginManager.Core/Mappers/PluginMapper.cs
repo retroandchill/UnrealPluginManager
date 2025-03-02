@@ -1,10 +1,10 @@
-﻿using System.IO.Abstractions;
-using Riok.Mapperly.Abstractions;
+﻿using Riok.Mapperly.Abstractions;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Mappers;
@@ -47,7 +47,7 @@ public static partial class PluginMapper {
     /// <param name="version">The <see cref="PluginVersion"/> instance containing version information.</param>
     /// <returns>A <see cref="List{T}"/> of <see cref="VersionDetails"/> objects based on the provided <see cref="PluginVersion"/>.</returns>
     public static List<VersionDetails> MapVersionDetails(PluginVersion version) {
-        return version.AsEnumerable().Select(ToVersionDetails).ToList();
+        return version.ToEnumerable().Select(ToVersionDetails).ToList();
     }
 
     /// <summary>
@@ -118,13 +118,12 @@ public static partial class PluginMapper {
     /// </summary>
     /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>
     /// <param name="name">The name of the plugin to assign in the created <see cref="Plugin"/> instance.</param>
-    /// <param name="icon">An optional icon for the plugin.</param>
     /// <returns>A new <see cref="Plugin"/> object mapped from the provided <see cref="PluginDescriptor"/>, name, and optional icon.</returns>
     [MapperIgnoreTarget(nameof(Plugin.Id))]
     [MapperIgnoreTarget(nameof(Plugin.Versions))]
     [MapProperty(nameof(PluginDescriptor.CreatedBy), nameof(Plugin.AuthorName))]
     [MapProperty(nameof(PluginDescriptor.CreatedByUrl), nameof(Plugin.AuthorWebsite))]
-    public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name, string? icon = null);
+    public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name);
 
     /// <summary>
     /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="PluginVersion"/> object.
@@ -170,24 +169,17 @@ public static partial class PluginMapper {
     public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor descriptor);
 
     /// <summary>
-    /// Maps an <see cref="EngineFileData"/> object to a <see cref="PluginBinaries"/> object.
+    /// Converts an <see cref="EngineFileData"/> object into a collection of <see cref="UploadedBinaries"/> objects.
     /// </summary>
-    /// <param name="descriptor">The <see cref="EngineFileData"/> object containing the source data for mapping.</param>
-    /// <returns>A new <see cref="PluginBinaries"/> object created based on the provided <see cref="EngineFileData"/>.</returns>
-    [MapperIgnoreTarget(nameof(PluginBinaries.Id))]
-    [MapperIgnoreTarget(nameof(PluginBinaries.Parent))]
-    [MapperIgnoreTarget(nameof(PluginBinaries.ParentId))]
-    [MapProperty(nameof(EngineFileData.FileInfo.ZipFile), nameof(PluginBinaries.FilePath))]
-    public static partial PluginBinaries ToPluginBinaries(this EngineFileData descriptor);
-
-    /// <summary>
-    /// Converts an <see cref="EngineFileData"/> object into a collection of <see cref="PluginBinaries"/> objects.
-    /// </summary>
-    /// <param name="descriptor">The <see cref="EngineFileData"/> object containing file data to be transformed into a collection of <see cref="PluginBinaries"/> instances.</param>
-    /// <returns>A collection of <see cref="PluginBinaries"/> objects corresponding to the transformed file data represented by the provided <see cref="EngineFileData"/>.</returns>
-    public static ICollection<PluginBinaries> ToPluginBinaries(this EngineFileData? descriptor) {
-        return descriptor.AsEnumerable()
-            .Select(ToPluginBinaries)
+    /// <param name="descriptor">The <see cref="EngineFileData"/> object containing file data to be transformed into a collection of <see cref="UploadedBinaries"/> instances.</param>
+    /// <returns>A collection of <see cref="UploadedBinaries"/> objects corresponding to the transformed file data represented by the provided <see cref="EngineFileData"/>.</returns>
+    public static ICollection<UploadedBinaries> ToPluginBinaries(this EngineFileData? descriptor) {
+        return descriptor.ToEnumerable()
+            .SelectMany(x => x.FileInfo.Binaries.Keys
+                                .Select(y => new UploadedBinaries {
+                                        Platform = y,
+                                        EngineVersion = x.EngineVersion
+                                }))
             .ToList();
     }
 
@@ -205,10 +197,4 @@ public static partial class PluginMapper {
     /// <returns>The same <see cref="SemVersionRange"/> object that was provided as input.</returns>
     private static SemVersionRange PassSemVersionRange(SemVersionRange version) => version;
 
-    /// <summary>
-    /// Passes through the provided <see cref="IFileInfo"/> object.
-    /// </summary>
-    /// <param name="fileInfo">The <see cref="IFileInfo"/> object to be passed through unmodified.</param>
-    /// <returns>The same <see cref="IFileInfo"/> object that was passed as input.</returns>
-    private static IFileInfo PassFileInfo(IFileInfo fileInfo) => fileInfo;
 }

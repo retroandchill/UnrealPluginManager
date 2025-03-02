@@ -26,6 +26,12 @@ public interface IVersionedEntity {
     public int Patch { get; }
 
     /// <summary>
+    /// Gets or sets the prerelease label of the plugin version.
+    /// Represents the prerelease identifier in a semantic version, such as "alpha", "beta", or "rc".
+    /// </summary>
+    public string? Prerelease { get; }
+
+    /// <summary>
     /// Gets or sets the release candidate number for the plugin version.
     /// This property indicates the pre-release state of the software
     /// and is used in conjunction with semantic versioning.

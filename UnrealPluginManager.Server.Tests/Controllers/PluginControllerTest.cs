@@ -131,8 +131,20 @@ public class PluginControllerTest {
 
     [Test]
     public async Task TestAddAndDownloadPlugin() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var tempFileName = Path.GetTempFileName();
+        var dirName = Path.GetDirectoryName(tempFileName);
+        Assert.That(dirName, Is.Not.Null);
+        filesystem.Directory.CreateDirectory(dirName);
+        
         using var testZip = new MemoryStream();
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            zipArchive.CreateEntry("Resources/");
+            zipArchive.CreateEntry("Resources/Icon128.png");
+            zipArchive.CreateEntry("Binaries/");
+            zipArchive.CreateEntry("Binaries/Win64/");
+            zipArchive.CreateEntry("Binaries/Win64/TestPlugin.dll");
+            
             var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
             await using var writer = new StreamWriter(entry.Open());
 
@@ -150,7 +162,7 @@ public class PluginControllerTest {
             new Version(5, 5));
         Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
-        var downloaded = await _pluginsController.DownloadPlugin("TestPlugin", new Version(5, 5));
+        var downloaded = await _pluginsController.DownloadPlugin("TestPlugin", new Version(5, 5), ["Win64"]);
         Assert.Multiple(() => {
             Assert.That(downloaded.FileDownloadName, Is.EqualTo("TestPlugin.zip"));
             Assert.That(downloaded.ContentType, Is.EqualTo("application/zip"));

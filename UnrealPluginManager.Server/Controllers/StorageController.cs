@@ -1,6 +1,7 @@
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Filters;
 
 namespace UnrealPluginManager.Server.Controllers;
@@ -22,12 +23,14 @@ public partial class StorageController {
     /// <summary>
     /// Retrieves an icon as a stream for the specified file name.
     /// </summary>
-    /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+    /// <param name="pluginName">The name of the plugin to search for</param>
     /// <returns>A stream containing the requested image data.</returns>
-    [HttpGet("icons/{fileName}")]
+    [HttpGet("icons/{pluginName}")]
     [Produces(MediaTypeNames.Image.Png)]
-    public Stream GetIcon(string fileName) {
-        return _storageService.RetrieveIcon(fileName);
+    public Stream GetIcon(string pluginName) {
+        return _storageService.RetrievePluginIcon(pluginName)
+                .OrElseThrow(() => new FileNotFoundException($"Icon for plugin {pluginName} not found."))
+                .OpenRead();
     }
     
 }

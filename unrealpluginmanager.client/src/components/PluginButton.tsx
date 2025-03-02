@@ -73,11 +73,7 @@ export class PluginButton extends Component<PluginButtonProps, PluginButtonState
     }
 
     componentDidMount() {
-        if (this.props.plugin.icon != undefined) {
-            this.setState({icon: `${iconsPath}/${this.props.plugin.icon}`})
-        } else {
-            this.setState({icon: Icon128})
-        }
+        this.setState({icon: `${iconsPath}/${this.props.plugin.name}`})
     }
     
     render() {

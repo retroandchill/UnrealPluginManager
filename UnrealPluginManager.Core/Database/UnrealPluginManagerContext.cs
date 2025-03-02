@@ -15,7 +15,6 @@ namespace UnrealPluginManager.Core.Database;
 /// It leverages the configuration provided by the <see cref="DbContextOptions{TContext}"/> to establish the connection and behavior for the database.
 /// </remarks>
 public abstract class UnrealPluginManagerContext : DbContext {
-    private readonly IFileSystem _filesystem;
 
 
     /// <summary>
@@ -26,7 +25,6 @@ public abstract class UnrealPluginManagerContext : DbContext {
     /// It leverages the provided <see cref="IFileSystem"/> instance to handle file-related operations relevant to the database and application logic.
     /// </remarks>
     protected UnrealPluginManagerContext(IFileSystem filesystem) {
-        _filesystem = filesystem;
     }
 
     /// <summary>
@@ -47,20 +45,21 @@ public abstract class UnrealPluginManagerContext : DbContext {
     /// </remarks>
     public DbSet<PluginVersion> PluginVersions { get; init; }
 
+
     /// <summary>
-    /// Represents the database set for storing and managing uploaded plugin file metadata within the UnrealPluginManager context.
+    /// Represents the database set for managing plugin binary data within the UnrealPluginManager context.
     /// </summary>
     /// <remarks>
-    /// This property provides access to the collection of PluginFileInfo entities that detail the file paths, engine versions, and parent plugin references for uploaded plugins.
-    /// It is utilized for querying, storing, and updating metadata about plugin files associated with the system.
+    /// This property provides access to the collection of plugin binaries stored in the database.
+    /// Plugin binaries include platform-specific and engine version-specific binaries associated with a plugin version.
     /// </remarks>
-    public DbSet<PluginBinaries> UploadedPlugins { get; init; }
+    public DbSet<UploadedBinaries> PluginBinaries { get; init; }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        Plugin.DefineModelMetadata(modelBuilder, _filesystem);
+        Plugin.DefineModelMetadata(modelBuilder);
         PluginVersion.DefineModelMetadata(modelBuilder);
         Dependency.DefineModelMetadata(modelBuilder);
-        PluginBinaries.DefineModelMetadata(modelBuilder, _filesystem);
+        UploadedBinaries.DefineModelMetadata(modelBuilder);
     }
 }

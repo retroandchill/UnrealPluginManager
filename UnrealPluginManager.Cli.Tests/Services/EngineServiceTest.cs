@@ -75,15 +75,13 @@ public partial class EngineServiceTest {
 
         PluginDescriptor? capturedData = null;
         string? capturedTextFile = null;
-        _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<Stream>(),
-                It.Is(new Version(5, 5), EqualityComparer<Version>.Default)))
-            .Returns(async (Stream x, Version _) => {
-                using var archive = new ZipArchive(x);
-                var entry = archive.GetEntry("MyPlugin.uplugin")!;
-                await using var entryStream = entry.Open();
+        _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<IDirectoryInfo>(),
+                It.Is("5.5", EqualityComparer<string>.Default)))
+            .Returns(async (IDirectoryInfo x, string _) => {
+                var entry = x.GetFiles("*.uplugin").First();
+                await using var entryStream = entry.OpenRead();
                 capturedData = await JsonSerializer.DeserializeAsync<PluginDescriptor>(entryStream, JsonOptions);
-                var subFile = archive.GetEntry(Path.Join("Example", "TextFile.txt"));
-                await using var subFileStream = subFile!.Open();
+                await using var subFileStream = _filesystem.File.OpenRead(Path.Join(x.FullName, "Example", "TextFile.txt"));
                 using var textReader = new StreamReader(subFileStream);
                 capturedTextFile = await textReader.ReadToEndAsync();
                 return new PluginDetails {
@@ -154,11 +152,12 @@ public partial class EngineServiceTest {
             await textWriter.WriteAsync("Hello World!");
         }
 
-        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4"))
-            .ReturnsAsync((string _, SemVersionRange _, string _) => _filesystem.File.OpenRead(pluginPath));
+        List<string> targetPlatforms = ["Win64"];
+        _pluginService.Setup(x => x.GetPluginFileData("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms))
+            .ReturnsAsync((string _, SemVersionRange _, string _, IReadOnlyCollection<string> _) => _filesystem.File.OpenRead(pluginPath));
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
-        var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4");
+        var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);
         Assert.Multiple(() =>
         {
             Assert.That(returnCode, Is.EqualTo(0));

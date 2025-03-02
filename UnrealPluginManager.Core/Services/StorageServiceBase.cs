@@ -2,8 +2,10 @@
 using System.IO.Compression;
 using System.Text.Json;
 using LanguageExt;
+using Semver;
 using UnrealPluginManager.Core.Converters;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 
@@ -37,6 +39,62 @@ public abstract partial class StorageServiceBase : IStorageService {
     
     private string ConfigDirectory => Path.Join(BaseDirectory, "Config");
 
+    private string GetPluginSourceFileName(string pluginName, SemVersion version) {
+        var pluginDirectory = FileSystem.Directory.CreateDirectory(Path.Join(PluginDirectory, pluginName, version.ToString()));
+        return Path.Join(pluginDirectory.FullName, "Source.zip");
+    }
+
+    /// <inheritdoc />
+    public Task<IFileInfo> StorePluginSource(string pluginName, SemVersion version, IFileSource fileSource) {
+        return fileSource.CreateFile(GetPluginSourceFileName(pluginName, version));
+    }
+
+    /// <inheritdoc />
+    public Option<IFileInfo> RetrievePluginSource(string pluginName, SemVersion version) {
+        return GetPluginSourceFileName(pluginName, version).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
+    }
+
+    private string GetPluginIconFileName(string pluginName) {
+        var pluginDirectory = FileSystem.Directory.CreateDirectory(Path.Join(PluginDirectory, pluginName));
+        return Path.Join(pluginDirectory.FullName, "Icon.png");
+    }
+
+    /// <inheritdoc />
+    public Task<IFileInfo> StorePluginIcon(string pluginName, IFileSource iconFile) {
+        return iconFile.CreateFile(GetPluginIconFileName(pluginName));
+    }
+
+    /// <inheritdoc />
+    public Option<IFileInfo> RetrievePluginIcon(string pluginName) {
+        return GetPluginIconFileName(pluginName).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
+    }
+
+    private string GetPluginBinariesFileName(string pluginName, SemVersion version, string engineVersion,
+                                             string platform) {
+        var pluginDirectory = FileSystem.Directory.CreateDirectory(Path.Join(PluginDirectory, pluginName, 
+                                                                             version.ToString(), "Binaries",
+                                                                             engineVersion));
+        return Path.Join(pluginDirectory.FullName, $"{platform}.zip");
+    }
+
+    /// <inheritdoc />
+    public Task<IFileInfo> StorePluginBinaries(string pluginName, SemVersion version, string engineVersion, 
+                                               string platform, IFileSource binariesFile) {
+        return binariesFile.CreateFile(GetPluginBinariesFileName(pluginName, version, engineVersion, platform));
+    }
+
+    /// <inheritdoc />
+    public Option<IFileInfo> RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion,
+                                                    string platform) {
+        return GetPluginBinariesFileName(pluginName, version, engineVersion, platform).ToOption()
+                .Select(x => FileSystem.FileInfo.New(x))
+                .Where(x => x.Exists);
+    }
+
     /// <inheritdoc />
     public async Task<StoredPluginData> StorePlugin(Stream fileData) {
         using var archive = new ZipArchive(fileData);
@@ -63,7 +121,9 @@ public abstract partial class StorageServiceBase : IStorageService {
             $"{Path.GetFileNameWithoutExtension(archiveEntry.FullName)}{Path.GetRandomFileName()}.zip";
         Directory.CreateDirectory(PluginDirectory);
         var fullPath = Path.Combine(PluginDirectory, fileName);
-        FileSystem.Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+        var directoryName = Path.GetDirectoryName(fullPath);
+        ArgumentNullException.ThrowIfNull(directoryName);
+        FileSystem.Directory.CreateDirectory(directoryName);
         await using var fileStream = FileSystem.FileStream.New(fullPath, FileMode.Create);
         fileData.Seek(0, SeekOrigin.Begin);
         await fileData.CopyToAsync(fileStream);
@@ -72,11 +132,6 @@ public abstract partial class StorageServiceBase : IStorageService {
             ZipFile = FileSystem.FileInfo.New(fullPath),
             IconFile = icon
         };
-    }
-
-    /// <inheritdoc />
-    public Stream RetrievePlugin(IFileInfo fileInfo) {
-        return fileInfo.OpenRead();
     }
 
     /// <inheritdoc />

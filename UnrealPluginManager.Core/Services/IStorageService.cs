@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
+using Semver;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Services;
@@ -18,19 +20,67 @@ public interface IStorageService {
     string BaseDirectory { get; }
 
     /// <summary>
+    /// Stores the source files of a plugin using the provided file source.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the source files are being stored.</param>
+    /// <param name="version">The version of the plugin.</param>
+    /// <param name="fileSource">The file source interface used to create the plugin source files.</param>
+    /// <returns>An <see cref="IFileInfo"/> object representing the stored plugin source file.</returns>
+    Task<IFileInfo> StorePluginSource(string pluginName, SemVersion version, IFileSource fileSource);
+
+    /// <summary>
+    /// Retrieves the source file of a plugin based on the specified plugin name and version.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin whose source file is being retrieved.</param>
+    /// <param name="version">The version of the plugin.</param>
+    /// <returns>A <see cref="Stream"/> containing the plugin source file.</returns>
+    Option<IFileInfo> RetrievePluginSource(string pluginName, SemVersion version);
+
+    /// <summary>
+    /// Stores the icon file of a plugin using the provided file source.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the icon file is being stored.</param>
+    /// <param name="iconFile">The file source interface used to create the plugin icon file.</param>
+    /// <returns>An <see cref="IFileInfo"/> object representing the stored plugin icon file.</returns>
+    Task<IFileInfo> StorePluginIcon(string pluginName, IFileSource iconFile);
+
+    /// <summary>
+    /// Retrieves the icon file stream associated with the specified plugin.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the icon is being retrieved.</param>
+    /// <returns>A <see cref="Stream"/> representing the plugin's icon file.</returns>
+    Option<IFileInfo> RetrievePluginIcon(string pluginName);
+
+    /// <summary>
+    /// Stores the binary files of a plugin for a specified version, engine version, and platform using the provided file source.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin for which the binary files are being stored.</param>
+    /// <param name="version">The version of the plugin.</param>
+    /// <param name="engineVersion">The version of the engine that the plugin binaries are compatible with.</param>
+    /// <param name="platform">The target platform for the plugin binaries.</param>
+    /// <param name="binariesFile">The file source interface used to create the plugin binary files.</param>
+    /// <returns>An <see cref="IFileInfo"/> object representing the stored plugin binary file.</returns>
+    Task<IFileInfo> StorePluginBinaries(string pluginName, SemVersion version, string engineVersion, string platform, 
+                                        IFileSource binariesFile);
+
+    /// <summary>
+    /// Retrieves the binary files of a plugin for the specified version, engine version, and platform.
+    /// </summary>
+    /// <param name="pluginName">The name of the plugin whose binaries are being retrieved.</param>
+    /// <param name="version">The version of the plugin.</param>
+    /// <param name="engineVersion">The version of the engine for which the binaries are being retrieved.</param>
+    /// <param name="platform">The platform for which the binaries are being retrieved.</param>
+    /// <returns>A <see cref="Stream"/> containing the plugin binary files.</returns>
+    Option<IFileInfo> RetrievePluginBinaries(string pluginName, SemVersion version, string engineVersion,
+                                             string platform);
+
+    /// <summary>
     /// Stores the provided plugin data stream.
     /// </summary>
     /// <param name="fileData">The stream containing the plugin data to be stored.</param>
     /// <returns>An <see cref="IFileInfo"/> object representing the stored plugin file.</returns>
     /// <exception cref="BadSubmissionException">Thrown when a .uplugin file is not found in the provided stream.</exception>
     Task<StoredPluginData> StorePlugin(Stream fileData);
-
-    /// <summary>
-    /// Retrieves the plugin data stream for the specified plugin file.
-    /// </summary>
-    /// <param name="fileInfo">The file information object representing the plugin file to be retrieved.</param>
-    /// <returns>A <see cref="Stream"/> representing the contents of the retrieved plugin file.</returns>
-    Stream RetrievePlugin(IFileInfo fileInfo);
 
     /// <summary>
     /// Retrieves the icon data stream for the specified icon name.

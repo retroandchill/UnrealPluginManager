@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -40,6 +41,7 @@ public class PluginServiceTests {
 
         services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
         services.AddScoped<IPluginService, PluginService>();
+        services.AddScoped<IPluginStructureService, PluginStructureService>();
         _serviceProvider = services.BuildServiceProvider();
     }
 
@@ -167,10 +169,15 @@ public class PluginServiceTests {
 
     [Test]
     public async Task TestSubmitPlugin() {
-        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         using var testZip = new MemoryStream();
         using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+            zipArchive.CreateEntry("Resources/");
+            zipArchive.CreateEntry("Resources/Icon128.png");
+            zipArchive.CreateEntry("Binaries/");
+            zipArchive.CreateEntry("Binaries/Win64/");
+            zipArchive.CreateEntry("Binaries/Win64/TestPlugin.dll");
+            
             var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
             await using var writer = new StreamWriter(entry.Open());
 
@@ -182,18 +189,46 @@ public class PluginServiceTests {
 
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
+        
+        testZip.Seek(0, SeekOrigin.Begin);
 
-        _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
-            .Returns(async (Stream input) => {
-                var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
-                await using var stream = dummyInfo.Create();
-                input.Seek(0, SeekOrigin.Begin);
-                await input.CopyToAsync(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                return new StoredPluginData { ZipFile = dummyInfo };
-            });
+        var summary = await pluginService.SubmitPlugin(testZip, "5.5");
+        Assert.Multiple(() => {
+            Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
+            Assert.That(summary.Description, Is.EqualTo("Test description"));
+            Assert.That(summary.Versions, Has.Count.EqualTo(1));
+            Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
+        });
+    }
+    
+    [Test]
+    public async Task TestSubmitPluginFromDirectory() {
+        var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        
+        var tempDir = filesystem.Directory.CreateDirectory("TestPlugin");
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Resources"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Binaries"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Binaries", "Win64"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate", "Build"));
+        filesystem.Directory.CreateDirectory(Path.Combine(tempDir.FullName, "Intermediate", "Build", "Win64"));
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Resources", "Icon128.png")).DisposeAsync();
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Binaries", "Win64", "TestPlugin.dll")).DisposeAsync();
+        await filesystem.File.Create(Path.Combine(tempDir.FullName, "Intermediate", "Build", "Win64", "TestPlugin.lib")).DisposeAsync();
+        await using (var upluginFile = filesystem.File.Create(Path.Combine(tempDir.FullName, "TestPlugin.uplugin"))) {
+            await using var writer = new StreamWriter(upluginFile);
 
-        var summary = await pluginService.SubmitPlugin(testZip, new Version(5, 5));
+            var descriptor = new PluginDescriptor {
+                    FriendlyName = "Test Plugin",
+                    VersionName = new SemVersion(1, 0, 0),
+                    Description = "Test description"
+            };
+
+            await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
+        }
+
+        var summary = await pluginService.SubmitPlugin(tempDir, "5.5");
         Assert.Multiple(() => {
             Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
             Assert.That(summary.Description, Is.EqualTo("Test description"));
@@ -225,7 +260,7 @@ public class PluginServiceTests {
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>
-            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+            await pluginService.SubmitPlugin(testZip, "5.5"));
     }
 
     [Test]
@@ -257,7 +292,7 @@ public class PluginServiceTests {
             });
 
         Assert.ThrowsAsync<BadSubmissionException>(async () =>
-            await pluginService.SubmitPlugin(testZip, new Version(5, 5)));
+            await pluginService.SubmitPlugin(testZip, "5.5"));
     }
 
     [Test]
@@ -266,9 +301,14 @@ public class PluginServiceTests {
         var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
         var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
 
+        var tempFileName = Path.GetTempFileName();
+        var dirName = Path.GetDirectoryName(tempFileName);
+        Assert.That(dirName, Is.Not.Null);
+        filesystem.Directory.CreateDirectory(dirName);
+
         var zipFile = filesystem.FileInfo.New("TestPlugin.zip");
         await using var testZip = zipFile.Create();
-        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+        using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create)) {
             var entry = zipArchive.CreateEntry("TestPlugin.json");
             await using var writer = new StreamWriter(entry.Open());
 
@@ -280,6 +320,20 @@ public class PluginServiceTests {
 
             await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
         }
+        
+        _mockStorageService.Setup(x => x.RetrievePluginSource("TestPlugin", new SemVersion(1, 0, 0)))
+                .Returns(Option<IFileInfo>.Some(zipFile));
+
+        var binaries = filesystem.FileInfo.New("Binaries.zip");
+        await using var binZip = binaries.Create();
+        using (var zipArchive = new ZipArchive(binZip, ZipArchiveMode.Create)) {
+            var entry = zipArchive.CreateEntry("TestPlugin.dll");
+            await using var writer = new StreamWriter(entry.Open());
+            await writer.WriteAsync("TestPlugin.dll");
+        }
+        
+        _mockStorageService.Setup(x => x.RetrievePluginBinaries("TestPlugin", new SemVersion(1, 0, 0), "5.5", "Win64"))
+                .Returns(Option<IFileInfo>.Some(binaries));
 
         var plugin = new Plugin {
             Name = "TestPlugin",
@@ -290,9 +344,8 @@ public class PluginServiceTests {
                 new PluginVersion {
                     Version = new SemVersion(1, 0, 0),
                     Binaries = [
-                        new PluginBinaries {
+                        new UploadedBinaries {
                             EngineVersion = "5.5",
-                            FilePath = zipFile,
                             Platform = "Win64"
                         }
                     ]
@@ -302,10 +355,10 @@ public class PluginServiceTests {
         await context.Plugins.AddAsync(plugin);
         await context.SaveChangesAsync();
 
-        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5"));
+        Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"]));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.4"));
+            await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.4", ["Win64"]));
         Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, "5.5"));
+            await pluginService.GetPluginFileData("OtherPlugin", SemVersionRange.All, "5.5", ["Win64"]));
     }
 }

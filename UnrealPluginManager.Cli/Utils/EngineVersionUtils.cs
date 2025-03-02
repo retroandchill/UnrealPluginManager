@@ -63,8 +63,8 @@ public static partial class EngineVersionUtils {
         }
         
         
-        return localEngineVersionPatch.IsSome ? new Version(localEngineVersionMajor.Get(), localEngineVersionMinor.Get(), 
-            localEngineVersionPatch.Get()) : new Version(localEngineVersionMajor.Get(), localEngineVersionMinor.Get());
+        return localEngineVersionPatch.IsSome ? new Version(localEngineVersionMajor.OrElseThrow(), localEngineVersionMinor.OrElseThrow(), 
+            localEngineVersionPatch.OrElseThrow()) : new Version(localEngineVersionMajor.OrElseThrow(), localEngineVersionMinor.OrElseThrow());
 
     }
 

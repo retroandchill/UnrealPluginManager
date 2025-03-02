@@ -94,11 +94,11 @@ public class PluginManagementServiceTest {
         Assert.That(plugins, Has.Count.EqualTo(3));
         Assert.That(plugins, Does.ContainKey("default"));
         Assert.That(plugins["default"].IsSucc, Is.True);
-        Assert.That(plugins["default"].Get(), Has.Count.EqualTo(300));
+        Assert.That(plugins["default"].OrElseThrow(), Has.Count.EqualTo(300));
         
         Assert.That(plugins, Does.ContainKey("alt"));
         Assert.That(plugins["alt"].IsSucc, Is.True);
-        Assert.That(plugins["alt"].Get(), Has.Count.EqualTo(50));
+        Assert.That(plugins["alt"].OrElseThrow(), Has.Count.EqualTo(50));
         
         Assert.That(plugins, Does.ContainKey("unaccessible"));
         Assert.That(plugins["unaccessible"].IsFail, Is.True);

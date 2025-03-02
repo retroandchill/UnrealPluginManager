@@ -83,7 +83,7 @@ public class CloudStorageServiceTest {
         
         var descriptorIn = storageService.GetConfig<ProjectDescriptor>("TestProject");
         Assert.That(descriptorIn.IsSome, Is.True);
-        Assert.That(descriptorIn.Get().Description, Is.EqualTo("Test description"));
+        Assert.That(descriptorIn.OrElseThrow().Description, Is.EqualTo("Test description"));
         
         var descriptorOut2 = storageService.GetConfig("TestProject", baseDescriptor);
         Assert.Multiple(() =>
@@ -133,7 +133,7 @@ public class CloudStorageServiceTest {
         
         var descriptorIn = await storageService.GetConfigAsync<ProjectDescriptor>("TestProject");
         Assert.That(descriptorIn.IsSome, Is.True);
-        Assert.That(descriptorIn.Get().Description, Is.EqualTo("Test description"));
+        Assert.That(descriptorIn.OrElseThrow().Description, Is.EqualTo("Test description"));
         
         var descriptorOut2 = await storageService.GetConfigAsync("TestProject", baseDescriptor);
         Assert.Multiple(() =>

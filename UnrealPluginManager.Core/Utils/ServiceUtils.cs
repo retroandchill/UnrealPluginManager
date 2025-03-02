@@ -36,9 +36,10 @@ public static class ServiceUtils {
     /// </summary>
     /// <param name="services">The IServiceCollection to which the core services will be added.</param>
     /// <returns>The updated IServiceCollection.</returns>
-    public static IServiceCollection AddCoreServices(this IServiceCollection sevices) {
-        return sevices
-            .AddScoped<IPluginService, PluginService>();
+    public static IServiceCollection AddCoreServices(this IServiceCollection services) {
+        return services
+            .AddScoped<IPluginService, PluginService>()
+            .AddScoped<IPluginStructureService, PluginStructureService>();
     }
     
 }

@@ -34,10 +34,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves an icon as a stream for the specified file name.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <returns>System.IO.Stream</returns>
-        System.IO.Stream GetIcon(string fileName, int operationIndex = 0);
+        System.IO.Stream GetIcon(string pluginName, int operationIndex = 0);
 
         /// <summary>
         /// Retrieves an icon as a stream for the specified file name.
@@ -46,10 +46,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <returns>ApiResponse of System.IO.Stream</returns>
-        ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string fileName, int operationIndex = 0);
+        ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string pluginName, int operationIndex = 0);
         #endregion Synchronous Operations
     }
 
@@ -66,11 +66,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of System.IO.Stream</returns>
-        System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string fileName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves an icon as a stream for the specified file name.
@@ -79,11 +79,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string fileName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -208,12 +208,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves an icon as a stream for the specified file name. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <returns>System.IO.Stream</returns>
-        public System.IO.Stream GetIcon(string fileName, int operationIndex = 0)
+        public System.IO.Stream GetIcon(string pluginName, int operationIndex = 0)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = GetIconWithHttpInfo(fileName);
+            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = GetIconWithHttpInfo(pluginName);
             return localVarResponse.Data;
         }
 
@@ -221,15 +221,15 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves an icon as a stream for the specified file name. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <returns>ApiResponse of System.IO.Stream</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string fileName, int operationIndex = 0)
+        public UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string pluginName, int operationIndex = 0)
         {
-            // verify the required parameter 'fileName' is set
-            if (fileName == null)
+            // verify the required parameter 'pluginName' is set
+            if (pluginName == null)
             {
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'fileName' when calling StorageApi->GetIcon");
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling StorageApi->GetIcon");
             }
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -254,14 +254,14 @@ namespace UnrealPluginManager.WebClient.Api
                 localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
             }
 
-            localVarRequestOptions.PathParameters.Add("fileName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(fileName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
 
             localVarRequestOptions.Operation = "StorageApi.GetIcon";
             localVarRequestOptions.OperationIndex = operationIndex;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<System.IO.Stream>("/files/icons/{fileName}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<System.IO.Stream>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration);
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetIcon", localVarResponse);
@@ -278,13 +278,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves an icon as a stream for the specified file name. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of System.IO.Stream</returns>
-        public async System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string fileName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = await GetIconWithHttpInfoAsync(fileName, operationIndex, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = await GetIconWithHttpInfoAsync(pluginName, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -292,16 +292,16 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves an icon as a stream for the specified file name. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="fileName">The name of the file representing the icon to be retrieved.</param>
+        /// <param name="pluginName">The name of the plugin to search for</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string fileName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'fileName' is set
-            if (fileName == null)
+            // verify the required parameter 'pluginName' is set
+            if (pluginName == null)
             {
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'fileName' when calling StorageApi->GetIcon");
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling StorageApi->GetIcon");
             }
 
 
@@ -327,14 +327,14 @@ namespace UnrealPluginManager.WebClient.Api
                 localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
             }
 
-            localVarRequestOptions.PathParameters.Add("fileName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(fileName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
 
             localVarRequestOptions.Operation = "StorageApi.GetIcon";
             localVarRequestOptions.OperationIndex = operationIndex;
 
 
             // make the HTTP request
-            var localVarResponse = await this.AsynchronousClient.GetAsync<System.IO.Stream>("/files/icons/{fileName}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<System.IO.Stream>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
