@@ -22,34 +22,34 @@ public static class ExpressionSolver {
     /// If no solution exists, returns None.
     /// </returns>
     public static Option<List<SelectedVersion>> Solve(this IExpression expr) {
-        var selected = SolveInternal(expr, new Dictionary<string, bool>());
+        var selected = SolveInternal(expr, new Dictionary<SelectedVersion, bool>());
         return selected
             .Select(x => x.Where(y => y.Value)
-                .Select(y => new SelectedVersion(VarName(y.Key), VarVersion(y.Key)))
+                .Select(y => y.Key)
                 .ToList());
     }
 
-    private static Option<Dictionary<string, bool>> SolveInternal(IExpression expr, Dictionary<string, bool> bindings) {
+    private static Option<Dictionary<SelectedVersion, bool>> SolveInternal(IExpression expr, Dictionary<SelectedVersion, bool> bindings) {
         var freeVar = AnyVar(expr);
         if (freeVar.IsNone) {
-            return expr.Evaluate() ? bindings : Option<Dictionary<string, bool>>.None;
+            return expr.Evaluate() ? bindings : Option<Dictionary<SelectedVersion, bool>>.None;
         }
 
-        var validatedVar = (string)freeVar;
+        var validatedVar = (SelectedVersion)freeVar;
         var trueExpr = expr.Replace(validatedVar, true);
-        var trueBindings = new Dictionary<string, bool>(bindings);
+        var trueBindings = new Dictionary<SelectedVersion, bool>(bindings);
         trueBindings[validatedVar] = true;
 
         var falseExpr = expr.Replace(validatedVar, false);
-        var falseBindings = new Dictionary<string, bool>(bindings);
+        var falseBindings = new Dictionary<SelectedVersion, bool>(bindings);
         falseBindings[validatedVar] = false;
 
         return SolveInternal(trueExpr, trueBindings) || SolveInternal(falseExpr, falseBindings);
     }
 
-    private static Option<string> AnyVar(IExpression expr) {
+    private static Option<SelectedVersion> AnyVar(IExpression expr) {
         var variables = expr.Free().OrderByDescending(x => x).ToList();
-        return variables.Count != 0 ? variables[0] : Option<string>.None;
+        return variables.Count != 0 ? variables[0] : Option<SelectedVersion>.None;
     }
 
     /// Converts a given set of plugin data into an IExpression that represents
@@ -74,7 +74,7 @@ public static class ExpressionSolver {
     /// </returns>
     public static IExpression Convert<T>(string root, SemVersion rootVersion, IDictionary<string, T> pluginData)
         where T : IEnumerable<IDependencyChainNode> {
-        List<IExpression> terms = [new Var($"{root}-v{rootVersion}")];
+        List<IExpression> terms = [new Var(new SelectedVersion(root, rootVersion))];
         foreach (var pack in
                  pluginData.Values.SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
             terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
@@ -89,12 +89,12 @@ public static class ExpressionSolver {
         var variables = new And(terms).Free()
             .ToHashSet();
         var varNames = variables
-            .Select(VarName)
+            .Select(x => x.Name)
             .ToHashSet();
         foreach (var name in varNames) {
             var versions = variables
-                .Where(v => VarName(v) == name)
-                .Select(VarVersion)
+                .Where(v => v.Name == name)
+                .Select(v => v.Version)
                 .ToHashSet();
             terms.AddRange(AllCombinations(versions)
                 .Select(combo =>
@@ -105,15 +105,7 @@ public static class ExpressionSolver {
     }
 
     private static Var PackageVar(string name, SemVersion version) {
-        return new Var($"{name}-v{version}");
-    }
-
-    private static string VarName(string name) {
-        return name.Split("-v")[0];
-    }
-
-    private static SemVersion VarVersion(string name) {
-        return SemVersion.Parse(name.Split("-v")[1]);
+        return new Var(new SelectedVersion(name, version));
     }
 
     private static List<(SemVersion, SemVersion)> AllCombinations(IEnumerable<SemVersion> versions) {

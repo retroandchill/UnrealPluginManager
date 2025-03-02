@@ -15,7 +15,7 @@ public interface IExpression {
     /// An enumerable collection of variable names that are free within the expression.
     /// If no free variables exist, an empty collection is returned.
     /// </returns>
-    IEnumerable<string> Free();
+    IEnumerable<SelectedVersion> Free();
 
     /// <summary>
     /// Evaluates the logical expression to determine its truth value.
@@ -41,7 +41,7 @@ public interface IExpression {
     /// with the provided boolean value. If the variable is not present in the expression, the
     /// original expression is returned unchanged.
     /// </returns>
-    IExpression Replace(string varName, bool varValue);
+    IExpression Replace(SelectedVersion varName, bool varValue);
 }
 
 /// <summary>
@@ -50,7 +50,7 @@ public interface IExpression {
 /// </summary>
 public record BoolExpression(bool Value) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return [];
     }
 
@@ -60,7 +60,7 @@ public record BoolExpression(bool Value) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new BoolExpression(Value);
     }
 }
@@ -68,9 +68,9 @@ public record BoolExpression(bool Value) : IExpression {
 /// <summary>
 /// Represents a variable in a logical expression. A variable holds a name and can be replaced or evaluated within the expression context.
 /// </summary>
-public record Var(string Name) : IExpression {
+public record Var(SelectedVersion Name) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return [Name];
     }
 
@@ -80,7 +80,7 @@ public record Var(string Name) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         if (Name == varName) {
             return new BoolExpression(varValue);
         }
@@ -94,7 +94,7 @@ public record Var(string Name) : IExpression {
 /// </summary>
 public record Not(IExpression Expression) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expression.Free();
     }
 
@@ -104,7 +104,7 @@ public record Not(IExpression Expression) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Not(Expression.Replace(varName, varValue));
     }
 }
@@ -114,7 +114,7 @@ public record Not(IExpression Expression) : IExpression {
 /// </summary>
 public record And(IEnumerable<IExpression> Expressions) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
     }
 
@@ -124,7 +124,7 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new And(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
     }
 }
@@ -134,7 +134,7 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
 /// </summary>
 public record Or(IEnumerable<IExpression> Expressions) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
     }
 
@@ -144,7 +144,7 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Or(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
     }
 }
@@ -159,7 +159,7 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
 /// </remarks>
 public record Impl(IExpression P, IExpression Q) : IExpression {
     /// <inheritdoc/>
-    public IEnumerable<string> Free() {
+    public IEnumerable<SelectedVersion> Free() {
         return P.Free().Concat(Q.Free()).ToImmutableSortedSet();
     }
 
@@ -169,7 +169,7 @@ public record Impl(IExpression P, IExpression Q) : IExpression {
     }
 
     /// <inheritdoc/>
-    public IExpression Replace(string varName, bool varValue) {
+    public IExpression Replace(SelectedVersion varName, bool varValue) {
         return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
     }
 }
