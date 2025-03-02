@@ -47,7 +47,7 @@ jobs:
         shell: powershell
         run: |
           cd unrealpluginmanager.client
-          npm install
+          npm ci
           cd ..
       - name: Build and analyze
         env:
