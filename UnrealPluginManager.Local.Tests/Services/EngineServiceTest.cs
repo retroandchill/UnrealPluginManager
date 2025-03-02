@@ -158,6 +158,8 @@ public partial class EngineServiceTest {
             .Returns((string _, SemVersionRange _, string _, IReadOnlyCollection<string> _) => _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
 
         var engineService = _serviceProvider.GetRequiredService<IEngineService>();
+        var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
+        Assert.That(installedPluginVersion.IsNone, Is.True);
         var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);
         Assert.Multiple(() =>
         {
@@ -166,6 +168,9 @@ public partial class EngineServiceTest {
                 Path.Join("C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin")),
                 Is.True);
         });
+        
+        installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
+        Assert.That(installedPluginVersion.IsSome, Is.True);
     }
 
     [GeneratedRegex("-Package=\"(.*)\"", RegexOptions.IgnoreCase)]
