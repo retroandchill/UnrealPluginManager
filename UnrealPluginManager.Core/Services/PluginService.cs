@@ -108,11 +108,12 @@ public partial class PluginService : IPluginService {
     }
 
     /// <inheritdoc/>
-    public async Task<List<PluginSummary>> GetDependencyList(string pluginName) {
+    public async Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
         var plugin = await _dbContext.PluginVersions
                 .Include(p => p.Parent)
                 .Include(p => p.Dependencies)
                 .Where(p => p.Parent.Name == pluginName)
+                .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
                 .OrderByVersionDecending()
                 .ToPluginVersionInfo()
                 .FirstAsync();
@@ -123,18 +124,31 @@ public partial class PluginService : IPluginService {
                                                     $"Unable to resolve plugin names:\n{string.Join("\n", dependencyList.UnresolvedDependencies)}");
         }
 
-        dependencyList.FoundDependencies.Add(pluginName, [plugin]);
-        var formula = ExpressionSolver.Convert(pluginName, plugin.Version, dependencyList.FoundDependencies);
+        return GetDependencyList(plugin, dependencyList);
+    }
+
+    /// <inheritdoc />
+    public List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
+        var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
         var bindings = formula.Solve();
         if (bindings.IsNone) {
             return [];
         }
+        
+        IEnumerable<PluginVersionInfo> result;
+        if (root is PluginVersionInfo plugin) {
+            result = bindings.SelectMany(b => b)
+                    .Select(p => p.Name == root.Name
+                                                                 ? plugin
+                                                                 : manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
 
-        return bindings.SelectMany(b => b)
-                .Select(p => p.Name == pluginName
-                                ? plugin
-                                : dependencyList.FoundDependencies[p.Name].First(d => d.Version == p.Version))
-                .Select(p => p.ToPluginSummary())
+        } else {
+            result = bindings.SelectMany(b => b)
+                    .Where(p => p.Name != root.Name)
+                    .Select(p => manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
+        }
+
+        return result.Select(p => p.ToPluginSummary())
                 .ToList();
     }
 

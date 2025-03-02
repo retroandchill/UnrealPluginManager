@@ -52,18 +52,4 @@ public record PluginSummary {
     [Required]
     [JsonConverter(typeof(SemVersionJsonConverter))]
     public required SemVersion Version { get; init; }
-
-    /// <summary>
-    /// Indicates whether the plugin is currently installed.
-    /// This property helps determine the plugin's installation status within the system.
-    /// </summary>
-    [JsonIgnore]
-    public bool IsInstalled { get; init; }
-
-    /// <summary>
-    /// Gets the remote name associated with the plugin.
-    /// This property is used to identify the plugin's name in external or remote systems.
-    /// </summary>
-    [JsonIgnore]
-    public string? RemoteName { get; init; }
 }

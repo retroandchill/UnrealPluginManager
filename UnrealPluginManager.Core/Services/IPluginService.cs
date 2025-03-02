@@ -47,13 +47,22 @@ public interface IPluginService {
     /// <summary>
     /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
     /// </summary>
-    /// <param name="pluginName">
-    ///     The name of the plugin for which to retrieve the dependency list.
-    /// </param>
+    /// <param name="pluginName">The name of the plugin for which to retrieve the dependency list.</param>
+    /// <param name="targetVersion">An optional version range filter for the plugin dependencies.</param>
     /// <returns>
     /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
     /// </returns>
-    Task<List<PluginSummary>> GetDependencyList(string pluginName);
+    Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
+
+    /// <summary>
+    /// Retrieves a list of plugin summaries based on the specified dependency chain root and dependency manifest.
+    /// </summary>
+    /// <param name="root">The root of the dependency chain for which the plugin summaries should be retrieved.</param>
+    /// <param name="manifest">The manifest containing possible versions for the dependencies.</param>
+    /// <returns>
+    /// A list of <see cref="PluginSummary"/> representing the plugins identified in the dependency chain.
+    /// </returns>
+    List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
 
     /// <summary>
     /// Adds a new plugin to the system using the provided plugin name and descriptor information.

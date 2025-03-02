@@ -166,6 +166,54 @@ public class PluginServiceTests {
             Assert.That(dependencyGraph.Find(x => x.Name == "App")?.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
         });
     }
+    
+    [Test]
+    public async Task TestAddPluginVersionsWithPreInstalledPlugins() {
+        var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+        await pluginService.SetupVersionResolutionTree();
+
+        List<PluginDependency> pluginDependencies = [
+                new() {
+                        PluginName = "Sql",
+                        Type = PluginType.Provided,
+                        PluginVersion = SemVersionRange.Parse("=2.0.0")
+                },
+                new() {
+                        PluginName = "Threads",
+                        Type = PluginType.Provided,
+                        PluginVersion = SemVersionRange.Parse("=2.0.0")
+                },
+                new() {
+                        PluginName = "Http",
+                        Type = PluginType.Provided,
+                        PluginVersion = SemVersionRange.Parse(">=3.0.0 <=4.0.0")
+                },
+                new() {
+                        PluginName = "StdLib",
+                        Type = PluginType.Provided,
+                        PluginVersion = SemVersionRange.Parse("=4.0.0")
+                }
+        ];
+        var possibleVersions = await pluginService.GetPossibleVersions(pluginDependencies);
+        Assert.That(possibleVersions.FoundDependencies, Contains.Key("Http"));
+        var http3 = possibleVersions.FoundDependencies["Http"]
+                .Find(x => x.Version.Major == 3);
+        Assert.That(http3, Is.Not.Null);
+        http3.Installed = true;
+
+        var root = new DependencyChainRoot {
+                Dependencies = pluginDependencies
+        };
+        
+        var dependencyGraph = pluginService.GetDependencyList(root, possibleVersions);
+        Assert.That(dependencyGraph, Has.Count.EqualTo(4));
+        Assert.Multiple(() => {
+            Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+            Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(3, 0, 0)));
+        });
+    }
 
     [Test]
     public async Task TestSubmitPlugin() {
