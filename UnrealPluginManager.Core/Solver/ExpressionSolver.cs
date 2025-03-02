@@ -78,14 +78,16 @@ public static class ExpressionSolver {
         var dependencyFrequency = node.Dependencies
                 .Concat(pluginData.SelectMany(x => x.Value)
                 .SelectMany(x => x.Dependencies))
+                .Where(dep => dep.Type == PluginType.Provided)
                 .GroupBy(x => x.PluginName)
                 .Select(x => (x.Key, x.Count()))
                 .OrderByDescending(x => x.Item2)
                 .Select(x => x.Item1)
                 .ToList();
         
-        foreach (var pack in dependencyFrequency.Select(x => pluginData[x])
-                         .SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer))) {
+        foreach (var pack in node.ToEnumerable()
+                         .Concat(dependencyFrequency.Select(x => pluginData[x])
+                                         .SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer)))) {
             terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
                 .Select(dep => pluginData[dep.PluginName]
                     .Where(pd => dep.PluginVersion.Contains(pd.Version))
