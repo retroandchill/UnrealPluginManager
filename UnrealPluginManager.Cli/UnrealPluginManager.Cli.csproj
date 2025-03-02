@@ -21,7 +21,9 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="JetBrains.Annotations" Version="2025.1.0-eap1" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.1.0-eap1" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
         <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
@@ -32,6 +34,7 @@
       <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
       <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj" />
       <ProjectReference Include="..\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
+      <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj" />
     </ItemGroup>
 
 </Project>
