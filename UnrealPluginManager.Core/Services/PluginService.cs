@@ -286,7 +286,7 @@ public partial class PluginService : IPluginService {
     /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                                 IReadOnlyCollection<string> targetPlatforms) {
-        var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempFileName(), Path.GetRandomFileName()), 
+        var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempPath(), Path.GetRandomFileName()), 
                                                     FileMode.Create, FileAccess.ReadWrite, 
                                                     FileShare.Read, 4096, FileOptions.DeleteOnClose);
         
