@@ -77,10 +77,6 @@ public partial class EngineService : IEngineService {
         return 0;
     }
 
-    public Task<PartitionedPlugin> PartitionPlugin(IDirectoryInfo buildPluginDirectory) {
-        throw new NotImplementedException();
-    }
-
     private InstalledEngine GetInstalledEngine(string? engineVersion) {
         var installedEngines = GetInstalledEngines();
         var installedEngine = engineVersion is not null

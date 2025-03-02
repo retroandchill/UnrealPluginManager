@@ -13,7 +13,4 @@ namespace UnrealPluginManager.Core.Model.Engine;
 /// <param name="FileInfo">
 /// Contains metadata and path information about the file, utilizing a file system abstraction.
 /// </param>
-/// <param name="Platform">
-/// Indicates the platform for which the engine file is designated, with a default value of "Win64".
-/// </param>
 public record struct EngineFileData(string EngineVersion, PartitionedPlugin FileInfo);

@@ -166,7 +166,7 @@ public partial class PluginService : IPluginService {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
 
-        var exists = _dbContext.PluginVersions.Any(x => x.Parent.Name == baseName
+        var exists = await _dbContext.PluginVersions.AnyAsync(x => x.Parent.Name == baseName
                                                         && x.VersionString == descriptor.VersionName.ToString());
         if (exists) {
             throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
@@ -196,7 +196,7 @@ public partial class PluginService : IPluginService {
             throw new BadSubmissionException("Uplugin file was malformed", e);
         }
 
-        var exists = _dbContext.PluginVersions.Any(x => x.Parent.Name == baseName
+        var exists = await _dbContext.PluginVersions.AnyAsync(x => x.Parent.Name == baseName
                                                         && x.VersionString == descriptor.VersionName.ToString());
         if (exists) {
             throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
@@ -286,7 +286,8 @@ public partial class PluginService : IPluginService {
     /// <inheritdoc/>
     public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                                 IReadOnlyCollection<string> targetPlatforms) {
-        var fileStream = _fileSystem.FileStream.New(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite, 
+        var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempFileName(), Path.GetRandomFileName()), 
+                                                    FileMode.Create, FileAccess.ReadWrite, 
                                                     FileShare.Read, 4096, FileOptions.DeleteOnClose);
         
         try {

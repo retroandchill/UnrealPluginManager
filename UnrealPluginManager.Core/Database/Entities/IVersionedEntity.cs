@@ -24,7 +24,11 @@ public interface IVersionedEntity {
     /// This is a part of the semantic versioning system (major.minor.patch) used to define the plugin version.
     /// </summary>
     public int Patch { get; }
-    
+
+    /// <summary>
+    /// Gets or sets the prerelease label of the plugin version.
+    /// Represents the prerelease identifier in a semantic version, such as "alpha", "beta", or "rc".
+    /// </summary>
     public string? Prerelease { get; }
 
     /// <summary>

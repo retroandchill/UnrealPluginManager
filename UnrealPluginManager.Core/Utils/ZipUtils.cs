@@ -64,10 +64,10 @@ public static class ZipUtils {
             await CreateZipEntryFromPath(fileSystem, targetZip, directory, directory.Parent.FullName, prefix);
         }
 
-        foreach (var file in files) {
-            var entry = targetZip.CreateEntry(file.FullName);
+        foreach (var file in files.Select(x => x.FullName)) {
+            var entry = targetZip.CreateEntry(file);
             await using var entryStream = entry.Open();
-            await using var sourceFile = fileSystem.FileStream.New(file.FullName, FileMode.Open);
+            await using var sourceFile = fileSystem.FileStream.New(file, FileMode.Open);
             await sourceFile.CopyToAsync(entryStream);
         }
         
@@ -132,6 +132,13 @@ public static class ZipUtils {
         return target.CopyEntries(source.Entries);
     }
 
+    /// <summary>
+    /// Copies the given collection of ZIP archive entries into a new ZIP file at the specified destination path.
+    /// </summary>
+    /// <param name="fileSystem">The file system abstraction to use for file and directory operations.</param>
+    /// <param name="entries">The collection of ZIP archive entries to copy to the new ZIP file.</param>
+    /// <param name="destinationPath">The file path where the new ZIP file should be created.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a reference to the created ZIP file.</returns>
     public static async Task<IFileInfo> CopyEntries(this IFileSystem fileSystem, IEnumerable<ZipArchiveEntry> entries, 
                                                     string destinationPath) {
         var toFile = fileSystem.FileInfo.New(destinationPath);

@@ -13,6 +13,8 @@ namespace UnrealPluginManager.Core.Services;
 /// </summary>
 [AutoConstructor]
 public partial class PluginStructureService : IPluginStructureService {
+    private const string Binaries = "Binaries";
+    private const string Intermediate = "Intermediate";
     private readonly IFileSystem _fileSystem;
     private readonly IStorageService _storageService;
 
@@ -27,25 +29,25 @@ public partial class PluginStructureService : IPluginStructureService {
         IFileInfo pluginSource;
         using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
             var sourceDirectories = pluginDirectory.EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
-                    .Where(x => !x.Name.StartsWith("Binaries") && !x.Name.StartsWith("Intermediate"));
+                    .Where(x => !x.Name.StartsWith(Binaries) && !x.Name.StartsWith(Intermediate));
             var sourceFiles = pluginDirectory.EnumerateFiles("*", SearchOption.TopDirectoryOnly);
             sourceZipInfo = await _fileSystem.CreateZipFile(sourceZipInfo.FullName, sourceDirectories, sourceFiles);
             pluginSource = await _storageService.StorePluginSource(pluginName, version, 
                                                                    new CopyFileSource(sourceZipInfo));
         }
 
-        var binariesDirectory = pluginDirectory.SubDirectory("Binaries");
-        var intermediateDirectory = pluginDirectory.SubDirectory("Intermediate", "Build");
+        var binariesDirectory = pluginDirectory.SubDirectory(Binaries);
+        var intermediateDirectory = pluginDirectory.SubDirectory(Intermediate, "Build");
         var binaryDirectories = binariesDirectory.EnumerateDirectories()
                 .ToDictionary<IDirectoryInfo, string, List<ZipSubDirectory>>(binary => binary.Name, 
-                                                                            binary => [new ZipSubDirectory("Binaries", binary)]);
+                                                                            binary => [new ZipSubDirectory(Binaries, binary)]);
 
         foreach (var intermediate in intermediateDirectory.EnumerateDirectories()) {
             var existingDirectories = binaryDirectories.TryGetValue(intermediate.Name, out var directories)
                 ? directories
                 : [];
             binaryDirectories[intermediate.Name] = existingDirectories
-                    .Concat([ new ZipSubDirectory(Path.Join("Intermediate", "Build"), intermediate) ]).ToList();
+                    .Concat([ new ZipSubDirectory(Path.Join(Intermediate, "Build"), intermediate) ]).ToList();
         }
 
         var pluginBinaries = new Dictionary<string, IFileInfo>();
@@ -72,7 +74,7 @@ public partial class PluginStructureService : IPluginStructureService {
         IFileInfo pluginSource;
         using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
             var sourceEntries = zipArchive.Entries
-                    .Where(x => !x.FullName.StartsWith("Binaries") && !x.FullName.StartsWith("Intermediate"));
+                    .Where(x => !x.FullName.StartsWith(Binaries) && !x.FullName.StartsWith(Intermediate));
             sourceZipInfo = await _fileSystem.CopyEntries(sourceEntries, sourceZipInfo.FullName);
             pluginSource = await _storageService.StorePluginSource(pluginName, version, 
                                                                    new CopyFileSource(sourceZipInfo));
@@ -80,9 +82,9 @@ public partial class PluginStructureService : IPluginStructureService {
 
         const string intermediateBuild = "Intermediate/Build";
         var binaryEntries = zipArchive.Entries
-                .Where(x => x.FullName.StartsWith("Binaries") || x.FullName.StartsWith(intermediateBuild))
+                .Where(x => x.FullName.StartsWith(Binaries) || x.FullName.StartsWith(intermediateBuild))
                 .Where(x => x.FullName != "Binaries/" && x.FullName != $"{intermediateBuild}/")
-                .GroupBy(x => x.FullName.StartsWith("Binaries") ? x.FullName.Split('/')[1] : x.FullName.Split('/')[2])
+                .GroupBy(x => x.FullName.StartsWith(Binaries) ? x.FullName.Split('/')[1] : x.FullName.Split('/')[2])
                 .ToDictionary(x => x.Key, x => x.ToList());
 
         var pluginBinaries = new Dictionary<string, IFileInfo>();
