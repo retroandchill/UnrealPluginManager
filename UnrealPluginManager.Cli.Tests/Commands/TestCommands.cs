@@ -1,14 +1,11 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
-using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using LanguageExt;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Moq;
-using NUnit.Framework.Internal.Execution;
 using Semver;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.DependencyInjection;

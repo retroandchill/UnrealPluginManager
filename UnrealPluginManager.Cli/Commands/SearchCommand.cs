@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using JetBrains.Annotations;
 using LanguageExt;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
@@ -45,6 +46,7 @@ public class SearchCommand : Command<SearchCommandOptions, SearchCommandHandler>
 /// This class encapsulates the input parameters required for the execution of the SearchCommand,
 /// including the search term and an optional remote name to specify the source of the search.
 /// </remarks>
+[UsedImplicitly]
 public class SearchCommandOptions : ICommandOptions {
 
     /// <summary>
@@ -75,6 +77,7 @@ public class SearchCommandOptions : ICommandOptions {
 /// It supports both local and remote plugin search functionality.
 /// </remarks>
 [AutoConstructor]
+[UsedImplicitly]
 public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommandOptions> {
     private readonly IConsole _console;
     private readonly IPluginService _pluginService;

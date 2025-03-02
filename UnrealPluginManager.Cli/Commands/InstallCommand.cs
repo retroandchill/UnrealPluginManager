@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
+using JetBrains.Annotations;
 using LanguageExt;
 using Semver;
 using UnrealPluginManager.Local.Services;
@@ -71,6 +72,7 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
 /// the version range of the plugin, and the target Unreal Engine version. These options
 /// are used to customize and validate the installation process.
 /// </remarks>
+[UsedImplicitly]
 public class InstallCommandOptions : ICommandOptions {
     /// <summary>
     /// Gets or sets the input value representing the name of the plugin to be installed.
@@ -113,6 +115,7 @@ public class InstallCommandOptions : ICommandOptions {
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
 [AutoConstructor]
+[UsedImplicitly]
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
     private readonly IConsole _console;
     private readonly IEngineService _engineService;
