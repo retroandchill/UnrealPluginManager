@@ -35,9 +35,25 @@ public interface IDependencyChainNode {
     /// to resolve and ensure that all necessary plugins are present and meet the specified compatibility requirements.
     /// </remarks>
     List<PluginDependency> Dependencies { get; }
-    
+
+    /// <summary>
+    /// Indicates whether the plugin has been installed on the system.
+    /// </summary>
+    /// <remarks>
+    /// This property reflects the installation status of a plugin or dependency.
+    /// It is utilized to determine if a plugin is currently available locally or
+    /// needs to be retrieved through other means, such as downloading from a remote source.
+    /// </remarks>
     public bool Installed { get; }
-    
+
+    /// <summary>
+    /// Gets or sets the index of the plugin in the remote repository or database.
+    /// </summary>
+    /// <remarks>
+    /// The RemoteIndex indicates the position or identifier of the plugin in a remote structure,
+    /// such as a repository or service listing. This property can be null if the plugin does not
+    /// have a corresponding entry in the remote system.
+    /// </remarks>
     public int? RemoteIndex { get; }
     
 }
