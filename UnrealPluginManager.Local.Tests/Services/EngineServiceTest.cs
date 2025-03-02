@@ -9,7 +9,6 @@ using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Services;
@@ -217,8 +216,8 @@ public partial class EngineServiceTest {
                 .ToListAsync();
         
         Assert.That(pluginVersions, Has.Count.EqualTo(3));
-        Assert.That(pluginVersions, Does.Contain(new SelectedVersion("MyPlugin", new SemVersion(1, 0, 0))));
-        Assert.That(pluginVersions, Does.Contain(new SelectedVersion("SecondPlugin", new SemVersion(2, 4, 3))));
-        Assert.That(pluginVersions, Does.Contain(new SelectedVersion("AnotherPlugin", new SemVersion(1, 1, 3))));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("MyPlugin", new SemVersion(1, 0, 0))));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("SecondPlugin", new SemVersion(2, 4, 3))));
+        Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("AnotherPlugin", new SemVersion(1, 1, 3))));
     }
 }

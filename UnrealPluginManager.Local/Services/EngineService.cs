@@ -7,7 +7,6 @@ using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
 
@@ -79,14 +78,14 @@ public partial class EngineService : IEngineService {
     }
 
     /// <inheritdoc />
-    public async IAsyncEnumerable<SelectedVersion> GetInstalledPlugins(string? engineVersion) {
+    public async IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var packageDirectory = _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory);
         foreach (var file in packageDirectory.EnumerateFiles("*.uplugin", SearchOption.AllDirectories)) {
             await using var reader = file.OpenRead();
             var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
             ArgumentNullException.ThrowIfNull(pluginDescriptor);
-            yield return new SelectedVersion(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName);
+            yield return new InstalledPlugin(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName);
         }
     }
 
