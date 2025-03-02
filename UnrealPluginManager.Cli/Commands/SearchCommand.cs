@@ -89,7 +89,7 @@ public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommand
     }
 
     private int ReportPlugins(IEnumerable<PluginOverview> plugins) {
-        bool hasResult = false;
+        var hasResult = false;
         foreach (var plugin in plugins) {
             hasResult = true;
             _console.WriteLine(plugin.Name);

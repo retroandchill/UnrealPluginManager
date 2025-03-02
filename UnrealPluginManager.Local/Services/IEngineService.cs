@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using LanguageExt;
 using Semver;
 using UnrealPluginManager.Local.Model.Engine;
 
@@ -29,6 +30,8 @@ public interface IEngineService {
     /// A task representing the asynchronous operation with an integer exit code indicating the result of the build process.
     /// </returns>
     public Task<int> BuildPlugin(IFileInfo pluginFile, string? engineVersion);
+    
+    public Task<Option<SemVersion>> GetInstalledPluginVersion(string pluginName, string? engineVersion);
 
     /// <summary>
     /// Installs the specified plugin for a given Unreal Engine version.

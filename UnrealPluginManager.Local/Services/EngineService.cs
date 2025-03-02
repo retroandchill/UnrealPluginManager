@@ -2,8 +2,10 @@
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
@@ -57,6 +59,21 @@ public partial class EngineService : IEngineService {
         
         await _pluginService.SubmitPlugin(intermediateFolder, installedEngine.Version.ToString());
         return 0;
+    }
+
+    public async Task<Option<SemVersion>> GetInstalledPluginVersion(string pluginName, string? engineVersion) {
+        var installedEngine = GetInstalledEngine(engineVersion);
+        var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
+        var upluginFile = Path.Join(installDirectory, $"{pluginName}.uplugin");
+        if (!_fileSystem.Directory.Exists(installDirectory) || !_fileSystem.File.Exists(upluginFile)) {
+            return Option<SemVersion>.None;
+        }
+        
+        var upluginInfo = _fileSystem.FileInfo.New(upluginFile);
+        await using var reader = upluginInfo.OpenRead();
+        var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
+        ArgumentNullException.ThrowIfNull(pluginDescriptor);
+        return pluginDescriptor.VersionName;
     }
 
     /// <inheritdoc />
