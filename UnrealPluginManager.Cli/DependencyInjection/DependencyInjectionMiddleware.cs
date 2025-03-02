@@ -26,7 +26,7 @@ public static class DependencyInjectionMiddleware {
     /// <param name="builder">The <see cref="CommandLineBuilder"/> instance to apply the dependency injection middleware to.</param>
     /// <param name="configureServices">An action to configure the services using the provided <see cref="InvocationContext"/> and <see cref="ServiceCollection"/>.</param>
     /// <returns>The modified <see cref="CommandLineBuilder"/> instance, allowing further configuration.</returns>
-    public static CommandLineBuilder UseDependencyInjection(this CommandLineBuilder builder, Action<InvocationContext, ServiceCollection> configureServices) {
+    private static CommandLineBuilder UseDependencyInjection(this CommandLineBuilder builder, Action<InvocationContext, ServiceCollection> configureServices) {
         return builder.AddMiddleware(async (context, next) => {
             var services = new ServiceCollection();
             configureServices(context, services);

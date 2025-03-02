@@ -84,6 +84,10 @@ public static class OptionUtils {
         return value ?? Option<T>.None;
     }
 
+    public static Task<Option<T>> ToOptionAsync<T>(this Task<T?> value) {
+        return value.Map(ToOption);
+    }
+
     /// <summary>
     /// Executes pattern matching logic on a nullable class type <see cref="T"/> value and produces a result of type <see cref="TResult"/>.
     /// </summary>

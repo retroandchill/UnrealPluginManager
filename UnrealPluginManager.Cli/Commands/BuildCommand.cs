@@ -1,7 +1,8 @@
 ﻿using System.CodeDom.Compiler;
 using System.CommandLine;
 using System.IO.Abstractions;
-using UnrealPluginManager.Cli.Services;
+using JetBrains.Annotations;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -42,6 +43,7 @@ public class BuildCommand : Command<BuildCommandOptions, BuildCommandOptionsHand
 /// needed to execute the build process for an Unreal Engine plugin. These options include the source
 /// plugin directory and optionally a target engine version.
 /// </remarks>
+[UsedImplicitly]
 public class BuildCommandOptions : ICommandOptions {
     /// <summary>
     /// Gets or sets the path to the input plugin directory for the build process.
@@ -72,6 +74,7 @@ public class BuildCommandOptions : ICommandOptions {
 /// target engine version.
 /// </remarks>
 [AutoConstructor]
+[UsedImplicitly]
 public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
     private readonly IFileSystem _fileSystem;
     private readonly IEngineService _engineService;
