@@ -3,11 +3,11 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Cli.Commands;
-using UnrealPluginManager.Cli.Database;
 using UnrealPluginManager.Cli.DependencyInjection;
-using UnrealPluginManager.Cli.Utils;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Database;
+using UnrealPluginManager.Local.Utils;
 
 var rootCommand = new RootCommand {
     new VersionsCommand(),
@@ -23,7 +23,7 @@ var builder = new CommandLineBuilder(rootCommand)
         services.AddSystemAbstractions()
             .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
             .AddCoreServices()
-            .AddCliServices()
+            .AddLocalServices()
             .AddApis();
     });
     

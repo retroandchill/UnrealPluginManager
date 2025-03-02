@@ -1,9 +1,9 @@
 ﻿using System.CommandLine;
+using System.CommandLine.IO;
+using JetBrains.Annotations;
+using LanguageExt;
 using Semver;
-using UnrealPluginManager.Cli.Services;
-using UnrealPluginManager.Core.Mappers;
-using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -34,21 +34,29 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
     public InstallCommand() : base("install", "Install the specified plugin into the engine") {
         var inputArg = new Argument<string>("input", "The name of plugin to install");
         AddArgument(inputArg);
-        var versionOption = new Option<SemVersionRange>(aliases: ["--version", "-v"],
-            description: "The version of the plugin to install",
-            parseArgument: r =>
-                r.Tokens.Count == 1 ? SemVersionRange.Parse(r.Tokens[0].Value) : SemVersionRange.AllRelease) {
-            IsRequired = false,
+        var versionOption = new System.CommandLine.Option<SemVersionRange>(aliases: ["--version", "-v"],
+                                                                           description:
+                                                                           "The version of the plugin to install",
+                                                                           parseArgument: r =>
+                                                                                   r.Tokens.Count == 1
+                                                                                           ? SemVersionRange
+                                                                                                   .Parse(r.Tokens[0]
+                                                                                                           .Value)
+                                                                                           : SemVersionRange
+                                                                                                   .AllRelease) {
+                IsRequired = false,
         };
         AddOption(versionOption);
-        AddOption(new Option<string>(["--engine-version", "-e"], "The version of the engine to build the plugin for") {
-            IsRequired = false,
+        AddOption(new System.CommandLine.Option<string>(["--engine-version", "-e"],
+                                                        "The version of the engine to build the plugin for") {
+                IsRequired = false,
         });
-        
+
         AddValidator(result => {
             var resultArg = result.GetValueForArgument(inputArg);
             const StringComparison ignore = StringComparison.InvariantCultureIgnoreCase;
-            if ((resultArg.EndsWith(".uplugin", ignore) || resultArg.EndsWith(".uproject")) && result.GetValueForOption(versionOption) is not null) {
+            if ((resultArg.EndsWith(".uplugin", ignore) || resultArg.EndsWith(".uproject")) &&
+                result.GetValueForOption(versionOption) is not null) {
                 result.ErrorMessage = "You cannot specify a version when installing from a project or plugin file.";
             }
         });
@@ -64,6 +72,7 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
 /// the version range of the plugin, and the target Unreal Engine version. These options
 /// are used to customize and validate the installation process.
 /// </remarks>
+[UsedImplicitly]
 public class InstallCommandOptions : ICommandOptions {
     /// <summary>
     /// Gets or sets the input value representing the name of the plugin to be installed.
@@ -106,11 +115,21 @@ public class InstallCommandOptions : ICommandOptions {
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
 [AutoConstructor]
+[UsedImplicitly]
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
+    private readonly IConsole _console;
     private readonly IEngineService _engineService;
 
     /// <inheritdoc />
     public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-        return await _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
+        var existingVersion = await _engineService.GetInstalledPluginVersion(options.Input, options.EngineVersion)
+                .Map(x => x.Where(y => options.Version.Contains(y)));
+        return await existingVersion
+                .Match(v => {
+                           _console.Out.WriteLine($"Installed version {v} already satisfies the version requirement.");
+                           return Task.FromResult(0);
+                       },
+                       () => _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion,
+                                                          ["Win64"]));
     }
 }

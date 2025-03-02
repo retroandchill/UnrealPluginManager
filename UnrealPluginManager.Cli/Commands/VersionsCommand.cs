@@ -1,8 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
-using UnrealPluginManager.Cli.Services;
+using JetBrains.Annotations;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -26,6 +27,7 @@ public class VersionsCommand()
 /// It enables the command to process user-provided data or defaults when listing all installed versions of the Unreal Engine.
 /// VersionsCommandOptions acts as a data contract for the command, ensuring proper parameter handling during execution.
 /// </remarks>
+[UsedImplicitly]
 public class VersionsCommandOptions : ICommandOptions;
 
 /// <summary>
@@ -39,6 +41,7 @@ public class VersionsCommandOptions : ICommandOptions;
 /// the console for displaying the results.
 /// </remarks>
 [AutoConstructor]
+[UsedImplicitly]
 public partial class VersionsCommandOptionsHandler : ICommandOptionsHandler<VersionsCommandOptions> {
     private readonly IConsole _console;
     private readonly IEnvironment _environment;

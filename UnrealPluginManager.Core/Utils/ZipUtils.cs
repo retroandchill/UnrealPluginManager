@@ -64,10 +64,10 @@ public static class ZipUtils {
             await CreateZipEntryFromPath(fileSystem, targetZip, directory, directory.Parent.FullName, prefix);
         }
 
-        foreach (var file in files.Select(x => x.FullName)) {
-            var entry = targetZip.CreateEntry(file);
+        foreach (var file in files) {
+            var entry = targetZip.CreateEntry(file.Name);
             await using var entryStream = entry.Open();
-            await using var sourceFile = fileSystem.FileStream.New(file, FileMode.Open);
+            await using var sourceFile = fileSystem.FileStream.New(file.FullName, FileMode.Open);
             await sourceFile.CopyToAsync(entryStream);
         }
         
@@ -115,6 +115,10 @@ public static class ZipUtils {
             if (entry.FullName.EndsWith('/')) {
                 fileSystem.Directory.CreateDirectory(fullPath);
             } else {
+                var directory = fileSystem.Directory.GetParent(fullPath);
+                if (directory is not null) {
+                    fileSystem.Directory.CreateDirectory(directory.FullName);
+                }
                 await using var fileStream = fileSystem.FileStream.New(fullPath, FileMode.Create);
                 await entry.Open().CopyToAsync(fileStream);
             }
