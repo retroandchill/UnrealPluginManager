@@ -40,4 +40,19 @@ public interface IPluginManagementService {
   /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
   /// </returns>
   Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
+
+  /// <summary>
+  /// Resolves potential dependencies for a given root dependency chain node, retrieving both resolved
+  /// and unresolved dependencies based on current installations and available remote data.
+  /// </summary>
+  /// <param name="root">
+  ///   The root of the dependency chain used as the base node to resolve dependencies. This node provides
+  ///   information such as the plugin name, version, and its existing dependencies.
+  /// </param>
+  /// <param name="engineVersion"></param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, contains a <see cref="DependencyManifest"/>
+  /// that includes resolved dependencies as a dictionary and a set of unresolved dependencies.
+  /// </returns>
+  Task<DependencyManifest> GetPossibleDependencies(IDependencyChainNode root, string? engineVersion);
 }

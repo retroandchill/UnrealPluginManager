@@ -54,8 +54,8 @@ public interface IEngineService {
   /// Retrieves a list of installed plugins for a specified Unreal Engine version.
   /// </summary>
   /// <param name="engineVersion">
-  /// The version of the Unreal Engine for which to retrieve the installed plugins.
-  /// If null, the default engine version will be used.
+  ///   The version of the Unreal Engine for which to retrieve the installed plugins.
+  ///   If null, the default engine version will be used.
   /// </param>
   /// <returns>
   /// An asynchronous enumerable of <see cref="InstalledPlugin"/> objects representing the plugins installed for the specified engine version.
