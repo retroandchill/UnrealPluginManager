@@ -78,7 +78,7 @@ public partial class EngineService : IEngineService {
     }
 
     /// <inheritdoc />
-    public async IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion) {
+    public async IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion = null) {
         var installedEngine = GetInstalledEngine(engineVersion);
         var packageDirectory = _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory);
         foreach (var file in packageDirectory.EnumerateFiles("*.uplugin", SearchOption.AllDirectories)) {

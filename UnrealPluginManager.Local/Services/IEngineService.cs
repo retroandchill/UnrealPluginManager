@@ -60,7 +60,7 @@ public interface IEngineService {
     /// <returns>
     /// An asynchronous enumerable of <see cref="InstalledPlugin"/> objects representing the plugins installed for the specified engine version.
     /// </returns>
-    public IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion);
+    public IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion = null);
 
     /// <summary>
     /// Installs the specified plugin for a given Unreal Engine version.

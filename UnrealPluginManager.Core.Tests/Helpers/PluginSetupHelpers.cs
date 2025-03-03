@@ -5,7 +5,7 @@ using UnrealPluginManager.Core.Services;
 namespace UnrealPluginManager.Core.Tests.Helpers;
 
 public static class PluginSetupHelpers {
-    internal static async Task SetupVersionResolutionTree(this IPluginService pluginService) {
+    public static async Task SetupVersionResolutionTree(this IPluginService pluginService) {
         await pluginService.AddPlugin("App", new PluginDescriptor {
             Version = 1,
             VersionName = new SemVersion(1, 0, 0),
@@ -182,4 +182,5 @@ public static class PluginSetupHelpers {
             VersionName = new SemVersion(4, 0, 0),
         });
     }
+    
 }
