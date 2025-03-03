@@ -14,11 +14,11 @@ namespace UnrealPluginManager.Local.Database;
 /// storage to ensure proper setup of the SQLite database context.
 /// </remarks>
 public class LocalUnrealPluginManagerContextFactory : IDesignTimeDbContextFactory<LocalUnrealPluginManagerContext> {
-    /// <inheritdoc />
-    public LocalUnrealPluginManagerContext CreateDbContext(string[] args) {
-        var filesystem = new FileSystem();
-        var environment = new SystemEnvironment();
-        var storageService = new LocalStorageService(environment, filesystem);
-        return new LocalUnrealPluginManagerContext(storageService, filesystem);
-    }
+  /// <inheritdoc />
+  public LocalUnrealPluginManagerContext CreateDbContext(string[] args) {
+    var filesystem = new FileSystem();
+    var environment = new SystemEnvironment();
+    var storageService = new LocalStorageService(environment, filesystem);
+    return new LocalUnrealPluginManagerContext(storageService, filesystem);
+  }
 }

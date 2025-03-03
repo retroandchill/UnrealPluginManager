@@ -1,5 +1,5 @@
 ﻿import {PluginOverview} from "../api";
-import { Component } from 'react';
+import {Component} from 'react';
 import Icon128 from "../assets/icon128.png";
 import {iconsPath} from "../config/Globals.ts";
 
@@ -20,35 +20,35 @@ export type PluginCallback = (plugin: PluginOverview) => void;
  * that interacts with a plugin functionality.
  */
 interface PluginButtonProps {
-    /**
-     * Represents the main plugin instance which encapsulates a specific functionality or feature.
-     * This variable is a reference to the PluginOverview instance that handles initialization,
-     * configuration, and the execution of associated plugin tasks.
-     *
-     * Typically, the `plugin` variable provides methods and properties for managing
-     * the lifecycle of the plugin, such as loading, enabling, disabling, or interacting
-     * with its functionality.
-     */
-    plugin: PluginOverview;
-    
-    /**
-     * Callback function to handle click events.
-     *
-     * The `onClick` variable is expected to store a reference to a function
-     * that is invoked when a corresponding user interaction occurs, typically
-     * a mouse or touch click event. It is used to define custom behavior
-     * in response to the event.
-     *
-     * This function is commonly passed as a parameter or directly set as
-     * a property on a component or widget that supports event handling.
-     *
-     * Type: `PluginCallback`.
-     */
-    onClick?: PluginCallback;
+  /**
+   * Represents the main plugin instance which encapsulates a specific functionality or feature.
+   * This variable is a reference to the PluginOverview instance that handles initialization,
+   * configuration, and the execution of associated plugin tasks.
+   *
+   * Typically, the `plugin` variable provides methods and properties for managing
+   * the lifecycle of the plugin, such as loading, enabling, disabling, or interacting
+   * with its functionality.
+   */
+  plugin: PluginOverview;
+
+  /**
+   * Callback function to handle click events.
+   *
+   * The `onClick` variable is expected to store a reference to a function
+   * that is invoked when a corresponding user interaction occurs, typically
+   * a mouse or touch click event. It is used to define custom behavior
+   * in response to the event.
+   *
+   * This function is commonly passed as a parameter or directly set as
+   * a property on a component or widget that supports event handling.
+   *
+   * Type: `PluginCallback`.
+   */
+  onClick?: PluginCallback;
 }
 
 interface PluginButtonState {
-    icon: string;
+  icon: string;
 }
 
 /**
@@ -61,34 +61,38 @@ interface PluginButtonState {
  * @template PluginButtonProps, PluginButtonState
  */
 export class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
-    
-    /**
-     * Constructs a new instance of the PluginButton.
-     *
-     * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.=
-     */
-    constructor(props: PluginButtonProps) {
-        super(props)
-        this.state = { icon: Icon128 }
-    }
 
-    componentDidMount() {
-        this.setState({icon: `${iconsPath}/${this.props.plugin.name}`})
-    }
-    
-    render() {
-        let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
+  /**
+   * Constructs a new instance of the PluginButton.
+   *
+   * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.=
+   */
+  constructor(props: PluginButtonProps) {
+    super(props)
+    this.state = {icon: Icon128}
+  }
 
-        return <button onClick={() => { if (this.props.onClick) { this.props.onClick(this.props.plugin); } }}>
-            <img  src={this.state.icon} alt="Plugin Icon"/>
-            <header style={{ textAlign: 'left', padding: 0, margin: 0, }}>
-                <h2>{this.props.plugin.name}</h2>
-            </header>
-            <ul style={{ listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
-                <li><b>Latest Release:</b> {latestVersion.version}</li>
-                <li><b>Author:</b> {this.props.plugin.authorName ? `${this.props.plugin.authorName}` : 'Unknown'}</li>
-            </ul>
-        </button>
-    }
-    
+  componentDidMount() {
+    this.setState({icon: `${iconsPath}/${this.props.plugin.name}`})
+  }
+
+  render() {
+    let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
+
+    return <button onClick={() => {
+      if (this.props.onClick) {
+        this.props.onClick(this.props.plugin);
+      }
+    }}>
+      <img src={this.state.icon} alt="Plugin Icon"/>
+      <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
+        <h2>{this.props.plugin.name}</h2>
+      </header>
+      <ul style={{listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
+        <li><b>Latest Release:</b> {latestVersion.version}</li>
+        <li><b>Author:</b> {this.props.plugin.authorName ? `${this.props.plugin.authorName}` : 'Unknown'}</li>
+      </ul>
+    </button>
+  }
+
 }

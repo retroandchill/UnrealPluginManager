@@ -10,11 +10,11 @@ namespace UnrealPluginManager.Local.Services;
 /// on platforms that adhere to the POSIX standard.
 /// </remarks>
 public class PosixEnginePlatformService : IEnginePlatformService {
-    /// <inheritdoc />
-    public string ScriptFileExtension => "sh";
+  /// <inheritdoc />
+  public string ScriptFileExtension => "sh";
 
-    /// <inheritdoc />
-    public List<InstalledEngine> GetInstalledEngines() {
-        throw new NotImplementedException();
-    }
+  /// <inheritdoc />
+  public List<InstalledEngine> GetInstalledEngines() {
+    throw new NotImplementedException();
+  }
 }

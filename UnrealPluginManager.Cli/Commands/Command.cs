@@ -23,17 +23,17 @@ public interface ICommandOptions;
 /// through the <c>HandleAsync</c> method.
 /// </remarks>
 public interface ICommandOptionsHandler<in TOptions> {
-    /// <summary>
-    /// Handles the specified command options asynchronously.
-    /// </summary>
-    /// <typeparam name="TOptions">The type of the command options to be processed.</typeparam>
-    /// <param name="options">The command options to handle.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation, returning an integer result
-    /// where 0 typically indicates success, and other values may indicate errors or specific statuses.
-    /// </returns>
-    Task<int> HandleAsync(TOptions options, CancellationToken cancellationToken);
+  /// <summary>
+  /// Handles the specified command options asynchronously.
+  /// </summary>
+  /// <typeparam name="TOptions">The type of the command options to be processed.</typeparam>
+  /// <param name="options">The command options to handle.</param>
+  /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+  /// <returns>
+  /// A task that represents the asynchronous operation, returning an integer result
+  /// where 0 typically indicates success, and other values may indicate errors or specific statuses.
+  /// </returns>
+  Task<int> HandleAsync(TOptions options, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -55,25 +55,25 @@ public interface ICommandOptionsHandler<in TOptions> {
 public abstract class Command<TOptions, TOptionsHandler> : Command
     where TOptions : class, ICommandOptions
     where TOptionsHandler : ICommandOptionsHandler<TOptions> {
-    /// <summary>
-    /// Serves as a base class for defining commands in the CLI tool, supporting specific option handlers
-    /// for processing command-line arguments and related operations.
-    /// </summary>
-    /// <typeparam name="TOptions">The type of options this command processes, adhering to the <see cref="ICommandOptions"/> interface.</typeparam>
-    /// <typeparam name="TOptionsHandler">The type of handler used to process the provided options,
-    /// implementing <see cref="ICommandOptionsHandler{TOptions}"/>.</typeparam>
-    /// <remarks>
-    /// This abstract class simplifies the process of setting up commands by automatically configuring
-    /// a handler that binds the provided options and invokes their corresponding operations through
-    /// the specified handler implementation.
-    /// </remarks>
-    protected Command(string name, string description) : base(name, description) {
-        Handler = CommandHandler.Create<TOptions, IServiceProvider, CancellationToken>(HandleOptions);
-    }
-    
-    private static async Task<int> HandleOptions(TOptions options, IServiceProvider serviceProvider,
-        CancellationToken cancellationToken) {
-        var handler = ActivatorUtilities.CreateInstance<TOptionsHandler>(serviceProvider);
-        return await handler.HandleAsync(options, cancellationToken);
-    }
+  /// <summary>
+  /// Serves as a base class for defining commands in the CLI tool, supporting specific option handlers
+  /// for processing command-line arguments and related operations.
+  /// </summary>
+  /// <typeparam name="TOptions">The type of options this command processes, adhering to the <see cref="ICommandOptions"/> interface.</typeparam>
+  /// <typeparam name="TOptionsHandler">The type of handler used to process the provided options,
+  /// implementing <see cref="ICommandOptionsHandler{TOptions}"/>.</typeparam>
+  /// <remarks>
+  /// This abstract class simplifies the process of setting up commands by automatically configuring
+  /// a handler that binds the provided options and invokes their corresponding operations through
+  /// the specified handler implementation.
+  /// </remarks>
+  protected Command(string name, string description) : base(name, description) {
+    Handler = CommandHandler.Create<TOptions, IServiceProvider, CancellationToken>(HandleOptions);
+  }
+
+  private static async Task<int> HandleOptions(TOptions options, IServiceProvider serviceProvider,
+                                               CancellationToken cancellationToken) {
+    var handler = ActivatorUtilities.CreateInstance<TOptionsHandler>(serviceProvider);
+    return await handler.HandleAsync(options, cancellationToken);
+  }
 }

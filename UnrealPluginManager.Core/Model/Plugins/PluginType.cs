@@ -11,18 +11,18 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// </remarks>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PluginType {
-    /// <summary>
-    /// Represents plugins that are integral to the engine.
-    /// </summary>
-    Engine,
+  /// <summary>
+  /// Represents plugins that are integral to the engine.
+  /// </summary>
+  Engine,
 
-    /// <summary>
-    /// Refers to plugins that are distributed along with a project or framework.
-    /// </summary>
-    Provided,
+  /// <summary>
+  /// Refers to plugins that are distributed along with a project or framework.
+  /// </summary>
+  Provided,
 
-    /// <summary>
-    /// Represents third-party or user-added plugins.
-    /// </summary>
-    External
+  /// <summary>
+  /// Represents third-party or user-added plugins.
+  /// </summary>
+  External
 }

@@ -14,12 +14,10 @@ namespace UnrealPluginManager.Server.Database;
 /// This context is used for managing plugin data, including uploads and metadata, within a cloud-based environment.
 /// </remarks>
 public class CloudUnrealPluginManagerContext(IFileSystem filesystem) : UnrealPluginManagerContext(filesystem) {
-
-    /// <inheritdoc />
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        optionsBuilder.UseSqlite("Filename=dev.sqlite", b =>
-            b.MinBatchSize(1)
-                .MaxBatchSize(100));
-    }
-    
+  /// <inheritdoc />
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+    optionsBuilder.UseSqlite("Filename=dev.sqlite", b =>
+                                 b.MinBatchSize(1)
+                                     .MaxBatchSize(100));
+  }
 }

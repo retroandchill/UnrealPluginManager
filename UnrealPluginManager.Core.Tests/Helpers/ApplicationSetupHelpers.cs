@@ -16,18 +16,18 @@ namespace UnrealPluginManager.Core.Tests.Helpers;
 /// mock file systems and database contexts, in an IServiceCollection.
 /// </summary>
 public static class ApplicationSetupHelpers {
-    /// <summary>
-    /// Configures the service collection with mock data providers for use in testing environments.
-    /// This method replaces default implementations with mock services such as a mock file system
-    /// and test database context for UnrealPluginManager-related features.
-    /// </summary>
-    /// <param name="services">The IServiceCollection instance to configure with mock services.</param>
-    /// <returns>The updated IServiceCollection with the mock data providers configured.</returns>
-    public static IServiceCollection SetUpMockDataProviders(this IServiceCollection services) {
-        services.AddSystemAbstractions()
-            .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
-        services.Remove(services.Single(x => x.ServiceType == typeof(IFileSystem)));
-        services.AddSingleton<IFileSystem, MockFileSystem>();
-        return services;
-    }
+  /// <summary>
+  /// Configures the service collection with mock data providers for use in testing environments.
+  /// This method replaces default implementations with mock services such as a mock file system
+  /// and test database context for UnrealPluginManager-related features.
+  /// </summary>
+  /// <param name="services">The IServiceCollection instance to configure with mock services.</param>
+  /// <returns>The updated IServiceCollection with the mock data providers configured.</returns>
+  public static IServiceCollection SetUpMockDataProviders(this IServiceCollection services) {
+    services.AddSystemAbstractions()
+        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
+    services.Remove(services.Single(x => x.ServiceType == typeof(IFileSystem)));
+    services.AddSingleton<IFileSystem, MockFileSystem>();
+    return services;
+  }
 }

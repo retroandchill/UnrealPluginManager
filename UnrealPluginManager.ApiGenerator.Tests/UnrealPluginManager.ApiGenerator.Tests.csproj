@@ -21,15 +21,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.AspNetCore">
-        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.0\Microsoft.AspNetCore.dll</HintPath>
-      </Reference>
+        <Reference Include="Microsoft.AspNetCore">
+            <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.0\Microsoft.AspNetCore.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj" />
-      <ProjectReference Include="..\UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj" />
-      <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj" />
+        <ProjectReference Include="..\UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj"/>
+        <ProjectReference Include="..\UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj"/>
+        <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
     </ItemGroup>
 
 </Project>

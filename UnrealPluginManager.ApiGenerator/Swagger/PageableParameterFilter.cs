@@ -21,49 +21,49 @@ namespace UnrealPluginManager.ApiGenerator.Swagger;
 /// </example>
 /// <seealso cref="Swashbuckle.AspNetCore.SwaggerGen.IOperationFilter" />
 public class PageableParameterFilter : IOperationFilter {
-
-    /// <inheritdoc />
-    public void Apply(OpenApiOperation operation, OperationFilterContext context) {
-        var pageableValue = context.MethodInfo.GetParameters()
-            .FirstOrDefault(p => p.ParameterType == typeof(Pageable));
-        if (pageableValue is null) {
-            return;
-        }
-        
-        var paramNames = typeof(Pageable).GetProperties()
-            .Select(p => p.Name)
-            .ToHashSet();
-        var toRemove = operation.Parameters
-            .Where(p => paramNames.Contains(p.Name))
-            .ToList();
-
-        foreach (var index in toRemove) {
-            operation.Parameters.Remove(index);
-        }
-        operation.Parameters.Add(new OpenApiParameter {
-            Name = "page",
-            In = ParameterLocation.Query,
-            Description = "The page number to retrieve.",
-            Required = false,
-            Schema = new OpenApiSchema {
-                Type = "integer",
-                Format = "int32",
-                Default = new OpenApiInteger(1),
-                Minimum = 1
-            }
-        });
-        operation.Parameters.Add(new OpenApiParameter {
-            Name = "size",
-            In = ParameterLocation.Query,
-            Description = "The number of items to retrieve per page.",
-            Required = false,
-            Schema = new OpenApiSchema {
-                Type = "integer",
-                Format = "int32",
-                Default = new OpenApiInteger(10),
-                Minimum = 1,
-                Maximum = 100
-            }
-        });
+  /// <inheritdoc />
+  public void Apply(OpenApiOperation operation, OperationFilterContext context) {
+    var pageableValue = context.MethodInfo.GetParameters()
+        .FirstOrDefault(p => p.ParameterType == typeof(Pageable));
+    if (pageableValue is null) {
+      return;
     }
+
+    var paramNames = typeof(Pageable).GetProperties()
+        .Select(p => p.Name)
+        .ToHashSet();
+    var toRemove = operation.Parameters
+        .Where(p => paramNames.Contains(p.Name))
+        .ToList();
+
+    foreach (var index in toRemove) {
+      operation.Parameters.Remove(index);
+    }
+
+    operation.Parameters.Add(new OpenApiParameter {
+        Name = "page",
+        In = ParameterLocation.Query,
+        Description = "The page number to retrieve.",
+        Required = false,
+        Schema = new OpenApiSchema {
+            Type = "integer",
+            Format = "int32",
+            Default = new OpenApiInteger(1),
+            Minimum = 1
+        }
+    });
+    operation.Parameters.Add(new OpenApiParameter {
+        Name = "size",
+        In = ParameterLocation.Query,
+        Description = "The number of items to retrieve per page.",
+        Required = false,
+        Schema = new OpenApiSchema {
+            Type = "integer",
+            Format = "int32",
+            Default = new OpenApiInteger(10),
+            Minimum = 1,
+            Maximum = 100
+        }
+    });
+  }
 }

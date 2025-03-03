@@ -7,41 +7,41 @@ namespace UnrealPluginManager.Core.Solver;
 /// Represents a logical expression interface that defines methods for evaluating and manipulating logical expressions.
 /// </summary>
 public interface IExpression {
-    /// <summary>
-    /// Retrieves the set of free variables contained within the logical expression.
-    /// A free variable is one that has not been bound or replaced with a specific value.
-    /// </summary>
-    /// <returns>
-    /// An enumerable collection of variable names that are free within the expression.
-    /// If no free variables exist, an empty collection is returned.
-    /// </returns>
-    IEnumerable<SelectedVersion> Free();
+  /// <summary>
+  /// Retrieves the set of free variables contained within the logical expression.
+  /// A free variable is one that has not been bound or replaced with a specific value.
+  /// </summary>
+  /// <returns>
+  /// An enumerable collection of variable names that are free within the expression.
+  /// If no free variables exist, an empty collection is returned.
+  /// </returns>
+  IEnumerable<SelectedVersion> Free();
 
-    /// <summary>
-    /// Evaluates the logical expression to determine its truth value.
-    /// </summary>
-    /// <returns>
-    /// A boolean value indicating the result of the evaluation.
-    /// Throws an exception if the expression contains free variables that cannot be evaluated.
-    /// </returns>
-    bool Evaluate();
+  /// <summary>
+  /// Evaluates the logical expression to determine its truth value.
+  /// </summary>
+  /// <returns>
+  /// A boolean value indicating the result of the evaluation.
+  /// Throws an exception if the expression contains free variables that cannot be evaluated.
+  /// </returns>
+  bool Evaluate();
 
-    /// <summary>
-    /// Replaces every occurrence of a specified variable within the logical expression
-    /// with the corresponding boolean value.
-    /// </summary>
-    /// <param name="varName">
-    /// The name of the variable to be replaced in the expression.
-    /// </param>
-    /// <param name="varValue">
-    /// The boolean value that will replace the occurrences of the specified variable.
-    /// </param>
-    /// <returns>
-    /// A new logical expression where all occurrences of the specified variable are replaced
-    /// with the provided boolean value. If the variable is not present in the expression, the
-    /// original expression is returned unchanged.
-    /// </returns>
-    IExpression Replace(SelectedVersion varName, bool varValue);
+  /// <summary>
+  /// Replaces every occurrence of a specified variable within the logical expression
+  /// with the corresponding boolean value.
+  /// </summary>
+  /// <param name="varName">
+  /// The name of the variable to be replaced in the expression.
+  /// </param>
+  /// <param name="varValue">
+  /// The boolean value that will replace the occurrences of the specified variable.
+  /// </param>
+  /// <returns>
+  /// A new logical expression where all occurrences of the specified variable are replaced
+  /// with the provided boolean value. If the variable is not present in the expression, the
+  /// original expression is returned unchanged.
+  /// </returns>
+  IExpression Replace(SelectedVersion varName, bool varValue);
 }
 
 /// <summary>
@@ -49,135 +49,135 @@ public interface IExpression {
 /// This expression encapsulates a constant boolean value which can be evaluated directly.
 /// </summary>
 public record BoolExpression(bool Value) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return [];
-    }
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return [];
+  }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        return Value;
-    }
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    return Value;
+  }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        return new BoolExpression(Value);
-    }
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    return new BoolExpression(Value);
+  }
 
-    /// <inheritdoc />
-    public override string ToString() {
-        return Value.ToString();
-    }
+  /// <inheritdoc />
+  public override string ToString() {
+    return Value.ToString();
+  }
 }
 
 /// <summary>
 /// Represents a variable in a logical expression. A variable holds a name and can be replaced or evaluated within the expression context.
 /// </summary>
 public record Var(SelectedVersion Selected) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return [Selected];
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return [Selected];
+  }
+
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    throw new NotSupportedException($"The variable {Selected} has not been replaced");
+  }
+
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    if (Selected == varName) {
+      return new BoolExpression(varValue);
     }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        throw new NotSupportedException($"The variable {Selected} has not been replaced");
+    // Plugin versions are mutually exclusive, so we want to assign all others with the same name to false.
+    // This speeds up the algorithm a bit
+    if (Selected.Name == varName.Name) {
+      return new BoolExpression(false);
     }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        if (Selected == varName) {
-            return new BoolExpression(varValue);
-        }
-        
-        // Plugin versions are mutually exclusive, so we want to assign all others with the same name to false.
-        // This speeds up the algorithm a bit
-        if (Selected.Name == varName.Name) {
-            return new BoolExpression(false);
-        }
+    return new Var(Selected);
+  }
 
-        return new Var(Selected);
-    }
-
-    /// <inheritdoc />
-    public override string ToString() {
-        return $"{Selected.Name}/{Selected.Version}";
-    }
+  /// <inheritdoc />
+  public override string ToString() {
+    return $"{Selected.Name}/{Selected.Version}";
+  }
 }
 
 /// <summary>
 /// Represents a logical NOT operation in a boolean expression. This expression negates the result of its underlying expression.
 /// </summary>
 public record Not(IExpression Expression) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return Expression.Free();
-    }
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return Expression.Free();
+  }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        return !Expression.Evaluate();
-    }
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    return !Expression.Evaluate();
+  }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        return new Not(Expression.Replace(varName, varValue));
-    }
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    return new Not(Expression.Replace(varName, varValue));
+  }
 
-    /// <inheritdoc />
-    public override string ToString() {
-        return $"!{Expression}";
-    }
+  /// <inheritdoc />
+  public override string ToString() {
+    return $"!{Expression}";
+  }
 }
 
 /// <summary>
 /// Represents a logical "AND" operation applied to a collection of logical expressions.
 /// </summary>
 public record And(IEnumerable<IExpression> Expressions) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
-    }
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
+  }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        return Expressions.All(e => e.Evaluate());
-    }
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    return Expressions.All(e => e.Evaluate());
+  }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        return new And(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
-    }
-    
-    /// <inheritdoc />
-    public override string ToString() {
-        return $"({string.Join(" && ", Expressions.Select(x => x.ToString()))})";
-    }
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    return new And(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
+  }
+
+  /// <inheritdoc />
+  public override string ToString() {
+    return $"({string.Join(" && ", Expressions.Select(x => x.ToString()))})";
+  }
 }
 
 /// <summary>
 /// Represents a logical expression that evaluates to true if any of its contained expressions evaluate to true.
 /// </summary>
 public record Or(IEnumerable<IExpression> Expressions) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
-    }
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
+  }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        return Expressions.Any(e => e.Evaluate());
-    }
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    return Expressions.Any(e => e.Evaluate());
+  }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        return new Or(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
-    }
-    
-    /// <inheritdoc />
-    public override string ToString() {
-        return $"({string.Join(" || ", Expressions.Select(x => x.ToString()))})";
-    }
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    return new Or(Expressions.Select(x => x.Replace(varName, varValue)).ToList());
+  }
+
+  /// <inheritdoc />
+  public override string ToString() {
+    return $"({string.Join(" || ", Expressions.Select(x => x.ToString()))})";
+  }
 }
 
 /// <summary>
@@ -189,23 +189,23 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
 /// to retrieve free variables and replace variables within the expression.
 /// </remarks>
 public record Impl(IExpression P, IExpression Q) : IExpression {
-    /// <inheritdoc/>
-    public IEnumerable<SelectedVersion> Free() {
-        return P.Free().Concat(Q.Free()).ToImmutableSortedSet();
-    }
+  /// <inheritdoc/>
+  public IEnumerable<SelectedVersion> Free() {
+    return P.Free().Concat(Q.Free()).ToImmutableSortedSet();
+  }
 
-    /// <inheritdoc/>
-    public bool Evaluate() {
-        return !P.Evaluate() || Q.Evaluate();
-    }
+  /// <inheritdoc/>
+  public bool Evaluate() {
+    return !P.Evaluate() || Q.Evaluate();
+  }
 
-    /// <inheritdoc/>
-    public IExpression Replace(SelectedVersion varName, bool varValue) {
-        return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
-    }
-    
-    /// <inheritdoc />
-    public override string ToString() {
-        return $"{P} => {Q}";
-    }
+  /// <inheritdoc/>
+  public IExpression Replace(SelectedVersion varName, bool varValue) {
+    return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
+  }
+
+  /// <inheritdoc />
+  public override string ToString() {
+    return $"{P} => {Q}";
+  }
 }

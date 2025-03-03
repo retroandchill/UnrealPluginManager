@@ -18,19 +18,18 @@ namespace UnrealPluginManager.Server.Controllers;
 [Route("/files")]
 [AutoConstructor]
 public partial class StorageController {
-    private readonly IStorageService _storageService;
+  private readonly IStorageService _storageService;
 
-    /// <summary>
-    /// Retrieves an icon as a stream for the specified file name.
-    /// </summary>
-    /// <param name="pluginName">The name of the plugin to search for</param>
-    /// <returns>A stream containing the requested image data.</returns>
-    [HttpGet("icons/{pluginName}")]
-    [Produces(MediaTypeNames.Image.Png)]
-    public Stream GetIcon(string pluginName) {
-        return _storageService.RetrievePluginIcon(pluginName)
-                .OrElseThrow(() => new FileNotFoundException($"Icon for plugin {pluginName} not found."))
-                .OpenRead();
-    }
-    
+  /// <summary>
+  /// Retrieves an icon as a stream for the specified file name.
+  /// </summary>
+  /// <param name="pluginName">The name of the plugin to search for</param>
+  /// <returns>A stream containing the requested image data.</returns>
+  [HttpGet("icons/{pluginName}")]
+  [Produces(MediaTypeNames.Image.Png)]
+  public Stream GetIcon(string pluginName) {
+    return _storageService.RetrievePluginIcon(pluginName)
+        .OrElseThrow(() => new FileNotFoundException($"Icon for plugin {pluginName} not found."))
+        .OpenRead();
+  }
 }

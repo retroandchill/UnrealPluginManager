@@ -12,10 +12,9 @@ namespace UnrealPluginManager.Core.Tests.Mocks;
 /// </remarks>
 [SupportedOSPlatform("windows")]
 public class MockRegistry : IRegistry {
+  /// <inheritdoc />
+  public IRegistryKey LocalMachine { get; set; } = new MockRegistryKey();
 
-    /// <inheritdoc />
-    public IRegistryKey LocalMachine { get; set; } = new MockRegistryKey();
-    
-    /// <inheritdoc />
-    public IRegistryKey CurrentUser { get; set; } = new MockRegistryKey();
+  /// <inheritdoc />
+  public IRegistryKey CurrentUser { get; set; } = new MockRegistryKey();
 }
