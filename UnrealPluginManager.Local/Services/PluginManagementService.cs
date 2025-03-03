@@ -50,7 +50,8 @@ public partial class PluginManagementService : IPluginManagementService {
         .Map(x => x.SetInstalledPlugins(currentlyInstalled)).ToEnumerable()
         .Concat(_remoteService.GetApiAccessors<IPluginsApi>()
                     .Select((x, i) => x.Api.GetCandidateDependenciesAsync(root.Dependencies)
-                                .Map(y => y.SetRemoteIndex(i))));
+                                .Map(y => y.SetRemoteIndex(i))))
+        .ToList();
 
     return await Task.WhenEach(dependencyTasks)
         .Select(x => x.Result)
