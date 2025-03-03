@@ -9,18 +9,18 @@
 /// being referenced or manipulated.
 /// </remarks>
 public enum VersionPart {
-    /// <summary>
-    /// The major version.
-    /// </summary>
-    Major,
-    
-    /// <summary>
-    /// The minor version.
-    /// </summary>
-    Minor,
-    
-    /// <summary>
-    /// The patch version
-    /// </summary>
-    Patch
+  /// <summary>
+  /// The major version.
+  /// </summary>
+  Major,
+
+  /// <summary>
+  /// The minor version.
+  /// </summary>
+  Minor,
+
+  /// <summary>
+  /// The patch version
+  /// </summary>
+  Patch
 }

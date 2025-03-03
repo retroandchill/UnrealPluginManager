@@ -11,16 +11,14 @@ namespace UnrealPluginManager.Local.Database;
 /// </summary>
 [AutoConstructor]
 public partial class LocalUnrealPluginManagerContext : UnrealPluginManagerContext {
-    private readonly IStorageService _storageService;
+  private readonly IStorageService _storageService;
 
-    /// <inheritdoc />
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        Directory.CreateDirectory(_storageService.BaseDirectory);
-        optionsBuilder.UseSqlite($"Filename={Path.Join(_storageService.BaseDirectory, "cache.sqlite")}", b =>
-            b.MigrationsAssembly(Assembly.GetCallingAssembly())
-                .MinBatchSize(1)
-                .MaxBatchSize(100));
-    }
-    
-    
+  /// <inheritdoc />
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+    Directory.CreateDirectory(_storageService.BaseDirectory);
+    optionsBuilder.UseSqlite($"Filename={Path.Join(_storageService.BaseDirectory, "cache.sqlite")}", b =>
+                                 b.MigrationsAssembly(Assembly.GetCallingAssembly())
+                                     .MinBatchSize(1)
+                                     .MaxBatchSize(100));
+  }
 }

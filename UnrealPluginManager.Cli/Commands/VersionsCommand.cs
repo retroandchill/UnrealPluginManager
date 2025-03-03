@@ -17,7 +17,7 @@ namespace UnrealPluginManager.Cli.Commands;
 /// </remarks>
 public class VersionsCommand()
     : Command<VersionsCommandOptions, VersionsCommandOptionsHandler>("versions",
-        "Lists all installed engine versions.");
+                                                                     "Lists all installed engine versions.");
 
 /// <summary>
 /// Represents the options required for the VersionsCommand in the CLI interface.
@@ -43,23 +43,24 @@ public class VersionsCommandOptions : ICommandOptions;
 [AutoConstructor]
 [UsedImplicitly]
 public partial class VersionsCommandOptionsHandler : ICommandOptionsHandler<VersionsCommandOptions> {
-    private readonly IConsole _console;
-    private readonly IEnvironment _environment;
-    private readonly IEngineService _engineService;
+  private readonly IConsole _console;
+  private readonly IEnvironment _environment;
+  private readonly IEngineService _engineService;
 
-    /// <inheritdoc />
-    public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
-        var installedEngines = _engineService.GetInstalledEngines();
-        var currentVersion = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
-            .Match(x => installedEngines.FindIndex(y => y.Name == x),
-                () => installedEngines.Index()
-                    .Where(y => !y.Item.CustomBuild)
-                    .OrderByDescending(y => y.Item.Version)
-                    .Select(y => y.Index)
-                    .FirstOrDefault(-1));
-        foreach (var version in installedEngines.Index()) {
-            _console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
-        }
-        return Task.FromResult(0);
+  /// <inheritdoc />
+  public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
+    var installedEngines = _engineService.GetInstalledEngines();
+    var currentVersion = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
+        .Match(x => installedEngines.FindIndex(y => y.Name == x),
+               () => installedEngines.Index()
+                   .Where(y => !y.Item.CustomBuild)
+                   .OrderByDescending(y => y.Item.Version)
+                   .Select(y => y.Index)
+                   .FirstOrDefault(-1));
+    foreach (var version in installedEngines.Index()) {
+      _console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
     }
+
+    return Task.FromResult(0);
+  }
 }

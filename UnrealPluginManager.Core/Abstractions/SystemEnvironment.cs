@@ -8,13 +8,13 @@
 /// <c>GetEnvironmentVariable</c> and <c>GetFolderPath</c>.
 /// </remarks>
 public class SystemEnvironment : IEnvironment {
-    /// <inheritdoc />
-    public string? GetEnvironmentVariable(string variable) {
-        return Environment.GetEnvironmentVariable(variable);
-    }
+  /// <inheritdoc />
+  public string? GetEnvironmentVariable(string variable) {
+    return Environment.GetEnvironmentVariable(variable);
+  }
 
-    /// <inheritdoc />
-    public string GetFolderPath(Environment.SpecialFolder folder) {
-        return Environment.GetFolderPath(folder);
-    }
+  /// <inheritdoc />
+  public string GetFolderPath(Environment.SpecialFolder folder) {
+    return Environment.GetFolderPath(folder);
+  }
 }

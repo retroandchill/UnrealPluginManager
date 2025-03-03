@@ -12,12 +12,12 @@
 /// </remarks>
 /// <seealso cref="UnrealPluginManagerException" />
 public class PluginNotFoundException : UnrealPluginManagerException {
-    public PluginNotFoundException() {
-    }
+  public PluginNotFoundException() {
+  }
 
-    public PluginNotFoundException(string? message) : base(message) {
-    }
+  public PluginNotFoundException(string? message) : base(message) {
+  }
 
-    public PluginNotFoundException(string? message, Exception? innerException) : base(message, innerException) {
-    }
+  public PluginNotFoundException(string? message, Exception? innerException) : base(message, innerException) {
+  }
 }

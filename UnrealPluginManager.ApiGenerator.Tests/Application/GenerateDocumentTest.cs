@@ -9,21 +9,19 @@ using UnrealPluginManager.Server.Utils;
 namespace UnrealPluginManager.ApiGenerator.Tests.Application;
 
 public class GenerateDocumentTest {
+  [Test]
+  public async Task TestGenerateDocument() {
+    var app = WebApplication.CreateBuilder([])
+        .SetUpCommonConfiguration()
+        .SetUpMockDataProviders()
+        .SetUpSwagger()
+        .ConfigureEndpoints()
+        .Build();
 
-    [Test]
-    public async Task TestGenerateDocument() {
-        var app = WebApplication.CreateBuilder([])
-            .SetUpCommonConfiguration()
-            .SetUpMockDataProviders()
-            .SetUpSwagger()
-            .ConfigureEndpoints()
-            .Build();
-        
-        app.Configure();
-        await app.ProduceSwaggerDocument();
-        
-        var fileSystem = app.Services.GetRequiredService<IFileSystem>();
-        Assert.That(fileSystem.FileInfo.New("openapi-spec.json").Exists, Is.True);
-    }
-    
+    app.Configure();
+    await app.ProduceSwaggerDocument();
+
+    var fileSystem = app.Services.GetRequiredService<IFileSystem>();
+    Assert.That(fileSystem.FileInfo.New("openapi-spec.json").Exists, Is.True);
+  }
 }

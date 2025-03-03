@@ -9,10 +9,10 @@ namespace UnrealPluginManager.Core.Files;
 /// file and directory operations.
 [AutoConstructor]
 public sealed partial class DirectoryZipFileSource : IFileSource {
-    private readonly IDirectoryInfo _directoryInfo;
+  private readonly IDirectoryInfo _directoryInfo;
 
-    /// <inheritdoc />
-    public Task<IFileInfo> CreateFile(string destinationPath) {
-        return _directoryInfo.FileSystem.CreateZipFile(destinationPath, _directoryInfo.FullName);
-    }
+  /// <inheritdoc />
+  public Task<IFileInfo> CreateFile(string destinationPath) {
+    return _directoryInfo.FileSystem.CreateZipFile(destinationPath, _directoryInfo.FullName);
+  }
 }

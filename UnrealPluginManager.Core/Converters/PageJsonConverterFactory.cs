@@ -14,21 +14,20 @@ namespace UnrealPluginManager.Core.Converters;
 /// that matches the definition of <see cref="Page{T}"/>.
 /// </remarks>
 public class PageJsonConverterFactory : JsonConverterFactory {
-
-    /// <inheritdoc/>
-    public override bool CanConvert(Type typeToConvert) {
-        if (!typeToConvert.IsGenericType) {
-            return false;
-        }
-        
-        return typeToConvert.GetGenericTypeDefinition() == typeof(Page<>);
+  /// <inheritdoc/>
+  public override bool CanConvert(Type typeToConvert) {
+    if (!typeToConvert.IsGenericType) {
+      return false;
     }
 
-    /// <inheritdoc/>
-    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options) {
-        var wrappedType = typeToConvert.GetGenericArguments()[0];
-        
-        var converterType = typeof(PageJsonConverter<>).MakeGenericType(wrappedType);
-        return (JsonConverter?) Activator.CreateInstance(converterType);
-    }
+    return typeToConvert.GetGenericTypeDefinition() == typeof(Page<>);
+  }
+
+  /// <inheritdoc/>
+  public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options) {
+    var wrappedType = typeToConvert.GetGenericArguments()[0];
+
+    var converterType = typeof(PageJsonConverter<>).MakeGenericType(wrappedType);
+    return (JsonConverter?)Activator.CreateInstance(converterType);
+  }
 }

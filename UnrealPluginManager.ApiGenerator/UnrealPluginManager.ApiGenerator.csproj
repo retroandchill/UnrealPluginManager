@@ -8,11 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj" />
+        <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.3.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.3.1"/>
     </ItemGroup>
 
 </Project>

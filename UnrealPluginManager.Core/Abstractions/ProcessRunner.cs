@@ -11,14 +11,14 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// programmatically. For instance, it can be employed to run CLI tools or other executables.
 /// </remarks>
 public class ProcessRunner : IProcessRunner {
-    /// <inheritdoc />
-    public async Task<int> RunProcess(string command, string[] arguments) {
-        var process = new Process();
-        process.StartInfo.FileName = command;
-        process.StartInfo.Arguments = string.Join(" ", arguments);
+  /// <inheritdoc />
+  public async Task<int> RunProcess(string command, string[] arguments) {
+    var process = new Process();
+    process.StartInfo.FileName = command;
+    process.StartInfo.Arguments = string.Join(" ", arguments);
 
-        process.Start();
-        await process.WaitForExitAsync();
-        return process.ExitCode;
-    }
+    process.Start();
+    await process.WaitForExitAsync();
+    return process.ExitCode;
+  }
 }
