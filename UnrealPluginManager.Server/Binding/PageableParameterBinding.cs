@@ -12,22 +12,21 @@ namespace UnrealPluginManager.Server.Binding;
 /// If the "page" or "size" parameters are not present in the query, default values are used.
 /// </remarks>
 public class PageableParameterBinding : IModelBinder {
-    
-    /// <inheritdoc />
-    public Task BindModelAsync(ModelBindingContext bindingContext) {
-        if (bindingContext.ModelType != typeof(Pageable)) {
-            throw new InvalidOperationException();
-        }
-
-        var queryParams = bindingContext.HttpContext.Request.Query;
-        queryParams.TryGetValue("page", out var page);
-        queryParams.TryGetValue("size", out var size);
-        string? pageString = page;
-        string? sizeString = size;
-        var pageNumber = pageString is not null ? int.Parse(pageString) : 1;
-        var pageSize = sizeString is not null ? int.Parse(sizeString) : 10;
-        
-        bindingContext.Result = ModelBindingResult.Success(new Pageable(pageNumber, pageSize));
-        return Task.CompletedTask;
+  /// <inheritdoc />
+  public Task BindModelAsync(ModelBindingContext bindingContext) {
+    if (bindingContext.ModelType != typeof(Pageable)) {
+      throw new InvalidOperationException();
     }
+
+    var queryParams = bindingContext.HttpContext.Request.Query;
+    queryParams.TryGetValue("page", out var page);
+    queryParams.TryGetValue("size", out var size);
+    string? pageString = page;
+    string? sizeString = size;
+    var pageNumber = pageString is not null ? int.Parse(pageString) : 1;
+    var pageSize = sizeString is not null ? int.Parse(sizeString) : 10;
+
+    bindingContext.Result = ModelBindingResult.Success(new Pageable(pageNumber, pageSize));
+    return Task.CompletedTask;
+  }
 }

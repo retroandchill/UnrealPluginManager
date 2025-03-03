@@ -14,24 +14,24 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// </remarks>
 [SupportedOSPlatform("windows")]
 public record WindowsRegistryKey(RegistryKey RegistryKey) : IRegistryKey {
-    /// <inheritdoc />
-    public IRegistryKey? OpenSubKey(string name) {
-        var key = RegistryKey.OpenSubKey(name);
-        return key is not null ? new WindowsRegistryKey(key) : null;
-    }
+  /// <inheritdoc />
+  public IRegistryKey? OpenSubKey(string name) {
+    var key = RegistryKey.OpenSubKey(name);
+    return key is not null ? new WindowsRegistryKey(key) : null;
+  }
 
-    /// <inheritdoc />
-    public string[] GetSubKeyNames() {
-        return RegistryKey.GetSubKeyNames();
-    }
+  /// <inheritdoc />
+  public string[] GetSubKeyNames() {
+    return RegistryKey.GetSubKeyNames();
+  }
 
-    /// <inheritdoc />
-    public string[] GetValueNames() {
-        return RegistryKey.GetValueNames();
-    }
+  /// <inheritdoc />
+  public string[] GetValueNames() {
+    return RegistryKey.GetValueNames();
+  }
 
-    /// <inheritdoc />
-    public T? GetValue<T>(string name) {
-        return (T?) RegistryKey.GetValue(name);
-    }
+  /// <inheritdoc />
+  public T? GetValue<T>(string name) {
+    return (T?)RegistryKey.GetValue(name);
+  }
 }

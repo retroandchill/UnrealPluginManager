@@ -11,22 +11,22 @@ namespace UnrealPluginManager.Server.Services;
 /// Implements methods to store and retrieve plugin files.
 /// </summary>
 public class CloudStorageService : StorageServiceBase {
-    private readonly StorageMetadata _storageMetadata;
+  private readonly StorageMetadata _storageMetadata;
 
-    /// <inheritdoc />
-    public sealed override string BaseDirectory => _storageMetadata.BaseDirectory;
+  /// <inheritdoc />
+  public sealed override string BaseDirectory => _storageMetadata.BaseDirectory;
 
-    /// <summary>
-    /// Provides a cloud storage service implementation for managing plugin files.
-    /// This service handles storing and retrieving plugins in a configurable cloud-based directory.
-    /// </summary>
-    public CloudStorageService(IFileSystem filesystem, IConfiguration config) : base(filesystem) {
-        _storageMetadata = new StorageMetadata();
-        config.GetSection(StorageMetadata.Name).Bind(_storageMetadata);
+  /// <summary>
+  /// Provides a cloud storage service implementation for managing plugin files.
+  /// This service handles storing and retrieving plugins in a configurable cloud-based directory.
+  /// </summary>
+  public CloudStorageService(IFileSystem filesystem, IConfiguration config) : base(filesystem) {
+    _storageMetadata = new StorageMetadata();
+    config.GetSection(StorageMetadata.Name).Bind(_storageMetadata);
 
-        var directoryInfo = FileSystem.DirectoryInfo.New(_storageMetadata.BaseDirectory);
-        if (!directoryInfo.Exists) {
-            directoryInfo.Create();
-        }
+    var directoryInfo = FileSystem.DirectoryInfo.New(_storageMetadata.BaseDirectory);
+    if (!directoryInfo.Exists) {
+      directoryInfo.Create();
     }
+  }
 }

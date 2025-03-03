@@ -11,24 +11,24 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// of plugin dependencies that form the primary layer of the chain.
 /// </remarks>
 public class DependencyChainRoot : IDependencyChainNode {
-    /// <summary>
-    /// Gets the name of the dependency chain node.
-    /// </summary>
-    /// <remarks>
-    /// The Name property provides a unique identifier or representation of the dependency chain node.
-    /// For the `DependencyChainRoot` class, this value is always "$Root".
-    /// </remarks>
-    public string Name => "$Root";
-    
-    /// <inheritdoc />
-    public SemVersion Version => new(1, 0, 0);
+  /// <summary>
+  /// Gets the name of the dependency chain node.
+  /// </summary>
+  /// <remarks>
+  /// The Name property provides a unique identifier or representation of the dependency chain node.
+  /// For the `DependencyChainRoot` class, this value is always "$Root".
+  /// </remarks>
+  public string Name => "$Root";
 
-    /// <inheritdoc />
-    public required List<PluginDependency> Dependencies { get; set; }
+  /// <inheritdoc />
+  public SemVersion Version => new(1, 0, 0);
 
-    /// <inheritdoc />
-    public bool Installed => true;
-    
-    /// <inheritdoc />
-    public int? RemoteIndex => null;
+  /// <inheritdoc />
+  public required List<PluginDependency> Dependencies { get; set; }
+
+  /// <inheritdoc />
+  public bool Installed => true;
+
+  /// <inheritdoc />
+  public int? RemoteIndex => null;
 }

@@ -13,9 +13,9 @@
  * the last call.
  */
 export const debounce = <T extends any[]>(callback: Func<void, T>, delay: number): Func<void, T> => {
-    let timer: NodeJS.Timeout | undefined;
-    return (...args: T) => {
-        clearTimeout(timer)
-        timer = setTimeout(() => callback(...args), delay)
-    }
+  let timer: NodeJS.Timeout | undefined;
+  return (...args: T) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => callback(...args), delay)
+  }
 }

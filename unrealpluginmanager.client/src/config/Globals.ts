@@ -10,7 +10,7 @@
 export const apiBaseUrl = window.location.origin;
 
 const apiConfig = new Configuration({
-    basePath: apiBaseUrl
+  basePath: apiBaseUrl
 });
 /**
  * Represents an instance of the PluginsApi class.

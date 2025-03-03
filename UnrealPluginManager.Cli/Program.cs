@@ -20,11 +20,11 @@ var builder = new CommandLineBuilder(rootCommand)
     .UseDefaults()
     .UseExceptionHandler(errorExitCode: 1)
     .UseDependencyInjection(services => {
-        services.AddSystemAbstractions()
-            .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
-            .AddCoreServices()
-            .AddLocalServices()
-            .AddApis();
+      services.AddSystemAbstractions()
+          .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
+          .AddCoreServices()
+          .AddLocalServices()
+          .AddApis();
     });
-    
+
 await builder.Build().InvokeAsync(args);

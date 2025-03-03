@@ -12,88 +12,88 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// of a plugin version within the system.
 /// </remarks>
 public class PluginVersionInfo : IDependencyChainNode {
-    /// <summary>
-    /// Gets or sets the unique identifier for a plugin.
-    /// </summary>
-    /// <remarks>
-    /// The identifier is used to represent a specific plugin across various operations
-    /// and mappings within the plugin management system. This value must be consistent
-    /// for the plugin it represents and is essential for ensuring reliable identification
-    /// across components interacting with the plugin.
-    /// </remarks>
-    public required ulong PluginId { get; set; }
-    
-    /// <summary>
-    /// Gets the name of the plugin associated with the current version.
-    /// </summary>
-    /// <remarks>
-    /// The plugin name is a unique identifier for the plugin and is generally used
-    /// to distinguish it from other plugins. It follows specific validation rules, such as
-    /// starting with an uppercase letter and containing only alphanumeric characters.
-    /// </remarks>
-    public required string Name { get; set; }
+  /// <summary>
+  /// Gets or sets the unique identifier for a plugin.
+  /// </summary>
+  /// <remarks>
+  /// The identifier is used to represent a specific plugin across various operations
+  /// and mappings within the plugin management system. This value must be consistent
+  /// for the plugin it represents and is essential for ensuring reliable identification
+  /// across components interacting with the plugin.
+  /// </remarks>
+  public required ulong PluginId { get; set; }
 
-    /// <summary>
-    /// Gets or sets the user-friendly name of the plugin associated with the current version.
-    /// </summary>
-    /// <remarks>
-    /// The friendly name is a descriptive and more readable representation of the plugin's identity
-    /// intended to be displayed to end-users. It may contain spaces and other characters,
-    /// unlike the unique plugin name used internally.
-    /// </remarks>
-    public string? FriendlyName { get; set; }
+  /// <summary>
+  /// Gets the name of the plugin associated with the current version.
+  /// </summary>
+  /// <remarks>
+  /// The plugin name is a unique identifier for the plugin and is generally used
+  /// to distinguish it from other plugins. It follows specific validation rules, such as
+  /// starting with an uppercase letter and containing only alphanumeric characters.
+  /// </remarks>
+  public required string Name { get; set; }
 
-    /// <summary>
-    /// Gets or sets the unique identifier for the plugin version.
-    /// </summary>
-    /// <remarks>
-    /// The VersionId is a numerical value that uniquely identifies a specific version
-    /// of the plugin. It is used to track and manage individual plugin versions
-    /// and their associations with other plugin metadata.
-    /// </remarks>
-    public required ulong VersionId { get; set; }
-    
-    /// <summary>
-    /// Gets the semantic version of the plugin.
-    /// </summary>
-    /// <remarks>
-    /// The version follows semantic versioning conventions, represented by major, minor, and patch numbers.
-    /// It is used to determine compatibility and precedence among plugin versions.
-    /// </remarks>
-    public required SemVersion Version { get; set; }
+  /// <summary>
+  /// Gets or sets the user-friendly name of the plugin associated with the current version.
+  /// </summary>
+  /// <remarks>
+  /// The friendly name is a descriptive and more readable representation of the plugin's identity
+  /// intended to be displayed to end-users. It may contain spaces and other characters,
+  /// unlike the unique plugin name used internally.
+  /// </remarks>
+  public string? FriendlyName { get; set; }
 
-    /// <summary>
-    /// Gets or sets the list of dependencies for the current plugin version.
-    /// </summary>
-    /// <remarks>
-    /// This property represents the collection of plugins that the current plugin
-    /// version depends on. Each dependency includes details such as the plugin's name,
-    /// type, and its compatible version range.
-    /// </remarks>
-    public required List<PluginDependency> Dependencies { get; set; }
+  /// <summary>
+  /// Gets or sets the unique identifier for the plugin version.
+  /// </summary>
+  /// <remarks>
+  /// The VersionId is a numerical value that uniquely identifies a specific version
+  /// of the plugin. It is used to track and manage individual plugin versions
+  /// and their associations with other plugin metadata.
+  /// </remarks>
+  public required ulong VersionId { get; set; }
 
-    /// <summary>
-    /// Indicates whether the plugin version is currently installed.
-    /// </summary>
-    /// <remarks>
-    /// This property specifies the installation status of the plugin version. It can be
-    /// used to determine if a plugin version is available on the system for use or
-    /// requires installation. The value `true` represents that the plugin is installed,
-    /// while `false` indicates it is not installed.
-    /// </remarks>
-    [JsonIgnore]
-    public bool Installed { get; set; }
+  /// <summary>
+  /// Gets the semantic version of the plugin.
+  /// </summary>
+  /// <remarks>
+  /// The version follows semantic versioning conventions, represented by major, minor, and patch numbers.
+  /// It is used to determine compatibility and precedence among plugin versions.
+  /// </remarks>
+  public required SemVersion Version { get; set; }
+
+  /// <summary>
+  /// Gets or sets the list of dependencies for the current plugin version.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the collection of plugins that the current plugin
+  /// version depends on. Each dependency includes details such as the plugin's name,
+  /// type, and its compatible version range.
+  /// </remarks>
+  public required List<PluginDependency> Dependencies { get; set; }
+
+  /// <summary>
+  /// Indicates whether the plugin version is currently installed.
+  /// </summary>
+  /// <remarks>
+  /// This property specifies the installation status of the plugin version. It can be
+  /// used to determine if a plugin version is available on the system for use or
+  /// requires installation. The value `true` represents that the plugin is installed,
+  /// while `false` indicates it is not installed.
+  /// </remarks>
+  [JsonIgnore]
+  public bool Installed { get; set; }
 
 
-    /// <summary>
-    /// Gets or sets the index of the plugin version as retrieved from a remote source.
-    /// </summary>
-    /// <remarks>
-    /// This property is used to track the position or order of the plugin version
-    /// in a dataset originating from an external or remote repository. It is
-    /// primarily utilized for managing or querying the plugin's metadata
-    /// in scenarios involving remote data synchronization or retrieval.
-    /// </remarks>
-    [JsonIgnore]
-    public int? RemoteIndex { get; set; }
+  /// <summary>
+  /// Gets or sets the index of the plugin version as retrieved from a remote source.
+  /// </summary>
+  /// <remarks>
+  /// This property is used to track the position or order of the plugin version
+  /// in a dataset originating from an external or remote repository. It is
+  /// primarily utilized for managing or querying the plugin's metadata
+  /// in scenarios involving remote data synchronization or retrieval.
+  /// </remarks>
+  [JsonIgnore]
+  public int? RemoteIndex { get; set; }
 }

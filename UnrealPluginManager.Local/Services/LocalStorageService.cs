@@ -15,10 +15,10 @@ namespace UnrealPluginManager.Local.Services;
 /// </remarks>
 [AutoConstructor]
 public partial class LocalStorageService : StorageServiceBase {
-    private readonly IEnvironment _environment;
+  private readonly IEnvironment _environment;
 
-    /// <inheritdoc />
-    public sealed override string BaseDirectory =>
-        _environment.GetEnvironmentVariable(EnvironmentVariables.StorageDirectory) ??
-        Path.Join(_environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".unrealpluginmanager");
+  /// <inheritdoc />
+  public sealed override string BaseDirectory =>
+      _environment.GetEnvironmentVariable(EnvironmentVariables.StorageDirectory) ??
+      Path.Join(_environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".unrealpluginmanager");
 }

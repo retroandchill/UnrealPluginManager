@@ -12,6 +12,3 @@ await WebApplication.CreateBuilder(args)
     .Build()
     .Configure()
     .ProduceSwaggerDocument();
-
-
-
