@@ -9,10 +9,10 @@ namespace UnrealPluginManager.Core.Files;
 /// </summary>
 [AutoConstructor]
 public sealed partial class CopyFileSource : IFileSource {
-    private readonly IFileInfo _fileInfo;
+  private readonly IFileInfo _fileInfo;
 
-    /// <inheritdoc />
-    public Task<IFileInfo> CreateFile(string destinationPath) {
-        return Task.FromResult(_fileInfo.CopyTo(destinationPath, true));
-    }
+  /// <inheritdoc />
+  public Task<IFileInfo> CreateFile(string destinationPath) {
+    return Task.FromResult(_fileInfo.CopyTo(destinationPath, true));
+  }
 }

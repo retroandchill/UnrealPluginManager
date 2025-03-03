@@ -10,12 +10,12 @@
 /// This exception extends UnrealPluginManagerException to specialize in dependency-related error handling.
 /// </remarks>
 public class DependencyResolutionException : UnrealPluginManagerException {
-    public DependencyResolutionException() {
-    }
+  public DependencyResolutionException() {
+  }
 
-    public DependencyResolutionException(string? message) : base(message) {
-    }
+  public DependencyResolutionException(string? message) : base(message) {
+  }
 
-    public DependencyResolutionException(string? message, Exception? innerException) : base(message, innerException) {
-    }
+  public DependencyResolutionException(string? message, Exception? innerException) : base(message, innerException) {
+  }
 }

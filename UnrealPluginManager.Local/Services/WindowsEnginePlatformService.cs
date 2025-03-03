@@ -24,44 +24,45 @@ namespace UnrealPluginManager.Local.Services;
 [SupportedOSPlatform("windows")]
 [AutoConstructor]
 public partial class WindowsEnginePlatformService : IEnginePlatformService {
-    private readonly IFileSystem _fileSystem;
-    private readonly IRegistry _registry;
+  private readonly IFileSystem _fileSystem;
+  private readonly IRegistry _registry;
 
-    /// <inheritdoc />
-    public string ScriptFileExtension => "bat";
+  /// <inheritdoc />
+  public string ScriptFileExtension => "bat";
 
-    /// <inheritdoc />
-    public List<InstalledEngine> GetInstalledEngines() {
-        return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine")
-            .Concat(GetCustomBuiltEnginesFromRegistry(@"Software\Epic Games\Unreal Engine\Builds"))
-            .ToList();
+  /// <inheritdoc />
+  public List<InstalledEngine> GetInstalledEngines() {
+    return GetInstalledEnginesFromRegistry(@"Software\EpicGames\Unreal Engine")
+        .Concat(GetCustomBuiltEnginesFromRegistry(@"Software\Epic Games\Unreal Engine\Builds"))
+        .ToList();
+  }
+
+  private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey) {
+    var engineInstallations = _registry.LocalMachine.OpenSubKey(registryKey);
+    if (engineInstallations is null) {
+      return [];
     }
 
-    private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey) {
-        var engineInstallations = _registry.LocalMachine.OpenSubKey(registryKey);
-        if (engineInstallations is null) {
-            return [];
-        }
-        
-        return engineInstallations.GetSubKeyNames()
-            .Select(s => (Key: s, Value: engineInstallations.OpenSubKey(s)))
-            .Where(s => s.Value is not null)
-            .Select(s => (Name: s.Key, Directory: s.Value!.GetValue<string>("InstalledDirectory")))
-            .Where(s => s.Directory is not null)
-            .Select((x, i) => new InstalledEngine(x.Name,
-                Version.Parse(x.Name), _fileSystem.DirectoryInfo.New(x.Directory!)));
+    return engineInstallations.GetSubKeyNames()
+        .Select(s => (Key: s, Value: engineInstallations.OpenSubKey(s)))
+        .Where(s => s.Value is not null)
+        .Select(s => (Name: s.Key, Directory: s.Value!.GetValue<string>("InstalledDirectory")))
+        .Where(s => s.Directory is not null)
+        .Select((x, i) => new InstalledEngine(x.Name,
+                                              Version.Parse(x.Name), _fileSystem.DirectoryInfo.New(x.Directory!)));
+  }
+
+  private IEnumerable<InstalledEngine> GetCustomBuiltEnginesFromRegistry(string registryKey) {
+    var engineInstallations = _registry.CurrentUser.OpenSubKey(registryKey);
+    if (engineInstallations is null) {
+      return [];
     }
-    
-    private IEnumerable<InstalledEngine> GetCustomBuiltEnginesFromRegistry(string registryKey) {
-        var engineInstallations = _registry.CurrentUser.OpenSubKey(registryKey);
-        if (engineInstallations is null) {
-            return [];
-        }
-        
-        return engineInstallations.GetValueNames()
-            .Select(s => (Name: s, Directory: engineInstallations.GetValue<string>(s)))
-            .Where(s => s.Directory is not null)
-            .SelectValid((x, i) => new InstalledEngine(x.Name,
-                _fileSystem.GetEngineVersion(x.Directory!), _fileSystem.DirectoryInfo.New(x.Directory!), true));
-    }
+
+    return engineInstallations.GetValueNames()
+        .Select(s => (Name: s, Directory: engineInstallations.GetValue<string>(s)))
+        .Where(s => s.Directory is not null)
+        .SelectValid((x, i) => new InstalledEngine(x.Name,
+                                                   _fileSystem.GetEngineVersion(x.Directory!),
+                                                   _fileSystem.DirectoryInfo.New(x.Directory!), true));
+  }
 }

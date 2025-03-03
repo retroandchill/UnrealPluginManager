@@ -12,12 +12,10 @@ namespace UnrealPluginManager.Server.Binding;
 /// using the <see cref="PageableParameterBinding"/> implementation.
 /// </remarks>
 public class PaginationModelBinderProvider : IModelBinderProvider {
+  /// <inheritdoc />
+  public IModelBinder? GetBinder(ModelBinderProviderContext context) {
+    ArgumentNullException.ThrowIfNull(context);
 
-    /// <inheritdoc />
-    public IModelBinder? GetBinder(ModelBinderProviderContext context) {
-        ArgumentNullException.ThrowIfNull(context);
-
-        return context.Metadata.ModelType == typeof(Pageable) ? new PageableParameterBinding() : null;
-
-    }
+    return context.Metadata.ModelType == typeof(Pageable) ? new PageableParameterBinding() : null;
+  }
 }

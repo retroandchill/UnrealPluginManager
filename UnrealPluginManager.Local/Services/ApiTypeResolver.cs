@@ -6,11 +6,11 @@ namespace UnrealPluginManager.Local.Services;
 /// Resolves and retrieves the interface type of a given API accessor instance.
 /// </summary>
 public class ApiTypeResolver : IApiTypeResolver {
-    /// <inheritdoc />
-    public Type GetInterfaceType(IApiAccessor apiAccessor) {
-        var concreteType = apiAccessor.GetType();
-        var interfaceType = concreteType.GetInterface($"I{concreteType.Name}");
-        ArgumentNullException.ThrowIfNull(interfaceType);
-        return interfaceType;
-    }
+  /// <inheritdoc />
+  public Type GetInterfaceType(IApiAccessor apiAccessor) {
+    var concreteType = apiAccessor.GetType();
+    var interfaceType = concreteType.GetInterface($"I{concreteType.Name}");
+    ArgumentNullException.ThrowIfNull(interfaceType);
+    return interfaceType;
+  }
 }

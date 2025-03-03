@@ -12,21 +12,20 @@ namespace UnrealPluginManager.Cli.Tests.Mocks;
 /// functionalities for writing text, retrieving the written content, and flushing the underlying buffer.
 /// </remarks>
 public class RedirectingStreamWriter : IStandardStreamWriter {
-    
-    private readonly StringWriter _writer = new();
+  private readonly StringWriter _writer = new();
 
-    /// <inheritdoc />
-    public void Write(string? value) {
-        _writer.Write(value);
-    }
+  /// <inheritdoc />
+  public void Write(string? value) {
+    _writer.Write(value);
+  }
 
-    /// <summary>
-    /// Retrieves the content written to the underlying string writer buffer.
-    /// </summary>
-    /// <returns>
-    /// A string containing the entirety of the data written to the string writer.
-    /// </returns>
-    public string GetWrittenString() {
-        return _writer.ToString();
-    }
+  /// <summary>
+  /// Retrieves the content written to the underlying string writer buffer.
+  /// </summary>
+  /// <returns>
+  /// A string containing the entirety of the data written to the string writer.
+  /// </returns>
+  public string GetWrittenString() {
+    return _writer.ToString();
+  }
 }

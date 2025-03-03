@@ -11,9 +11,9 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// </remarks>
 [SupportedOSPlatform("windows")]
 public class WindowsRegistry : IRegistry {
-    /// <inheritdoc />
-    public IRegistryKey LocalMachine => new WindowsRegistryKey(Microsoft.Win32.Registry.LocalMachine);
+  /// <inheritdoc />
+  public IRegistryKey LocalMachine => new WindowsRegistryKey(Microsoft.Win32.Registry.LocalMachine);
 
-    /// <inheritdoc />
-    public IRegistryKey CurrentUser => new WindowsRegistryKey(Microsoft.Win32.Registry.CurrentUser);
+  /// <inheritdoc />
+  public IRegistryKey CurrentUser => new WindowsRegistryKey(Microsoft.Win32.Registry.CurrentUser);
 }

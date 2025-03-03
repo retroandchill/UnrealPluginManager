@@ -16,12 +16,12 @@ using System.Net;
 using System.Net.Mime;
 using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Pagination;
-using UnrealPluginManager.Core.Model.Plugins;
+    using UnrealPluginManager.Core.Model.Plugins;
 
 
 namespace UnrealPluginManager.WebClient.Api
 {
-    using PluginOverviewPage = Page<PluginOverview>;    
+    using PluginOverviewPage = Page<PluginOverview>;
 
 
     /// <summary>

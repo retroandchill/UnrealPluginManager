@@ -16,12 +16,12 @@
 /// or BadSubmissionException for specific error scenarios.
 /// </example>
 public abstract class UnrealPluginManagerException : Exception {
-    protected UnrealPluginManagerException() {
-    }
+  protected UnrealPluginManagerException() {
+  }
 
-    protected UnrealPluginManagerException(string? message) : base(message) {
-    }
+  protected UnrealPluginManagerException(string? message) : base(message) {
+  }
 
-    protected UnrealPluginManagerException(string? message, Exception? innerException) : base(message, innerException) {
-    }
+  protected UnrealPluginManagerException(string? message, Exception? innerException) : base(message, innerException) {
+  }
 }

@@ -12,39 +12,41 @@ namespace UnrealPluginManager.Cli.Tests.Mocks;
 /// output and error streams. It allows for inspecting the content written to the console during testing.
 /// </remarks>
 public class RedirectingConsole : IConsole {
-    
-    private readonly RedirectingStreamWriter _outWriter = new();
-    private readonly RedirectingStreamWriter _errorWriter = new();
+  private readonly RedirectingStreamWriter _outWriter = new();
+  private readonly RedirectingStreamWriter _errorWriter = new();
 
-    /// <inheritdoc />
-    public IStandardStreamWriter Out => _outWriter;
-    /// <inheritdoc />
-    public bool IsOutputRedirected => true;
-    /// <inheritdoc />
-    public IStandardStreamWriter Error => _errorWriter;
-    /// <inheritdoc />
-    public bool IsErrorRedirected => true;
-    /// <inheritdoc />
-    public bool IsInputRedirected => false;
+  /// <inheritdoc />
+  public IStandardStreamWriter Out => _outWriter;
 
-    /// <summary>
-    /// Retrieves the content written to the standard output stream managed by the current console instance.
-    /// </summary>
-    /// <returns>
-    /// A string containing all the data captured from the redirected standard output stream.
-    /// </returns>
-    public string GetWrittenOut() {
-        return _outWriter.GetWrittenString();
-    }
+  /// <inheritdoc />
+  public bool IsOutputRedirected => true;
 
-    /// <summary>
-    /// Retrieves the content written to the standard error stream managed by the current console instance.
-    /// </summary>
-    /// <returns>
-    /// A string containing all the data captured from the redirected standard error stream.
-    /// </returns>
-    public string GetWrittenError() {
-        return _errorWriter.GetWrittenString();
-    }
-    
+  /// <inheritdoc />
+  public IStandardStreamWriter Error => _errorWriter;
+
+  /// <inheritdoc />
+  public bool IsErrorRedirected => true;
+
+  /// <inheritdoc />
+  public bool IsInputRedirected => false;
+
+  /// <summary>
+  /// Retrieves the content written to the standard output stream managed by the current console instance.
+  /// </summary>
+  /// <returns>
+  /// A string containing all the data captured from the redirected standard output stream.
+  /// </returns>
+  public string GetWrittenOut() {
+    return _outWriter.GetWrittenString();
+  }
+
+  /// <summary>
+  /// Retrieves the content written to the standard error stream managed by the current console instance.
+  /// </summary>
+  /// <returns>
+  /// A string containing all the data captured from the redirected standard error stream.
+  /// </returns>
+  public string GetWrittenError() {
+    return _errorWriter.GetWrittenString();
+  }
 }
