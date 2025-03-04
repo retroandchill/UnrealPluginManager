@@ -219,8 +219,8 @@ public partial class EngineServiceTest {
         .ToListAsync();
 
     Assert.That(pluginVersions, Has.Count.EqualTo(3));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("MyPlugin", new SemVersion(1, 0, 0))));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("SecondPlugin", new SemVersion(2, 4, 3))));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("AnotherPlugin", new SemVersion(1, 1, 3))));
+    Assert.That(pluginVersions, Does.Contain(new PluginIdentifier("MyPlugin", new SemVersion(1, 0, 0))));
+    Assert.That(pluginVersions, Does.Contain(new PluginIdentifier("SecondPlugin", new SemVersion(2, 4, 3))));
+    Assert.That(pluginVersions, Does.Contain(new PluginIdentifier("AnotherPlugin", new SemVersion(1, 1, 3))));
   }
 }

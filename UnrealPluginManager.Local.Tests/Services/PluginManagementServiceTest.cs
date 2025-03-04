@@ -159,7 +159,7 @@ public class PluginManagementServiceTest {
     };
 
     _engineService.Setup(x => x.GetInstalledPlugins(null))
-        .Returns(new List<InstalledPlugin> {
+        .Returns(new List<PluginIdentifier> {
             new("StdLib", new SemVersion(4, 0, 0)),
             new("Http", new SemVersion(3, 0, 0)),
         }.ToAsyncEnumerable());

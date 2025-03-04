@@ -1,4 +1,6 @@
 ﻿using LanguageExt;
+using Semver;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Local.Services;
@@ -40,6 +42,29 @@ public interface IPluginManagementService {
   /// list of <see cref="PluginOverview"/> objects containing detailed information about the plugins retrieved.
   /// </returns>
   Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
+
+  /// <summary>
+  /// Finds and retrieves the target version information for a specified plugin
+  /// that matches the given version range and engine version, either by checking
+  /// installed plugins or looking up available versions.
+  /// </summary>
+  /// <param name="pluginName">
+  /// The name of the plugin to locate. This must match the plugin's identifier.
+  /// </param>
+  /// <param name="versionRange">
+  /// The range of acceptable versions for the plugin. If multiple versions are found to satisfy the range,
+  /// prioritization will occur based on specific criteria.
+  /// </param>
+  /// <param name="engineVersion">
+  /// An optional engine version used to filter plugins that are compatible with the specified engine version.
+  /// If null, compatibility with any engine version is assumed.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns a
+  /// <see cref="PluginVersionInfo"/> object containing details about the resolved plugin version.
+  /// Throws a <see cref="PluginNotFoundException"/> if no matching plugin is found.
+  /// </returns>
+  Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion);
 
   /// <summary>
   /// Retrieves a list of plugins that need to be installed based on the provided root dependency chain node

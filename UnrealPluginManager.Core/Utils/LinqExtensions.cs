@@ -5,6 +5,7 @@
 /// and enriched querying and transformation capabilities on collections and sequences.
 /// </summary>
 public static class LinqExtensions {
+  
   /// <summary>
   /// Projects each element of a sequence into a new form by using a provided transform function,
   /// ignoring elements where the transform function results in exceptions.

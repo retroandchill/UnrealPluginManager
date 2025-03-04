@@ -1,4 +1,6 @@
 ﻿using LanguageExt;
+using Semver;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
@@ -43,13 +45,54 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
+  public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion) {
+    var currentlyInstalled = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
+        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo(pluginName, v)));
+
+    var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
+    return resolved.OrElseThrow(() => new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
+  }
+
+  private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
+    var cached = await _pluginService.GetPluginVersionInfo(pluginName, versionRange);
+    
+    return await cached.OrElseAsync(() => LookupPluginVersionOnCloud(pluginName, versionRange));
+  }
+
+  private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(string pluginName, SemVersionRange versionRange) {
+    var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
+        .Select(x => x.Api.GetLatestVersionAsync(pluginName, versionRange.ToString()))
+        .ToList();
+    
+    await foreach (var version in Task.WhenEach(tasks)) {
+      if (version.IsFaulted) {
+        continue;
+      }
+
+      return await version;
+    }
+    
+    return Option<PluginVersionInfo>.None;
+  }
+
+  /// <inheritdoc />
   public async Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => x.Version);
-    var dependencyTasks = _pluginService.GetPossibleVersions(root.Dependencies)
+    
+    var allDependencies = root.Dependencies
+        .Concat(currentlyInstalled.Select(x => new PluginDependency {
+            PluginName = x.Key,
+            PluginVersion = SemVersionRange.AtLeast(x.Value),
+            Type = PluginType.Provided
+        }))
+        .DistinctBy(x => x.PluginName)
+        .ToList();
+    
+    var dependencyTasks = _pluginService.GetPossibleVersions(allDependencies)
         .Map(x => x.SetInstalledPlugins(currentlyInstalled)).ToEnumerable()
         .Concat(_remoteService.GetApiAccessors<IPluginsApi>()
-                    .Select((x, i) => x.Api.GetCandidateDependenciesAsync(root.Dependencies)
+                    .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
                                 .Map(y => y.SetRemoteIndex(i))))
         .ToList();
 

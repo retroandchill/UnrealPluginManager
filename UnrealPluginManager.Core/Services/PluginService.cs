@@ -43,23 +43,21 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public Task<Option<SemVersion>> GetLatestVersion(string pluginName, SemVersionRange? targetVersion = null) {
-    return _dbContext.PluginVersions
-        .Where(p => p.Parent.Name == pluginName)
-        .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
-        .OrderByVersionDecending()
-        .Select(x => x.VersionString)
-        .FirstOrDefaultAsync()
-        .ToOptionAsync()
-        .Map(x => x.Select(y => SemVersion.Parse(y)));
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName && x.VersionString == version.ToString())
+        .ToPluginVersionInfo()
+        .FirstOrDefaultAsync();
   }
 
-  /// <inheritdoc/>
-  public Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions) {
-    return _dbContext.PluginVersions
-        .Where(x => requestedVersions.Contains(new PluginVersionRequest(x.Parent.Name, x.Version)))
+  /// <inheritdoc />
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName)
+        .WhereVersionInRange(versionRange)
+        .OrderByVersionDecending()
         .ToPluginVersionInfo()
-        .ToListAsync();
+        .FirstOrDefaultAsync();
   }
 
   /// <inheritdoc />

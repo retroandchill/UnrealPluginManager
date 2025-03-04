@@ -110,7 +110,48 @@
         }
       }
     },
-    "/api/plugins/{pluginName}": {
+    "/api/plugins/{pluginName}/latest": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Retrieves detailed information about the latest version of the specified plugin,\r\noptionally constrained by a version range.",
+        "operationId": "getLatestVersion",
+        "parameters": [
+          {
+            "name": "pluginName",
+            "in": "path",
+            "description": "The name of the plugin to retrieve the latest version for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "An optional version range to filter the plugin's versions. Defaults to all released versions.",
+            "schema": {
+              "type": "string",
+              "example": ">=1.0.0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginVersionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginName}/latest/dependencies": {
       "get": {
         "tags": [
           "Plugins"
@@ -128,6 +169,29 @@
             }
           }
         ],
+        "requestBody": {
+          "description": "Optional target version range to filter the dependency tree.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "example": ">=1.0.0"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string",
+                "example": ">=1.0.0"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string",
+                "example": ">=1.0.0"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -141,6 +205,221 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginName}/latest/{engineVersion}/download": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.",
+        "operationId": "downloadLatestPlugin",
+        "parameters": [
+          {
+            "name": "pluginName",
+            "in": "path",
+            "description": "The name of the plugin to be downloaded.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "engineVersion",
+            "in": "path",
+            "description": "The Unreal Engine version for which the plugin file is requested.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetVersion",
+            "in": "query",
+            "description": "The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified.",
+            "schema": {
+              "type": "string",
+              "example": ">=1.0.0"
+            }
+          },
+          {
+            "name": "platforms",
+            "in": "query",
+            "description": "The collection of target platforms for which the plugin file is compatible.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginName}/version/{version}/download/{engineVersion}": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.",
+        "operationId": "downloadPluginVersion",
+        "parameters": [
+          {
+            "name": "pluginName",
+            "in": "path",
+            "description": "The name of the plugin to download.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "engineVersion",
+            "in": "path",
+            "description": "The version of the Unreal Engine for which the plugin is compatible.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platforms",
+            "in": "query",
+            "description": "The collection of target platforms for the plugin.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginName}/version/{version}/download/source": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Downloads the source code of a specific plugin version as a zip file.",
+        "operationId": "downloadPluginSource",
+        "parameters": [
+          {
+            "name": "pluginName",
+            "in": "path",
+            "description": "The name of the plugin to download.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginName}/version/{version}/download/{engineVersion}/{platform}/binaries": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Downloads the binary files of a specified plugin for a given version, engine version, and platform.",
+        "operationId": "downloadPluginBinaries",
+        "parameters": [
+          {
+            "name": "pluginName",
+            "in": "path",
+            "description": "The name of the plugin whose binaries are being requested.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "engineVersion",
+            "in": "path",
+            "description": "The version of the engine for which the plugin binaries are targeted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "path",
+            "description": "The platform for which the plugin binaries are compiled.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -174,58 +453,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DependencyManifest"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/plugins/{pluginName}/download": {
-      "get": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.",
-        "operationId": "downloadPlugin",
-        "parameters": [
-          {
-            "name": "pluginName",
-            "in": "path",
-            "description": "The name of the plugin to be downloaded.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "engineVersion",
-            "in": "query",
-            "description": "The Unreal Engine version for which the plugin file is requested.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platforms",
-            "in": "query",
-            "description": "The collection of target platforms for which the plugin file is compatible.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
                 }
               }
             }

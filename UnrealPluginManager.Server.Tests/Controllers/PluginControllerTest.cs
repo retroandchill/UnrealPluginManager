@@ -162,7 +162,7 @@ public class PluginControllerTest {
                                                     new Version(5, 5));
     Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
-    var downloaded = await _pluginsController.DownloadPlugin("TestPlugin", new Version(5, 5), ["Win64"]);
+    var downloaded = await _pluginsController.DownloadLatestPlugin("TestPlugin", new Version(5, 5), SemVersionRange.AllRelease, ["Win64"]);
     Assert.Multiple(() => {
       Assert.That(downloaded.FileDownloadName, Is.EqualTo("TestPlugin.zip"));
       Assert.That(downloaded.ContentType, Is.EqualTo("application/zip"));
