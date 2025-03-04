@@ -42,17 +42,19 @@ public interface IPluginManagementService {
   Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
 
   /// <summary>
-  /// Resolves potential dependencies for a given root dependency chain node, retrieving both resolved
-  /// and unresolved dependencies based on current installations and available remote data.
+  /// Retrieves a list of plugins that need to be installed based on the provided root dependency chain node
+  /// and the specified engine version.
   /// </summary>
   /// <param name="root">
-  ///   The root of the dependency chain used as the base node to resolve dependencies. This node provides
-  ///   information such as the plugin name, version, and its existing dependencies.
+  /// The root node of the dependency chain that defines the plugin and its dependencies.
   /// </param>
-  /// <param name="engineVersion"></param>
+  /// <param name="engineVersion">
+  /// The version of the game engine, which is used to determine compatibility with plugins.
+  /// This can be null if engine version filtering is not required.
+  /// </param>
   /// <returns>
-  /// A task representing the asynchronous operation. Upon completion, contains a <see cref="DependencyManifest"/>
-  /// that includes resolved dependencies as a dictionary and a set of unresolved dependencies.
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="List{PluginSummary}"/>
+  /// containing the plugins that need to be installed, including their details.
   /// </returns>
-  Task<DependencyManifest> GetPossibleDependencies(IDependencyChainNode root, string? engineVersion);
+  Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
 }

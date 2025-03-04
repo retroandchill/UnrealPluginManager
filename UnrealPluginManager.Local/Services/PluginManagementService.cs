@@ -43,7 +43,7 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
-  public async Task<DependencyManifest> GetPossibleDependencies(IDependencyChainNode root, string? engineVersion) {
+  public async Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => x.Version);
     var dependencyTasks = _pluginService.GetPossibleVersions(root.Dependencies)
@@ -53,8 +53,9 @@ public partial class PluginManagementService : IPluginManagementService {
                                 .Map(y => y.SetRemoteIndex(i))))
         .ToList();
 
-    return await Task.WhenEach(dependencyTasks)
+    var dependencyManifest = await Task.WhenEach(dependencyTasks)
         .Select(x => x.Result)
         .Collapse();
+    return _pluginService.GetDependencyList(root, dependencyManifest);
   }
 }

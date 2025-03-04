@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
+using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Pagination;
@@ -62,6 +63,11 @@ public class PluginManagementServiceTest {
     services.AddScoped<IPluginManagementService, PluginManagementService>();
 
     _serviceProvider = services.BuildServiceProvider();
+    
+    var realPluginService = new PluginService(null, null, null, null);
+    _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
+        .Returns((IDependencyChainNode root, DependencyManifest manifest) => realPluginService.GetDependencyList(root, manifest));
+    
     _pluginManagementService = _serviceProvider.GetRequiredService<IPluginManagementService>();
 
     var pageList = AddPluginsToRemote(300)
@@ -126,7 +132,7 @@ public class PluginManagementServiceTest {
   }
 
   [Test]
-  public async Task GetAllPluginDependencies() {
+  public async Task TestGetPluginDependencyTreet() {
     var root = new DependencyChainRoot {
         Dependencies = [
             new PluginDependency {
@@ -203,10 +209,13 @@ public class PluginManagementServiceTest {
                                   .ToList())
         }));
 
-    var result = await _pluginManagementService.GetPossibleDependencies(root, null);
-    Assert.Multiple(() => { 
-      Assert.That(result.FoundDependencies, Has.Count.EqualTo(4));
-      Assert.That(result.UnresolvedDependencies, Has.Count.EqualTo(0));
+    var dependencyGraph = await _pluginManagementService.GetPluginsToInstall(root, null);
+    Assert.That(dependencyGraph, Has.Count.EqualTo(4));
+    Assert.Multiple(() => {
+      Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(3, 0, 0)));
     });
   }
 }
