@@ -58,7 +58,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/plugins/{engineVersion}/submit": {
       "post": {
         "tags": [
           "Plugins"
@@ -68,8 +70,9 @@
         "parameters": [
           {
             "name": "engineVersion",
-            "in": "query",
+            "in": "path",
             "description": "The target Unreal Engine version for which the plugin is being added.",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -271,7 +274,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/version/{version}/download/{engineVersion}": {
+    "/api/plugins/{pluginName}/{version}/download/{engineVersion}": {
       "get": {
         "tags": [
           "Plugins"
@@ -313,6 +316,7 @@
             "in": "path",
             "required": true,
             "schema": {
+              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
               "type": "string"
             }
           }
@@ -332,7 +336,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/version/{version}/download/source": {
+    "/api/plugins/{pluginName}/{version}/download/source": {
       "get": {
         "tags": [
           "Plugins"
@@ -354,6 +358,7 @@
             "in": "path",
             "required": true,
             "schema": {
+              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
               "type": "string"
             }
           }
@@ -373,7 +378,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/version/{version}/download/{engineVersion}/{platform}/binaries": {
+    "/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries": {
       "get": {
         "tags": [
           "Plugins"
@@ -413,6 +418,7 @@
             "in": "path",
             "required": true,
             "schema": {
+              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
               "type": "string"
             }
           }

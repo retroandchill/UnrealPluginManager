@@ -53,11 +53,11 @@ public partial class PluginsController : ControllerBase {
   /// <param name="pluginFile">The uploaded plugin file in a valid format.</param>
   /// <param name="engineVersion">The target Unreal Engine version for which the plugin is being added.</param>
   /// <return>Returns detailed information about the added plugin.</return>
-  [HttpPost]
+  [HttpPost("{engineVersion}/submit")]
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginDetails), (int)HttpStatusCode.OK)]
-  public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromQuery] Version engineVersion) {
+  public async Task<PluginDetails> AddPlugin(IFormFile pluginFile, [FromRoute] Version engineVersion) {
     await using var stream = pluginFile.OpenReadStream();
     return await _pluginService.SubmitPlugin(stream, engineVersion.ToString());
   }
@@ -123,7 +123,7 @@ public partial class PluginsController : ControllerBase {
   /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
   /// <param name="platforms">The collection of target platforms for the plugin.</param>
   /// <return>Returns a ZIP file containing the requested plugin version for the specified engine version and platforms.</return>
-  [HttpGet("{pluginName}/version/{version}/download/{engineVersion}")]
+  [HttpGet("{pluginName}/{version}/download/{engineVersion}")]
   [Produces(MediaTypeNames.Application.Zip)]
   [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadPluginVersion([FromRoute] string pluginName, [FromRoute] SemVersion version,
@@ -141,7 +141,7 @@ public partial class PluginsController : ControllerBase {
   /// <param name="pluginName">The name of the plugin to download.</param>
   /// <param name="version">The specific version of the plugin to download.</param>
   /// <return>Returns a file stream result containing the plugin source code in a zip archive.</return>
-  [HttpGet("{pluginName}/version/{version}/download/source")]
+  [HttpGet("{pluginName}/{version}/download/source")]
   [Produces(MediaTypeNames.Application.Zip)]
   [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadPluginSource([FromRoute] string pluginName, [FromRoute] SemVersion version) {
@@ -159,7 +159,7 @@ public partial class PluginsController : ControllerBase {
   /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
   /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
   /// <return>Returns the binary files of the plugin as a file stream result in ZIP format.</return>
-  [HttpGet("{pluginName}/version/{version}/download/{engineVersion}/{platform}/binaries")]
+  [HttpGet("{pluginName}/{version}/download/{engineVersion}/{platform}/binaries")]
   public async Task<FileStreamResult> DownloadPluginBinaries([FromRoute] string pluginName, [FromRoute] SemVersion version,
                                                      [FromRoute] Version engineVersion,
                                                      [FromRoute] string platform) {

@@ -16,7 +16,7 @@ using UnrealPluginManager.Server.Utils;
 namespace UnrealPluginManager.ApiGenerator.Swagger;
 
 public static class SwaggerExtensions {
-  private const string SemVerPattern =
+  public const string SemVerPattern =
       @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
 
   public static WebApplicationBuilder SetUpSwagger(this WebApplicationBuilder builder) {
@@ -47,6 +47,7 @@ public static class SwaggerExtensions {
           options.AddSchemaFilterInstance(new CollectionPropertyFilter());
           options.AddOperationFilterInstance(new PageableParameterFilter());
           options.AddSchemaFilterInstance(new PagePropertyFilter());
+          options.AddOperationFilterInstance(new SemVersionParameterFilter());
         });
 
     return builder;

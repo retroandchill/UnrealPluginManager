@@ -38,7 +38,7 @@ import {
 } from '../models/index';
 
 export interface AddPluginRequest {
-    engineVersion?: string;
+    engineVersion: string;
     pluginFile?: Blob;
 }
 
@@ -97,11 +97,14 @@ export class PluginsApi extends runtime.BaseAPI {
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
     async addPluginRaw(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
-        const queryParameters: any = {};
-
-        if (requestParameters['engineVersion'] != null) {
-            queryParameters['engineVersion'] = requestParameters['engineVersion'];
+        if (requestParameters['engineVersion'] == null) {
+            throw new runtime.RequiredError(
+                'engineVersion',
+                'Required parameter "engineVersion" was null or undefined when calling addPlugin().'
+            );
         }
+
+        const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -126,7 +129,7 @@ export class PluginsApi extends runtime.BaseAPI {
         }
 
         const response = await this.request({
-            path: `/api/plugins`,
+            path: `/api/plugins/{engineVersion}/submit`.replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -139,7 +142,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
-    async addPlugin(requestParameters: AddPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+    async addPlugin(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
         const response = await this.addPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -229,7 +232,7 @@ export class PluginsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/api/plugins/{pluginName}/version/{version}/download/{engineVersion}/{platform}/binaries`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))).replace(`{${"platform"}}`, encodeURIComponent(String(requestParameters['platform']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
+            path: `/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))).replace(`{${"platform"}}`, encodeURIComponent(String(requestParameters['platform']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -268,7 +271,7 @@ export class PluginsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/api/plugins/{pluginName}/version/{version}/download/source`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
+            path: `/api/plugins/{pluginName}/{version}/download/source`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -319,7 +322,7 @@ export class PluginsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/api/plugins/{pluginName}/version/{version}/download/{engineVersion}`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
+            path: `/api/plugins/{pluginName}/{version}/download/{engineVersion}`.replace(`{${"pluginName"}}`, encodeURIComponent(String(requestParameters['pluginName']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))).replace(`{${"version"}}`, encodeURIComponent(String(requestParameters['version']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
