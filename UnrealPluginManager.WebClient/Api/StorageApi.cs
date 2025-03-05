@@ -17,6 +17,7 @@ using System.Net.Mime;
 using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Pagination;
     using UnrealPluginManager.Core.Model.Plugins;
+    using UnrealPluginManager.Core.Model.Resolution;
 
 
 namespace UnrealPluginManager.WebClient.Api

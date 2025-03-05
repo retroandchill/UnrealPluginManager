@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using System.ComponentModel.DataAnnotations;
+using Semver;
 
 namespace UnrealPluginManager.Core.Model.Resolution;
 
@@ -6,7 +7,7 @@ namespace UnrealPluginManager.Core.Model.Resolution;
 /// Represents a requirement for a plugin, specifying the source of the requirement
 /// and the version range that satisfies it.
 /// </summary>
-public record struct PluginRequirement(string RequiredBy, SemVersionRange RequiredVersion);
+public record struct PluginRequirement([Required] string RequiredBy, [Required] SemVersionRange RequiredVersion);
 
 /// <summary>
 /// Represents a conflict that occurs when multiple requirements specify incompatible
@@ -17,4 +18,4 @@ public record struct PluginRequirement(string RequiredBy, SemVersionRange Requir
 /// specific version requirements that caused the conflict. This allows identifying
 /// and diagnosing dependency resolution issues.
 /// </remarks>
-public record struct Conflict(string PluginName, List<PluginRequirement> Versions);
+public record struct Conflict([Required] string PluginName, [Required] List<PluginRequirement> Versions);

@@ -89,7 +89,7 @@ public partial class PluginsController : ControllerBase {
   /// <return>Returns a list of plugin summaries representing the dependency tree.</return>
   [HttpGet("{pluginName}/latest/dependencies")]
   [Produces(MediaTypeNames.Application.Json)]
-  [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
+  [ProducesResponseType(typeof(ResolutionResult), (int)HttpStatusCode.OK)]
   public Task<ResolutionResult> GetDependencyTree([FromRoute] string pluginName, SemVersionRange? targetVersion = null) {
     return _pluginService.GetDependencyList(pluginName, targetVersion);
   }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using UnrealPluginManager.Core.Model.Plugins;
 
@@ -15,9 +15,21 @@ namespace UnrealPluginManager.Core.Model.Resolution;
 /// - <see cref="ResolvedDependencies"/>: Represents a successful resolution with a list of selected plugins.
 /// - <see cref="ConflictDetected"/>: Represents resolution failure due to conflicts with a description of the conflicts.
 /// </remarks>
-[JsonDerivedType(typeof(ResolvedDependencies), typeDiscriminator: "Resolved")]
-[JsonDerivedType(typeof(ConflictDetected), typeDiscriminator: "ConflictsDetected")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = nameof(Type))]
+[JsonDerivedType(typeof(ResolvedDependencies), typeDiscriminator: nameof(ResolvedDependencies))]
+[JsonDerivedType(typeof(ConflictDetected), typeDiscriminator: nameof(ConflictDetected))]
 public abstract class ResolutionResult {
+  /// <summary>
+  /// Gets the discriminator type used to identify the specific subclass of <see cref="ResolutionResult"/>.
+  /// </summary>
+  /// <remarks>
+  /// This property enables polymorphic serialization and deserialization of <see cref="ResolutionResult"/>
+  /// instances by designating the concrete type of the result. It is required for distinguishing between
+  /// different derived types such as <see cref="ResolvedDependencies"/> and <see cref="ConflictDetected"/>.
+  /// </remarks>
+  [Required] 
+  public abstract string Type { get; }
+  
   /// <summary>
   /// Defines an implicit conversion operator for resolving plugin summaries into a
   /// <see cref="ResolutionResult"/>.
@@ -51,7 +63,6 @@ public abstract class ResolutionResult {
   public static implicit operator ResolutionResult(List<Conflict> conflicts) {
     return new ConflictDetected { Conflicts = conflicts };
   }
-  
 }
 
 /// <summary>
@@ -61,7 +72,7 @@ public abstract class ResolutionResult {
 /// This class is a concrete implementation of <see cref="ResolutionResult"/> and signifies that all plugin dependencies
 /// have been resolved without conflicts. It provides a list of selected plugins that meet the resolution criteria.
 /// </remarks>
-public class ResolvedDependencies : ResolutionResult {
+public sealed class ResolvedDependencies : ResolutionResult {
   /// <summary>
   /// Gets or sets the list of plugins that have been successfully resolved during dependency resolution.
   /// </summary>
@@ -71,8 +82,12 @@ public class ResolvedDependencies : ResolutionResult {
   /// and optional friendly name. This ensures the resolved dependencies are accurately captured
   /// for further use in the Unreal Plugin Manager workflow.
   /// </remarks>
+  [Required] 
   public required List<PluginSummary> SelectedPlugins { get; set; }
-  
+
+  /// <inheritdoc />
+  [Required] 
+  public override string Type => nameof(ResolvedDependencies);
 }
 
 /// <summary>
@@ -83,7 +98,7 @@ public class ResolvedDependencies : ResolutionResult {
 /// could not be resolved because of conflicts between required versions. It provides a detailed list of conflicts
 /// that must be addressed to successfully resolve the dependencies.
 /// </remarks>
-public class ConflictDetected : ResolutionResult {
+public sealed class ConflictDetected : ResolutionResult {
   /// <summary>
   /// Gets or sets the list of conflicts detected during the dependency resolution process in the Unreal Plugin Manager.
   /// </summary>
@@ -92,6 +107,10 @@ public class ConflictDetected : ResolutionResult {
   /// alongside the version requirements imposed by different sources. These conflicts represent incompatible version
   /// dependencies that need to be resolved to proceed with successful dependency resolution.
   /// </remarks>
+  [Required] 
   public required List<Conflict> Conflicts { get; set; }
-  
+
+  /// <inheritdoc />
+  [Required] 
+  public override string Type => nameof(ConflictDetected);
 }

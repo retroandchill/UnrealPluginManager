@@ -149,7 +149,7 @@ public partial class PluginService : IPluginService {
     }
 
     return result.Select(p => p.ToPluginSummary())
-        .ToList();
+            .ToList();
   }
 
   /// <inheritdoc/>

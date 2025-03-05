@@ -201,10 +201,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PluginSummary"
-                  }
+                  "$ref": "#/components/schemas/ResolutionResult"
                 }
               }
             }
@@ -531,6 +528,54 @@
         "additionalProperties": false,
         "description": "Represents an overview of binary files for a specific platform and engine version."
       },
+      "Conflict": {
+        "type": "object",
+        "properties": {
+          "pluginName": {
+            "type": "string",
+            "nullable": true
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginRequirement"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a conflict that occurs when multiple requirements specify incompatible\r\nversions for the same plugin during resolution."
+      },
+      "ConflictDetected": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResolutionResult"
+          },
+          {
+            "required": [
+              "conflicts",
+              "type"
+            ],
+            "type": "object",
+            "properties": {
+              "conflicts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Conflict"
+                },
+                "description": "Gets or sets the list of conflicts detected during the dependency resolution process in the Unreal Plugin Manager."
+              },
+              "type": {
+                "minLength": 1,
+                "type": "string",
+                "readOnly": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "description": "Represents resolution failure due to detected conflicts among plugin dependencies within the Unreal Plugin Manager."
+      },
       "DependencyManifest": {
         "type": "object",
         "properties": {
@@ -769,6 +814,22 @@
         },
         "description": "Represents the output of a paged query of PluginOverview."
       },
+      "PluginRequirement": {
+        "type": "object",
+        "properties": {
+          "requiredBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiredVersion": {
+            "type": "string",
+            "nullable": true,
+            "example": ">=1.0.0"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a requirement for a plugin, specifying the source of the requirement\r\nand the version range that satisfies it."
+      },
       "PluginSummary": {
         "required": [
           "friendlyName",
@@ -868,6 +929,58 @@
         },
         "additionalProperties": false,
         "description": "Represents detailed information about a specific version of a plugin."
+      },
+      "ResolutionResult": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "minLength": 1,
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the result of a plugin resolution operation within the Unreal Plugin Manager.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Resolved": "ResolvedDependencies",
+            "ConflictsDetected": "ConflictDetected"
+          }
+        }
+      },
+      "ResolvedDependencies": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResolutionResult"
+          },
+          {
+            "required": [
+              "selectedPlugins",
+              "type"
+            ],
+            "type": "object",
+            "properties": {
+              "selectedPlugins": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PluginSummary"
+                },
+                "description": "Gets or sets the list of plugins that have been successfully resolved during dependency resolution."
+              },
+              "type": {
+                "minLength": 1,
+                "type": "string",
+                "readOnly": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "description": "Represents a successful resolution of plugin dependencies within the Unreal Plugin Manager."
       },
       "VersionDetails": {
         "required": [

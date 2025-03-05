@@ -17,6 +17,7 @@ using System.Net.Mime;
 using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Pagination;
     using UnrealPluginManager.Core.Model.Plugins;
+    using UnrealPluginManager.Core.Model.Resolution;
 
 using UnrealPluginManager.WebClient.Model;
 
@@ -180,8 +181,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>List&lt;PluginSummary&gt;</returns>
-        List<PluginSummary> GetDependencyTree(string pluginName, string? body = default(string?), int operationIndex = 0);
+        /// <returns>ResolutionResult</returns>
+        ResolutionResult GetDependencyTree(string pluginName, string? body = default(string?), int operationIndex = 0);
 
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
@@ -193,8 +194,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of List&lt;PluginSummary&gt;</returns>
-        ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?), int operationIndex = 0);
+        /// <returns>ApiResponse of ResolutionResult</returns>
+        ApiResponse<ResolutionResult> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?), int operationIndex = 0);
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
         /// </summary>
@@ -433,8 +434,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ResolutionResult</returns>
+        System.Threading.Tasks.Task<ResolutionResult> GetDependencyTreeAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
@@ -447,8 +448,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (ResolutionResult)</returns>
+        System.Threading.Tasks.Task<ApiResponse<ResolutionResult>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
         /// </summary>
@@ -1670,10 +1671,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>List&lt;PluginSummary&gt;</returns>
-        public List<PluginSummary> GetDependencyTree(string pluginName, string? body = default(string?), int operationIndex = 0)
+        /// <returns>ResolutionResult</returns>
+        public ResolutionResult GetDependencyTree(string pluginName, string? body = default(string?), int operationIndex = 0)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = GetDependencyTreeWithHttpInfo(pluginName, body);
+            UnrealPluginManager.WebClient.Client.ApiResponse<ResolutionResult> localVarResponse = GetDependencyTreeWithHttpInfo(pluginName, body);
             return localVarResponse.Data;
         }
 
@@ -1684,8 +1685,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of List&lt;PluginSummary&gt;</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?), int operationIndex = 0)
+        /// <returns>ApiResponse of ResolutionResult</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<ResolutionResult> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?), int operationIndex = 0)
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -1726,7 +1727,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<List<PluginSummary>>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<ResolutionResult>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration);
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetDependencyTree", localVarResponse);
@@ -1747,10 +1748,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        public async System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ResolutionResult</returns>
+        public async System.Threading.Tasks.Task<ResolutionResult> GetDependencyTreeAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = await GetDependencyTreeWithHttpInfoAsync(pluginName, body, operationIndex, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<ResolutionResult> localVarResponse = await GetDependencyTreeWithHttpInfoAsync(pluginName, body, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1762,8 +1763,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (ResolutionResult)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<ResolutionResult>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -1805,7 +1806,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = await this.AsynchronousClient.GetAsync<List<PluginSummary>>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<ResolutionResult>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
