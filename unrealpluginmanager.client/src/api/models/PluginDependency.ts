@@ -32,7 +32,7 @@ export interface PluginDependency {
      * @type {string}
      * @memberof PluginDependency
      */
-    pluginName: string | null;
+    pluginName: string;
     /**
      * 
      * @type {PluginType}
@@ -44,7 +44,7 @@ export interface PluginDependency {
      * @type {string}
      * @memberof PluginDependency
      */
-    pluginVersion: string | null;
+    pluginVersion: string;
 }
 
 

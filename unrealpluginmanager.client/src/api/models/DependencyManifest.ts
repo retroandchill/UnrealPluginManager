@@ -33,14 +33,14 @@ export interface DependencyManifest {
      * @type {{ [key: string]: Array<PluginVersionInfo>; }}
      * @memberof DependencyManifest
      */
-    foundDependencies?: { [key: string]: Array<PluginVersionInfo>; } | null;
+    foundDependencies?: { [key: string]: Array<PluginVersionInfo>; };
     /**
      * A property that holds a collection of dependencies that could not be resolved
      * during the dependency resolution process.
      * @type {Set<string>}
      * @memberof DependencyManifest
      */
-    unresolvedDependencies?: Set<string> | null;
+    unresolvedDependencies?: Set<string>;
 }
 
 /**

@@ -38,7 +38,7 @@ export interface PluginVersionInfo {
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    name: string | null;
+    name: string;
     /**
      * Gets or sets the user-friendly name of the plugin associated with the current version.
      * @type {string}
@@ -56,13 +56,13 @@ export interface PluginVersionInfo {
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    version: string | null;
+    version: string;
     /**
      * Gets or sets the list of dependencies for the current plugin version.
      * @type {Array<PluginDependency>}
      * @memberof PluginVersionInfo
      */
-    dependencies: Array<PluginDependency> | null;
+    dependencies: Array<PluginDependency>;
 }
 
 /**
@@ -92,7 +92,7 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
         'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
         'versionId': json['versionId'],
         'version': json['version'],
-        'dependencies': (json['dependencies'] == null ? null : (json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
+        'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
     };
 }
 
@@ -112,7 +112,7 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
         'friendlyName': value['friendlyName'],
         'versionId': value['versionId'],
         'version': value['version'],
-        'dependencies': (value['dependencies'] == null ? null : (value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
+        'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
     };
 }
 

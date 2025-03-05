@@ -532,15 +532,13 @@
         "type": "object",
         "properties": {
           "pluginName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "versions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PluginRequirement"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false,
@@ -587,8 +585,7 @@
                 "$ref": "#/components/schemas/PluginVersionInfo"
               }
             },
-            "description": "A property that stores a collection of dependencies that have been successfully resolved\r\nduring the dependency resolution process.",
-            "nullable": true
+            "description": "A property that stores a collection of dependencies that have been successfully resolved\r\nduring the dependency resolution process."
           },
           "unresolvedDependencies": {
             "uniqueItems": true,
@@ -596,8 +593,7 @@
             "items": {
               "type": "string"
             },
-            "description": "A property that holds a collection of dependencies that could not be resolved\r\nduring the dependency resolution process.",
-            "nullable": true
+            "description": "A property that holds a collection of dependencies that could not be resolved\r\nduring the dependency resolution process."
           }
         },
         "additionalProperties": false,
@@ -618,13 +614,11 @@
           },
           "pluginName": {
             "type": "string",
-            "description": "Gets or sets the name of the plugin associated with the dependency.\r\nThe plugin name is a required field and must adhere to the predefined naming rules.",
-            "nullable": true
+            "description": "Gets or sets the name of the plugin associated with the dependency.\r\nThe plugin name is a required field and must adhere to the predefined naming rules."
           },
           "pluginVersion": {
             "type": "string",
             "description": "Gets or sets the version range associated with the plugin dependency.\r\nThis version range defines the compatible versions of the plugin required by the dependency.",
-            "nullable": true,
             "example": ">=1.0.0"
           },
           "optional": {
@@ -648,8 +642,7 @@
         "properties": {
           "pluginName": {
             "type": "string",
-            "description": "Gets the name of the plugin.",
-            "nullable": true
+            "description": "Gets the name of the plugin."
           },
           "type": {
             "$ref": "#/components/schemas/PluginType"
@@ -657,7 +650,6 @@
           "pluginVersion": {
             "type": "string",
             "description": "Gets the version range of the dependent plugin.",
-            "nullable": true,
             "example": ">=1.0.0"
           }
         },
@@ -818,12 +810,10 @@
         "type": "object",
         "properties": {
           "requiredBy": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "requiredVersion": {
             "type": "string",
-            "nullable": true,
             "example": ">=1.0.0"
           }
         },
@@ -898,8 +888,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Gets the name of the plugin associated with the current version.",
-            "nullable": true
+            "description": "Gets the name of the plugin associated with the current version."
           },
           "friendlyName": {
             "type": "string",
@@ -915,7 +904,6 @@
             "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
             "type": "string",
             "description": "Gets the semantic version of the plugin.",
-            "nullable": true,
             "example": "1.0.0"
           },
           "dependencies": {
@@ -923,8 +911,7 @@
             "items": {
               "$ref": "#/components/schemas/PluginDependency"
             },
-            "description": "Gets or sets the list of dependencies for the current plugin version.",
-            "nullable": true
+            "description": "Gets or sets the list of dependencies for the current plugin version."
           }
         },
         "additionalProperties": false,
@@ -939,6 +926,7 @@
           "type": {
             "minLength": 1,
             "type": "string",
+            "description": "Gets the discriminator type used to identify the specific subclass of UnrealPluginManager.Core.Model.Resolution.ResolutionResult.",
             "readOnly": true
           }
         },
@@ -1007,16 +995,14 @@
             "items": {
               "$ref": "#/components/schemas/DependencyOverview"
             },
-            "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality.",
-            "nullable": true
+            "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality."
           },
           "binaries": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BinariesOverview"
             },
-            "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports.",
-            "nullable": true
+            "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports."
           }
         },
         "additionalProperties": false,

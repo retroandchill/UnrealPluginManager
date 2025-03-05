@@ -18,7 +18,13 @@ namespace UnrealPluginManager.ApiGenerator.Swagger;
 public class DiscriminatorFilter : ISchemaFilter {
   /// <inheritdoc />
   public void Apply(OpenApiSchema schema, SchemaFilterContext context) {
-    if (context.Type != typeof(ResolutionResult)) return;
+    if (context.Type != typeof(ResolutionResult)) {
+      if (context.Type.IsSubclassOf(typeof(ResolutionResult))) {
+        schema.Properties.Remove("type");
+      }
+      
+      return;
+    }
     // Add the discriminator property
     schema.Discriminator = new OpenApiDiscriminator
     {

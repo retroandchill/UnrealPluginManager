@@ -50,6 +50,7 @@ public static class SwaggerExtensions {
           options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
           
           options.EnableAnnotations(true, true);
+          options.SupportNonNullableReferenceTypes();
           
           // include models xml documentation
           var modelsAssembly = typeof(PluginSummary).Assembly;

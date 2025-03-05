@@ -15,7 +15,7 @@ namespace UnrealPluginManager.Core.Model.Resolution;
 /// - <see cref="ResolvedDependencies"/>: Represents a successful resolution with a list of selected plugins.
 /// - <see cref="ConflictDetected"/>: Represents resolution failure due to conflicts with a description of the conflicts.
 /// </remarks>
-[JsonPolymorphic(TypeDiscriminatorPropertyName = nameof(Type))]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(ResolvedDependencies), typeDiscriminator: nameof(ResolvedDependencies))]
 [JsonDerivedType(typeof(ConflictDetected), typeDiscriminator: nameof(ConflictDetected))]
 public abstract class ResolutionResult {

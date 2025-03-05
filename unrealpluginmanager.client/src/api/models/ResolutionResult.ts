@@ -22,7 +22,7 @@ import { ResolvedDependencies, ResolvedDependenciesFromJSONTyped, ResolvedDepend
  */
 export interface ResolutionResult {
     /**
-     * 
+     * Gets the discriminator type used to identify the specific subclass of UnrealPluginManager.Core.Model.Resolution.ResolutionResult.
      * @type {string}
      * @memberof ResolutionResult
      */

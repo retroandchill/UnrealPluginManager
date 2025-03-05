@@ -25,13 +25,13 @@ export interface PluginRequirement {
      * @type {string}
      * @memberof PluginRequirement
      */
-    requiredBy?: string | null;
+    requiredBy?: string;
     /**
      * 
      * @type {string}
      * @memberof PluginRequirement
      */
-    requiredVersion?: string | null;
+    requiredVersion?: string;
 }
 
 /**

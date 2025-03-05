@@ -33,13 +33,13 @@ export interface Conflict {
      * @type {string}
      * @memberof Conflict
      */
-    pluginName?: string | null;
+    pluginName?: string;
     /**
      * 
      * @type {Array<PluginRequirement>}
      * @memberof Conflict
      */
-    versions?: Array<PluginRequirement> | null;
+    versions?: Array<PluginRequirement>;
 }
 
 /**

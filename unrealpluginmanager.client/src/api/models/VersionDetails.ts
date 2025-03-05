@@ -53,14 +53,14 @@ export interface VersionDetails {
      * @type {Array<DependencyOverview>}
      * @memberof VersionDetails
      */
-    dependencies: Array<DependencyOverview> | null;
+    dependencies: Array<DependencyOverview>;
     /**
      * A collection of binary overviews associated with a specific version of a plugin.
      * Each binary overview provides details about the platform and engine version it supports.
      * @type {Array<BinariesOverview>}
      * @memberof VersionDetails
      */
-    binaries: Array<BinariesOverview> | null;
+    binaries: Array<BinariesOverview>;
 }
 
 /**
@@ -86,8 +86,8 @@ export function VersionDetailsFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'id': json['id'],
         'version': json['version'],
-        'dependencies': (json['dependencies'] == null ? null : (json['dependencies'] as Array<any>).map(DependencyOverviewFromJSON)),
-        'binaries': (json['binaries'] == null ? null : (json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
+        'dependencies': ((json['dependencies'] as Array<any>).map(DependencyOverviewFromJSON)),
+        'binaries': ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
     };
 }
 
@@ -104,8 +104,8 @@ export function VersionDetailsToJSONTyped(value?: VersionDetails | null, ignoreD
         
         'id': value['id'],
         'version': value['version'],
-        'dependencies': (value['dependencies'] == null ? null : (value['dependencies'] as Array<any>).map(DependencyOverviewToJSON)),
-        'binaries': (value['binaries'] == null ? null : (value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),
+        'dependencies': ((value['dependencies'] as Array<any>).map(DependencyOverviewToJSON)),
+        'binaries': ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),
     };
 }
 

@@ -41,14 +41,14 @@ export interface DependencyOverview {
      * @type {string}
      * @memberof DependencyOverview
      */
-    pluginName: string | null;
+    pluginName: string;
     /**
      * Gets or sets the version range associated with the plugin dependency.
      * This version range defines the compatible versions of the plugin required by the dependency.
      * @type {string}
      * @memberof DependencyOverview
      */
-    pluginVersion?: string | null;
+    pluginVersion?: string;
     /**
      * Gets or sets a value indicating whether the dependency is optional.
      * When set to true, the dependency is not mandatory, and the system
