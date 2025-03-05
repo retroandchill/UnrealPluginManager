@@ -213,7 +213,7 @@ public class PluginServiceTests {
         Dependencies = pluginDependencies
     };
 
-    var result = await pluginService.GetDependencyList("App");
+    var result = pluginService.GetDependencyList(root, possibleVersions);
     Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
     var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
     Assert.That(dependencyGraph, Has.Count.EqualTo(4));

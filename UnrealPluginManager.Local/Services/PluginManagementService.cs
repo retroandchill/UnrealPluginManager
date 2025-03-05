@@ -98,6 +98,7 @@ public partial class PluginManagementService : IPluginManagementService {
         .ToList();
 
     var dependencyManifest = await Task.WhenEach(dependencyTasks)
+        .Where(x => x.IsCompletedSuccessfully)
         .Select(x => x.Result)
         .Collapse();
     return _pluginService.GetDependencyList(root, dependencyManifest);

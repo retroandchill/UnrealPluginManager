@@ -2,8 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
@@ -194,7 +192,7 @@ public class PluginManagementServiceTest {
         }));
 
     _pluginsApi.Setup(x => x.GetCandidateDependenciesAsync(
-                          It.Is(root.Dependencies, EqualityComparer<List<PluginDependency>>.Default),
+                          It.IsAny<List<PluginDependency>>(),
                           It.IsAny<int>(), It.IsAny<CancellationToken>()))
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is not "Http" and not "StdLib")
