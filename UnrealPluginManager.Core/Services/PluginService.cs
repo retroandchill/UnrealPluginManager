@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text.Json;
 using LanguageExt;
@@ -10,6 +11,7 @@ using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
@@ -106,7 +108,7 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
+  public async Task<ResolutionResult> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
     var plugin = await _dbContext.PluginVersions
         .Include(p => p.Parent)
         .Include(p => p.Dependencies)
@@ -126,21 +128,22 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
+  public ResolutionResult GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
     var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
-    var bindings = formula.Solve();
-    if (bindings.IsNone) {
-      return [];
-    }
+    return formula.Solve()
+        .Right(ResolutionResult (r) => r)
+        .Left(l => GetDependencyList(l, root, manifest));
+  }
 
+  private static ResolutionResult GetDependencyList(List<SelectedVersion> selectedVersions, IDependencyChainNode root, DependencyManifest manifest) {
     IEnumerable<PluginVersionInfo> result;
     if (root is PluginVersionInfo plugin) {
-      result = bindings.SelectMany(b => b)
+      result = selectedVersions
           .Select(p => p.Name == root.Name
                       ? plugin
                       : manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
     } else {
-      result = bindings.SelectMany(b => b)
+      result = selectedVersions
           .Where(p => p.Name != root.Name)
           .Select(p => manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
     }

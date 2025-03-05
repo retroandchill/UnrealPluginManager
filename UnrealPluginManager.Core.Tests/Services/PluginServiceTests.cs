@@ -12,6 +12,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
@@ -132,17 +133,23 @@ public class PluginServiceTests {
         ]
     });
 
-    var plugin1List = await pluginService.GetDependencyList("Plugin1");
+    var plugin1Result = await pluginService.GetDependencyList("Plugin1");
+    Assert.That(plugin1Result, Is.InstanceOf<ResolvedDependencies>());
+    var plugin1List = ((ResolvedDependencies)plugin1Result).SelectedPlugins;
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
 
-    var plugin2List = await pluginService.GetDependencyList("Plugin2");
+    var plugin2Result = await pluginService.GetDependencyList("Plugin2");
+    Assert.That(plugin2Result, Is.InstanceOf<ResolvedDependencies>());
+    var plugin2List = ((ResolvedDependencies)plugin2Result).SelectedPlugins;
     Assert.That(plugin2List, Has.Count.EqualTo(2));
     var plugin2Names = plugin2List.Select(x => x.Name).ToList();
     Assert.That(plugin2Names, Does.Contain("Plugin1"));
     Assert.That(plugin2Names, Does.Contain("Plugin2"));
 
-    var plugin3List = await pluginService.GetDependencyList("Plugin3");
+    var plugin3Result = await pluginService.GetDependencyList("Plugin3");
+    Assert.That(plugin3Result, Is.InstanceOf<ResolvedDependencies>());
+    var plugin3List = ((ResolvedDependencies)plugin3Result).SelectedPlugins;
     Assert.That(plugin3List, Has.Count.EqualTo(3));
     var plugin3Names = plugin3List.Select(x => x.Name).ToList();
     Assert.That(plugin3Names, Does.Contain("Plugin1"));
@@ -155,7 +162,9 @@ public class PluginServiceTests {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     await pluginService.SetupVersionResolutionTree();
 
-    var dependencyGraph = await pluginService.GetDependencyList("App");
+    var result = await pluginService.GetDependencyList("App");
+    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
+    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
     Assert.That(dependencyGraph, Has.Count.EqualTo(5));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
@@ -204,7 +213,9 @@ public class PluginServiceTests {
         Dependencies = pluginDependencies
     };
 
-    var dependencyGraph = pluginService.GetDependencyList(root, possibleVersions);
+    var result = await pluginService.GetDependencyList("App");
+    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
+    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
     Assert.That(dependencyGraph, Has.Count.EqualTo(4));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));

@@ -3,6 +3,7 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
@@ -66,7 +67,7 @@ public interface IPluginService {
   /// <returns>
   /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
   /// </returns>
-  Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
+  Task<ResolutionResult> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
 
   /// <summary>
   /// Retrieves a list of plugin summaries based on the specified dependency chain root and dependency manifest.
@@ -76,7 +77,7 @@ public interface IPluginService {
   /// <returns>
   /// A list of <see cref="PluginSummary"/> representing the plugins identified in the dependency chain.
   /// </returns>
-  List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
+  ResolutionResult GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
 
   /// <summary>
   /// Adds a new plugin to the system using the provided plugin name and descriptor information.

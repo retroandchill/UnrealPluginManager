@@ -1,7 +1,11 @@
 ﻿using System.Collections.Immutable;
 using LanguageExt;
+using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 
 namespace UnrealPluginManager.Core.Solver;
+
+public record struct EvaluationResult(bool Result, string RequiredBy, PluginDependency Dependency);
 
 /// <summary>
 /// Represents a logical expression interface that defines methods for evaluating and manipulating logical expressions.
@@ -20,11 +24,12 @@ public interface IExpression {
   /// <summary>
   /// Evaluates the logical expression to determine its truth value.
   /// </summary>
+  /// <param name="results"></param>
   /// <returns>
   /// A boolean value indicating the result of the evaluation.
   /// Throws an exception if the expression contains free variables that cannot be evaluated.
   /// </returns>
-  bool Evaluate();
+  bool Evaluate(List<EvaluationResult> results);
 
   /// <summary>
   /// Replaces every occurrence of a specified variable within the logical expression
@@ -54,8 +59,9 @@ public record BoolExpression(bool Value) : IExpression {
     return [];
   }
 
+  /// <param name="results"></param>
   /// <inheritdoc/>
-  public bool Evaluate() {
+  public bool Evaluate(List<EvaluationResult> results) {
     return Value;
   }
 
@@ -79,8 +85,9 @@ public record Var(SelectedVersion Selected) : IExpression {
     return [Selected];
   }
 
+  /// <param name="results"></param>
   /// <inheritdoc/>
-  public bool Evaluate() {
+  public bool Evaluate(List<EvaluationResult> results) {
     throw new NotSupportedException($"The variable {Selected} has not been replaced");
   }
 
@@ -114,9 +121,10 @@ public record Not(IExpression Expression) : IExpression {
     return Expression.Free();
   }
 
+  /// <param name="results"></param>
   /// <inheritdoc/>
-  public bool Evaluate() {
-    return !Expression.Evaluate();
+  public bool Evaluate(List<EvaluationResult> results) {
+    return !Expression.Evaluate(results);
   }
 
   /// <inheritdoc/>
@@ -139,9 +147,10 @@ public record And(IEnumerable<IExpression> Expressions) : IExpression {
     return Expressions.SelectMany(e => e.Free()).ToImmutableSortedSet();
   }
 
+  /// <param name="results"></param>
   /// <inheritdoc/>
-  public bool Evaluate() {
-    return Expressions.All(e => e.Evaluate());
+  public bool Evaluate(List<EvaluationResult> results) {
+    return Expressions.All(e => e.Evaluate(results));
   }
 
   /// <inheritdoc/>
@@ -165,8 +174,8 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
   }
 
   /// <inheritdoc/>
-  public bool Evaluate() {
-    return Expressions.Any(e => e.Evaluate());
+  public bool Evaluate(List<EvaluationResult> results) {
+    return Expressions.Any(e => e.Evaluate(results));
   }
 
   /// <inheritdoc/>
@@ -188,20 +197,27 @@ public record Or(IEnumerable<IExpression> Expressions) : IExpression {
 /// if the first sub-expression (P) is false or the second sub-expression (Q) is true. It also provides methods
 /// to retrieve free variables and replace variables within the expression.
 /// </remarks>
-public record Impl(IExpression P, IExpression Q) : IExpression {
+public record Impl(IExpression P, IExpression Q, string RequiredBy, PluginDependency Dependency) : IExpression {
   /// <inheritdoc/>
   public IEnumerable<SelectedVersion> Free() {
     return P.Free().Concat(Q.Free()).ToImmutableSortedSet();
   }
 
+  /// <param name="results"></param>
   /// <inheritdoc/>
-  public bool Evaluate() {
-    return !P.Evaluate() || Q.Evaluate();
+  public bool Evaluate(List<EvaluationResult> results) {
+    if (!P.Evaluate(results)) {
+      return true;
+    }
+
+    var depEvaluation = Q.Evaluate(results);
+    results.Add(new EvaluationResult(depEvaluation, RequiredBy, Dependency));
+    return depEvaluation;
   }
 
   /// <inheritdoc/>
   public IExpression Replace(SelectedVersion varName, bool varValue) {
-    return new Impl(P.Replace(varName, varValue), Q.Replace(varName, varValue));
+    return this with { P = P.Replace(varName, varValue), Q = Q.Replace(varName, varValue) };
   }
 
   /// <inheritdoc />

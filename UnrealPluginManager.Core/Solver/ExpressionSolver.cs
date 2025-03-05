@@ -3,15 +3,19 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Solver;
+
+using SolveResult = Either<List<SelectedVersion>, List<Conflict>>;
 
 /// Static class responsible for solving logical expressions and managing variable bindings.
 /// This class provides functionality to evaluate logical expressions represented by the `IExpression` interface
 /// and create binding pairs of variable names and their associated `SemVersion` values.
 /// It also supports converting plugin dependency data into solvable expressions.
 public static class ExpressionSolver {
+  
   /// Solves the given logical expression and returns a list of variable bindings that satisfy the expression.
   /// <param name="expr">
   /// An instance of IExpression representing the logical expression to be evaluated.
@@ -21,19 +25,35 @@ public static class ExpressionSolver {
   /// the variable name as a string and its corresponding version as a SemVersion.
   /// If no solution exists, returns None.
   /// </returns>
-  public static Option<List<SelectedVersion>> Solve(this IExpression expr) {
-    var selected = SolveInternal(expr, new Dictionary<SelectedVersion, bool>());
+  public static SolveResult Solve(this IExpression expr) {
+    var conflicts = new List<Conflict>();
+    var selected = SolveInternal(expr, new Dictionary<SelectedVersion, bool>(), conflicts);
     return selected
-        .Select(x => x.Where(y => y.Value)
-                    .Select(y => y.Key)
-                    .ToList());
+        .Match(SolveResult (x) => x.Where(y => y.Value)
+                   .Select(y => y.Key)
+                   .ToList(),
+               () => conflicts);
   }
 
   private static Option<Dictionary<SelectedVersion, bool>> SolveInternal(
-      IExpression expr, Dictionary<SelectedVersion, bool> bindings) {
+      IExpression expr, Dictionary<SelectedVersion, bool> bindings, List<Conflict> conflicts) {
     var freeVar = AnyVar(expr);
     if (freeVar.IsNone) {
-      return expr.Evaluate() ? bindings : Option<Dictionary<SelectedVersion, bool>>.None;
+      var results = new List<EvaluationResult>();
+      if (expr.Evaluate(results)) {
+        return bindings;
+      }
+
+      conflicts.AddRange(results.GroupBy(x => x.Dependency.PluginName)
+          .Where(x => x.Count() > 1)
+          .Where(x => x.Any(y => !y.Result))
+          .Select(x => 
+                      new Conflict(x.Key, x.Select(y => 
+                                                       new PluginRequirement(y.RequiredBy, 
+                                                                             y.Dependency.PluginVersion))
+                                       .ToList())));
+      
+      return Option<Dictionary<SelectedVersion, bool>>.None;
     }
 
     var validatedVar = (SelectedVersion)freeVar;
@@ -45,7 +65,7 @@ public static class ExpressionSolver {
     var falseBindings = new Dictionary<SelectedVersion, bool>(bindings);
     falseBindings[validatedVar] = false;
 
-    return SolveInternal(trueExpr, trueBindings) || SolveInternal(falseExpr, falseBindings);
+    return SolveInternal(trueExpr, trueBindings, conflicts) || SolveInternal(falseExpr, falseBindings, conflicts);
   }
 
   private static Option<SelectedVersion> AnyVar(IExpression expr) {
@@ -91,12 +111,12 @@ public static class ExpressionSolver {
                  .Concat(dependencyFrequency.Select(x => pluginData[x])
                              .SelectMany(x => x.OrderBy(y => y.Version, SemVersion.PrecedenceComparer)))) {
       terms.AddRange(pack.Dependencies.Where(dep => dep.Type == PluginType.Provided)
-                         .Select(dep => pluginData[dep.PluginName]
+                         .Select(dep => (Dep: dep, Vars: pluginData[dep.PluginName]
                                      .Where(pd => dep.PluginVersion.Contains(pd.Version))
                                      .Select(pd => PackageVar(dep.PluginName, pd.Version, pd.Installed, pd.RemoteIndex))
-                                     .ToList())
+                                     .ToList()))
                          .Select(deps => new Impl(PackageVar(pack.Name, pack.Version, pack.Installed, pack.RemoteIndex),
-                                                  new Or(deps))));
+                                                  new Or(deps.Vars), pack.Name, deps.Dep)));
     }
 
     var variables = new And(terms).Free()

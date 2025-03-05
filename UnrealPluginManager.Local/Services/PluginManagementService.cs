@@ -2,6 +2,7 @@
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -76,7 +77,7 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
-  public async Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
+  public async Task<ResolutionResult> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => x.Version);
     

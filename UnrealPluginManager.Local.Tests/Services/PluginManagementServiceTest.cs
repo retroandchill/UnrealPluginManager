@@ -5,6 +5,7 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -209,7 +210,9 @@ public class PluginManagementServiceTest {
                                   .ToList())
         }));
 
-    var dependencyGraph = await _pluginManagementService.GetPluginsToInstall(root, null);
+    var result = await _pluginManagementService.GetPluginsToInstall(root, null);
+    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
+    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
     Assert.That(dependencyGraph, Has.Count.EqualTo(4));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));

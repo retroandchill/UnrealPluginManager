@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -79,7 +80,7 @@ public partial class PluginsController : ControllerBase {
         () => new PluginNotFoundException(
             $"Could not find plugin {pluginName} that satisfies the specified version range."));
   }
-  
+
   /// <summary>
   /// Retrieves the dependency tree for a specified plugin.
   /// </summary>
@@ -89,7 +90,7 @@ public partial class PluginsController : ControllerBase {
   [HttpGet("{pluginName}/latest/dependencies")]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
-  public Task<List<PluginSummary>> GetDependencyTree([FromRoute] string pluginName, SemVersionRange? targetVersion = null) {
+  public Task<ResolutionResult> GetDependencyTree([FromRoute] string pluginName, SemVersionRange? targetVersion = null) {
     return _pluginService.GetDependencyList(pluginName, targetVersion);
   }
   

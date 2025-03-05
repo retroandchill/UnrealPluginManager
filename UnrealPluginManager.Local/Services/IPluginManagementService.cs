@@ -2,6 +2,7 @@
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -71,15 +72,15 @@ public interface IPluginManagementService {
   /// and the specified engine version.
   /// </summary>
   /// <param name="root">
-  /// The root node of the dependency chain that defines the plugin and its dependencies.
+  ///   The root node of the dependency chain that defines the plugin and its dependencies.
   /// </param>
   /// <param name="engineVersion">
-  /// The version of the game engine, which is used to determine compatibility with plugins.
-  /// This can be null if engine version filtering is not required.
+  ///   The version of the game engine, which is used to determine compatibility with plugins.
+  ///   This can be null if engine version filtering is not required.
   /// </param>
   /// <returns>
   /// A task representing the asynchronous operation. Upon completion, returns a <see cref="List{PluginSummary}"/>
   /// containing the plugins that need to be installed, including their details.
   /// </returns>
-  Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
+  Task<ResolutionResult> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
 }
