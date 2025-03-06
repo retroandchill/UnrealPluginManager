@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using LanguageExt;
 using Semver;
 using UnrealPluginManager.Local.Services;
+using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Cli.Commands;
 
@@ -119,6 +120,7 @@ public class InstallCommandOptions : ICommandOptions {
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
   private readonly IConsole _console;
   private readonly IEngineService _engineService;
+  private readonly IPluginManagementService _pluginManagementService;
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
@@ -129,7 +131,38 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
                  _console.Out.WriteLine($"Installed version {v} already satisfies the version requirement.");
                  return Task.FromResult(0);
                },
-               () => _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion,
-                                                  ["Win64"]));
+               () => TryInstall(options.Input, options.Version, options.EngineVersion));
+  }
+
+  private async Task<int> TryInstall(string input, SemVersionRange version, string? engineVersion) {
+    var targetPlugin = await _pluginManagementService.FindTargetPlugin(input, version, engineVersion);
+    var dependencyTree = await _pluginManagementService.GetPluginsToInstall(targetPlugin, engineVersion);
+    return await dependencyTree.Match(x => InstallToEngine(x, engineVersion),
+        x => ReportConflicts(input, x));
+  }
+
+  private async Task<int> InstallToEngine(ResolvedDependencies resolvedDependencies, string? engineVersion) {
+    var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
+        .ToDictionaryAsync(x => x.Name, x => x.Version);
+
+    foreach (var dep in resolvedDependencies.SelectedPlugins) {
+      if (!currentlyInstalled.TryGetValue(dep.Name, out var currentVersion) || currentVersion != dep.Version) {
+        await _engineService.InstallPlugin(dep.Name, dep.Version, engineVersion, ["Win64"]);
+      }
+    }
+
+    return 0;
+  }
+
+  private Task<int> ReportConflicts(string pluginName, ConflictDetected conflicts) {
+    _console.Out.WriteLine($"Unable to install {pluginName} due conflicts. The following conflicts were detected:");
+    foreach (var conflict in conflicts.Conflicts) {
+      _console.Out.WriteLine($"\n{conflict.PluginName} required by:");
+      foreach (var requiredBy in conflict.Versions) {
+        _console.Out.WriteLine($"    {requiredBy.RequiredBy} => {requiredBy.RequiredVersion}");
+      }
+    }
+
+    return Task.FromResult(1);
   }
 }

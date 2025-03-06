@@ -170,6 +170,9 @@ public interface IPluginService {
   /// </returns>
   Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
+  
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+                                               IReadOnlyCollection<string> targetPlatforms);
 
   /// <summary>
   /// Retrieves all plugin data files matching the specified parameters.

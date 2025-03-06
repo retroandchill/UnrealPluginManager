@@ -68,6 +68,6 @@ public interface IEngineService {
   /// <returns>
   /// A task representing the asynchronous operation. The task result contains an integer indicating the status of the installation process.
   /// </returns>
-  public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+  public Task<int> InstallPlugin(string pluginName, SemVersion pluginVersion, string? engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
 }

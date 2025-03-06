@@ -152,14 +152,14 @@ public partial class EngineServiceTest {
     }
 
     List<string> targetPlatforms = ["Win64"];
-    _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms))
+    _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms))
         .Returns((string _, SemVersionRange _, string _, IReadOnlyCollection<string> _) =>
                      _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
     Assert.That(installedPluginVersion.IsNone, Is.True);
-    var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);
+    var returnCode = await engineService.InstallPlugin("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms);
     Assert.Multiple(() => {
       Assert.That(returnCode, Is.EqualTo(0));
       Assert.That(_filesystem.Directory.Exists(

@@ -91,7 +91,7 @@ public partial class EngineService : IEngineService {
   }
 
   /// <inheritdoc />
-  public async Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+  public async Task<int> InstallPlugin(string pluginName, SemVersion pluginVersion, string? engineVersion,
                                        IReadOnlyCollection<string> targetPlatforms) {
     var installedEngine = GetInstalledEngine(engineVersion);
     var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);

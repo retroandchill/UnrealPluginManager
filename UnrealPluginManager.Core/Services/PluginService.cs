@@ -336,6 +336,16 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
+  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+                                                            IReadOnlyCollection<string> targetPlatforms) {
+    yield return await GetPluginSource(pluginName, targetVersion);
+
+    await foreach (var (_, archive) in GetPluginBinaries(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+      yield return archive;
+    }
+  }
+
+  /// <inheritdoc />
   public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersionRange targetVersion,
                                                             string engineVersion,
                                                             IReadOnlyCollection<string> targetPlatforms) {
