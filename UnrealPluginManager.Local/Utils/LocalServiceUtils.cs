@@ -48,7 +48,9 @@ public static class LocalServiceUtils {
   /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
   private static IServiceCollection AddApi<T, TImpl>(this IServiceCollection services)
       where T : class, IApiAccessor where TImpl : T, new() {
-    return services.AddScoped<T>(x => new TImpl());
+    var instance = new TImpl();
+    return services.AddSingleton<T>(instance)
+        .AddSingleton<IApiAccessor>(instance);
   }
 
   /// <summary>

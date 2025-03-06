@@ -99,11 +99,11 @@ public class RemoteService : IRemoteService {
 
   /// <inheritdoc />
   public IEnumerable<Remote<T>> GetApiAccessors<T>() where T : IApiAccessor {
-    if (!_apiAccessors.TryGetValue(typeof(T), out var accessor) || accessor is not T) {
+    if (!_apiAccessors.TryGetValue(typeof(T), out var accessor) || accessor is not T value) {
       throw new ArgumentException($"No API accessor for type {nameof(T)}");
     }
 
-    return GetApiAccessorsIterator((T)accessor);
+    return GetApiAccessorsIterator(value);
   }
 
   private IEnumerable<Remote<T>> GetApiAccessorsIterator<T>(T accessor) where T : IApiAccessor {
