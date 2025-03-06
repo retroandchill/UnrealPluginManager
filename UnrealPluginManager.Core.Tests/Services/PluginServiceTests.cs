@@ -227,6 +227,29 @@ public class PluginServiceTests {
   }
 
   [Test]
+  public async Task TestGetDependencyTreeWithConflicts() {
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+    await pluginService.SetupVersionResolutionTreeWithConflict();
+
+    var result = await pluginService.GetDependencyList("App");
+    Assert.That(result, Is.InstanceOf<ConflictDetected>());
+    var conflicts = result.UnwrapConflictDetected().Conflicts;
+    Assert.That(conflicts, Has.Count.EqualTo(1));
+    Assert.Multiple(() => {
+      Assert.That(conflicts[0].PluginName, Is.EqualTo("ConflictingDependency"));
+      Assert.That(conflicts[0].Versions, Has.Count.EqualTo(2));
+    });
+    Assert.That(conflicts[0].Versions,
+                Has.Exactly(1)
+                    .Matches<PluginRequirement>(x => x.RequiredBy == "App"
+                                                     && x.RequiredVersion == SemVersionRange.Parse("=1.0.0")));
+    Assert.That(conflicts[0].Versions,
+                Has.Exactly(1)
+                    .Matches<PluginRequirement>(x => x.RequiredBy == "Sql"
+                                                     && x.RequiredVersion == SemVersionRange.Parse("=2.0.0")));
+  }
+
+  [Test]
   public async Task TestSubmitPlugin() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     using var testZip = new MemoryStream();
