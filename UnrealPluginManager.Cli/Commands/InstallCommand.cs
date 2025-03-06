@@ -1,8 +1,14 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
+using System.IO.Abstractions;
+using System.Text.Json;
 using JetBrains.Annotations;
 using LanguageExt;
 using Semver;
+using UnrealPluginManager.Core.Mappers;
+using UnrealPluginManager.Core.Model.EngineFile;
+using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Local.Services;
 using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
@@ -83,6 +89,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// wishes to install using the command-line interface. It is a required parameter
   /// utilized during the plugin installation process.
   /// </remarks>
+  [UsedImplicitly]
   public required string Input { get; set; }
 
   /// <summary>
@@ -93,6 +100,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// intends to install. It supports specifying exact versions, ranges, or constraints,
   /// allowing flexibility in determining compatible versions during the installation process.
   /// </remarks>
+  [UsedImplicitly]
   public SemVersionRange Version { get; set; } = SemVersionRange.AllRelease;
 
   /// <summary>
@@ -103,6 +111,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// It allows users to target a specific engine version when executing the installation command.
   /// If not specified, it may default to a suitable version as determined by the system or the installer.
   /// </remarks>
+  [UsedImplicitly]
   public string? EngineVersion { get; set; }
 }
 
@@ -119,26 +128,50 @@ public class InstallCommandOptions : ICommandOptions {
 [UsedImplicitly]
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
   private readonly IConsole _console;
+  private readonly IFileSystem _fileSystem;
   private readonly IEngineService _engineService;
   private readonly IPluginManagementService _pluginManagementService;
 
   /// <inheritdoc />
-  public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-    var existingVersion = await _engineService.GetInstalledPluginVersion(options.Input, options.EngineVersion)
-        .Map(x => x.Where(y => options.Version.Contains(y)));
+  public Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
+    if (options.Input.EndsWith(".uplugin", StringComparison.InvariantCultureIgnoreCase) || options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)) {
+      return InstallRequirements(options.Input, options.EngineVersion);
+    }
+
+    return InstallPlugin(options.Input, options.Version, options.EngineVersion);
+  }
+
+  private async Task<int> InstallRequirements(string pluginFile, string? engineVersion) {
+    IDependencyHolder? descriptor;
+    await using (var stream = _fileSystem.File.OpenRead(pluginFile)) {
+      descriptor = pluginFile.EndsWith(".uplugin") ? await JsonSerializer.DeserializeAsync<PluginDescriptor>(stream) 
+          : await JsonSerializer.DeserializeAsync<ProjectDescriptor>(stream);
+      ArgumentNullException.ThrowIfNull(descriptor);
+    }
+
+    var chainRoot = descriptor.ToDependencyChainRoot();
+    var dependencyTree = await _pluginManagementService.GetPluginsToInstall(chainRoot, engineVersion);
+    return await dependencyTree.Match(x => InstallToEngine(x, engineVersion),
+                                      x => ReportConflicts("requirements", x));
+  }
+
+  private async Task<int> InstallPlugin(string name, SemVersionRange version, string? engineVersion) {
+    var existingVersion = await _engineService.GetInstalledPluginVersion(name, engineVersion)
+        .Map(x => x.Where(version.Contains));
     return await existingVersion
         .Match(v => {
                  _console.Out.WriteLine($"Installed version {v} already satisfies the version requirement.");
                  return Task.FromResult(0);
                },
-               () => TryInstall(options.Input, options.Version, options.EngineVersion));
+               () => TryInstall(name, version, engineVersion));
   }
+  
 
-  private async Task<int> TryInstall(string input, SemVersionRange version, string? engineVersion) {
-    var targetPlugin = await _pluginManagementService.FindTargetPlugin(input, version, engineVersion);
+  private async Task<int> TryInstall(string name, SemVersionRange version, string? engineVersion) {
+    var targetPlugin = await _pluginManagementService.FindTargetPlugin(name, version, engineVersion);
     var dependencyTree = await _pluginManagementService.GetPluginsToInstall(targetPlugin, engineVersion);
     return await dependencyTree.Match(x => InstallToEngine(x, engineVersion),
-        x => ReportConflicts(input, x));
+        x => ReportConflicts(name, x));
   }
 
   private async Task<int> InstallToEngine(ResolvedDependencies resolvedDependencies, string? engineVersion) {
