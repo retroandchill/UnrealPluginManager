@@ -9,6 +9,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Model.Plugins;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -19,6 +20,7 @@ namespace UnrealPluginManager.Local.Services;
 public partial class EngineService : IEngineService {
   private readonly IFileSystem _fileSystem;
   private readonly IPluginService _pluginService;
+  private readonly IPluginStructureService _pluginStructureService;
   private readonly IEnginePlatformService _enginePlatformService;
   private readonly IProcessRunner _processRunner;
 
@@ -79,14 +81,16 @@ public partial class EngineService : IEngineService {
   }
 
   /// <inheritdoc />
-  public async IAsyncEnumerable<PluginIdentifier> GetInstalledPlugins(string? engineVersion) {
+  public async IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion) {
     var installedEngine = GetInstalledEngine(engineVersion);
     var packageDirectory = _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory);
     foreach (var file in packageDirectory.EnumerateFiles("*.uplugin", SearchOption.AllDirectories)) {
       await using var reader = file.OpenRead();
       var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
       ArgumentNullException.ThrowIfNull(pluginDescriptor);
-      yield return new PluginIdentifier(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName);
+      ArgumentNullException.ThrowIfNull(file.Directory);
+      yield return new InstalledPlugin(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName,
+                                       _pluginStructureService.GetInstalledBinaries(file.Directory));
     }
   }
 

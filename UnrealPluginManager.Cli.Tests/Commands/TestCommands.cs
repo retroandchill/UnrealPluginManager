@@ -25,7 +25,7 @@ public class TestCommands {
   private Parser _parser;
   private Mock<IEnvironment> _environment;
   private Mock<IPluginService> _pluginService;
-  private Mock<IPluginManagementService> _remoteCallService;
+  private Mock<IPluginManagementService> _pluginManagementService;
   private Mock<IEngineService> _engineService;
 
   [SetUp]
@@ -40,7 +40,7 @@ public class TestCommands {
 
     _pluginService = new Mock<IPluginService>();
     _engineService = new Mock<IEngineService>();
-    _remoteCallService = new Mock<IPluginManagementService>();
+    _pluginManagementService = new Mock<IPluginManagementService>();
     _environment = new Mock<IEnvironment>();
     var builder = new CommandLineBuilder(rootCommand)
         .UseDefaults()
@@ -50,7 +50,7 @@ public class TestCommands {
           services.AddSingleton(_environment.Object);
           services.AddSingleton(_engineService.Object);
           services.AddSingleton(_pluginService.Object);
-          services.AddSingleton(_remoteCallService.Object);
+          services.AddSingleton(_pluginManagementService.Object);
         });
 
     _parser = builder.Build();
@@ -183,11 +183,11 @@ public class TestCommands {
     Assert.That(returnCode, Is.EqualTo(0));
     _pluginService.Verify(x => x.ListPlugins("*", default));
 
-    _remoteCallService.Setup(x => x.GetPlugins("default", "*"))
+    _pluginManagementService.Setup(x => x.GetPlugins("default", "*"))
         .Returns(Task.FromResult(plugins));
     returnCode = await _parser.InvokeAsync("search * --remote default");
     Assert.That(returnCode, Is.EqualTo(0));
-    _remoteCallService.Verify(x => x.GetPlugins("default", "*"));
+    _pluginManagementService.Verify(x => x.GetPlugins("default", "*"));
 
     var split = plugins
         .Select((x, i) => new {
@@ -199,22 +199,22 @@ public class TestCommands {
                     $"group{i}",
                     i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
-    _remoteCallService.Setup(x => x.GetPlugins("*"))
+    _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(split));
     returnCode = await _parser.InvokeAsync("search * --remote all");
     Assert.That(returnCode, Is.EqualTo(0));
-    _remoteCallService.Verify(x => x.GetPlugins("*"));
+    _pluginManagementService.Verify(x => x.GetPlugins("*"));
 
     var allErrors = Enumerable.Range(0, 100)
         .Select(i => new KeyValuePair<string, Fin<List<PluginOverview>>>(
                     $"group{i}",
                     Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
-    _remoteCallService.Setup(x => x.GetPlugins("*"))
+    _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(allErrors));
 
     returnCode = await _parser.InvokeAsync("search * --remote all");
     Assert.That(returnCode, Is.EqualTo(-1));
-    _remoteCallService.Verify(x => x.GetPlugins("*"));
+    _pluginManagementService.Verify(x => x.GetPlugins("*"));
   }
 }

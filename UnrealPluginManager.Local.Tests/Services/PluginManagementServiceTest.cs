@@ -8,6 +8,7 @@ using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
@@ -159,9 +160,9 @@ public class PluginManagementServiceTest {
     };
 
     _engineService.Setup(x => x.GetInstalledPlugins(null))
-        .Returns(new List<PluginIdentifier> {
-            new("StdLib", new SemVersion(4, 0, 0)),
-            new("Http", new SemVersion(3, 0, 0)),
+        .Returns(new List<InstalledPlugin> {
+            new("StdLib", new SemVersion(4, 0, 0), ["Win64"]),
+            new("Http", new SemVersion(3, 0, 0), ["Win64"]),
         }.ToAsyncEnumerable());
 
     var allPlugins = new Dictionary<string, List<SemVersion>> {

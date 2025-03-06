@@ -3,6 +3,7 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Model.Plugins;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -56,7 +57,7 @@ public interface IEngineService {
   /// <returns>
   /// An asynchronous enumerable of <see cref="PluginIdentifier"/> objects representing the plugins installed for the specified engine version.
   /// </returns>
-  public IAsyncEnumerable<PluginIdentifier> GetInstalledPlugins(string? engineVersion);
+  public IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion);
 
   /// <summary>
   /// Installs the specified plugin for a given Unreal Engine version.

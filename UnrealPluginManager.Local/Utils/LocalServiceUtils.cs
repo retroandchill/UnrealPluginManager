@@ -34,7 +34,8 @@ public static class LocalServiceUtils {
     return services.AddScoped<IEngineService, EngineService>()
         .AddScoped<IStorageService, LocalStorageService>()
         .AddScoped<IRemoteService, RemoteService>()
-        .AddScoped<IPluginManagementService, PluginManagementService>();
+        .AddScoped<IPluginManagementService, PluginManagementService>()
+        .AddScoped<IInstallService, InstallService>();
   }
 
   /// <summary>
@@ -45,7 +46,7 @@ public static class LocalServiceUtils {
   /// <typeparam name="TImpl">The implementation type of the API accessor interface.</typeparam>
   /// <param name="services">The <see cref="IServiceCollection"/> to which the accessor factory is added.</param>
   /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
-  public static IServiceCollection AddApi<T, TImpl>(this IServiceCollection services)
+  private static IServiceCollection AddApi<T, TImpl>(this IServiceCollection services)
       where T : class, IApiAccessor where TImpl : T, new() {
     return services.AddScoped<T>(x => new TImpl());
   }
