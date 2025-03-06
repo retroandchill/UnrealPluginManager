@@ -12,30 +12,28 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import { ConflictDetected, ConflictDetectedFromJSONTyped, ConflictDetectedToJSON, ConflictDetectedToJSONTyped } from './ConflictDetected';
-import { ResolvedDependencies, ResolvedDependenciesFromJSONTyped, ResolvedDependenciesToJSON, ResolvedDependenciesToJSONTyped } from './ResolvedDependencies';
-/**
- * Represents the result of a plugin resolution operation within the Unreal Plugin Manager.
- * @export
- * @interface ResolutionResult
- */
-export interface ResolutionResult {
-    /**
-     * Gets the discriminator type used to identify the specific subclass of UnrealPluginManager.Core.Model.Resolution.ResolutionResult.
-     * @type {string}
-     * @memberof ResolutionResult
-     */
-    readonly type: string;
-}
+import type { ConflictDetected } from './ConflictDetected';
+import {
+    instanceOfConflictDetected,
+    ConflictDetectedFromJSON,
+    ConflictDetectedFromJSONTyped,
+    ConflictDetectedToJSON,
+} from './ConflictDetected';
+import type { ResolvedDependencies } from './ResolvedDependencies';
+import {
+    instanceOfResolvedDependencies,
+    ResolvedDependenciesFromJSON,
+    ResolvedDependenciesFromJSONTyped,
+    ResolvedDependenciesToJSON,
+} from './ResolvedDependencies';
 
 /**
- * Check if a given object implements the ResolutionResult interface.
+ * @type ResolutionResult
+ * Represents the result of a resolution process that determines the required
+ * or conflicting plugins within a dependency chain.
+ * @export
  */
-export function instanceOfResolutionResult(value: object): value is ResolutionResult {
-    if (!('type' in value) || value['type'] === undefined) return false;
-    return true;
-}
+export type ResolutionResult = ConflictDetected | ResolvedDependencies;
 
 export function ResolutionResultFromJSON(json: any): ResolutionResult {
     return ResolutionResultFromJSONTyped(json, false);
@@ -45,42 +43,32 @@ export function ResolutionResultFromJSONTyped(json: any, ignoreDiscriminator: bo
     if (json == null) {
         return json;
     }
-    if (!ignoreDiscriminator) {
-        if (json['type'] === 'ConflictsDetected') {
-            return ConflictDetectedFromJSONTyped(json, ignoreDiscriminator);
-        }
-        if (json['type'] === 'Resolved') {
-            return ResolvedDependenciesFromJSONTyped(json, ignoreDiscriminator);
-        }
+    if (instanceOfConflictDetected(json)) {
+        return ConflictDetectedFromJSONTyped(json, true);
     }
-    return {
-        
-        'type': json['type'],
-    };
+    if (instanceOfResolvedDependencies(json)) {
+        return ResolvedDependenciesFromJSONTyped(json, true);
+    }
+
+    return {} as any;
 }
 
-export function ResolutionResultToJSON(json: any): ResolutionResult {
+export function ResolutionResultToJSON(json: any): any {
     return ResolutionResultToJSONTyped(json, false);
 }
 
-export function ResolutionResultToJSONTyped(value?: Omit<ResolutionResult, 'type'> | null, ignoreDiscriminator: boolean = false): any {
+export function ResolutionResultToJSONTyped(value?: ResolutionResult | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
-    if (!ignoreDiscriminator) {
-        switch (value['type']) {
-            case 'ConflictsDetected':
-                return ConflictDetectedToJSONTyped(value as ConflictDetected, ignoreDiscriminator);
-            case 'Resolved':
-                return ResolvedDependenciesToJSONTyped(value as ResolvedDependencies, ignoreDiscriminator);
-            default:
-                throw new Error(`No variant of ResolutionResult exists with 'type=${value['type']}'`);
-        }
+    if (instanceOfConflictDetected(value)) {
+        return ConflictDetectedToJSON(value as ConflictDetected);
+    }
+    if (instanceOfResolvedDependencies(value)) {
+        return ResolvedDependenciesToJSON(value as ResolvedDependencies);
     }
 
-    return {
-        
-    };
+    return {};
 }
 

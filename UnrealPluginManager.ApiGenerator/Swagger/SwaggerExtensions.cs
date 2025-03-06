@@ -4,15 +4,10 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
 using Semver;
-using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Server.Controllers;
-using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
 
@@ -49,8 +44,8 @@ public static class SwaggerExtensions {
           var apiAssembly = typeof(PluginsController).Assembly;
           options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
           
-          options.EnableAnnotations(true, true);
           options.SupportNonNullableReferenceTypes();
+          options.UseAllOfForInheritance();
           
           // include models xml documentation
           var modelsAssembly = typeof(PluginSummary).Assembly;
@@ -68,8 +63,7 @@ public static class SwaggerExtensions {
           options.AddOperationFilterInstance(new PageableParameterFilter());
           options.AddSchemaFilterInstance(new PagePropertyFilter());
           options.AddOperationFilterInstance(new SemVersionParameterFilter());
-          options.AddSchemaFilterInstance(new DiscriminatorFilter());
-          options.AddSchemaFilterInstance(new EnsureModelsRefFilter());
+          options.AddSchemaFilterInstance(new DiscriminatedUnionSchemaFilter());
         });
 
     return builder;

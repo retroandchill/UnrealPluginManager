@@ -8,6 +8,7 @@ export * from './DependencyOverview';
 export * from './PluginDependency';
 export * from './PluginDetails';
 export * from './PluginOverview';
+export * from './PluginOverviewBase';
 export * from './PluginOverviewPage';
 export * from './PluginRequirement';
 export * from './PluginSummary';

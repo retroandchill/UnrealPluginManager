@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ResolutionResult } from './ResolutionResult';
-import {
-    ResolutionResultFromJSON,
-    ResolutionResultFromJSONTyped,
-    ResolutionResultToJSON,
-    ResolutionResultToJSONTyped,
-} from './ResolutionResult';
 import type { PluginSummary } from './PluginSummary';
 import {
     PluginSummaryFromJSON,
@@ -29,30 +22,29 @@ import {
 } from './PluginSummary';
 
 /**
- * Represents a successful resolution of plugin dependencies within the Unreal Plugin Manager.
+ * Represents a resolution outcome where all required dependencies have been successfully resolved.
  * @export
  * @interface ResolvedDependencies
  */
-export interface ResolvedDependencies extends ResolutionResult {
+export interface ResolvedDependencies {
     /**
-     * Gets or sets the list of plugins that have been successfully resolved during dependency resolution.
+     * 
      * @type {Array<PluginSummary>}
      * @memberof ResolvedDependencies
      */
-    selectedPlugins: Array<PluginSummary>;
+    selectedPlugins?: Array<PluginSummary>;
     /**
      * 
      * @type {string}
      * @memberof ResolvedDependencies
      */
-    readonly type: string;
+    type: string;
 }
 
 /**
  * Check if a given object implements the ResolvedDependencies interface.
  */
 export function instanceOfResolvedDependencies(value: object): value is ResolvedDependencies {
-    if (!('selectedPlugins' in value) || value['selectedPlugins'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
     return true;
 }
@@ -66,8 +58,8 @@ export function ResolvedDependenciesFromJSONTyped(json: any, ignoreDiscriminator
         return json;
     }
     return {
-        ...ResolutionResultFromJSONTyped(json, true),
-        'selectedPlugins': ((json['selectedPlugins'] as Array<any>).map(PluginSummaryFromJSON)),
+        
+        'selectedPlugins': json['selectedPlugins'] == null ? undefined : ((json['selectedPlugins'] as Array<any>).map(PluginSummaryFromJSON)),
         'type': json['type'],
     };
 }
@@ -76,14 +68,15 @@ export function ResolvedDependenciesToJSON(json: any): ResolvedDependencies {
     return ResolvedDependenciesToJSONTyped(json, false);
 }
 
-export function ResolvedDependenciesToJSONTyped(value?: Omit<ResolvedDependencies, 'type'> | null, ignoreDiscriminator: boolean = false): any {
+export function ResolvedDependenciesToJSONTyped(value?: ResolvedDependencies | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
-        ...ResolutionResultToJSONTyped(value, true),
-        'selectedPlugins': ((value['selectedPlugins'] as Array<any>).map(PluginSummaryToJSON)),
+        
+        'selectedPlugins': value['selectedPlugins'] == null ? undefined : ((value['selectedPlugins'] as Array<any>).map(PluginSummaryToJSON)),
+        'type': value['type'],
     };
 }
 

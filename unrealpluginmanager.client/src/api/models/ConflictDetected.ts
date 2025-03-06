@@ -20,39 +20,32 @@ import {
     ConflictToJSON,
     ConflictToJSONTyped,
 } from './Conflict';
-import type { ResolutionResult } from './ResolutionResult';
-import {
-    ResolutionResultFromJSON,
-    ResolutionResultFromJSONTyped,
-    ResolutionResultToJSON,
-    ResolutionResultToJSONTyped,
-} from './ResolutionResult';
 
 /**
- * Represents resolution failure due to detected conflicts among plugin dependencies within the Unreal Plugin Manager.
+ * Represents a conflict detected during the resolution process
+ * when plugin dependencies have incompatible requirements.
  * @export
  * @interface ConflictDetected
  */
-export interface ConflictDetected extends ResolutionResult {
+export interface ConflictDetected {
     /**
-     * Gets or sets the list of conflicts detected during the dependency resolution process in the Unreal Plugin Manager.
+     * 
      * @type {Array<Conflict>}
      * @memberof ConflictDetected
      */
-    conflicts: Array<Conflict>;
+    conflicts?: Array<Conflict>;
     /**
      * 
      * @type {string}
      * @memberof ConflictDetected
      */
-    readonly type: string;
+    type: string;
 }
 
 /**
  * Check if a given object implements the ConflictDetected interface.
  */
 export function instanceOfConflictDetected(value: object): value is ConflictDetected {
-    if (!('conflicts' in value) || value['conflicts'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
     return true;
 }
@@ -66,8 +59,8 @@ export function ConflictDetectedFromJSONTyped(json: any, ignoreDiscriminator: bo
         return json;
     }
     return {
-        ...ResolutionResultFromJSONTyped(json, true),
-        'conflicts': ((json['conflicts'] as Array<any>).map(ConflictFromJSON)),
+        
+        'conflicts': json['conflicts'] == null ? undefined : ((json['conflicts'] as Array<any>).map(ConflictFromJSON)),
         'type': json['type'],
     };
 }
@@ -76,14 +69,15 @@ export function ConflictDetectedToJSON(json: any): ConflictDetected {
     return ConflictDetectedToJSONTyped(json, false);
 }
 
-export function ConflictDetectedToJSONTyped(value?: Omit<ConflictDetected, 'type'> | null, ignoreDiscriminator: boolean = false): any {
+export function ConflictDetectedToJSONTyped(value?: ConflictDetected | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
-        ...ResolutionResultToJSONTyped(value, true),
-        'conflicts': ((value['conflicts'] as Array<any>).map(ConflictToJSON)),
+        
+        'conflicts': value['conflicts'] == null ? undefined : ((value['conflicts'] as Array<any>).map(ConflictToJSON)),
+        'type': value['type'],
     };
 }
 

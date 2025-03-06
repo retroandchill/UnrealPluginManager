@@ -18,6 +18,7 @@ using UnrealPluginManager.Server.Config;
 using UnrealPluginManager.Server.Controllers;
 using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Utils;
+using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 

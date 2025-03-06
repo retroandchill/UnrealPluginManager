@@ -12,6 +12,7 @@ using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
+using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Local.Tests.Services;
 

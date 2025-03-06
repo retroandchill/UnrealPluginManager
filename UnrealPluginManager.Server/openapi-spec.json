@@ -545,34 +545,23 @@
         "description": "Represents a conflict that occurs when multiple requirements specify incompatible\r\nversions for the same plugin during resolution."
       },
       "ConflictDetected": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResolutionResult"
-          },
-          {
-            "required": [
-              "conflicts",
-              "type"
-            ],
-            "type": "object",
-            "properties": {
-              "conflicts": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Conflict"
-                },
-                "description": "Gets or sets the list of conflicts detected during the dependency resolution process in the Unreal Plugin Manager."
-              },
-              "type": {
-                "minLength": 1,
-                "type": "string",
-                "readOnly": true
-              }
-            },
-            "additionalProperties": false
-          }
+        "required": [
+          "type"
         ],
-        "description": "Represents resolution failure due to detected conflicts among plugin dependencies within the Unreal Plugin Manager."
+        "type": "object",
+        "properties": {
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Conflict"
+            }
+          },
+          "type": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "description": "Represents a conflict detected during the resolution process\r\nwhen plugin dependencies have incompatible requirements."
       },
       "DependencyManifest": {
         "type": "object",
@@ -657,62 +646,59 @@
         "description": "Represents a dependency of a plugin within the Unreal Plugin Manager framework."
       },
       "PluginDetails": {
-        "required": [
-          "id",
-          "name",
-          "versions"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "minimum": 1,
-            "type": "integer",
-            "description": "Gets or sets the unique identifier for the plugin.",
-            "format": "int64"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PluginOverviewBase"
           },
-          "name": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Gets or sets the name of the plugin."
-          },
-          "friendlyName": {
-            "type": "string",
-            "description": "Gets or sets the user-friendly name of the plugin, which may be used for display purposes.",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "description": "Gets or sets the description of the plugin, providing detailed information about its purpose or functionality.",
-            "nullable": true
-          },
-          "authorName": {
-            "type": "string",
-            "description": "Gets or sets the name of the author associated with the plugin.",
-            "nullable": true
-          },
-          "authorWebsite": {
-            "type": "string",
-            "description": "Gets or sets the URL associated with the author of the plugin.",
-            "format": "uri",
-            "nullable": true
-          },
-          "versions": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VersionDetails"
+          {
+            "required": [
+              "versions"
+            ],
+            "type": "object",
+            "properties": {
+              "versions": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VersionDetails"
+                },
+                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
+              }
             },
-            "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
+            "additionalProperties": false
           }
-        },
-        "additionalProperties": false,
+        ],
         "description": "Represents detailed information about a plugin, including its associated versions.\r\nInherits from UnrealPluginManager.Core.Model.Plugins.PluginOverviewBase to provide core metadata."
       },
       "PluginOverview": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PluginOverviewBase"
+          },
+          {
+            "required": [
+              "versions"
+            ],
+            "type": "object",
+            "properties": {
+              "versions": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VersionOverview"
+                },
+                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
+      },
+      "PluginOverviewBase": {
         "required": [
           "id",
-          "name",
-          "versions"
+          "name"
         ],
         "type": "object",
         "properties": {
@@ -747,18 +733,10 @@
             "description": "Gets or sets the URL associated with the author of the plugin.",
             "format": "uri",
             "nullable": true
-          },
-          "versions": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VersionOverview"
-            },
-            "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
           }
         },
         "additionalProperties": false,
-        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
+        "description": "Provides a base class for representing essential metadata of a plugin.\r\nThis includes core properties such as the plugin's unique identifier, name,\r\noptional friendly name, description, author's name, and website."
       },
       "PluginOverviewPage": {
         "required": [
@@ -918,94 +896,67 @@
         "description": "Represents detailed information about a specific version of a plugin."
       },
       "ResolutionResult": {
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ResolvedDependencies"
+          },
+          {
+            "$ref": "#/components/schemas/ConflictDetected"
+          }
+        ],
+        "additionalProperties": false,
+        "description": "Represents the result of a resolution process that determines the required\r\nor conflicting plugins within a dependency chain."
+      },
+      "ResolvedDependencies": {
         "required": [
           "type"
         ],
         "type": "object",
         "properties": {
+          "selectedPlugins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginSummary"
+            }
+          },
           "type": {
             "minLength": 1,
-            "type": "string",
-            "description": "Gets the discriminator type used to identify the specific subclass of UnrealPluginManager.Core.Model.Resolution.ResolutionResult.",
-            "readOnly": true
+            "type": "string"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents the result of a plugin resolution operation within the Unreal Plugin Manager.",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Resolved": "ResolvedDependencies",
-            "ConflictsDetected": "ConflictDetected"
-          }
-        }
+        "description": "Represents a resolution outcome where all required dependencies have been successfully resolved."
       },
-      "ResolvedDependencies": {
+      "VersionDetails": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ResolutionResult"
+            "$ref": "#/components/schemas/VersionOverview"
           },
           {
             "required": [
-              "selectedPlugins",
-              "type"
+              "binaries",
+              "dependencies"
             ],
             "type": "object",
             "properties": {
-              "selectedPlugins": {
+              "dependencies": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/PluginSummary"
+                  "$ref": "#/components/schemas/DependencyOverview"
                 },
-                "description": "Gets or sets the list of plugins that have been successfully resolved during dependency resolution."
+                "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality."
               },
-              "type": {
-                "minLength": 1,
-                "type": "string",
-                "readOnly": true
+              "binaries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BinariesOverview"
+                },
+                "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports."
               }
             },
             "additionalProperties": false
           }
         ],
-        "description": "Represents a successful resolution of plugin dependencies within the Unreal Plugin Manager."
-      },
-      "VersionDetails": {
-        "required": [
-          "binaries",
-          "dependencies",
-          "id",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "Gets or sets the unique identifier for this instance.",
-            "format": "int64"
-          },
-          "version": {
-            "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-            "type": "string",
-            "description": "Gets or sets the semantic version of the plugin, representing its specific version details.",
-            "example": "1.0.0"
-          },
-          "dependencies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DependencyOverview"
-            },
-            "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality."
-          },
-          "binaries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BinariesOverview"
-            },
-            "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports."
-          }
-        },
-        "additionalProperties": false,
         "description": "Represents detailed information about a specific plugin version,\r\nincluding its version number, unique identifier, and list of associated binaries."
       },
       "VersionOverview": {

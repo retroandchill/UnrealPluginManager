@@ -11,6 +11,7 @@ models/DependencyOverview.ts
 models/PluginDependency.ts
 models/PluginDetails.ts
 models/PluginOverview.ts
+models/PluginOverviewBase.ts
 models/PluginOverviewPage.ts
 models/PluginRequirement.ts
 models/PluginSummary.ts

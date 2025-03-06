@@ -18,6 +18,7 @@ using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
+using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Core.Tests.Services;
 
