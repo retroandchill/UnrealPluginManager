@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Server\Source\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

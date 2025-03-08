@@ -18,8 +18,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
-        <ProjectReference Include="..\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj"/>
+        <ProjectReference Include="..\..\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
+        <ProjectReference Include="..\..\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj"/>
     </ItemGroup>
 
 

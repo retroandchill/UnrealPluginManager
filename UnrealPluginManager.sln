@@ -3,33 +3,79 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server", "UnrealPluginManager.Server\UnrealPluginManager.Server.csproj", "{1AF09A44-ED09-4C18-9F59-554A5437FBF4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server", "UnrealPluginManager.Server\Source\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj", "{1AF09A44-ED09-4C18-9F59-554A5437FBF4}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "unrealpluginmanager.client", "unrealpluginmanager.client\unrealpluginmanager.client.esproj", "{14DA7D81-0C7E-4201-8E03-65B8230EA26A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core", "UnrealPluginManager.Core\UnrealPluginManager.Core.csproj", "{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core", "UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj", "{9A758204-7132-4CA0-A70C-BA59C0FBF0BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Tests", "UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj", "{F4529935-7CAC-4257-8228-DE20D74AD955}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Tests", "UnrealPluginManager.Core\Tests\UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj", "{F4529935-7CAC-4257-8228-DE20D74AD955}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server.Tests", "UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj", "{0DF810B9-0E26-4639-A5FA-0537C7D964D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Server.Tests", "UnrealPluginManager.Server\Tests\UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj", "{0DF810B9-0E26-4639-A5FA-0537C7D964D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli", "UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj", "{613D5350-AD38-45BA-B6B2-E12C9402E811}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli", "UnrealPluginManager.Local\Source\UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj", "{613D5350-AD38-45BA-B6B2-E12C9402E811}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli.Tests", "UnrealPluginManager.Cli.Tests\UnrealPluginManager.Cli.Tests.csproj", "{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Cli.Tests", "UnrealPluginManager.Local\Tests\UnrealPluginManager.Cli.Tests\UnrealPluginManager.Cli.Tests.csproj", "{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator", "UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj", "{65CAE6E6-7901-4DFB-8316-4DF601296048}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator", "UnrealPluginManager.Api\Source\UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj", "{65CAE6E6-7901-4DFB-8316-4DF601296048}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator.Tests", "UnrealPluginManager.ApiGenerator.Tests\UnrealPluginManager.ApiGenerator.Tests.csproj", "{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.ApiGenerator.Tests", "UnrealPluginManager.Api\Tests\UnrealPluginManager.ApiGenerator.Tests\UnrealPluginManager.ApiGenerator.Tests.csproj", "{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.WebClient", "UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj", "{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.WebClient", "UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj", "{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local", "UnrealPluginManager.Local\UnrealPluginManager.Local.csproj", "{19C9F8D2-B68A-47DC-805C-E2B179E9A19C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local", "UnrealPluginManager.Local\Source\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj", "{19C9F8D2-B68A-47DC-805C-E2B179E9A19C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local.Tests", "UnrealPluginManager.Local.Tests\UnrealPluginManager.Local.Tests.csproj", "{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local.Tests", "UnrealPluginManager.Local\Tests\UnrealPluginManager.Local.Tests\UnrealPluginManager.Local.Tests.csproj", "{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator", "UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj", "{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator", "UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj", "{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator.Tests", "UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.Tests\UnrealPluginManager.Core.Generator.Tests.csproj", "{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator.Tests", "UnrealPluginManager.Core\Tests\UnrealPluginManager.Core.Generator.Tests\UnrealPluginManager.Core.Generator.Tests.csproj", "{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Core", "UnrealPluginManager.Core", "{F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{AECF1712-0CA8-443B-8F9A-C02E746E36C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C11E29E4-4A66-462B-9796-611E0DD5AD6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Server", "UnrealPluginManager.Server", "{6CF35F2A-78C2-4D6D-9381-1DF1E61FC194}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{1CAA98C5-4873-45E8-847B-8C2BC6CBE603}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5881A07A-27DD-46C6-A316-1EF0C3E57144}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Cli", "UnrealPluginManager.Cli", "{D87B17C1-2878-4BAD-8C89-CE4F77691034}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{CDD5E9F1-3884-4DEB-8223-5D7347205B30}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1AF70BA8-A80E-4891-A845-A7199C4A17F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Local", "UnrealPluginManager.Local", "{68AFBD25-8761-489C-8DC9-0A82F55E1D65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{4792B0DC-7E08-42FA-A0E3-35BD18D25ADF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F07D3997-D624-4010-86D9-C196B3188F9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Api", "UnrealPluginManager.Api", "{7D13B1D4-DBEE-4372-A774-79FC0B3EE24A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{E1BECA28-F815-43E3-A212-30E8C356E7F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E45E078B-0794-4566-AFF5-2E3453029410}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{25ADB3D4-36C4-45F5-8D79-5D79E27BADEF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E25AC043-6879-4D78-BD03-F56844C9C235}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$root", "$root", "{64D07B84-FEE4-426B-B1DB-EA2C31ED327F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		update_database.ps1 = update_database.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,5 +144,31 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AECF1712-0CA8-443B-8F9A-C02E746E36C0} = {F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}
+		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA} = {AECF1712-0CA8-443B-8F9A-C02E746E36C0}
+		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D} = {AECF1712-0CA8-443B-8F9A-C02E746E36C0}
+		{C11E29E4-4A66-462B-9796-611E0DD5AD6D} = {F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}
+		{F4529935-7CAC-4257-8228-DE20D74AD955} = {C11E29E4-4A66-462B-9796-611E0DD5AD6D}
+		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB} = {C11E29E4-4A66-462B-9796-611E0DD5AD6D}
+		{1CAA98C5-4873-45E8-847B-8C2BC6CBE603} = {6CF35F2A-78C2-4D6D-9381-1DF1E61FC194}
+		{1AF09A44-ED09-4C18-9F59-554A5437FBF4} = {1CAA98C5-4873-45E8-847B-8C2BC6CBE603}
+		{5881A07A-27DD-46C6-A316-1EF0C3E57144} = {6CF35F2A-78C2-4D6D-9381-1DF1E61FC194}
+		{0DF810B9-0E26-4639-A5FA-0537C7D964D5} = {5881A07A-27DD-46C6-A316-1EF0C3E57144}
+		{CDD5E9F1-3884-4DEB-8223-5D7347205B30} = {D87B17C1-2878-4BAD-8C89-CE4F77691034}
+		{1AF70BA8-A80E-4891-A845-A7199C4A17F1} = {D87B17C1-2878-4BAD-8C89-CE4F77691034}
+		{4792B0DC-7E08-42FA-A0E3-35BD18D25ADF} = {68AFBD25-8761-489C-8DC9-0A82F55E1D65}
+		{19C9F8D2-B68A-47DC-805C-E2B179E9A19C} = {4792B0DC-7E08-42FA-A0E3-35BD18D25ADF}
+		{F07D3997-D624-4010-86D9-C196B3188F9A} = {68AFBD25-8761-489C-8DC9-0A82F55E1D65}
+		{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333} = {F07D3997-D624-4010-86D9-C196B3188F9A}
+		{E1BECA28-F815-43E3-A212-30E8C356E7F7} = {7D13B1D4-DBEE-4372-A774-79FC0B3EE24A}
+		{65CAE6E6-7901-4DFB-8316-4DF601296048} = {E1BECA28-F815-43E3-A212-30E8C356E7F7}
+		{F97F80C2-C8F5-4AA5-9066-4D535DAC78E1} = {E1BECA28-F815-43E3-A212-30E8C356E7F7}
+		{E45E078B-0794-4566-AFF5-2E3453029410} = {7D13B1D4-DBEE-4372-A774-79FC0B3EE24A}
+		{F4242B1F-A9CB-46F2-A42E-AAE5A140D42D} = {E45E078B-0794-4566-AFF5-2E3453029410}
+		{613D5350-AD38-45BA-B6B2-E12C9402E811} = {4792B0DC-7E08-42FA-A0E3-35BD18D25ADF}
+		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2} = {F07D3997-D624-4010-86D9-C196B3188F9A}
+		{E25AC043-6879-4D78-BD03-F56844C9C235} = {25ADB3D4-36C4-45F5-8D79-5D79E27BADEF}
 	EndGlobalSection
 EndGlobal
