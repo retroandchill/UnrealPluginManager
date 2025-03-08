@@ -2,6 +2,7 @@
 using System.CommandLine;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
+using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -87,6 +88,7 @@ public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCo
   public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
     var installResult = await _installService.InstallRequirements(options.Input, options.Version, 
                                                             ["Win64"]);
+    _console.WriteVersionChanges(installResult);
     return await _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
   }
 }

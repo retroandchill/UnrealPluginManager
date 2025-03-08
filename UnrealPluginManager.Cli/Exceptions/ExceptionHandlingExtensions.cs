@@ -20,22 +20,9 @@ public static class ExceptionHandlingExtensions {
   public static CommandLineBuilder UseCustomExceptionHandler(this CommandLineBuilder builder) {
     return builder.UseExceptionHandler(ProcessException);
   }
-
-  /// <summary>
-  /// Registers a custom exception handler within the dependency injection container.
-  /// This method configures the dependency injection framework to resolve and use a custom
-  /// exception handler for handling CLI application errors.
-  /// </summary>
-  /// <param name="services">The <see cref="IServiceCollection"/> to which the custom exception handler will be added.</param>
-  /// <returns>The updated <see cref="IServiceCollection"/> with the custom exception handler service registered.</returns>
-  public static IServiceCollection AddCustomExceptionHandler(this IServiceCollection services) {
-    return services
-        .AddSingleton<ICliExceptionHandler, CliExceptionHandler>();
-  }
   
   private static void ProcessException(Exception ex, InvocationContext context) {
-    var serviceProvider = context.BindingContext.GetRequiredService<IServiceProvider>();
-    var handler = serviceProvider.GetRequiredService<ICliExceptionHandler>();
+    var handler = new CliExceptionHandler(context.Console);
     context.ExitCode = handler.HandleException(ex);
   }
   

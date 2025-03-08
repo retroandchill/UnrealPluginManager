@@ -23,7 +23,6 @@ var builder = new CommandLineBuilder(rootCommand)
     .UseDependencyInjection(services => {
       services.AddSystemAbstractions()
           .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
-          .AddCustomExceptionHandler()
           .AddCoreServices()
           .AddLocalServices()
           .AddApis();

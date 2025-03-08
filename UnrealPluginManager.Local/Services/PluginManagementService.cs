@@ -65,15 +65,11 @@ public partial class PluginManagementService : IPluginManagementService {
         .Select(x => x.Api.GetLatestVersionAsync(pluginName, versionRange.ToString()))
         .ToList();
     
-    await foreach (var version in Task.WhenEach(tasks)) {
-      if (version.IsFaulted) {
-        continue;
-      }
-
-      return await version;
-    }
-    
-    return Option<PluginVersionInfo>.None;
+    await Task.WhenAll(tasks);
+    return tasks.Where(version => !version.IsFaulted)
+        .Select(x => x.Result)
+        .FirstOrDefault()
+        .ToOption();
   }
 
   /// <inheritdoc />

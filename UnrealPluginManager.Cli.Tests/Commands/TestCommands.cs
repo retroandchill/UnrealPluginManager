@@ -12,7 +12,9 @@ using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Exceptions;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -105,6 +107,9 @@ public class TestCommands {
 
   [Test]
   public async Task TestRequestBuild() {
+    _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
+            It.IsAny<IReadOnlyCollection<string>>()))
+        .ReturnsAsync([]);
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x =>
@@ -123,44 +128,56 @@ public class TestCommands {
   }
 
   [Test]
+  public async Task TestRequestBuildWithError() {
+    _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
+            It.IsAny<IReadOnlyCollection<string>>()))
+        .ThrowsAsync(new DependencyConflictException([
+            new Conflict("TestPlugin", [
+                new PluginRequirement("OtherPlugin", SemVersionRange.Parse("1.0.0")),
+                new PluginRequirement("ThirdPlugin", SemVersionRange.Parse("2.0.0"))
+            ])
+        ]));
+    var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
+    Assert.That(returnCode, Is.EqualTo(-1));
+  }
+  
+  [Test]
+  public async Task TestRequestBuildWithGenericError() {
+    _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
+            It.IsAny<IReadOnlyCollection<string>>()))
+        .ThrowsAsync(new ArithmeticException());
+    var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
+    Assert.That(returnCode, Is.EqualTo(1));
+  }
+
+  [Test]
   public async Task TestInstallPlugin() {
     _installService.Setup(x => x.InstallPlugin(It.IsAny<string>(), It.IsAny<SemVersionRange>(), It.IsAny<string?>(),
                                                It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync([new VersionChange("MyPlugin", null, new SemVersion(1, 0, 0))]);
     var returnCode = await _parser.InvokeAsync("install MyPlugin");
     Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersion>(y => y == new SemVersion(1, 0, 0)),
+     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
+                                               It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
                                                It.Is<string?>(y => y == null),
                                                It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("install MyPlugin --version 1.0.0");
     Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersion>(y => y ==
-                                                                           new SemVersion(1, 0, 0)),
+    _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
+                                               It.Is<SemVersionRange>(y => y ==
+                                                                           SemVersionRange.Parse("1.0.0", 2048)),
                                                It.Is<string?>(y => y == null),
                                                It.IsAny<IReadOnlyCollection<string>>()));
 
+    _installService.Invocations.Clear();
     returnCode = await _parser.InvokeAsync("install MyPlugin --version >=1.0.0 --engine-version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersion>(y => y ==
-                                                                      new SemVersion(1, 0, 0)),
+    _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
+                                               It.Is<SemVersionRange>(y => y ==
+                                                                           SemVersionRange.AtLeast(new SemVersion(1, 0, 0), false)),
                                                It.Is<string?>(y => y == "5.5"),
                                                It.IsAny<IReadOnlyCollection<string>>()));
-
-    _engineService.Setup(x => x.GetInstalledPluginVersion("MyPlugin", "5.5"))
-        .Returns(() => Task.FromResult<LanguageExt.Option<SemVersion>>(SemVersion.Parse("1.0.0")));
-    _engineService.Invocations.Clear();
-    returnCode = await _parser.InvokeAsync("install MyPlugin --version >=1.0.0 --engine-version 5.5");
-    Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersion>(y => y ==
-                                                                           new SemVersion(1, 0, 0)),
-                                               It.Is<string?>(y => y == "5.5"),
-                                               It.IsAny<IReadOnlyCollection<string>>()),
-                          Times.Never);
   }
 
   [Test]

@@ -2,6 +2,7 @@
 using System.CommandLine.IO;
 using JetBrains.Annotations;
 using Semver;
+using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -128,11 +129,7 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
                         options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)
         ? await _installService.InstallRequirements(options.Input, options.EngineVersion, ["Win64"])
         : await _installService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
-
-    _console.Out.WriteLine($"Successfully installed/upgraded the following plugin(s):");
-    foreach (var change in changes) {
-      _console.Out.WriteLine($"- {change.PluginName}: {change.OldVersion?.ToString() ?? "(new)"} => {change.NewVersion}");
-    }
+    _console.WriteVersionChanges(changes);
 
     return 0;
   }
