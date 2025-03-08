@@ -3,10 +3,15 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
+
+/// <summary>
+/// Represents a plugin with its name and version.
+/// </summary>
+public record struct PluginIdentifier(string Name, SemVersion Version);
 
 /// <summary>
 /// Service declaration for operations involving plugins.
@@ -22,17 +27,27 @@ public interface IPluginService {
   /// </returns>
   Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
 
-  Task<Option<SemVersion>> GetLatestVersion(string pluginName, SemVersionRange? targetVersion = null);
+  /// <summary>
+  /// Retrieves version information for a specific plugin by its name and version.
+  /// </summary>
+  /// <param name="pluginName">The name of the plugin for which version information is requested.</param>
+  /// <param name="version">The version of the plugin to retrieve information for.</param>
+  /// <returns>
+  /// An <see cref="Option{PluginVersionInfo}"/> containing the version information if available,
+  /// or an empty result if the plugin version is not found.
+  /// </returns>
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version);
 
   /// <summary>
-  /// Requests detailed version information for a list of specified plugins.
+  /// Retrieves detailed version information associated with a specific plugin name and version range.
   /// </summary>
-  /// <param name="requestedVersions">A list of requested plugin versions including their names and semantic versions.</param>
+  /// <param name="pluginName">The name of the plugin to fetch version information for.</param>
+  /// <param name="versionRange">The range of versions to filter applicable plugin versions.</param>
   /// <returns>
-  /// A task representing the asynchronous operation, containing a list of <see cref="PluginVersionInfo"/>
-  /// that provide detailed information about the specified plugin versions.
+  /// An optional <see cref="PluginVersionInfo"/> containing detailed version information
+  /// if a matching plugin version is found; otherwise, an empty option.
   /// </returns>
-  Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions);
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange);
 
   /// <summary>
   /// Determines and retrieves possible versions of plugins that satisfy the given list of dependencies.
@@ -155,7 +170,20 @@ public interface IPluginService {
   /// </returns>
   Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
+  
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+                                               IReadOnlyCollection<string> targetPlatforms);
 
+  /// <summary>
+  /// Retrieves all plugin data files matching the specified parameters.
+  /// </summary>
+  /// <param name="pluginName">The name of the plugin to retrieve data for.</param>
+  /// <param name="targetVersion">The version range of the plugin to match.</param>
+  /// <param name="engineVersion">The engine version to use when targeting the plugin.</param>
+  /// <param name="targetPlatforms">The collection of platforms for which the plugin is targeted.</param>
+  /// <returns>
+  /// An asynchronous enumerable of <see cref="IFileInfo"/> representing the plugin data files.
+  /// </returns>
   IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersionRange targetVersion, string engineVersion,
                                                IReadOnlyCollection<string> targetPlatforms);
 }

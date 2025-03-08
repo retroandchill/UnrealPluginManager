@@ -5,12 +5,11 @@ using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
@@ -43,23 +42,21 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public Task<Option<SemVersion>> GetLatestVersion(string pluginName, SemVersionRange? targetVersion = null) {
-    return _dbContext.PluginVersions
-        .Where(p => p.Parent.Name == pluginName)
-        .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
-        .OrderByVersionDecending()
-        .Select(x => x.VersionString)
-        .FirstOrDefaultAsync()
-        .ToOptionAsync()
-        .Map(x => x.Select(y => SemVersion.Parse(y)));
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName && x.VersionString == version.ToString())
+        .ToPluginVersionInfo()
+        .FirstOrDefaultAsync();
   }
 
-  /// <inheritdoc/>
-  public Task<List<PluginVersionInfo>> RequestPluginInfos(List<PluginVersionRequest> requestedVersions) {
-    return _dbContext.PluginVersions
-        .Where(x => requestedVersions.Contains(new PluginVersionRequest(x.Parent.Name, x.Version)))
+  /// <inheritdoc />
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName)
+        .WhereVersionInRange(versionRange)
+        .OrderByVersionDecending()
         .ToPluginVersionInfo()
-        .ToListAsync();
+        .FirstOrDefaultAsync();
   }
 
   /// <inheritdoc />
@@ -119,36 +116,35 @@ public partial class PluginService : IPluginService {
         .FirstAsync();
 
     var dependencyList = await GetPossibleVersions(plugin.Dependencies);
-    if (dependencyList.UnresolvedDependencies.Count > 0) {
-      throw new DependencyResolutionException(
-          $"Unable to resolve plugin names:\n{string.Join("\n", dependencyList.UnresolvedDependencies)}");
-    }
-
     return GetDependencyList(plugin, dependencyList);
   }
 
   /// <inheritdoc />
   public List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
-    var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
-    var bindings = formula.Solve();
-    if (bindings.IsNone) {
-      return [];
+    if (manifest.UnresolvedDependencies.Count > 0) {
+      throw new MissingDependenciesException(manifest.UnresolvedDependencies);
     }
+    var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
+    return formula.Solve()
+        .Right(List<PluginSummary> (r) => throw new DependencyConflictException(r))
+        .Left(l => GetDependencyList(l, root, manifest));
+  }
 
+  private static List<PluginSummary> GetDependencyList(List<SelectedVersion> selectedVersions, IDependencyChainNode root, DependencyManifest manifest) {
     IEnumerable<PluginVersionInfo> result;
     if (root is PluginVersionInfo plugin) {
-      result = bindings.SelectMany(b => b)
+      result = selectedVersions
           .Select(p => p.Name == root.Name
                       ? plugin
                       : manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
     } else {
-      result = bindings.SelectMany(b => b)
+      result = selectedVersions
           .Where(p => p.Name != root.Name)
           .Select(p => manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
     }
 
     return result.Select(p => p.ToPluginSummary())
-        .ToList();
+            .ToList();
   }
 
   /// <inheritdoc/>
@@ -318,14 +314,9 @@ public partial class PluginService : IPluginService {
 
     try {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
-      await using (var source = await GetPluginSource(pluginName, targetVersion).Map(x => x.OpenRead())) {
-        using var zipArchive = new ZipArchive(source);
-        await destinationZip.Merge(zipArchive);
-      }
-
-      await foreach (var (_, archive) in GetPluginBinaries(pluginName, targetVersion, engineVersion, targetPlatforms)) {
-        await using var binaries = archive.OpenRead();
-        using var zipArchive = new ZipArchive(binaries);
+      await foreach (var archive in GetAllPluginData(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+        await using var data = archive.OpenRead();
+        using var zipArchive = new ZipArchive(data);
         await destinationZip.Merge(zipArchive);
       }
     } catch (Exception) {
@@ -335,6 +326,16 @@ public partial class PluginService : IPluginService {
     }
 
     return fileStream;
+  }
+
+  /// <inheritdoc />
+  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+                                                            IReadOnlyCollection<string> targetPlatforms) {
+    yield return await GetPluginSource(pluginName, targetVersion);
+
+    await foreach (var (_, archive) in GetPluginBinaries(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+      yield return archive;
+    }
   }
 
   /// <inheritdoc />

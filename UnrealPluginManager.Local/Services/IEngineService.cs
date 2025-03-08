@@ -1,14 +1,11 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using Semver;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Model.Plugins;
 
 namespace UnrealPluginManager.Local.Services;
-
-/// <summary>
-/// Represents an installed Unreal Engine plugin with its name and version details.
-/// </summary>
-public record struct InstalledPlugin(string Name, SemVersion Version);
 
 /// <summary>
 /// Provides functionalities related to engine management within the Unreal Plugin Manager CLI.
@@ -58,7 +55,7 @@ public interface IEngineService {
   ///   If null, the default engine version will be used.
   /// </param>
   /// <returns>
-  /// An asynchronous enumerable of <see cref="InstalledPlugin"/> objects representing the plugins installed for the specified engine version.
+  /// An asynchronous enumerable of <see cref="PluginIdentifier"/> objects representing the plugins installed for the specified engine version.
   /// </returns>
   public IAsyncEnumerable<InstalledPlugin> GetInstalledPlugins(string? engineVersion);
 
@@ -72,6 +69,6 @@ public interface IEngineService {
   /// <returns>
   /// A task representing the asynchronous operation. The task result contains an integer indicating the status of the installation process.
   /// </returns>
-  public Task<int> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
+  public Task<int> InstallPlugin(string pluginName, SemVersion pluginVersion, string? engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
 }

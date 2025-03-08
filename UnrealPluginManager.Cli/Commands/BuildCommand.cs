@@ -2,6 +2,7 @@
 using System.CommandLine;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
+using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -52,6 +53,7 @@ public class BuildCommandOptions : ICommandOptions {
   /// This property specifies the directory containing the Unreal Engine plugin source files
   /// that need to be compiled as part of the build command.
   /// </remarks>
+  [UsedImplicitly]
   public required string Input { get; set; }
 
   /// <summary>
@@ -61,6 +63,7 @@ public class BuildCommandOptions : ICommandOptions {
   /// This property specifies the version of the Unreal Engine to use when compiling the plugin.
   /// If no version is specified, the build process may use a default or globally configured version.
   /// </remarks>
+  [UsedImplicitly]
   public string? Version { get; set; }
 }
 
@@ -76,11 +79,16 @@ public class BuildCommandOptions : ICommandOptions {
 [AutoConstructor]
 [UsedImplicitly]
 public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
+  private readonly IConsole _console;
   private readonly IFileSystem _fileSystem;
   private readonly IEngineService _engineService;
+  private readonly IInstallService _installService;
 
   /// <inheritdoc />
-  public Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-    return _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
+  public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
+    var installResult = await _installService.InstallRequirements(options.Input, options.Version, 
+                                                            ["Win64"]);
+    _console.WriteVersionChanges(installResult);
+    return await _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
   }
 }

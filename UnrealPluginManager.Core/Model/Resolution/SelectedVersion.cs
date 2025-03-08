@@ -1,6 +1,6 @@
 ﻿using Semver;
 
-namespace UnrealPluginManager.Core.Solver;
+namespace UnrealPluginManager.Core.Model.Resolution;
 
 /// <summary>
 /// Represents a selected version with a name and its corresponding semantic version.

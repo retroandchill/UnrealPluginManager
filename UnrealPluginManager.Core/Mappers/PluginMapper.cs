@@ -3,7 +3,9 @@ using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Engine;
+using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 
@@ -181,6 +183,14 @@ public static partial class PluginMapper {
                         }))
         .ToList();
   }
+
+  /// <summary>
+  /// Converts an <see cref="IDependencyHolder"/> instance to a <see cref="DependencyChainRoot"/> representation.
+  /// </summary>
+  /// <param name="descriptor">The source <see cref="IDependencyHolder"/> containing plugin dependency information.</param>
+  /// <returns>A <see cref="DependencyChainRoot"/> instance representing the dependency chain of the provided <see cref="IDependencyHolder"/>.</returns>
+  [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
+  public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
 
   /// <summary>
   /// Returns a <see cref="SemVersion"/> object without any modifications.

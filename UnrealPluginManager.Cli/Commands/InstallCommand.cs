@@ -1,8 +1,8 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
 using JetBrains.Annotations;
-using LanguageExt;
 using Semver;
+using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -34,7 +34,7 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
   public InstallCommand() : base("install", "Install the specified plugin into the engine") {
     var inputArg = new Argument<string>("input", "The name of plugin to install");
     AddArgument(inputArg);
-    var versionOption = new System.CommandLine.Option<SemVersionRange>(aliases: ["--version", "-v"],
+    var versionOption = new Option<SemVersionRange>(aliases: ["--version", "-v"],
                                                                        description:
                                                                        "The version of the plugin to install",
                                                                        parseArgument: r =>
@@ -47,7 +47,7 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
         IsRequired = false,
     };
     AddOption(versionOption);
-    AddOption(new System.CommandLine.Option<string>(["--engine-version", "-e"],
+    AddOption(new Option<string>(["--engine-version", "-e"],
                                                     "The version of the engine to build the plugin for") {
         IsRequired = false,
     });
@@ -82,6 +82,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// wishes to install using the command-line interface. It is a required parameter
   /// utilized during the plugin installation process.
   /// </remarks>
+  [UsedImplicitly]
   public required string Input { get; set; }
 
   /// <summary>
@@ -92,6 +93,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// intends to install. It supports specifying exact versions, ranges, or constraints,
   /// allowing flexibility in determining compatible versions during the installation process.
   /// </remarks>
+  [UsedImplicitly]
   public SemVersionRange Version { get; set; } = SemVersionRange.AllRelease;
 
   /// <summary>
@@ -102,6 +104,7 @@ public class InstallCommandOptions : ICommandOptions {
   /// It allows users to target a specific engine version when executing the installation command.
   /// If not specified, it may default to a suitable version as determined by the system or the installer.
   /// </remarks>
+  [UsedImplicitly]
   public string? EngineVersion { get; set; }
 }
 
@@ -118,18 +121,16 @@ public class InstallCommandOptions : ICommandOptions {
 [UsedImplicitly]
 public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
   private readonly IConsole _console;
-  private readonly IEngineService _engineService;
+  private readonly IInstallService _installService;
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-    var existingVersion = await _engineService.GetInstalledPluginVersion(options.Input, options.EngineVersion)
-        .Map(x => x.Where(y => options.Version.Contains(y)));
-    return await existingVersion
-        .Match(v => {
-                 _console.Out.WriteLine($"Installed version {v} already satisfies the version requirement.");
-                 return Task.FromResult(0);
-               },
-               () => _engineService.InstallPlugin(options.Input, options.Version, options.EngineVersion,
-                                                  ["Win64"]));
+    var changes = options.Input.EndsWith(".uplugin", StringComparison.InvariantCultureIgnoreCase) ||
+                        options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)
+        ? await _installService.InstallRequirements(options.Input, options.EngineVersion, ["Win64"])
+        : await _installService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
+    _console.WriteVersionChanges(changes);
+
+    return 0;
   }
 }

@@ -4,21 +4,35 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
 using Semver;
-using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Server.Controllers;
-using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
 
+/// <summary>
+/// Provides extension methods for configuring and generating Swagger documentation in a .NET application.
+/// </summary>
 public static class SwaggerExtensions {
-  private const string SemVerPattern =
+  /// <summary>
+  /// A regular expression pattern for Semantic Versioning (SemVer) that complies with SemVer 2.0.0 specification.
+  /// </summary>
+  /// <remarks>
+  /// This pattern matches version strings in the format of Major.Minor.Patch, optionally followed by
+  /// pre-release identifiers (e.g., -alpha, -beta) and build metadata (e.g., +001).
+  /// </remarks>
+  public const string SemVerPattern =
       @"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
 
+  /// <summary>
+  /// Configures and sets up Swagger for the application, including adding OpenAPI documentation,
+  /// XML comments, and various schema and operation filters.
+  /// </summary>
+  /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance being configured.</param>
+  /// <return>
+  /// The configured <see cref="WebApplicationBuilder"/> instance with Swagger setup.
+  /// </return>
   public static WebApplicationBuilder SetUpSwagger(this WebApplicationBuilder builder) {
     builder.Services.AddSingleton<ISwaggerService, SwaggerService>()
         .AddOpenApi()
@@ -29,9 +43,10 @@ public static class SwaggerExtensions {
           options.CustomOperationIds(GetOperationIdName);
           var apiAssembly = typeof(PluginsController).Assembly;
           options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
-
-          options.EnableAnnotations(true, true);
-
+          
+          options.SupportNonNullableReferenceTypes();
+          options.UseAllOfForInheritance();
+          
           // include models xml documentation
           var modelsAssembly = typeof(PluginSummary).Assembly;
           options.IncludeXmlComments(GetXmlDocumentationFileFor(modelsAssembly));
@@ -47,6 +62,7 @@ public static class SwaggerExtensions {
           options.AddSchemaFilterInstance(new CollectionPropertyFilter());
           options.AddOperationFilterInstance(new PageableParameterFilter());
           options.AddSchemaFilterInstance(new PagePropertyFilter());
+          options.AddOperationFilterInstance(new SemVersionParameterFilter());
         });
 
     return builder;

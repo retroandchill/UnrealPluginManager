@@ -24,7 +24,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute {
   /// <inheritdoc />
   public override void OnException(ExceptionContext context) {
     context.Result = context.Exception switch {
-        DependencyResolutionException or PluginNotFoundException => new NotFoundObjectResult(context.Exception
+        PluginNotFoundException => new NotFoundObjectResult(context.Exception
               .Message),
         BadSubmissionException => new BadRequestObjectResult(context.Exception.Message),
         _ => context.Result

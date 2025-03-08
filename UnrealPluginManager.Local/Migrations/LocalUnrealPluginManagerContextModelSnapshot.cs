@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UnrealPluginManager.Local.Database;
-using LocalUnrealPluginManagerContext = UnrealPluginManager.Local.Database.LocalUnrealPluginManagerContext;
 
 #nullable disable
 
@@ -15,7 +14,7 @@ namespace UnrealPluginManager.Local.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
@@ -148,7 +147,7 @@ namespace UnrealPluginManager.Local.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("EngineVersion", "Platform")
+                    b.HasIndex("ParentId", "EngineVersion", "Platform")
                         .IsUnique();
 
                     b.ToTable("PluginBinaries");

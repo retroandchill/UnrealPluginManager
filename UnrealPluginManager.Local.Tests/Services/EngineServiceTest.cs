@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Local.Tests.Services;
@@ -25,6 +26,7 @@ public partial class EngineServiceTest {
   private Mock<IEnginePlatformService> _enginePlatformService;
   private Mock<IProcessRunner> _processRunner;
   private Mock<IPluginService> _pluginService;
+  private Mock<IPluginStructureService> _pluginStructureService;
 
   [SetUp]
   public void Setup() {
@@ -39,6 +41,8 @@ public partial class EngineServiceTest {
     services.AddSingleton(_processRunner.Object);
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
+    _pluginStructureService = new Mock<IPluginStructureService>();
+    services.AddSingleton(_pluginStructureService.Object);
 
     services.AddSingleton<IEngineService, EngineService>();
 
@@ -152,14 +156,14 @@ public partial class EngineServiceTest {
     }
 
     List<string> targetPlatforms = ["Win64"];
-    _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms))
-        .Returns((string _, SemVersionRange _, string _, IReadOnlyCollection<string> _) =>
+    _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms))
+        .Returns((string _, SemVersion _, string _, IReadOnlyCollection<string> _) =>
                      _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
     Assert.That(installedPluginVersion.IsNone, Is.True);
-    var returnCode = await engineService.InstallPlugin("MyPlugin", SemVersionRange.All, "5.4", targetPlatforms);
+    var returnCode = await engineService.InstallPlugin("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms);
     Assert.Multiple(() => {
       Assert.That(returnCode, Is.EqualTo(0));
       Assert.That(_filesystem.Directory.Exists(
@@ -214,13 +218,16 @@ public partial class EngineServiceTest {
     await _filesystem.File.WriteAllTextAsync(Path.Join(subDir3.FullName, "AnotherPlugin.uplugin"),
                                              JsonSerializer.Serialize(descriptor3));
 
+    _pluginStructureService.Setup(x => x.GetInstalledBinaries(It.IsAny<IDirectoryInfo>()))
+        .Returns(["Win64"]);
+
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var pluginVersions = await engineService.GetInstalledPlugins("5.5")
         .ToListAsync();
 
     Assert.That(pluginVersions, Has.Count.EqualTo(3));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("MyPlugin", new SemVersion(1, 0, 0))));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("SecondPlugin", new SemVersion(2, 4, 3))));
-    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("AnotherPlugin", new SemVersion(1, 1, 3))));
+    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("MyPlugin", new SemVersion(1, 0, 0), ["Win64"])));
+    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("SecondPlugin", new SemVersion(2, 4, 3), ["Win64"])));
+    Assert.That(pluginVersions, Does.Contain(new InstalledPlugin("AnotherPlugin", new SemVersion(1, 1, 3), ["Win64"])));
   }
 }

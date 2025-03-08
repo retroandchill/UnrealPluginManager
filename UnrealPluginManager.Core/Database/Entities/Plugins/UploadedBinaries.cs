@@ -79,7 +79,7 @@ public class UploadedBinaries : IVersionedEntityChild {
         .HasIndex(x => x.ParentId);
 
     modelBuilder.Entity<UploadedBinaries>()
-        .HasIndex(x => new { x.EngineVersion, x.Platform })
+        .HasIndex(x => new { x.ParentId, x.EngineVersion, x.Platform })
         .IsUnique();
   }
 }

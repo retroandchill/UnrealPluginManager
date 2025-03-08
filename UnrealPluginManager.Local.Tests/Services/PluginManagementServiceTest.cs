@@ -2,12 +2,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
@@ -62,6 +63,12 @@ public class PluginManagementServiceTest {
     services.AddScoped<IPluginManagementService, PluginManagementService>();
 
     _serviceProvider = services.BuildServiceProvider();
+
+    var realPluginService = new PluginService(null, null, null, null);
+    _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
+        .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
+            realPluginService.GetDependencyList(root, manifest));
+
     _pluginManagementService = _serviceProvider.GetRequiredService<IPluginManagementService>();
 
     var pageList = AddPluginsToRemote(300)
@@ -70,8 +77,8 @@ public class PluginManagementServiceTest {
 
     var pageIndex = 0;
     _pluginsApi.Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
-                                             It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(),
-                                             It.IsAny<CancellationToken>()))
+            It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(),
+            It.IsAny<CancellationToken>()))
         .Returns((string? _, int? _, int? _, int _, CancellationToken _) => {
           if (pageIndex >= pageList.Count) {
             throw new ApiException(404, "Unreachable");
@@ -89,7 +96,7 @@ public class PluginManagementServiceTest {
   private static List<Page<PluginOverview>> AddPluginsToRemote(int totalCount) {
     return Enumerable.Range(0, totalCount)
         .Select(i => new PluginOverview {
-            Id = (ulong)i + 1,
+            Id = (ulong) i + 1,
             Name = $"Plugin{i + 1}",
             FriendlyName = $"Plugin {i + 1}",
             Versions = []
@@ -126,7 +133,7 @@ public class PluginManagementServiceTest {
   }
 
   [Test]
-  public async Task GetAllPluginDependencies() {
+  public async Task TestGetPluginDependencyTreet() {
     var root = new DependencyChainRoot {
         Dependencies = [
             new PluginDependency {
@@ -154,8 +161,8 @@ public class PluginManagementServiceTest {
 
     _engineService.Setup(x => x.GetInstalledPlugins(null))
         .Returns(new List<InstalledPlugin> {
-            new("StdLib", new SemVersion(4, 0, 0)),
-            new("Http", new SemVersion(3, 0, 0)),
+            new("StdLib", new SemVersion(4, 0, 0), ["Win64"]),
+            new("Http", new SemVersion(3, 0, 0), ["Win64"]),
         }.ToAsyncEnumerable());
 
     var allPlugins = new Dictionary<string, List<SemVersion>> {
@@ -175,38 +182,71 @@ public class PluginManagementServiceTest {
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is "Http" or "StdLib")
                 .ToDictionary(x => x.Key, x => x.Value
-                                  .Select(y =>
-                                              new PluginVersionInfo {
-                                                  VersionId = 1,
-                                                  PluginId = 1,
-                                                  Name = x.Key,
-                                                  Version = y,
-                                                  Dependencies = []
-                                              })
-                                  .ToList())
+                    .Select(y =>
+                        new PluginVersionInfo {
+                            VersionId = 1,
+                            PluginId = 1,
+                            Name = x.Key,
+                            Version = y,
+                            Dependencies = []
+                        })
+                    .ToList())
         }));
 
     _pluginsApi.Setup(x => x.GetCandidateDependenciesAsync(
-                          It.Is(root.Dependencies, EqualityComparer<List<PluginDependency>>.Default),
-                          It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            It.IsAny<List<PluginDependency>>(),
+            It.IsAny<int>(), It.IsAny<CancellationToken>()))
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is not "Http" and not "StdLib")
                 .ToDictionary(x => x.Key, x => x.Value
-                                  .Select(y =>
-                                              new PluginVersionInfo {
-                                                  VersionId = 1,
-                                                  PluginId = 1,
-                                                  Name = x.Key,
-                                                  Version = y,
-                                                  Dependencies = []
-                                              })
-                                  .ToList())
+                    .Select(y =>
+                        new PluginVersionInfo {
+                            VersionId = 1,
+                            PluginId = 1,
+                            Name = x.Key,
+                            Version = y,
+                            Dependencies = []
+                        })
+                    .ToList())
         }));
 
-    var result = await _pluginManagementService.GetPossibleDependencies(root, null);
-    Assert.Multiple(() => { 
-      Assert.That(result.FoundDependencies, Has.Count.EqualTo(4));
-      Assert.That(result.UnresolvedDependencies, Has.Count.EqualTo(0));
+    var dependencyGraph = await _pluginManagementService.GetPluginsToInstall(root, null);
+    Assert.That(dependencyGraph, Has.Count.EqualTo(4));
+    Assert.Multiple(() => {
+      Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "StdLib")?.Version, Is.EqualTo(new SemVersion(4, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "Sql")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
+      Assert.That(dependencyGraph.Find(x => x.Name == "Http")?.Version, Is.EqualTo(new SemVersion(3, 0, 0)));
     });
   }
+
+  [Test]
+  public async Task TestFindTargetPlugin() {
+    _engineService.Setup(x => x.GetInstalledPluginVersion("TestPlugin", "5.5"))
+        .ReturnsAsync(LanguageExt.Option<SemVersion>.None);
+    _pluginService.Setup(x => x.GetPluginVersionInfo("TestPlugin", SemVersionRange.All))
+        .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
+
+    _pluginsApi.Setup(x =>
+            x.GetLatestVersionAsync("TestPlugin", SemVersionRange.All.ToString(), 0, CancellationToken.None))
+        .ReturnsAsync(new PluginVersionInfo {
+            PluginId = 1,
+            Name = "TestPlugin",
+            FriendlyName = "Test Plugin",
+            VersionId = 1,
+            Version = new SemVersion(1, 1, 0),
+            Dependencies = []
+        });
+
+    var targetPlugin = await _pluginManagementService.FindTargetPlugin("TestPlugin", SemVersionRange.All, "5.5");
+    Assert.That(targetPlugin, Is.Not.Null);
+    Assert.Multiple(() => {
+      Assert.That(targetPlugin.Name, Is.EqualTo("TestPlugin"));
+      Assert.That(targetPlugin.FriendlyName, Is.EqualTo("Test Plugin"));
+      Assert.That(targetPlugin.Version, Is.EqualTo(new SemVersion(1, 1, 0)));
+      Assert.That(targetPlugin.Dependencies, Is.Empty);
+    });
+  }
+  
+  
 }

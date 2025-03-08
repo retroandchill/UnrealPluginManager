@@ -44,4 +44,6 @@ public class LinqExtensionsTest {
     var dict3 = Enumerable.Range(0, 10).ToOrderedDictionary(x => x.ToString(), y => y);
     Assert.That(dict3, Has.Count.EqualTo(10));
   }
+  
+  
 }

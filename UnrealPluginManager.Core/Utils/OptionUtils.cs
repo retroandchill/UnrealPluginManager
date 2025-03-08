@@ -45,6 +45,25 @@ public static class OptionUtils {
                      x => throw x.ToException());
   }
 
+  public static Task<T> OrElseAsync<T>(this Option<T> option, Func<Task<T>> fallback) {
+    return option.Match(x => Task.FromResult(x), fallback);
+  }
+
+  /// <summary>
+  /// Asynchronously retrieves the current option's value or falls back to a new option provided by an asynchronous fallback function.
+  /// </summary>
+  /// <typeparam name="T">The type of the value contained within the Option.</typeparam>
+  /// <param name="option">The Option instance to retrieve the value from.</param>
+  /// <param name="fallback">
+  /// A function that returns a Task containing an Option to be used if the current option has no value.
+  /// </param>
+  /// <returns>A task containing an Option with the value from the current option or the fallback.
+  /// If both are None, the result will also be None.
+  /// </returns>
+  public static Task<Option<T>> OrElseAsync<T>(this Option<T> option, Func<Task<Option<T>>> fallback) {
+    return option.Match(x => Task.FromResult<Option<T>>(x), fallback);
+  }
+
   /// <summary>
   /// Converts a nullable value of type <typeparamref name="T"/> to an enumerable containing the value if it is not null.
   /// In the case of nullable value types, the returned enumerable will contain the value if present.
@@ -84,6 +103,12 @@ public static class OptionUtils {
     return value ?? Option<T>.None;
   }
 
+  /// <summary>
+  /// Converts a task producing a nullable value into a task producing an <see cref="Option{T}"/>.
+  /// </summary>
+  /// <typeparam name="T">The type of the value that the task might produce.</typeparam>
+  /// <param name="value">The task producing a nullable value to be converted to an Option.</param>
+  /// <returns>A task that produces an <see cref="Option{T}"/> containing the value if it is not null, or None if it is null.</returns>
   public static Task<Option<T>> ToOptionAsync<T>(this Task<T?> value) {
     return value.Map(ToOption);
   }
@@ -99,6 +124,23 @@ public static class OptionUtils {
   /// <returns>The result of type <see cref="TResult"/> determined by executing either the <paramref name="some"/> or <paramref name="none"/> function.</returns>
   public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : class {
     return value is not null ? some(value) : none();
+  }
+
+  /// <summary>
+  /// Projects the value contained within an <see cref="Option{T}"/> instance into a new <see cref="Option{TResult}"/> asynchronously
+  /// using the provided function if the option contains a value.
+  /// Returns None if the original option is None.
+  /// </summary>
+  /// <typeparam name="T">The type of the value contained within the original option.</typeparam>
+  /// <typeparam name="TResult">The type of the value contained within the resulting option.</typeparam>
+  /// <param name="option">The Option instance to project.</param>
+  /// <param name="selector">A function that produces a new option asynchronously from the current value.</param>
+  /// <returns>A task that represents the asynchronous operation, containing the projected <see cref="Option{TResult}"/> instance.</returns>
+  public static Task<Option<TResult>> SelectManyAsync<T, TResult>(this Option<T> option, Func<T, Task<Option<TResult>>> selector) {
+    return option.Match(
+        selector,
+        () => Task.FromResult(Option<TResult>.None)
+    );
   }
 
   /// <summary>

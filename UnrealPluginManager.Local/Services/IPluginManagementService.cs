@@ -1,5 +1,8 @@
 ﻿using LanguageExt;
+using Semver;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Resolution;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -42,17 +45,42 @@ public interface IPluginManagementService {
   Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm);
 
   /// <summary>
-  /// Resolves potential dependencies for a given root dependency chain node, retrieving both resolved
-  /// and unresolved dependencies based on current installations and available remote data.
+  /// Finds and retrieves the target version information for a specified plugin
+  /// that matches the given version range and engine version, either by checking
+  /// installed plugins or looking up available versions.
+  /// </summary>
+  /// <param name="pluginName">
+  /// The name of the plugin to locate. This must match the plugin's identifier.
+  /// </param>
+  /// <param name="versionRange">
+  /// The range of acceptable versions for the plugin. If multiple versions are found to satisfy the range,
+  /// prioritization will occur based on specific criteria.
+  /// </param>
+  /// <param name="engineVersion">
+  /// An optional engine version used to filter plugins that are compatible with the specified engine version.
+  /// If null, compatibility with any engine version is assumed.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns a
+  /// <see cref="PluginVersionInfo"/> object containing details about the resolved plugin version.
+  /// Throws a <see cref="PluginNotFoundException"/> if no matching plugin is found.
+  /// </returns>
+  Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion);
+
+  /// <summary>
+  /// Retrieves a list of plugins that need to be installed based on the provided root dependency chain node
+  /// and the specified engine version.
   /// </summary>
   /// <param name="root">
-  ///   The root of the dependency chain used as the base node to resolve dependencies. This node provides
-  ///   information such as the plugin name, version, and its existing dependencies.
+  ///   The root node of the dependency chain that defines the plugin and its dependencies.
   /// </param>
-  /// <param name="engineVersion"></param>
+  /// <param name="engineVersion">
+  ///   The version of the game engine, which is used to determine compatibility with plugins.
+  ///   This can be null if engine version filtering is not required.
+  /// </param>
   /// <returns>
-  /// A task representing the asynchronous operation. Upon completion, contains a <see cref="DependencyManifest"/>
-  /// that includes resolved dependencies as a dictionary and a set of unresolved dependencies.
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="List{PluginSummary}"/>
+  /// containing the plugins that need to be installed, including their details.
   /// </returns>
-  Task<DependencyManifest> GetPossibleDependencies(IDependencyChainNode root, string? engineVersion);
+  Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
 }

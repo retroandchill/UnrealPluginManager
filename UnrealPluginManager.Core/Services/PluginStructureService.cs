@@ -15,6 +15,8 @@ namespace UnrealPluginManager.Core.Services;
 public partial class PluginStructureService : IPluginStructureService {
   private const string Binaries = "Binaries";
   private const string Intermediate = "Intermediate";
+  private const string IntermediateBuild = "Intermediate/Build";
+  
   private readonly IFileSystem _fileSystem;
   private readonly IStorageService _storageService;
 
@@ -82,10 +84,9 @@ public partial class PluginStructureService : IPluginStructureService {
                                                              new CopyFileSource(sourceZipInfo));
     }
 
-    const string intermediateBuild = "Intermediate/Build";
     var binaryEntries = zipArchive.Entries
-        .Where(x => x.FullName.StartsWith(Binaries) || x.FullName.StartsWith(intermediateBuild))
-        .Where(x => x.FullName != "Binaries/" && x.FullName != $"{intermediateBuild}/")
+        .Where(x => x.FullName.StartsWith(Binaries) || x.FullName.StartsWith(IntermediateBuild))
+        .Where(x => x.FullName != "Binaries/" && x.FullName != $"{IntermediateBuild}/")
         .GroupBy(x => x.FullName.StartsWith(Binaries) ? x.FullName.Split('/')[1] : x.FullName.Split('/')[2])
         .ToDictionary(x => x.Key, x => x.ToList());
 
@@ -98,5 +99,14 @@ public partial class PluginStructureService : IPluginStructureService {
     }
 
     return new PartitionedPlugin(pluginSource, pluginIcon, pluginBinaries);
+  }
+
+  /// <inheritdoc />
+  public List<string> GetInstalledBinaries(IDirectoryInfo pluginDirectory) {
+    return pluginDirectory.EnumerateDirectories(Binaries, SearchOption.TopDirectoryOnly)
+        .Concat(pluginDirectory.EnumerateDirectories(IntermediateBuild, SearchOption.TopDirectoryOnly))
+        .Select(x => x.Name)
+        .Distinct()
+        .ToList();
   }
 }
