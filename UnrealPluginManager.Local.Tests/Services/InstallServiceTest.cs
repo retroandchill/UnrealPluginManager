@@ -53,7 +53,7 @@ public class InstallServiceTest {
         .ReturnsAsync(new SemVersion(1, 0, 0));
 
     var result = await _installService.InstallPlugin("TestPlugin", SemVersionRange.All, "5.5", ["Win64"]);
-    Assert.That(result, Is.InstanceOf<AlreadyInstalled>());
+    Assert.That(result, Has.Count.EqualTo(0));
 
     var existingPlugin = new PluginVersionInfo {
         PluginId = 1,
@@ -78,14 +78,12 @@ public class InstallServiceTest {
             new("TestPlugin", new SemVersion(1, 0, 0), ["Win64"])
         }).ToAsyncEnumerable());
 
-    result = await _installService.InstallPlugin("TestPlugin", targetVersion, "5.5", ["Win64"]);
-    Assert.That(result, Is.InstanceOf<InstallChanges>());
-    var changes = (InstallChanges) result;
-    Assert.That(changes.VersionChanges, Has.Count.EqualTo(1));
+    var changes = await _installService.InstallPlugin("TestPlugin", targetVersion, "5.5", ["Win64"]);
+    Assert.That(changes, Has.Count.EqualTo(1));
     Assert.Multiple(() => {
-      Assert.That(changes.VersionChanges[0].PluginName, Is.EqualTo("TestPlugin"));
-      Assert.That(changes.VersionChanges[0].OldVersion, Is.EqualTo(new SemVersion(1, 0, 0)));
-      Assert.That(changes.VersionChanges[0].NewVersion, Is.EqualTo(new SemVersion(1, 1, 0)));
+      Assert.That(changes[0].PluginName, Is.EqualTo("TestPlugin"));
+      Assert.That(changes[0].OldVersion, Is.EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(changes[0].NewVersion, Is.EqualTo(new SemVersion(1, 1, 0)));
     });
 
     _engineService.Verify(x => x.InstallPlugin("TestPlugin", new SemVersion(1, 1, 0), "5.5", new List<string> {

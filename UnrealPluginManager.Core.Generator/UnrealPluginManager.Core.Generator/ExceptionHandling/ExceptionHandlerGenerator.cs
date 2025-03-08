@@ -26,7 +26,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
       "Target class may not be nested",
       "Target class '{0}' may not be nested.",
       "ExceptionHandlerGenerator",
-      DiagnosticSeverity.Warning,
+      DiagnosticSeverity.Error,
       isEnabledByDefault: true);
 
   public void Initialize(IncrementalGeneratorInitializationContext context) {
