@@ -13,7 +13,6 @@ using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
-using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Local.Tests.Services;
 
@@ -210,9 +209,7 @@ public class PluginManagementServiceTest {
                                   .ToList())
         }));
 
-    var result = await _pluginManagementService.GetPluginsToInstall(root, null);
-    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
-    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
+    var dependencyGraph = await _pluginManagementService.GetPluginsToInstall(root, null);
     Assert.That(dependencyGraph, Has.Count.EqualTo(4));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));

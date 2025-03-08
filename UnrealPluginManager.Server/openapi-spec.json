@@ -201,7 +201,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResolutionResult"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PluginSummary"
+                  }
                 }
               }
             }
@@ -528,41 +531,6 @@
         "additionalProperties": false,
         "description": "Represents an overview of binary files for a specific platform and engine version."
       },
-      "Conflict": {
-        "type": "object",
-        "properties": {
-          "pluginName": {
-            "type": "string"
-          },
-          "versions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PluginRequirement"
-            }
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents a conflict that occurs when multiple requirements specify incompatible\r\nversions for the same plugin during resolution."
-      },
-      "ConflictDetected": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "conflicts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Conflict"
-            }
-          },
-          "type": {
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "description": "Represents a conflict detected during the resolution process\r\nwhen plugin dependencies have incompatible requirements."
-      },
       "DependencyManifest": {
         "type": "object",
         "properties": {
@@ -784,20 +752,6 @@
         },
         "description": "Represents the output of a paged query of PluginOverview."
       },
-      "PluginRequirement": {
-        "type": "object",
-        "properties": {
-          "requiredBy": {
-            "type": "string"
-          },
-          "requiredVersion": {
-            "type": "string",
-            "example": ">=1.0.0"
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents a requirement for a plugin, specifying the source of the requirement\r\nand the version range that satisfies it."
-      },
       "PluginSummary": {
         "required": [
           "friendlyName",
@@ -894,38 +848,6 @@
         },
         "additionalProperties": false,
         "description": "Represents detailed information about a specific version of a plugin."
-      },
-      "ResolutionResult": {
-        "type": "object",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/ResolvedDependencies"
-          },
-          {
-            "$ref": "#/components/schemas/ConflictDetected"
-          }
-        ],
-        "additionalProperties": false,
-        "description": "Represents the result of a resolution process that determines the required\r\nor conflicting plugins within a dependency chain."
-      },
-      "ResolvedDependencies": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "selectedPlugins": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PluginSummary"
-            }
-          },
-          "type": {
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "description": "Represents a resolution outcome where all required dependencies have been successfully resolved."
       },
       "VersionDetails": {
         "allOf": [

@@ -4,8 +4,6 @@ apis/StorageApi.ts
 apis/index.ts
 index.ts
 models/BinariesOverview.ts
-models/Conflict.ts
-models/ConflictDetected.ts
 models/DependencyManifest.ts
 models/DependencyOverview.ts
 models/PluginDependency.ts
@@ -13,12 +11,9 @@ models/PluginDetails.ts
 models/PluginOverview.ts
 models/PluginOverviewBase.ts
 models/PluginOverviewPage.ts
-models/PluginRequirement.ts
 models/PluginSummary.ts
 models/PluginType.ts
 models/PluginVersionInfo.ts
-models/ResolutionResult.ts
-models/ResolvedDependencies.ts
 models/VersionDetails.ts
 models/VersionOverview.ts
 models/index.ts

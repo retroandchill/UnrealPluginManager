@@ -19,8 +19,8 @@ import type {
   PluginDependency,
   PluginDetails,
   PluginOverviewPage,
+  PluginSummary,
   PluginVersionInfo,
-  ResolutionResult,
 } from '../models/index';
 import {
     DependencyManifestFromJSON,
@@ -31,10 +31,10 @@ import {
     PluginDetailsToJSON,
     PluginOverviewPageFromJSON,
     PluginOverviewPageToJSON,
+    PluginSummaryFromJSON,
+    PluginSummaryToJSON,
     PluginVersionInfoFromJSON,
     PluginVersionInfoToJSON,
-    ResolutionResultFromJSON,
-    ResolutionResultToJSON,
 } from '../models/index';
 
 export interface AddPluginRequest {
@@ -378,7 +378,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Retrieves the dependency tree for a specified plugin.
      */
-    async getDependencyTreeRaw(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResolutionResult>> {
+    async getDependencyTreeRaw(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<PluginSummary>>> {
         if (requestParameters['pluginName'] == null) {
             throw new runtime.RequiredError(
                 'pluginName',
@@ -400,13 +400,13 @@ export class PluginsApi extends runtime.BaseAPI {
             body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ResolutionResultFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PluginSummaryFromJSON));
     }
 
     /**
      * Retrieves the dependency tree for a specified plugin.
      */
-    async getDependencyTree(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResolutionResult> {
+    async getDependencyTree(requestParameters: GetDependencyTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<PluginSummary>> {
         const response = await this.getDependencyTreeRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -8,8 +8,6 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Installation;
-using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
-using InstallResult = UnrealPluginManager.Local.Model.Installation.InstallResult;
 
 namespace UnrealPluginManager.Local.Services;
 

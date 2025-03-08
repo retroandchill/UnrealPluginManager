@@ -18,7 +18,6 @@ using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
-using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 
 namespace UnrealPluginManager.Core.Tests.Services;
 
@@ -134,23 +133,17 @@ public class PluginServiceTests {
         ]
     });
 
-    var plugin1Result = await pluginService.GetDependencyList("Plugin1");
-    Assert.That(plugin1Result, Is.InstanceOf<ResolvedDependencies>());
-    var plugin1List = ((ResolvedDependencies)plugin1Result).SelectedPlugins;
+    var plugin1List = await pluginService.GetDependencyList("Plugin1");
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
 
-    var plugin2Result = await pluginService.GetDependencyList("Plugin2");
-    Assert.That(plugin2Result, Is.InstanceOf<ResolvedDependencies>());
-    var plugin2List = ((ResolvedDependencies)plugin2Result).SelectedPlugins;
+    var plugin2List = await pluginService.GetDependencyList("Plugin2");
     Assert.That(plugin2List, Has.Count.EqualTo(2));
     var plugin2Names = plugin2List.Select(x => x.Name).ToList();
     Assert.That(plugin2Names, Does.Contain("Plugin1"));
     Assert.That(plugin2Names, Does.Contain("Plugin2"));
 
-    var plugin3Result = await pluginService.GetDependencyList("Plugin3");
-    Assert.That(plugin3Result, Is.InstanceOf<ResolvedDependencies>());
-    var plugin3List = ((ResolvedDependencies)plugin3Result).SelectedPlugins;
+    var plugin3List = await pluginService.GetDependencyList("Plugin3");
     Assert.That(plugin3List, Has.Count.EqualTo(3));
     var plugin3Names = plugin3List.Select(x => x.Name).ToList();
     Assert.That(plugin3Names, Does.Contain("Plugin1"));

@@ -13,7 +13,6 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
-using static UnrealPluginManager.Local.Model.Installation.InstallResult;
 
 namespace UnrealPluginManager.Local.Tests.Services;
 
@@ -114,10 +113,8 @@ public class InstallServiceTest {
             ])
         }));
 
-    var result = await _installService.InstallPlugin("TestPlugin", targetVersion, "5.5", ["Win64"]);
-    Assert.That(result, Is.InstanceOf<HasConflicts>());
-    var changes = (HasConflicts) result;
-    Assert.That(changes.Conflicts, Has.Count.EqualTo(1));
+    var conflicts = Assert.ThrowsAsync<DependencyConflictException>(async () => await _installService.InstallPlugin("TestPlugin", targetVersion, "5.5", ["Win64"]));
+    Assert.That(conflicts.Conflicts, Has.Count.EqualTo(1));
     _engineService.Verify(x => x.InstallPlugin("TestPlugin", new SemVersion(1, 1, 0), "5.5", new List<string> {
         "Win64"
     }), Times.Never());
@@ -179,12 +176,10 @@ public class InstallServiceTest {
     _engineService.Setup(x => x.GetInstalledPlugins("5.5"))
         .Returns(installedPlugins.ToAsyncEnumerable());
     
-    var result = await _installService.InstallRequirements("Project.uproject", "5.5", ["Win64"]);
-    Assert.That(result, Is.InstanceOf<InstallChanges>());
-    var changes = (InstallChanges) result;
-    Assert.That(changes.VersionChanges, Has.Count.EqualTo(2));
-    Assert.That(changes.VersionChanges, Has.Member(new VersionChange("Plugin2", new SemVersion(1, 0, 0), new SemVersion(1, 1, 0))));
-    Assert.That(changes.VersionChanges, Has.Member(new VersionChange("Plugin3", new SemVersion(1, 3, 0), new SemVersion(1, 3, 0))));
+    var changes = await _installService.InstallRequirements("Project.uproject", "5.5", ["Win64"]);
+    Assert.That(changes, Has.Count.EqualTo(2));
+    Assert.That(changes, Has.Member(new VersionChange("Plugin2", new SemVersion(1, 0, 0), new SemVersion(1, 1, 0))));
+    Assert.That(changes, Has.Member(new VersionChange("Plugin3", new SemVersion(1, 3, 0), new SemVersion(1, 3, 0))));
     
     _engineService.Verify(x => x.InstallPlugin("Plugin2", new SemVersion(1, 1, 0), "5.5", new List<string> { "Win64" }), Times.Once());
     _engineService.Verify(x => x.InstallPlugin("Plugin3", new SemVersion(1, 3, 0), "5.5", new List<string> { "Win64" }), Times.Once());
