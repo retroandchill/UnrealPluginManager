@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../../UnrealPluginManager.Cli/UnrealPluginManager.Cli.csproj"
+      "targetProject": "../../../UnrealPluginManager.Local/Source/UnrealPluginManager.Cli/UnrealPluginManager.Cli.csproj"
     }
   }
 }

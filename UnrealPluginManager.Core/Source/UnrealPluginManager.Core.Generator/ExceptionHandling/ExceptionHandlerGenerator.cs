@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using UnrealPluginManager.Core.Annotations.Exceptions;
 using UnrealPluginManager.Core.Generator.Properties;
 using UnrealPluginManager.Core.Generator.Utilities;
 
@@ -29,9 +34,10 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
       DiagnosticSeverity.Error,
       isEnabledByDefault: true);
 
+  /// <inheritdoc />
   public void Initialize(IncrementalGeneratorInitializationContext context) {
     var classesProvider = context.SyntaxProvider
-        .CreateSyntaxProvider((node, _) => IsValidTarget(node),
+        .CreateSyntaxProvider((node, _) => node is ClassDeclarationSyntax,
             (ctx, _) => {
               var classDeclaration = (ClassDeclarationSyntax) ctx.Node;
               return classDeclaration;
@@ -50,10 +56,6 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     });
   }
 
-  private static bool IsValidTarget(SyntaxNode node) {
-    return node is ClassDeclarationSyntax;
-  }
-
   private static void Execute(ClassDeclarationSyntax handlerClass,
                               Compilation compilation,
                               SourceProductionContext context) {
@@ -64,7 +66,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     }
     var attributeData = classSymbol
         .GetAttributes()
-        .FirstOrDefault(x => x.AttributeClass?.ToDisplayString() == "UnrealPluginManager.Core.Exceptions.ExceptionHandlerAttribute");
+        .FirstOrDefault(x => x.IsOfAttributeType<ExceptionHandlerAttribute>());
     if (attributeData is null) {
       return;
     }
@@ -93,20 +95,79 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
       defaultExitCode = $"{code}";
     }
     
+    var allMethods = handlerClass.Members
+        .OfType<MethodDeclarationSyntax>()
+        .Select(x => (Token: x, Symbol: semanticModel.GetDeclaredSymbol(x)!))
+        .ToList();
+    
+    var fallbackHandlers = allMethods
+        .Where(x => IsFallbackHandler(x.Symbol))
+        .ToList();
+    
+    var dedicatedHandlers = allMethods
+        .Where(x => IsSpecificHandler(x.Symbol))
+        .ToList();
+    
     var fullData = new {
         Namespace = parentNamespace.Name.ToString(),
         ClassName = handlerClass.Identifier.Text,
-        Exceptions = handlerClass.Members
-            .OfType<MethodDeclarationSyntax>()
-            .Select(x => (Token: x, Symbol: semanticModel.GetDeclaredSymbol(x)!))
-            .Where(x => IsExceptionHandlerMethod(x.Symbol))
-            .Select((x, i) => new {
-                ExceptionName = x.Symbol.Parameters[0].Type.ToString(),
-                VarName = $"exception{i}",
-                MethodName = x.Token.Identifier.Text
+        GeneralHandlers = allMethods
+            .Where(x => IsGeneralExceptionHandlerMethod(x.Symbol))
+            .Select(x => new {
+                x.Symbol.ReturnsVoid,
+                ReturnType = x.Symbol.ReturnType.ToDisplayString(),
+                Modifiers = string.Join(" ", x.Token.Modifiers.Select(m => m.ToString())),
+                MethodName = x.Symbol.Name,
+                ExceptionParameter = x.Symbol.Parameters[0].Name,
+                Parameters = x.Symbol.Parameters
+                    .Select((p, i) => new {
+                        Type = p.Type.ToDisplayString(),
+                        p.Name,
+                        Comma = i != x.Symbol.Parameters.Length - 1
+                    })
+                    .ToList(),
+                Exceptions = dedicatedHandlers
+                    .Where(y => IsValidHandler(x.Symbol, y.Symbol))
+                    .Select((y, i) => {
+                      var exceptionTypes = GetExceptionTypes(y.Symbol);
+                      return new {
+                          ExceptionTypes = exceptionTypes
+                              .Select((t, j) => new {
+                                  ExceptionName = t.ToDisplayString(),
+                                  Comma = j != exceptionTypes.Count - 1
+                              })
+                              .ToList(),
+                          SingleException = exceptionTypes.Count == 1,
+                          Index = i,
+                          MethodName = y.Symbol.Name,
+                          ExceptionType = y.Symbol.Parameters[0].Type.ToDisplayString(),
+                          OtherParameters = x.Symbol.Parameters
+                              .Skip(1)
+                              .Take(y.Symbol.Parameters.Length - 1)
+                              .Select((p, j) => new {
+                                  p.Name,
+                                  Comma = j != y.Symbol.Parameters.Length - 2,
+                              })
+                              .ToList(),
+                          HasOtherParameters = x.Symbol.Parameters.Length > 1
+                      };
+                    })
+                    .ToList(),
+                FallbackHandler = fallbackHandlers
+                    .Where(y => IsValidFallback(x.Symbol, y.Symbol))
+                    .Select(y => new {
+                        MethodName = y.Symbol.Name,
+                        Parameters = x.Symbol.Parameters
+                            .Take(y.Symbol.Parameters.Length)
+                            .Select((p, j) => new {
+                                p.Name,
+                                Comma = j != y.Symbol.Parameters.Length - 1,
+                            })
+                            .ToList()
+                    })
+                    .FirstOrDefault()
             })
-            .ToList(),
-        DefaultExitCode = defaultExitCode
+            .ToList()
     };
     
     var template = Handlebars.Compile(Templates.ExceptionHandler);
@@ -116,19 +177,63 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     context.AddSource($"{handlerClass.Identifier}.g.cs", template(fullData));
   }
 
-  private static bool IsExceptionHandlerMethod(IMethodSymbol methodSymbol) {
-    if (methodSymbol.ReturnType.ToDisplayString() != "int") {
-      return false;
-    }
-
-    var parameters = methodSymbol.Parameters;
-    if (parameters.Length != 1) {
+  private static bool IsGeneralExceptionHandlerMethod(IMethodSymbol methodSymbol) {
+    if (!methodSymbol.IsPartialDefinition) {
       return false;
     }
     
-    var paramType = parameters[0].Type;
-    
-    return paramType.ToDisplayString() != "System.Exception" && paramType.IsExceptionType();
-
+    var attribute = methodSymbol.GetAttribute<GeneralExceptionHandlerAttribute>();
+    return attribute is not null && methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].Type.IsExceptionType();
   }
+
+  private static bool IsFallbackHandler(IMethodSymbol methodSymbol) {
+    var attribute = methodSymbol.GetAttribute<FallbackExceptionHandlerAttribute>();
+    return attribute is not null && methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].Type.IsExceptionType();
+  }
+  
+  private static bool IsSpecificHandler(IMethodSymbol methodSymbol) {
+    var attribute = methodSymbol.GetAttribute<HandlesExceptionAttribute>();
+    return attribute is not null && methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].Type.IsExceptionType();
+  }
+
+  private static bool IsValidHandler(IMethodSymbol parent, IMethodSymbol child) {
+    if (!parent.HasCommonReturnType(child) || !parent.IsCallableFrom(child) || child.Parameters.Length > parent.Parameters.Length) {
+      return false;
+    }
+    
+    if (!GetExceptionTypes(child).All(x => x!.ConvertableTo(parent.Parameters[0].Type))) {
+      return false;
+    }
+
+    for (var i = 1; i < child.Parameters.Length; i++) {
+      if (!parent.Parameters[i].Type.ConvertableTo(child.Parameters[i].Type)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  private static bool IsValidFallback(IMethodSymbol parent, IMethodSymbol child) {
+    if (!parent.HasCommonReturnType(child) || !parent.IsCallableFrom(child) || child.Parameters.Length > parent.Parameters.Length) {
+      return false;
+    }
+
+    return !child.Parameters.Where((t, i) => !parent.Parameters[i].Type.ConvertableTo(t.Type)).Any();
+  }
+
+  private static List<ITypeSymbol> GetExceptionTypes(IMethodSymbol method) {
+    var parameterPack = method.GetAttribute<HandlesExceptionAttribute>()!.ConstructorArguments.FirstOrDefault();
+    var exceptionTypes = parameterPack.Values
+        .Where(a => a.Kind == TypedConstantKind.Type)
+        .Select(a => a.Value as ITypeSymbol)
+        .ToList();
+
+    if (exceptionTypes.Count == 0) {
+      exceptionTypes.Add(method.Parameters[0].Type);
+    }
+    
+    return exceptionTypes!;
+  }
+
 }

@@ -66,16 +66,18 @@ namespace UnrealPluginManager.Core.Generator.Properties {
         ///
         ///public partial class {{ClassName}} {
         ///
-        ///  /// &lt;summary&gt;
-        ///  /// Handles and processes the provided exception.
-        ///  /// &lt;/summary&gt;
-        ///  /// &lt;param name=&quot;ex&quot;&gt;The exception to handle.&lt;/param&gt;
-        ///  /// &lt;returns&gt;An integer value representing the result of handling the exception.&lt;/returns&gt;  
-        ///  public int HandleException(Exception ex) {
-        ///    return ex switch {
-        ///        {{#Exceptions}}
-        ///        {{ExceptionName}} {{VarName}} =&gt; {{MethodName}}({{VarName}}),
-        ///        {{/Exception [rest of string was truncated]&quot;;.
+        ///  {{#GeneralHandlers}}
+        ///  {{Modifiers}} {{ReturnType}} {{MethodName}}(
+        ///      {{#Parameters}}
+        ///      {{Type}} {{Name}}{{#Comma}}, {{/Comma}}    
+        ///      {{/Parameters}}) {
+        ///    {{#ReturnsVoid}}
+        ///    switch ({{ExceptionParameter}}) {
+        ///      {{#Exceptions}}
+        ///      {{#SingleException}}
+        ///      case {{#ExceptionTypes}}{{ExceptionName}}{{/ExceptionTypes}} e{{Index}}:
+        ///        {{#HasOtherParameters}}
+        ///            {{MethodName}}(e{{ [rest of string was truncated]&quot;;.
         /// </summary>
         public static string ExceptionHandler {
             get {
