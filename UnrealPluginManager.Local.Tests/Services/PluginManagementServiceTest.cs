@@ -247,4 +247,6 @@ public class PluginManagementServiceTest {
       Assert.That(targetPlugin.Dependencies, Is.Empty);
     });
   }
+  
+  
 }

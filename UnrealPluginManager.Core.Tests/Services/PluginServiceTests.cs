@@ -369,8 +369,23 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestRetrievePlugin() {
-    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+    
+    await SetupTestPluginEnvironment();
+
+    Assert.DoesNotThrowAsync(
+        async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"]));
+    Assert.ThrowsAsync<PluginNotFoundException>(async () =>
+                                                    await pluginService.GetPluginFileData(
+                                                        "TestPlugin", SemVersionRange.All, "5.4", ["Win64"]));
+    Assert.ThrowsAsync<PluginNotFoundException>(async () =>
+                                                    await pluginService.GetPluginFileData(
+                                                        "OtherPlugin", SemVersionRange.All, "5.5", ["Win64"]));
+  }
+
+  private async Task SetupTestPluginEnvironment() {
+
+    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
 
     var tempFileName = Path.GetTempFileName();
@@ -426,14 +441,19 @@ public class PluginServiceTests {
     };
     await context.Plugins.AddAsync(plugin);
     await context.SaveChangesAsync();
+  }
 
-    Assert.DoesNotThrowAsync(
-        async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"]));
-    Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        "TestPlugin", SemVersionRange.All, "5.4", ["Win64"]));
-    Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        "OtherPlugin", SemVersionRange.All, "5.5", ["Win64"]));
+  [Test]
+  public async Task TestIterateOverPluginData() {
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+    await SetupTestPluginEnvironment();
+
+    var range = await pluginService.GetAllPluginData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"])
+        .ToListAsync();
+    
+    var fromSingle = await pluginService.GetAllPluginData("TestPlugin", new SemVersion(1, 0, 0), "5.5", ["Win64"])
+        .ToListAsync();
+    
+    Assert.That(range, Is.EquivalentTo(fromSingle));
   }
 }

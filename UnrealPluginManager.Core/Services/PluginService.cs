@@ -314,14 +314,9 @@ public partial class PluginService : IPluginService {
 
     try {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
-      await using (var source = await GetPluginSource(pluginName, targetVersion).Map(x => x.OpenRead())) {
-        using var zipArchive = new ZipArchive(source);
-        await destinationZip.Merge(zipArchive);
-      }
-
-      await foreach (var (_, archive) in GetPluginBinaries(pluginName, targetVersion, engineVersion, targetPlatforms)) {
-        await using var binaries = archive.OpenRead();
-        using var zipArchive = new ZipArchive(binaries);
+      await foreach (var archive in GetAllPluginData(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+        await using var data = archive.OpenRead();
+        using var zipArchive = new ZipArchive(data);
         await destinationZip.Merge(zipArchive);
       }
     } catch (Exception) {
