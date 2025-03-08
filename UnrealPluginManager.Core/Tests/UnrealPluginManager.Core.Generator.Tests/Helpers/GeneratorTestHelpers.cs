@@ -14,7 +14,6 @@ public static class GeneratorTestHelpers {
             typeof(Binder)
         }
         .Concat(types)
-        .Distinct()
         .Select(t => t.GetTypeInfo().Assembly.Location)
         .Select(l => MetadataReference.CreateFromFile(l));
     return CSharpCompilation.Create("compilation",

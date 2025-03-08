@@ -72,7 +72,7 @@ def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str], template_di
             if file.endswith('.cs'):
                 with open(os.path.join(root, file), 'r+') as f:
                     content = f.read()
-                    content = content.replace('using UnrealPluginManager.WebClient.Client;', namespace_replacement)
+                    content = content.replace('using UnrealPluginManager.WebClient.Model;', namespace_replacement)
                     content = content.replace('namespace UnrealPluginManager.WebClient.Api\n{', page_declarations)
                     f.seek(0)
                     f.write(content)
@@ -87,7 +87,7 @@ def fix_dotnet_client(out_dir: str, import_mappings: dict[str, str], template_di
 
 def move_dotnet_client(out_dir: str, root_dir: str):
     base_dir = os.path.join(out_dir, 'src', 'UnrealPluginManager.WebClient')
-    generated_dir = os.path.join(root_dir, 'UnrealPluginManager.WebClient')
+    generated_dir = os.path.join(root_dir, 'UnrealPluginManager.Api', 'Source', 'UnrealPluginManager.WebClient')
     api_dir = os.path.join(generated_dir, 'Api')
     client_dir = os.path.join(generated_dir, 'Client')
     models_dir = os.path.join(generated_dir, 'Model')
@@ -106,8 +106,8 @@ def main():
     with open(os.path.join(os.path.join(script_dir, 'openapi-spec.json'))) as f:
         spec: OpenAPIObject = json.load(f)
 
-    root_dir = os.path.abspath(os.path.join(script_dir, '..'))
-    search_dirs = [os.path.join(root_dir, 'UnrealPluginManager.Core')]
+    root_dir = os.path.abspath(os.path.join(script_dir, '..', '..', '..'))
+    search_dirs = [os.path.join(root_dir, 'UnrealPluginManager.Core', 'Source', 'UnrealPluginManager.Core')]
     import_mappings = {}
     schemas = spec['components']['schemas']
     for schema_name, schema in schemas.items():

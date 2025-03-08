@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
+using UnrealPluginManager.Core.Annotations.Exceptions;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Generator.ExceptionHandling;
 using static UnrealPluginManager.Core.Generator.Tests.Helpers.GeneratorTestHelpers;
@@ -13,19 +14,29 @@ public class CreateExceptionHandlerTest {
   [Test]
   public void TestCreateExceptionHandler() {
     var inputCompilation = CreateCompilation("""
-                                             using System.Exception;
+                                             using System;
                                              using UnrealPluginManager.Core.Exceptions;
+                                             using UnrealPluginManager.Core.Annotations.Exceptions;
 
                                              namespace Test;
 
                                              [ExceptionHandler]
                                              public partial class TestHandler {
-                                               public int HandleException(PluginNotFoundException ex) {
+                                               [GeneralExceptionHandler]
+                                               public partial int HandleException(Exception ex);
+                                             
+                                               [HandlesException]
+                                               public int HandleSingle(PluginNotFoundException ex) {
                                                  return 4;
                                                }
+                                               
+                                                [HandlesException(typeof(DependencyConflictException, typeof(MissingDependenciesException)))]
+                                                public int HandleMultiple(Exception ex) {
+                                                  return 4;
+                                                }
                                              }
 
-                                             """);
+                                             """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
     
@@ -39,6 +50,7 @@ public class CreateExceptionHandlerTest {
     var inputCompilation = CreateCompilation("""
                                              using System.Exception;
                                              using UnrealPluginManager.Core.Exceptions;
+                                             using UnrealPluginManager.Core.Annotations.Exceptions;
 
                                              namespace Test;
 
@@ -49,7 +61,7 @@ public class CreateExceptionHandlerTest {
                                                }
                                              }
 
-                                             """, typeof(PluginNotFoundException));
+                                             """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
     
@@ -66,6 +78,7 @@ public class CreateExceptionHandlerTest {
     var inputCompilation = CreateCompilation("""
                                              using System.Exception;
                                              using UnrealPluginManager.Core.Exceptions;
+                                             using UnrealPluginManager.Core.Annotations.Exceptions;
 
                                              namespace Test;
 
@@ -79,7 +92,7 @@ public class CreateExceptionHandlerTest {
                                                }
                                              }
 
-                                             """, typeof(PluginNotFoundException));
+                                             """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
     
