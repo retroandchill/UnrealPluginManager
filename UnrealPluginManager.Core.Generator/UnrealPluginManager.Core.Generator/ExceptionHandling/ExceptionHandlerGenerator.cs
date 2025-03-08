@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using UnrealPluginManager.Core.Generator.Properties;
+using UnrealPluginManager.Core.Generator.Utilities;
 
 namespace UnrealPluginManager.Core.Generator.ExceptionHandling;
 
@@ -85,11 +86,9 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     var arguments = attributeData.NamedArguments
         .ToDictionary(x => x.Key, x => x.Value.Value);
     
-    string? skippedHandlerMethod = null;
     var defaultExitCode = "33";
     if (arguments.TryGetValue("DefaultHandlerMethod", out var handlerMethod) && handlerMethod is string method) {
       defaultExitCode = $"{method}(ex)";
-      skippedHandlerMethod = method;
     } else if (arguments.TryGetValue("DefaultExitCode", out var exitCode) && exitCode is int code) {
       defaultExitCode = $"{code}";
     }
@@ -99,9 +98,8 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
         ClassName = handlerClass.Identifier.Text,
         Exceptions = handlerClass.Members
             .OfType<MethodDeclarationSyntax>()
-            .Where(IsExceptionHandlerMethod)
-            .Where(x => x.Identifier.Text != skippedHandlerMethod)
             .Select(x => (Token: x, Symbol: semanticModel.GetDeclaredSymbol(x)!))
+            .Where(x => IsExceptionHandlerMethod(x.Symbol))
             .Select((x, i) => new {
                 ExceptionName = x.Symbol.Parameters[0].Type.ToString(),
                 VarName = $"exception{i}",
@@ -118,13 +116,19 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     context.AddSource($"{handlerClass.Identifier}.g.cs", template(fullData));
   }
 
-  private static bool IsExceptionHandlerMethod(MethodDeclarationSyntax methodDeclaration) {
-    if (methodDeclaration.ReturnType.ToString() != "int") {
+  private static bool IsExceptionHandlerMethod(IMethodSymbol methodSymbol) {
+    if (methodSymbol.ReturnType.ToDisplayString() != "int") {
       return false;
     }
 
-    var parameters = methodDeclaration.ParameterList.Parameters;
-    return parameters.Count == 1;
+    var parameters = methodSymbol.Parameters;
+    if (parameters.Length != 1) {
+      return false;
+    }
+    
+    var paramType = parameters[0].Type;
+    
+    return paramType.ToDisplayString() != "System.Exception" && paramType.IsExceptionType();
 
   }
 }
