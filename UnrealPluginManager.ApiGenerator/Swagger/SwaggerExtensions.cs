@@ -63,7 +63,6 @@ public static class SwaggerExtensions {
           options.AddOperationFilterInstance(new PageableParameterFilter());
           options.AddSchemaFilterInstance(new PagePropertyFilter());
           options.AddOperationFilterInstance(new SemVersionParameterFilter());
-          options.AddSchemaFilterInstance(new DiscriminatedUnionSchemaFilter());
         });
 
     return builder;
