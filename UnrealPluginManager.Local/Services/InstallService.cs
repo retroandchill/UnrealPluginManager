@@ -6,6 +6,7 @@ using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
+using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Installation;
 using static UnrealPluginManager.Core.Model.Resolution.ResolutionResult;
 using InstallResult = UnrealPluginManager.Local.Model.Installation.InstallResult;
@@ -24,17 +25,19 @@ public partial class InstallService : IInstallService {
   private readonly IPluginManagementService _pluginManagementService;
 
   /// <inheritdoc />
-  public async Task<InstallResult> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion,
-                                                 IReadOnlyCollection<string> platforms) {
+  public async Task<List<VersionChange>> InstallPlugin(string pluginName, SemVersionRange pluginVersion,
+                                                       string? engineVersion,
+                                                       IReadOnlyCollection<string> platforms) {
     var existingVersion = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
         .Map(x => x.Where(pluginVersion.Contains));
     return await existingVersion
-        .Match(_ => Task.FromResult(InstallResult.NoChanges),
-               () => TryInstall(pluginName, pluginVersion, engineVersion, platforms));
+        .Select(_ => new List<VersionChange>())
+        .OrElseAsync(() => TryInstall(pluginName, pluginVersion, engineVersion, platforms));
   }
 
   /// <inheritdoc />
-  public async Task<InstallResult> InstallRequirements(string descriptorFile, string? engineVersion, IReadOnlyCollection<string> platforms) {
+  public async Task<List<VersionChange>> InstallRequirements(string descriptorFile, string? engineVersion,
+                                                             IReadOnlyCollection<string> platforms) {
     IDependencyHolder? descriptor;
     await using (var stream = _fileSystem.File.OpenRead(descriptorFile)) {
       descriptor = descriptorFile.EndsWith(".uplugin") ? await JsonSerializer.DeserializeAsync<PluginDescriptor>(stream) 
@@ -44,25 +47,23 @@ public partial class InstallService : IInstallService {
 
     var chainRoot = descriptor.ToDependencyChainRoot();
     var dependencyTree = await _pluginManagementService.GetPluginsToInstall(chainRoot, engineVersion);
-    return await dependencyTree.Match(x => InstallToEngine(x, engineVersion, platforms),
-                                      x => Task.FromResult<InstallResult>(x.Conflicts));
+    return await InstallToEngine(dependencyTree, engineVersion, platforms);
   }
 
-  private async Task<InstallResult> TryInstall(string name, SemVersionRange version, string? engineVersion,
-                                               IReadOnlyCollection<string> platforms) {
+  private async Task<List<VersionChange>> TryInstall(string name, SemVersionRange version, string? engineVersion,
+                                                     IReadOnlyCollection<string> platforms) {
     var targetPlugin = await _pluginManagementService.FindTargetPlugin(name, version, engineVersion);
     var dependencyTree = await _pluginManagementService.GetPluginsToInstall(targetPlugin, engineVersion);
-    return await dependencyTree.Match(x => InstallToEngine(x, engineVersion, platforms),
-                                      x => Task.FromResult<InstallResult>(x.Conflicts));
+    return await InstallToEngine(dependencyTree, engineVersion, platforms);
   }
   
-  private async Task<InstallResult> InstallToEngine(ResolvedDependencies resolvedDependencies, string? engineVersion,
-                                                    IReadOnlyCollection<string> platforms) {
+  private async Task<List<VersionChange>> InstallToEngine(List<PluginSummary> resolvedDependencies, string? engineVersion,
+                                                          IReadOnlyCollection<string> platforms) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => (x.Version, x.Platforms));
 
     var installChanges = new List<VersionChange>();
-    foreach (var dep in resolvedDependencies.SelectedPlugins) {
+    foreach (var dep in resolvedDependencies) {
       if (currentlyInstalled.TryGetValue(dep.Name, out var current) && current.Version == dep.Version 
                                                                     && platforms.All(x => current.Platforms.Contains(x))) {
         continue;

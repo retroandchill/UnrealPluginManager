@@ -11,13 +11,5 @@
 /// inaccessible in the system.
 /// </remarks>
 /// <seealso cref="UnrealPluginManagerException" />
-public class PluginNotFoundException : UnrealPluginManagerException {
-  public PluginNotFoundException() {
-  }
-
-  public PluginNotFoundException(string? message) : base(message) {
-  }
-
-  public PluginNotFoundException(string? message, Exception? innerException) : base(message, innerException) {
-  }
-}
+public class PluginNotFoundException(string? message = null, Exception? innerException = null)
+    : UnrealPluginManagerException(message, innerException);

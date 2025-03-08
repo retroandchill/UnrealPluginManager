@@ -19,4 +19,14 @@ namespace UnrealPluginManager.Local.Model.Plugins;
 /// <param name="Platforms">
 /// A list of platform names where the plugin is compatible or intended to run.
 /// </param>
-public record struct InstalledPlugin(string Name, SemVersion Version, List<string> Platforms);
+public record struct InstalledPlugin(string Name, SemVersion Version, List<string> Platforms) {
+  /// <inheritdoc />
+  public bool Equals(InstalledPlugin other) {
+    return Name == other.Name && Version == other.Version && Platforms.SequenceEqual(other.Platforms);
+  }
+  
+  /// <inheritdoc />
+  public override int GetHashCode() {
+    return HashCode.Combine(Name, Version, Platforms);
+  }
+}

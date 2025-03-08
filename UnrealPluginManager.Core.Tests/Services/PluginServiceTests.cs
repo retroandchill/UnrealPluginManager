@@ -163,9 +163,7 @@ public class PluginServiceTests {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     await pluginService.SetupVersionResolutionTree();
 
-    var result = await pluginService.GetDependencyList("App");
-    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
-    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
+    var dependencyGraph = await pluginService.GetDependencyList("App");
     Assert.That(dependencyGraph, Has.Count.EqualTo(5));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
@@ -214,9 +212,7 @@ public class PluginServiceTests {
         Dependencies = pluginDependencies
     };
 
-    var result = pluginService.GetDependencyList(root, possibleVersions);
-    Assert.That(result, Is.InstanceOf<ResolvedDependencies>());
-    var dependencyGraph = ((ResolvedDependencies)result).SelectedPlugins;
+    var dependencyGraph = pluginService.GetDependencyList(root, possibleVersions);
     Assert.That(dependencyGraph, Has.Count.EqualTo(4));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
@@ -231,9 +227,9 @@ public class PluginServiceTests {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     await pluginService.SetupVersionResolutionTreeWithConflict();
 
-    var result = await pluginService.GetDependencyList("App");
-    Assert.That(result, Is.InstanceOf<ConflictDetected>());
-    var conflicts = result.UnwrapConflictDetected().Conflicts;
+    var conflictException = Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList("App"));
+    Assert.That(conflictException, Is.Not.Null);
+    var conflicts = conflictException.Conflicts;
     Assert.That(conflicts, Has.Count.EqualTo(1));
     Assert.Multiple(() => {
       Assert.That(conflicts[0].PluginName, Is.EqualTo("ConflictingDependency"));

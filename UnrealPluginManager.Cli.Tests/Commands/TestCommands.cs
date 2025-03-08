@@ -9,6 +9,7 @@ using Moq;
 using Semver;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.DependencyInjection;
+using UnrealPluginManager.Cli.Exceptions;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -16,6 +17,7 @@ using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
+using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Tests.Commands;
@@ -27,6 +29,7 @@ public class TestCommands {
   private Mock<IPluginService> _pluginService;
   private Mock<IPluginManagementService> _pluginManagementService;
   private Mock<IEngineService> _engineService;
+  private Mock<IInstallService> _installService;
 
   [SetUp]
   public void Setup() {
@@ -41,16 +44,18 @@ public class TestCommands {
     _pluginService = new Mock<IPluginService>();
     _engineService = new Mock<IEngineService>();
     _pluginManagementService = new Mock<IPluginManagementService>();
+    _installService = new Mock<IInstallService>();
     _environment = new Mock<IEnvironment>();
     var builder = new CommandLineBuilder(rootCommand)
         .UseDefaults()
-        .UseExceptionHandler(errorExitCode: 1)
+        .UseCustomExceptionHandler()
         .UseDependencyInjection(services => {
           services.AddSingleton<IFileSystem>(_filesystem);
           services.AddSingleton(_environment.Object);
           services.AddSingleton(_engineService.Object);
           services.AddSingleton(_pluginService.Object);
           services.AddSingleton(_pluginManagementService.Object);
+          services.AddSingleton(_installService.Object);
         });
 
     _parser = builder.Build();
@@ -119,6 +124,9 @@ public class TestCommands {
 
   [Test]
   public async Task TestInstallPlugin() {
+    _installService.Setup(x => x.InstallPlugin(It.IsAny<string>(), It.IsAny<SemVersionRange>(), It.IsAny<string?>(),
+                                               It.IsAny<IReadOnlyCollection<string>>()))
+        .ReturnsAsync([new VersionChange("MyPlugin", null, new SemVersion(1, 0, 0))]);
     var returnCode = await _parser.InvokeAsync("install MyPlugin");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),

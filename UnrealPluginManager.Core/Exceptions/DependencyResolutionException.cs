@@ -9,13 +9,5 @@
 /// when the system is unable to resolve one or more plugin names due to conflicts or missing dependencies.
 /// This exception extends UnrealPluginManagerException to specialize in dependency-related error handling.
 /// </remarks>
-public class DependencyResolutionException : UnrealPluginManagerException {
-  public DependencyResolutionException() {
-  }
-
-  public DependencyResolutionException(string? message) : base(message) {
-  }
-
-  public DependencyResolutionException(string? message, Exception? innerException) : base(message, innerException) {
-  }
-}
+public class DependencyResolutionException(string? message = null, Exception? innerException = null)
+    : UnrealPluginManagerException(message, innerException);

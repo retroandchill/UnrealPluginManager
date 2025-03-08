@@ -45,10 +45,21 @@ public static class OptionUtils {
                      x => throw x.ToException());
   }
 
-  public static Option<T> OrElse<T>(this Option<T> option, Func<Option<T>> fallback) {
-    return option.Match(x => x, fallback);
+  public static Task<T> OrElseAsync<T>(this Option<T> option, Func<Task<T>> fallback) {
+    return option.Match(x => Task.FromResult(x), fallback);
   }
 
+  /// <summary>
+  /// Asynchronously retrieves the current option's value or falls back to a new option provided by an asynchronous fallback function.
+  /// </summary>
+  /// <typeparam name="T">The type of the value contained within the Option.</typeparam>
+  /// <param name="option">The Option instance to retrieve the value from.</param>
+  /// <param name="fallback">
+  /// A function that returns a Task containing an Option to be used if the current option has no value.
+  /// </param>
+  /// <returns>A task containing an Option with the value from the current option or the fallback.
+  /// If both are None, the result will also be None.
+  /// </returns>
   public static Task<Option<T>> OrElseAsync<T>(this Option<T> option, Func<Task<Option<T>>> fallback) {
     return option.Match(x => Task.FromResult<Option<T>>(x), fallback);
   }

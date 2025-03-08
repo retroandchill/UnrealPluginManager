@@ -82,5 +82,5 @@ public interface IPluginManagementService {
   /// A task representing the asynchronous operation. Upon completion, returns a <see cref="List{PluginSummary}"/>
   /// containing the plugins that need to be installed, including their details.
   /// </returns>
-  Task<ResolutionResult> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
+  Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
 }

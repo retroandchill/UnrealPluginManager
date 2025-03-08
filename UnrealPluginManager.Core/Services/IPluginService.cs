@@ -67,7 +67,7 @@ public interface IPluginService {
   /// <returns>
   /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
   /// </returns>
-  Task<ResolutionResult> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
+  Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
 
   /// <summary>
   /// Retrieves a list of plugin summaries based on the specified dependency chain root and dependency manifest.
@@ -77,7 +77,7 @@ public interface IPluginService {
   /// <returns>
   /// A list of <see cref="PluginSummary"/> representing the plugins identified in the dependency chain.
   /// </returns>
-  ResolutionResult GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
+  List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
 
   /// <summary>
   /// Adds a new plugin to the system using the provided plugin name and descriptor information.

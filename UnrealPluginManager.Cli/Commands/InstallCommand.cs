@@ -2,9 +2,6 @@
 using System.CommandLine.IO;
 using JetBrains.Annotations;
 using Semver;
-using UnrealPluginManager.Cli.Utils;
-using UnrealPluginManager.Core.Model.Resolution;
-using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -127,30 +124,16 @@ public partial class InstallCommandHandler : ICommandOptionsHandler<InstallComma
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
-    var installResult = options.Input.EndsWith(".uplugin", StringComparison.InvariantCultureIgnoreCase) ||
+    var changes = options.Input.EndsWith(".uplugin", StringComparison.InvariantCultureIgnoreCase) ||
                         options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)
         ? await _installService.InstallRequirements(options.Input, options.EngineVersion, ["Win64"])
         : await _installService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
 
-    return await installResult.Match(x => ReportUpdates(options.Input, x.VersionChanges),
-                                     _ => {
-                                       _console.Out.WriteLine($"Satisfactory version of {options.Input} is already installed.");
-                                       return Task.FromResult(0);
-                                     },
-                                     x => ReportConflicts(options.Input, x.Conflicts));
-  }
-  
-  private Task<int> ReportUpdates(string pluginName, List<VersionChange> changes) {
-    _console.Out.WriteLine($"Successfully installed {pluginName} with the following changes:");
+    _console.Out.WriteLine($"Successfully installed/upgraded the following plugin(s):");
     foreach (var change in changes) {
       _console.Out.WriteLine($"- {change.PluginName}: {change.OldVersion?.ToString() ?? "(new)"} => {change.NewVersion}");
     }
 
-    return Task.FromResult(0);
-  }
-  
-  private Task<int> ReportConflicts(string pluginName, List<Conflict> conflicts) {
-    _console.ReportConflicts(pluginName, conflicts);
-    return Task.FromResult(1);
+    return 0;
   }
 }

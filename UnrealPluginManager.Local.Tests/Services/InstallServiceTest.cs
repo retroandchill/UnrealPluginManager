@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
@@ -108,12 +109,12 @@ public class InstallServiceTest {
         .ReturnsAsync(existingPlugin);
 
     _pluginManagementService.Setup(x => x.GetPluginsToInstall(existingPlugin, "5.5"))
-        .ReturnsAsync(new List<Conflict> {
+        .ThrowsAsync(new DependencyConflictException(new List<Conflict> {
             new("DependentPlugin", [
                 new PluginRequirement("TestPlugin", SemVersionRange.AtLeast(new SemVersion(2, 0, 0))),
                 new PluginRequirement("OtherPlugin", SemVersionRange.LessThan(new SemVersion(2, 0, 0)))
             ])
-        });
+        }));
 
     var result = await _installService.InstallPlugin("TestPlugin", targetVersion, "5.5", ["Win64"]);
     Assert.That(result, Is.InstanceOf<HasConflicts>());

@@ -105,7 +105,7 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<ResolutionResult> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
+  public async Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
     var plugin = await _dbContext.PluginVersions
         .Include(p => p.Parent)
         .Include(p => p.Dependencies)
@@ -116,23 +116,21 @@ public partial class PluginService : IPluginService {
         .FirstAsync();
 
     var dependencyList = await GetPossibleVersions(plugin.Dependencies);
-    if (dependencyList.UnresolvedDependencies.Count > 0) {
-      throw new DependencyResolutionException(
-          $"Unable to resolve plugin names:\n{string.Join("\n", dependencyList.UnresolvedDependencies)}");
-    }
-
     return GetDependencyList(plugin, dependencyList);
   }
 
   /// <inheritdoc />
-  public ResolutionResult GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
+  public List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest) {
+    if (manifest.UnresolvedDependencies.Count > 0) {
+      throw new MissingDependenciesException(manifest.UnresolvedDependencies);
+    }
     var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
     return formula.Solve()
-        .Right(ResolutionResult (r) => r)
+        .Right(List<PluginSummary> (r) => throw new DependencyConflictException(r))
         .Left(l => GetDependencyList(l, root, manifest));
   }
 
-  private static ResolutionResult GetDependencyList(List<SelectedVersion> selectedVersions, IDependencyChainNode root, DependencyManifest manifest) {
+  private static List<PluginSummary> GetDependencyList(List<SelectedVersion> selectedVersions, IDependencyChainNode root, DependencyManifest manifest) {
     IEnumerable<PluginVersionInfo> result;
     if (root is PluginVersionInfo plugin) {
       result = selectedVersions

@@ -1,5 +1,5 @@
 ﻿using Semver;
-using InstallResult = UnrealPluginManager.Local.Model.Installation.InstallResult;
+using UnrealPluginManager.Local.Model.Installation;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -15,7 +15,8 @@ public interface IInstallService {
   /// <param name="engineVersion">The Unreal Engine version to target for the plugin installation, or null to target the default engine version.</param>
   /// <param name="platforms">The collection of platforms for which the plugin should be installed.</param>
   /// <returns>A task that represents the asynchronous plugin installation operation. The task result contains the installation result.</returns>
-  public Task<InstallResult> InstallPlugin(string pluginName, SemVersionRange pluginVersion, string? engineVersion, IReadOnlyCollection<string> platforms);
+  public Task<List<VersionChange>> InstallPlugin(string pluginName, SemVersionRange pluginVersion,
+                                                 string? engineVersion, IReadOnlyCollection<string> platforms);
 
   /// <summary>
   /// Installs the requirements defined in a descriptor file for Unreal Engine, targeting a specific engine version and platforms.
@@ -24,5 +25,6 @@ public interface IInstallService {
   /// <param name="engineVersion">The Unreal Engine version to target for the installation, or null to use the default engine version.</param>
   /// <param name="platforms">The collection of platforms for which the requirements should be installed.</param>
   /// <returns>A task that represents the asynchronous installation operation. The task result contains the installation result.</returns>
-  public Task<InstallResult> InstallRequirements(string descriptorFile, string? engineVersion, IReadOnlyCollection<string> platforms);
+  public Task<List<VersionChange>> InstallRequirements(string descriptorFile, string? engineVersion,
+                                                       IReadOnlyCollection<string> platforms);
 }
