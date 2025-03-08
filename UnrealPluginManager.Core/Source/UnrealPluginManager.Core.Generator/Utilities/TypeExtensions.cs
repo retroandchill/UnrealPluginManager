@@ -5,12 +5,30 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace UnrealPluginManager.Core.Generator.Utilities;
 
+/// <summary>
+/// Provides extension methods for working with types represented as <see cref="ITypeSymbol"/>.
+/// </summary>
 public static class TypeExtensions {
 
+  /// <summary>
+  /// Checks if the type represented by the current <see cref="ITypeSymbol"/> is of type <see cref="Exception"/>.
+  /// </summary>
+  /// <param name="type">The current type symbol to check.</param>
+  /// <returns>
+  /// True if the current type symbol is of type <see cref="Exception"/>; otherwise, false.
+  /// </returns>
   public static bool IsExceptionType(this ITypeSymbol type) {
     return type.IsOfType<Exception>();
   }
 
+  /// <summary>
+  /// Checks if the type represented by the current <see cref="ITypeSymbol"/> is of the specified type <typeparamref name="T"/>.
+  /// </summary>
+  /// <typeparam name="T">The type to compare against.</typeparam>
+  /// <param name="type">The current type symbol to check.</param>
+  /// <returns>
+  /// True if the current type symbol is of the specified type; otherwise, false.
+  /// </returns>
   public static bool IsOfType<T>(this ITypeSymbol type) {
     if (type.ToString() == typeof(T).FullName) {
       return true;
@@ -28,8 +46,16 @@ public static class TypeExtensions {
     return false;
   }
 
+  /// <summary>
+  /// Checks if the type represented by the current <see cref="ITypeSymbol"/> is of the specified type represented by another <see cref="ITypeSymbol"/>.
+  /// </summary>
+  /// <param name="type">The current type symbol to check.</param>
+  /// <param name="other">The type symbol to compare against.</param>
+  /// <returns>
+  /// True if the current type symbol is of the specified type; otherwise, false.
+  /// </returns>
   public static bool IsOfType(this ITypeSymbol type, ITypeSymbol other) {
-    if (type.ToString() == other.ToString()) {
+    if (SymbolEqualityComparer.Default.Equals(type, other)) {
       return true;
     }
 
@@ -41,7 +67,15 @@ public static class TypeExtensions {
     };
 
   }
-  
+
+  /// <summary>
+  /// Determines whether the type represented by the current <see cref="ITypeSymbol"/> can be converted to the specified type represented by another <see cref="ITypeSymbol"/>.
+  /// </summary>
+  /// <param name="type">The current type symbol to check for convertibility.</param>
+  /// <param name="other">The target type symbol to check against.</param>
+  /// <returns>
+  /// True if the current type symbol can be converted to the specified type; otherwise, false.
+  /// </returns>
   public static bool ConvertableTo(this ITypeSymbol type, ITypeSymbol other) {
     if (type.IsOfType(other)) {
       return true;

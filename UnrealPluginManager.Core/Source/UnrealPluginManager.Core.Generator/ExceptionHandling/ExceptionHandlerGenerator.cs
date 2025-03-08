@@ -34,11 +34,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
       DiagnosticSeverity.Error,
       isEnabledByDefault: true);
 
-  [SuppressMessage(
-      "MicrosoftCodeAnalysisCorrectness",
-      "RS1035:Do not use APIs banned for analyzers",
-      Justification = "Only used here to launch the debugger correctly and not in included the release build"
-  )]
+  /// <inheritdoc />
   public void Initialize(IncrementalGeneratorInitializationContext context) {
     var classesProvider = context.SyntaxProvider
         .CreateSyntaxProvider((node, _) => node is ClassDeclarationSyntax,
@@ -227,7 +223,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
   }
 
   private static List<ITypeSymbol> GetExceptionTypes(IMethodSymbol method) {
-    var parameterPack = method.GetAttribute<HandlesExceptionAttribute>()!.ConstructorArguments.First();
+    var parameterPack = method.GetAttribute<HandlesExceptionAttribute>()!.ConstructorArguments.FirstOrDefault();
     var exceptionTypes = parameterPack.Values
         .Where(a => a.Kind == TypedConstantKind.Type)
         .Select(a => a.Value as ITypeSymbol)

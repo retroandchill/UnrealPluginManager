@@ -10,15 +10,13 @@ namespace UnrealPluginManager.Core.Generator.Tests.Helpers;
 
 public static class GeneratorTestHelpers {
   public static Compilation CreateCompilation(string source, params Type[] types) {
-    var assemblies = new List<Type> {
-            typeof(Binder)
-        }
-        .Concat(types)
-        .Select(t => t.GetTypeInfo().Assembly.Location)
+    var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+        .Select(a => a.Location)
+        .Where(a => !string.IsNullOrEmpty(a))
         .Select(l => MetadataReference.CreateFromFile(l));
     return CSharpCompilation.Create("compilation",
         [CSharpSyntaxTree.ParseText(source)],
         assemblies,
-        new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+        new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
   }
 }
