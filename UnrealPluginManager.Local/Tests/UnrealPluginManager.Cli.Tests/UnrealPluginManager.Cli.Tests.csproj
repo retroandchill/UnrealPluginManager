@@ -32,8 +32,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj"/>
-        <ProjectReference Include="..\UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj"/>
+        <ProjectReference Include="..\..\Source\UnrealPluginManager.Cli\UnrealPluginManager.Cli.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Tests\UnrealPluginManager.Core.Tests\UnrealPluginManager.Core.Tests.csproj"/>
     </ItemGroup>
 
 </Project>

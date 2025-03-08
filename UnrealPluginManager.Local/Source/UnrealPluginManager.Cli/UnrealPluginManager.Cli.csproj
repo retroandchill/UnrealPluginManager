@@ -28,10 +28,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
-        <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj"/>
-        <ProjectReference Include="..\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj"/>
         <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj"/>
     </ItemGroup>
 

@@ -24,8 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
-        <ProjectReference Include="..\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
     </ItemGroup>
 
 </Project>
