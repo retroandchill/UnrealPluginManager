@@ -83,8 +83,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
-        /// <returns></returns>
-        void DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version);
+        /// <returns>FileParameter</returns>
+        FileParameter DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version);
 
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
@@ -97,8 +97,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
-        /// <returns>ApiResponse of Object(void)</returns>
-        ApiResponse<Object> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version);
+        /// <returns>ApiResponse of FileParameter</returns>
+        ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version);
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
         /// </summary>
@@ -298,8 +298,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of void</returns>
-        System.Threading.Tasks.Task DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of FileParameter</returns>
+        System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
@@ -313,8 +313,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse</returns>
-        System.Threading.Tasks.Task<ApiResponse<Object>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (FileParameter)</returns>
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
         /// </summary>
@@ -972,10 +972,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
-        /// <returns></returns>
-        public void DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version)
+        /// <returns>FileParameter</returns>
+        public FileParameter DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version)
         {
-            DownloadPluginBinariesWithHttpInfo(pluginName, engineVersion, platform, version);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginBinariesWithHttpInfo(pluginName, engineVersion, platform, version);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -986,8 +987,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
-        /// <returns>ApiResponse of Object(void)</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<Object> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version)
+        /// <returns>ApiResponse of FileParameter</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version)
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -1012,6 +1013,7 @@ namespace UnrealPluginManager.WebClient.Api
 
             // to determine the Accept header
             string[] _accepts = new string[] {
+                "application/zip"
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
@@ -1027,7 +1029,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<Object>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1047,10 +1049,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of void</returns>
-        public async System.Threading.Tasks.Task DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of FileParameter</returns>
+        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            await DownloadPluginBinariesWithHttpInfoAsync(pluginName, engineVersion, platform, version, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginBinariesWithHttpInfoAsync(pluginName, engineVersion, platform, version, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1062,8 +1065,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
         /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<Object>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (FileParameter)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
@@ -1089,6 +1092,7 @@ namespace UnrealPluginManager.WebClient.Api
 
             // to determine the Accept header
             string[] _accepts = new string[] {
+                "application/zip"
             };
 
 
@@ -1106,7 +1110,7 @@ namespace UnrealPluginManager.WebClient.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<Object>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {

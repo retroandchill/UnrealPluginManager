@@ -198,7 +198,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Downloads the binary files of a specified plugin for a given version, engine version, and platform.
      */
-    async downloadPluginBinariesRaw(requestParameters: DownloadPluginBinariesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async downloadPluginBinariesRaw(requestParameters: DownloadPluginBinariesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
         if (requestParameters['pluginName'] == null) {
             throw new runtime.RequiredError(
                 'pluginName',
@@ -238,14 +238,15 @@ export class PluginsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.BlobApiResponse(response);
     }
 
     /**
      * Downloads the binary files of a specified plugin for a given version, engine version, and platform.
      */
-    async downloadPluginBinaries(requestParameters: DownloadPluginBinariesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.downloadPluginBinariesRaw(requestParameters, initOverrides);
+    async downloadPluginBinaries(requestParameters: DownloadPluginBinariesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.downloadPluginBinariesRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

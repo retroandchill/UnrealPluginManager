@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Semver;
+using UnrealPluginManager.Core.Converters;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -60,6 +61,7 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// The version follows semantic versioning conventions, represented by major, minor, and patch numbers.
   /// It is used to determine compatibility and precedence among plugin versions.
   /// </remarks>
+  [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; set; }
 
   /// <summary>

@@ -7,6 +7,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Tests.Helpers;
 using UnrealPluginManager.WebClient.Api;
+using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
@@ -15,7 +16,7 @@ public class PluginControllerTest {
   private HttpClient _client;
   private PluginsApi _pluginsApi;
   private IServiceProvider _serviceProvider;
-  
+
 
   [SetUp]
   public void Setup() {
@@ -85,7 +86,7 @@ public class PluginControllerTest {
         VersionName = new SemVersion(1, 2, 1),
         Plugins = []
     }, null);
-    
+
     var plugin1List = await _pluginsApi.GetDependencyTreeAsync("Plugin1");
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
@@ -105,6 +106,19 @@ public class PluginControllerTest {
 
     var allPluginsList = await _pluginsApi.GetPluginsAsync();
     Assert.That(allPluginsList, Has.Count.EqualTo(4));
+
+    var plugin3Latest = await _pluginsApi.GetLatestVersionAsync("Plugin3");
+    Assert.Multiple(() => {
+      Assert.That(plugin3Latest.Name, Is.EqualTo("Plugin3"));
+      Assert.That(plugin3Latest.Version, Is.EqualTo(new SemVersion(1, 2, 1)));
+    });
+
+    var plugin3Constrained =
+        await _pluginsApi.GetLatestVersionAsync("Plugin3", SemVersionRange.Parse("<1.2.0").ToString());
+    Assert.Multiple(() => {
+      Assert.That(plugin3Constrained.Name, Is.EqualTo("Plugin3"));
+      Assert.That(plugin3Constrained.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
+    });
   }
 
   [Test]
@@ -139,6 +153,15 @@ public class PluginControllerTest {
     var result = await _pluginsApi.AddPluginAsync("5.5", testZip);
     Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
-    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadLatestPluginAsync("TestPlugin", "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]));
+    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginSourceAsync("TestPlugin", "1.0.0"));
+    Assert.ThrowsAsync<ApiException>(() => _pluginsApi.DownloadPluginSourceAsync("TestPlugin", "1.0.1"));
+    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginBinariesAsync("TestPlugin", "5.5", "Win64", "1.0.0"));
+    Assert.ThrowsAsync<ApiException>(() =>
+        _pluginsApi.DownloadPluginBinariesAsync("TestPlugin", "5.5", "Linux", "1.0.0"));
+    Assert.ThrowsAsync<ApiException>(() =>
+        _pluginsApi.DownloadPluginBinariesAsync("TestPlugin", "5.5", "Win64", "1.0.1"));
+    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginVersionAsync("TestPlugin", "5.5", "1.0.0", ["Win64"]));
+    Assert.DoesNotThrowAsync(() =>
+        _pluginsApi.DownloadLatestPluginAsync("TestPlugin", "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]));
   }
 }
