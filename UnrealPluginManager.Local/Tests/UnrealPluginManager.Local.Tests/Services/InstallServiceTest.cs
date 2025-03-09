@@ -10,6 +10,7 @@ using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
@@ -36,6 +37,7 @@ public class InstallServiceTest {
     _pluginManagementService = new Mock<IPluginManagementService>();
     services.AddSingleton(_pluginManagementService.Object);
 
+    services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
     services.AddSingleton<IInstallService, InstallService>();
     _serviceProvider = services.BuildServiceProvider();
     _installService = _serviceProvider.GetRequiredService<IInstallService>();

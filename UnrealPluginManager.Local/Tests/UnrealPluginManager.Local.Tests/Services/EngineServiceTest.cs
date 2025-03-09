@@ -43,7 +43,8 @@ public partial class EngineServiceTest {
     services.AddSingleton(_pluginService.Object);
     _pluginStructureService = new Mock<IPluginStructureService>();
     services.AddSingleton(_pluginStructureService.Object);
-
+    
+    services.AddSingleton<IJsonService>(new JsonService(JsonOptions));
     services.AddSingleton<IEngineService, EngineService>();
 
     _serviceProvider = services.BuildServiceProvider();

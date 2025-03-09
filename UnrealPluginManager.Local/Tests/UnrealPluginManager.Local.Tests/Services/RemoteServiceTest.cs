@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using UnrealPluginManager.Core.Abstractions;
@@ -31,7 +32,8 @@ public class RemoteServiceTest {
     _environment.Setup(x => x.GetFolderPath(Environment.SpecialFolder.UserProfile))
         .Returns(UserPath);
     services.AddSingleton(_environment.Object);
-
+    
+    services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
     services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
     services.AddSingleton<IStorageService, LocalStorageService>();
     services.AddScoped<IRemoteService, RemoteService>();

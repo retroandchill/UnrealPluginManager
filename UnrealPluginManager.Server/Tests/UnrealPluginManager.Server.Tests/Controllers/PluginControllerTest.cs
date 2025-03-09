@@ -3,9 +3,11 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -41,7 +43,8 @@ public class PluginControllerTest {
     var mockSection = new Mock<IConfigurationSection>();
 
     mockConfig.Setup(x => x.GetSection(StorageMetadata.Name)).Returns(mockSection.Object);
-
+    
+    services.AddSingleton(Options.Create(new JsonOptions()));
     services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>()
         .AddCoreServices()
         .AddServerServices();
