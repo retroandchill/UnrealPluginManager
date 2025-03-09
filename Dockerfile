@@ -19,11 +19,8 @@ RUN apt-get -y install nodejs
 FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["UnrealPluginManager.Server/UnrealPluginManager.Server.csproj", "UnrealPluginManager.Server/"]
-COPY ["unrealpluginmanager.client/unrealpluginmanager.client.esproj", "unrealpluginmanager.client/"]
-RUN dotnet restore "./UnrealPluginManager.Server/UnrealPluginManager.Server.csproj"
 COPY . .
-WORKDIR "/src/UnrealPluginManager.Server"
+WORKDIR "/src/UnrealPluginManager.Server/Source/UnrealPluginManager.Server/"
 RUN dotnet build "./UnrealPluginManager.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
