@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.ApiGenerator.Swagger;
 using UnrealPluginManager.ApiGenerator.Utils;
 using UnrealPluginManager.Server.Tests;
+using UnrealPluginManager.Server.Tests.Helpers;
 using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.ApiGenerator.Tests.Application;

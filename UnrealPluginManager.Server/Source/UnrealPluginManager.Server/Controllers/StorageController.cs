@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Server.Filters;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -11,10 +10,8 @@ namespace UnrealPluginManager.Server.Controllers;
 /// </summary>
 /// <remarks>
 /// This controller is responsible for handling file-related requests and interacts with the storage service to process and retrieve the necessary data.
-/// It applies the <see cref="ApiExceptionFilterAttribute"/> to handle server-side exceptions gracefully for all its endpoints.
 /// </remarks>
 [ApiController]
-[ApiExceptionFilter]
 [Route("/files")]
 [AutoConstructor]
 public partial class StorageController {

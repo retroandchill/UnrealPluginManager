@@ -9,6 +9,7 @@ using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Plugins;
@@ -24,7 +25,7 @@ public partial class EngineServiceTest {
   private ServiceProvider _serviceProvider;
   private MockFileSystem _filesystem;
   private Mock<IEnginePlatformService> _enginePlatformService;
-  private Mock<IProcessRunner> _processRunner;
+  private MockProcessRunner _processRunner;
   private Mock<IPluginService> _pluginService;
   private Mock<IPluginStructureService> _pluginStructureService;
 
@@ -37,8 +38,8 @@ public partial class EngineServiceTest {
 
     _enginePlatformService = new Mock<IEnginePlatformService>();
     services.AddSingleton(_enginePlatformService.Object);
-    _processRunner = new Mock<IProcessRunner>();
-    services.AddSingleton(_processRunner.Object);
+    _processRunner = new MockProcessRunner();
+    services.AddSingleton(_processRunner);
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
     _pluginStructureService = new Mock<IPluginStructureService>();

@@ -10,7 +10,6 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Server.Filters;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -28,7 +27,6 @@ namespace UnrealPluginManager.Server.Controllers;
 /// </example>
 /// <seealso cref="UnrealPluginManager.Core.Services.IPluginService"/>
 [ApiController]
-[ApiExceptionFilter]
 [Route("/api/plugins")]
 [AutoConstructor]
 public partial class PluginsController : ControllerBase {

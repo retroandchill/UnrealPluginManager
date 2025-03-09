@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using UnrealPluginManager.Core.Tests.Helpers;
 
-namespace UnrealPluginManager.Server.Tests;
+namespace UnrealPluginManager.Server.Tests.Helpers;
 
 /// <summary>
 /// Provides helper methods for configuring server-side setups specifically for use in testing environments.
 /// This class extends functionality for setting up mock data providers within a WebApplicationBuilder instance.
 /// </summary>
-public static class ServerSetupHelpers {
+public static class ServerTestHelpers {
   /// <summary>
   /// Configures the WebApplicationBuilder instance with mock data providers for testing purposes.
   /// This extension method sets up necessary services and dependencies to provide mock implementations

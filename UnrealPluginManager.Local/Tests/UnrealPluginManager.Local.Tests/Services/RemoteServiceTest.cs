@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.Local.Tests.Mocks;
@@ -17,7 +18,7 @@ public class RemoteServiceTest {
 
   private ServiceProvider _serviceProvider;
   private MockFileSystem _filesystem;
-  private Mock<IEnvironment> _environment;
+  private MockEnvironment _environment;
   private IRemoteService _remoteService;
 
   [SetUp]
@@ -28,10 +29,12 @@ public class RemoteServiceTest {
     _filesystem.Directory.CreateDirectory(ConfigPath);
     services.AddSingleton<IFileSystem>(_filesystem);
 
-    _environment = new Mock<IEnvironment>();
-    _environment.Setup(x => x.GetFolderPath(Environment.SpecialFolder.UserProfile))
-        .Returns(UserPath);
-    services.AddSingleton(_environment.Object);
+    _environment = new MockEnvironment {
+        SpecialFolders = {
+            [Environment.SpecialFolder.UserProfile] = UserPath
+        }
+    };
+    services.AddSingleton(_environment);
     
     services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
     services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
