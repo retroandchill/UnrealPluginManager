@@ -41,7 +41,7 @@ partial class {{ClassName}} {
       break;
       {{/FallbackHandler}}
       {{^FallbackHandler}}
-      throw new NotSupportedException("Unhandled exception type", {ExceptionParameter}});
+      throw new NotSupportedException("Unhandled exception type", {{ExceptionParameter}});
       {{/FallbackHandler}}
     }
     {{/ReturnsVoid}}  
@@ -72,7 +72,7 @@ partial class {{ClassName}} {
       {{MethodName}}({{#Parameters}}{{Name}}{{#Comma}}, {{/Comma}}{{/Parameters}})
       {{/FallbackHandler}}
       {{^FallbackHandler}}
-      throw new NotSupportedException("Unhandled exception type", {ExceptionParameter}});
+      throw new NotSupportedException("Unhandled exception type", {{ExceptionParameter}})
       {{/FallbackHandler}}
     };
     {{/ReturnsVoid}}

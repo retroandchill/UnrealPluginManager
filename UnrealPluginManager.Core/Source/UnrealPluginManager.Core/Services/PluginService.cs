@@ -25,10 +25,7 @@ public partial class PluginService : IPluginService {
   private readonly IStorageService _storageService;
   private readonly IFileSystem _fileSystem;
   private readonly IPluginStructureService _pluginStructureService;
-
-  private static readonly JsonSerializerOptions JsonOptions = new() {
-      AllowTrailingCommas = true
-  };
+  private readonly IJsonService _jsonService;
 
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
@@ -183,9 +180,7 @@ public partial class PluginService : IPluginService {
     PluginDescriptor descriptor;
     try {
       await using var upluginFile = pluginDescriptorFile.Open();
-      var descriptorOut = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
-      ArgumentNullException.ThrowIfNull(descriptorOut);
-      descriptor = descriptorOut;
+      descriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(upluginFile);
     } catch (JsonException e) {
       throw new BadSubmissionException("Uplugin file was malformed", e);
     }
@@ -214,9 +209,7 @@ public partial class PluginService : IPluginService {
     PluginDescriptor descriptor;
     try {
       await using var upluginFile = pluginDescriptorFile.OpenRead();
-      var descriptorOut = await JsonSerializer.DeserializeAsync<PluginDescriptor>(upluginFile, JsonOptions);
-      ArgumentNullException.ThrowIfNull(descriptorOut);
-      descriptor = descriptorOut;
+      descriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(upluginFile);
     } catch (JsonException e) {
       throw new BadSubmissionException("Uplugin file was malformed", e);
     }

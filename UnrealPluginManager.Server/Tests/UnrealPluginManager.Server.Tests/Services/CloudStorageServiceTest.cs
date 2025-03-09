@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -27,7 +28,8 @@ public class CloudStorageServiceTest {
     var mockSection = new Mock<IConfigurationSection>();
 
     mockConfig.Setup(x => x.GetSection(StorageMetadata.Name)).Returns(mockSection.Object);
-
+    
+    services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
     services.AddScoped<IStorageService, CloudStorageService>();
     _serviceProvider = services.BuildServiceProvider();
   }

@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Design;
 using UnrealPluginManager.Core.Abstractions;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Local.Database;
@@ -18,7 +20,13 @@ public class LocalUnrealPluginManagerContextFactory : IDesignTimeDbContextFactor
   public LocalUnrealPluginManagerContext CreateDbContext(string[] args) {
     var filesystem = new FileSystem();
     var environment = new SystemEnvironment();
-    var storageService = new LocalStorageService(environment, filesystem);
+    var jsonService = new JsonService(new JsonSerializerOptions {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        AllowTrailingCommas = true
+    });
+    var storageService = new LocalStorageService(environment, filesystem, jsonService);
     return new LocalUnrealPluginManagerContext(storageService, filesystem);
   }
 }

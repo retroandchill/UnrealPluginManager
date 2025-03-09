@@ -1,5 +1,8 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Semver;
@@ -11,6 +14,7 @@ using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Binding;
 using UnrealPluginManager.Server.Controllers;
 using UnrealPluginManager.Server.Database;
+using UnrealPluginManager.Server.Exceptions;
 using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Utils;
@@ -38,7 +42,12 @@ public static class ServerServiceUtils {
   /// <returns>The updated <see cref="IServiceCollection"/> containing the registered server services.</returns>
   public static IServiceCollection AddServerServices(this IServiceCollection services) {
     return services
-        .AddScoped<IStorageService, CloudStorageService>();
+        .AddExceptionHandler<ServerExceptionHandler>()
+        .AddScoped<IStorageService, CloudStorageService>()
+        .AddSingleton<IJsonService>(provider => {
+          var options = provider.GetRequiredService<IOptions<JsonOptions>>();
+          return new JsonService(options.Value.JsonSerializerOptions);
+        });
   }
 
   /// <summary>
@@ -61,10 +70,19 @@ public static class ServerServiceUtils {
   /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance to configure.</param>
   /// <returns>The updated <see cref="WebApplicationBuilder"/> with common configurations applied.</returns>
   public static WebApplicationBuilder SetUpCommonConfiguration(this WebApplicationBuilder builder) {
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddJsonOptions(o => {
+          o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+          o.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+          o.JsonSerializerOptions.WriteIndented = true;
+          o.JsonSerializerOptions.AllowTrailingCommas = true;
+        });
     builder.Services.AddCoreServices()
         .AddServerServices()
-        .AddControllers(options => { options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider()); });
+        .AddControllers(options => {
+          options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
+          options.ModelBinderProviders.Insert(1, new SemVersionModelBinderProvider());
+        });
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 

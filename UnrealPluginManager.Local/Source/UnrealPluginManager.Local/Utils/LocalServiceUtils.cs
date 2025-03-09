@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Services;
@@ -31,11 +32,18 @@ public static class LocalServiceUtils {
       throw new PlatformNotSupportedException("The given platform is not supported.");
     }
 
+    var jsonSerializationOptions = new JsonSerializerOptions {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     return services.AddScoped<IEngineService, EngineService>()
         .AddScoped<IStorageService, LocalStorageService>()
         .AddScoped<IRemoteService, RemoteService>()
         .AddScoped<IPluginManagementService, PluginManagementService>()
-        .AddScoped<IInstallService, InstallService>();
+        .AddScoped<IInstallService, InstallService>()
+        .AddSingleton<IJsonService>(_ => new JsonService(jsonSerializationOptions));
   }
 
   /// <summary>

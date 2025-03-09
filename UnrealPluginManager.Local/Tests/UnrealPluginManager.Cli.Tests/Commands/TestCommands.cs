@@ -17,6 +17,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Installation;
@@ -27,7 +28,7 @@ namespace UnrealPluginManager.Cli.Tests.Commands;
 public class TestCommands {
   private MockFileSystem _filesystem;
   private Parser _parser;
-  private Mock<IEnvironment> _environment;
+  private MockEnvironment _environment;
   private Mock<IPluginService> _pluginService;
   private Mock<IPluginManagementService> _pluginManagementService;
   private Mock<IEngineService> _engineService;
@@ -47,13 +48,13 @@ public class TestCommands {
     _engineService = new Mock<IEngineService>();
     _pluginManagementService = new Mock<IPluginManagementService>();
     _installService = new Mock<IInstallService>();
-    _environment = new Mock<IEnvironment>();
+    _environment = new MockEnvironment();
     var builder = new CommandLineBuilder(rootCommand)
         .UseDefaults()
         .UseCustomExceptionHandler()
         .UseDependencyInjection(services => {
           services.AddSingleton<IFileSystem>(_filesystem);
-          services.AddSingleton(_environment.Object);
+          services.AddSingleton<IEnvironment>(_environment);
           services.AddSingleton(_engineService.Object);
           services.AddSingleton(_pluginService.Object);
           services.AddSingleton(_pluginManagementService.Object);
@@ -88,8 +89,7 @@ public class TestCommands {
       Assert.That(consoleOutput[3], Is.Empty);
     });
 
-    _environment.Setup(x => x.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion))
-        .Returns("5.6_Custom");
+    _environment.EnvironmentVariables[EnvironmentVariables.PrimaryUnrealEngineVersion] = "5.6_Custom";
     console = new RedirectingConsole();
     returnCode = await _parser.InvokeAsync("versions", console);
     consoleOutput = console.GetWrittenOut().Split(Environment.NewLine);

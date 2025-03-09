@@ -39,7 +39,7 @@ public class PluginServiceTests {
     _mockStorageService = new Mock<IStorageService>();
     services.AddSingleton(_mockStorageService.Object);
 
-
+    services.AddSingleton<IJsonService>(new JsonService(JsonOptions));
     services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
     services.AddScoped<IPluginService, PluginService>();
     services.AddScoped<IPluginStructureService, PluginStructureService>();

@@ -28,6 +28,14 @@ public abstract partial class StorageServiceBase : IStorageService {
   [field: AutoConstructorInject(initializer: "filesystem",
                                 injectedType: typeof(IFileSystem), parameterName: "filesystem")]
   protected IFileSystem FileSystem { get; }
+  /// <summary>
+  /// Provides access to the JSON serialization and deserialization logic used by storage services.
+  /// This property is used to perform JSON operations without directly depending on the standard
+  /// System.Text.Json classes, facilitating unit testing and custom implementations.
+  /// </summary>
+  [field: AutoConstructorInject(initializer: "jsonService",
+      injectedType: typeof(IJsonService), parameterName: "jsonService")]
+  protected IJsonService JsonService { get; }
 
   /// <inheritdoc />
   public abstract string BaseDirectory { get; }
@@ -150,7 +158,7 @@ public abstract partial class StorageServiceBase : IStorageService {
 
     using var fileStream = fileInfo.OpenText();
     var configText = fileStream.ReadToEnd();
-    var resultObject = JsonSerializer.Deserialize<T>(configText);
+    var resultObject = JsonService.Deserialize<T>(configText);
 
     return resultObject;
   }
@@ -185,7 +193,7 @@ public abstract partial class StorageServiceBase : IStorageService {
 
     using var fileStream = fileInfo.OpenText();
     var configText = await fileStream.ReadToEndAsync();
-    var resultObject = JsonSerializer.Deserialize<T>(configText);
+    var resultObject = JsonService.Deserialize<T>(configText);
 
     return resultObject;
   }
@@ -216,7 +224,7 @@ public abstract partial class StorageServiceBase : IStorageService {
     var filePath = Path.Combine(ConfigDirectory, filename);
     var fileInfo = FileSystem.FileInfo.New(filePath);
 
-    var configText = JsonSerializer.Serialize(value);
+    var configText = JsonService.Serialize(value);
 
     using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
     using var textWriter = new StreamWriter(writer);
@@ -230,7 +238,7 @@ public abstract partial class StorageServiceBase : IStorageService {
     var filePath = Path.Combine(ConfigDirectory, filename);
     var fileInfo = FileSystem.FileInfo.New(filePath);
 
-    var configText = JsonSerializer.Serialize(value);
+    var configText = JsonService.Serialize(value);
 
     await using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
     await using var textWriter = new StreamWriter(writer);

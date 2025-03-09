@@ -24,10 +24,7 @@ public static class ApplicationSetupHelpers {
   /// <param name="services">The IServiceCollection instance to configure with mock services.</param>
   /// <returns>The updated IServiceCollection with the mock data providers configured.</returns>
   public static IServiceCollection SetUpMockDataProviders(this IServiceCollection services) {
-    services.AddSystemAbstractions()
-        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
-    services.Remove(services.Single(x => x.ServiceType == typeof(IFileSystem)));
-    services.AddSingleton<IFileSystem, MockFileSystem>();
-    return services;
+    return services.AddMockSystemAbstractions()
+        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>(ServiceLifetime.Singleton, ServiceLifetime.Singleton);
   }
 }

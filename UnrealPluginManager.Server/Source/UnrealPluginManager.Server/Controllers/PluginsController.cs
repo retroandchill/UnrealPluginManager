@@ -10,7 +10,6 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Server.Filters;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -28,7 +27,6 @@ namespace UnrealPluginManager.Server.Controllers;
 /// </example>
 /// <seealso cref="UnrealPluginManager.Core.Services.IPluginService"/>
 [ApiController]
-[ApiExceptionFilter]
 [Route("/api/plugins")]
 [AutoConstructor]
 public partial class PluginsController : ControllerBase {
@@ -161,6 +159,8 @@ public partial class PluginsController : ControllerBase {
   /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
   /// <return>Returns the binary files of the plugin as a file stream result in ZIP format.</return>
   [HttpGet("{pluginName}/{version}/download/{engineVersion}/{platform}/binaries")]
+  [Produces(MediaTypeNames.Application.Zip)]
+  [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadPluginBinaries([FromRoute] string pluginName, [FromRoute] SemVersion version,
                                                      [FromRoute] Version engineVersion,
                                                      [FromRoute] string platform) {
