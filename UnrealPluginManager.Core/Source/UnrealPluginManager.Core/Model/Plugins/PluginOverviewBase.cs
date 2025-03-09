@@ -13,8 +13,8 @@ public abstract class PluginOverviewBase {
   /// </summary>
 
   [Required]
-  [Range(1, ulong.MaxValue)]
-  public required ulong Id { get; set; }
+  [Range(1, long.MaxValue)]
+  public required long Id { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the plugin.

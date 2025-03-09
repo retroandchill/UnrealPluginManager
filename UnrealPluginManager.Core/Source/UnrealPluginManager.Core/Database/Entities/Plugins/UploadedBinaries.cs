@@ -33,14 +33,14 @@ public class UploadedBinaries : IVersionedEntityChild {
   /// </summary>
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public ulong Id { get; set; }
+  public long Id { get; set; }
 
   /// <summary>
   /// Refers to the unique identifier of the parent entity associated with the plugin binary record in the database.
   /// Required for establishing hierarchical relationships between plugin entities.
   /// </summary>
   [Required]
-  public ulong ParentId { get; set; }
+  public long ParentId { get; set; }
 
   /// <summary>
   /// Represents the parent plugin version associated with the plugin binary entry.

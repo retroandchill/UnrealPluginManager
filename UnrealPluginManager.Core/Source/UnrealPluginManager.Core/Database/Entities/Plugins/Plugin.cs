@@ -23,7 +23,7 @@ public class Plugin {
   /// </remarks>
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public ulong Id { get; set; }
+  public long Id { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the plugin.
@@ -82,6 +82,7 @@ public class Plugin {
   /// project details, or other plugins they have developed. It may be null if the author
   /// has not provided a website.
   /// </remarks>
+  [MaxLength(255)]
   public Uri? AuthorWebsite { get; set; }
 
   /// <summary>

@@ -22,12 +22,12 @@ public class PluginVersion : IVersionedEntity {
   /// </summary>
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public ulong Id { get; set; }
+  public long Id { get; set; }
 
   /// <summary>
   /// Gets or sets the unique identifier for the parent entity associated with the plugin version.
   /// </summary>
-  public ulong ParentId { get; set; }
+  public long ParentId { get; set; }
 
   /// <summary>
   /// Gets or sets the parent plugin associated with the plugin version.

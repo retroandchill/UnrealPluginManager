@@ -190,12 +190,12 @@ public class TestCommands {
     var count = 1;
     var plugins = Enumerable.Range(0, 100)
         .Select(i => new PluginOverview {
-            Id = (ulong)i + 1,
+            Id = (long)i + 1,
             Name = $"TestPlugin{i}",
             Versions = versions
                 .Take((i % 10) + 1)
                 .Select(x => new VersionOverview {
-                    Id = (ulong)count++,
+                    Id = (long)count++,
                     Version = x,
                 })
                 .ToList()

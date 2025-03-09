@@ -98,7 +98,7 @@ public class PluginManagementServiceTest {
   private static List<Page<PluginOverview>> AddPluginsToRemote(int totalCount) {
     return Enumerable.Range(0, totalCount)
         .Select(i => new PluginOverview {
-            Id = (ulong) i + 1,
+            Id = (long) i + 1,
             Name = $"Plugin{i + 1}",
             FriendlyName = $"Plugin {i + 1}",
             Versions = []

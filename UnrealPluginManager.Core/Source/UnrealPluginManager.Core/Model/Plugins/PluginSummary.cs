@@ -17,8 +17,8 @@ public record PluginSummary {
   /// This property is required and serves as the primary identifier for the plugin within the system.
   /// </summary>
   [Required]
-  [Range(1, ulong.MaxValue)]
-  public required ulong PluginId { get; init; }
+  [Range(1, long.MaxValue)]
+  public required long PluginId { get; init; }
 
   /// <summary>
   /// Gets the name of the plugin.
@@ -40,8 +40,8 @@ public record PluginSummary {
   /// This property ensures that each version of a plugin is distinctly identifiable within the system.
   /// </summary>
   [Required]
-  [Range(1, ulong.MaxValue)]
-  public required ulong VersionId { get; init; }
+  [Range(1, long.MaxValue)]
+  public required long VersionId { get; init; }
 
   /// <summary>
   /// Gets the semantic version of the plugin.

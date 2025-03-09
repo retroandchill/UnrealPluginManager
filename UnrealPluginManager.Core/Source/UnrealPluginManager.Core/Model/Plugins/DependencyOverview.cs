@@ -15,8 +15,8 @@ public class DependencyOverview {
   /// dependencies within the system.
   /// </summary>
   [Required]
-  [Range(1, ulong.MaxValue)]
-  public ulong Id { get; set; }
+  [Range(1, long.MaxValue)]
+  public long Id { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the plugin associated with the dependency.
