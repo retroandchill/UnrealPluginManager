@@ -24,10 +24,10 @@
         <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-49"/>
         <PackageReference Include="LinqKit.Core" Version="1.2.8"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.2"/>
         <PackageReference Include="Riok.Mapperly" Version="4.2.0-next.1"/>
         <PackageReference Include="Semver" Version="3.0.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.3.1" />
