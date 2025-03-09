@@ -123,7 +123,7 @@ def main():
     config_file = os.path.join(script_dir, 'openapitools.json')
     out_dir = os.path.join(root_dir, 'generated', 'dotnet')
     commands = ['openapi-generator-cli', 'generate', '--generator-name', 'csharp',
-                '--config', config_file,
+                '--config', config_file, '--additional-properties', 'library=httpclient',
                 '--input-spec', os.path.join(script_dir, 'openapi-spec.json'),
                 '--output', out_dir, ' --template-dir', os.path.join(root_dir, 'openapi-template'),
                 '--package-name', 'UnrealPluginManager.WebClient', ]

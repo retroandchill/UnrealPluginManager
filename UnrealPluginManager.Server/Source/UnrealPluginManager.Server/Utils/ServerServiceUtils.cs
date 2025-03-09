@@ -93,7 +93,6 @@ public static class ServerServiceUtils {
   /// <returns>The configured <see cref="WebApplication"/> instance.</returns>
   public static WebApplication Configure(this WebApplication app) {
     app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name ?? "MyApplication";
-    app.UseExceptionHandler();
     app.UseDefaultFiles();
     app.MapStaticAssets();
     app.UseHttpsRedirection();

@@ -13,10 +13,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Mime;
 using UnrealPluginManager.WebClient.Client;
 using UnrealPluginManager.Core.Pagination;
-    using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins;
 
 
 namespace UnrealPluginManager.WebClient.Api
@@ -35,9 +36,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>System.IO.Stream</returns>
-        System.IO.Stream GetIcon(string pluginName, int operationIndex = 0);
+        /// <returns>FileParameter</returns>
+        FileParameter GetIcon(string pluginName);
 
         /// <summary>
         /// Retrieves an icon as a stream for the specified file name.
@@ -47,9 +47,8 @@ namespace UnrealPluginManager.WebClient.Api
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of System.IO.Stream</returns>
-        ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string pluginName, int operationIndex = 0);
+        /// <returns>ApiResponse of FileParameter</returns>
+        ApiResponse<FileParameter> GetIconWithHttpInfo(string pluginName);
         #endregion Synchronous Operations
     }
 
@@ -67,10 +66,9 @@ namespace UnrealPluginManager.WebClient.Api
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of System.IO.Stream</returns>
-        System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of FileParameter</returns>
+        System.Threading.Tasks.Task<FileParameter> GetIconAsync(string pluginName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves an icon as a stream for the specified file name.
@@ -80,10 +78,9 @@ namespace UnrealPluginManager.WebClient.Api
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (FileParameter)</returns>
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> GetIconWithHttpInfoAsync(string pluginName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -98,12 +95,14 @@ namespace UnrealPluginManager.WebClient.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public partial class StorageApi : IStorageApi
+    public partial class StorageApi : IDisposable, IStorageApi
     {
         private UnrealPluginManager.WebClient.Client.ExceptionFactory _exceptionFactory = (name, response) => null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StorageApi"/> class.
+        /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
+        /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
         public StorageApi() : this((string)null)
@@ -112,7 +111,11 @@ namespace UnrealPluginManager.WebClient.Api
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StorageApi"/> class.
+        /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
+        /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
+        /// <param name="basePath">The target service's base path in URL format.</param>
+        /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
         public StorageApi(string basePath)
         {
@@ -120,16 +123,19 @@ namespace UnrealPluginManager.WebClient.Api
                 UnrealPluginManager.WebClient.Client.GlobalConfiguration.Instance,
                 new UnrealPluginManager.WebClient.Client.Configuration { BasePath = basePath }
             );
-            this.Client = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
-            this.AsynchronousClient = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
+            this.ApiClient = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
+            this.Client =  this.ApiClient;
+            this.AsynchronousClient = this.ApiClient;
             this.ExceptionFactory = UnrealPluginManager.WebClient.Client.Configuration.DefaultExceptionFactory;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StorageApi"/> class
-        /// using Configuration object
+        /// Initializes a new instance of the <see cref="StorageApi"/> class using Configuration object.
+        /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
+        /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
-        /// <param name="configuration">An instance of Configuration</param>
+        /// <param name="configuration">An instance of Configuration.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
         public StorageApi(UnrealPluginManager.WebClient.Client.Configuration configuration)
         {
@@ -139,8 +145,78 @@ namespace UnrealPluginManager.WebClient.Api
                 UnrealPluginManager.WebClient.Client.GlobalConfiguration.Instance,
                 configuration
             );
-            this.Client = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
-            this.AsynchronousClient = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
+            this.ApiClient = new UnrealPluginManager.WebClient.Client.ApiClient(this.Configuration.BasePath);
+            this.Client = this.ApiClient;
+            this.AsynchronousClient = this.ApiClient;
+            ExceptionFactory = UnrealPluginManager.WebClient.Client.Configuration.DefaultExceptionFactory;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StorageApi"/> class.
+        /// </summary>
+        /// <param name="client">An instance of HttpClient.</param>
+        /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        /// <remarks>
+        /// Some configuration settings will not be applied without passing an HttpClientHandler.
+        /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
+        /// </remarks>
+        public StorageApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StorageApi"/> class.
+        /// </summary>
+        /// <param name="client">An instance of HttpClient.</param>
+        /// <param name="basePath">The target service's base path in URL format.</param>
+        /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <returns></returns>
+        /// <remarks>
+        /// Some configuration settings will not be applied without passing an HttpClientHandler.
+        /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
+        /// </remarks>
+        public StorageApi(HttpClient client, string basePath, HttpClientHandler handler = null)
+        {
+            if (client == null) throw new ArgumentNullException("client");
+
+            this.Configuration = UnrealPluginManager.WebClient.Client.Configuration.MergeConfigurations(
+                UnrealPluginManager.WebClient.Client.GlobalConfiguration.Instance,
+                new UnrealPluginManager.WebClient.Client.Configuration { BasePath = basePath }
+            );
+            this.ApiClient = new UnrealPluginManager.WebClient.Client.ApiClient(client, this.Configuration.BasePath, handler);
+            this.Client =  this.ApiClient;
+            this.AsynchronousClient = this.ApiClient;
+            this.ExceptionFactory = UnrealPluginManager.WebClient.Client.Configuration.DefaultExceptionFactory;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StorageApi"/> class using Configuration object.
+        /// </summary>
+        /// <param name="client">An instance of HttpClient.</param>
+        /// <param name="configuration">An instance of Configuration.</param>
+        /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        /// <remarks>
+        /// Some configuration settings will not be applied without passing an HttpClientHandler.
+        /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
+        /// </remarks>
+        public StorageApi(HttpClient client, UnrealPluginManager.WebClient.Client.Configuration configuration, HttpClientHandler handler = null)
+        {
+            if (configuration == null) throw new ArgumentNullException("configuration");
+            if (client == null) throw new ArgumentNullException("client");
+
+            this.Configuration = UnrealPluginManager.WebClient.Client.Configuration.MergeConfigurations(
+                UnrealPluginManager.WebClient.Client.GlobalConfiguration.Instance,
+                configuration
+            );
+            this.ApiClient = new UnrealPluginManager.WebClient.Client.ApiClient(client, this.Configuration.BasePath, handler);
+            this.Client = this.ApiClient;
+            this.AsynchronousClient = this.ApiClient;
             ExceptionFactory = UnrealPluginManager.WebClient.Client.Configuration.DefaultExceptionFactory;
         }
 
@@ -151,6 +227,7 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public StorageApi(UnrealPluginManager.WebClient.Client.ISynchronousClient client, UnrealPluginManager.WebClient.Client.IAsynchronousClient asyncClient, UnrealPluginManager.WebClient.Client.IReadableConfiguration configuration)
         {
             if (client == null) throw new ArgumentNullException("client");
@@ -162,6 +239,19 @@ namespace UnrealPluginManager.WebClient.Api
             this.Configuration = configuration;
             this.ExceptionFactory = UnrealPluginManager.WebClient.Client.Configuration.DefaultExceptionFactory;
         }
+
+        /// <summary>
+        /// Disposes resources if they were created by us
+        /// </summary>
+        public void Dispose()
+        {
+            this.ApiClient?.Dispose();
+        }
+
+        /// <summary>
+        /// Holds the ApiClient if created
+        /// </summary>
+        public UnrealPluginManager.WebClient.Client.ApiClient ApiClient { get; set; } = null;
 
         /// <summary>
         /// The client for accessing this underlying API asynchronously.
@@ -209,11 +299,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>System.IO.Stream</returns>
-        public System.IO.Stream GetIcon(string pluginName, int operationIndex = 0)
+        /// <returns>FileParameter</returns>
+        public FileParameter GetIcon(string pluginName)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = GetIconWithHttpInfo(pluginName);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = GetIconWithHttpInfo(pluginName);
             return localVarResponse.Data;
         }
 
@@ -222,15 +311,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of System.IO.Stream</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> GetIconWithHttpInfo(string pluginName, int operationIndex = 0)
+        /// <returns>ApiResponse of FileParameter</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> GetIconWithHttpInfo(string pluginName)
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
-            {
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling StorageApi->GetIcon");
-            }
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -243,32 +329,21 @@ namespace UnrealPluginManager.WebClient.Api
             };
 
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null)
-            {
-                localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-            }
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
 
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null)
-            {
-                localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-            }
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
             localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
 
-            localVarRequestOptions.Operation = "StorageApi.GetIcon";
-            localVarRequestOptions.OperationIndex = operationIndex;
-
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<System.IO.Stream>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration);
+
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetIcon", localVarResponse);
-                if (_exception != null)
-                {
-                    throw _exception;
-                }
+                if (_exception != null) throw _exception;
             }
 
             return localVarResponse;
@@ -279,12 +354,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of System.IO.Stream</returns>
-        public async System.Threading.Tasks.Task<System.IO.Stream> GetIconAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of FileParameter</returns>
+        public async System.Threading.Tasks.Task<FileParameter> GetIconAsync(string pluginName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream> localVarResponse = await GetIconWithHttpInfoAsync(pluginName, operationIndex, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await GetIconWithHttpInfoAsync(pluginName, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -293,16 +367,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="pluginName">The name of the plugin to search for</param>
-        /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<System.IO.Stream>> GetIconWithHttpInfoAsync(string pluginName, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (FileParameter)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> GetIconWithHttpInfoAsync(string pluginName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'pluginName' is set
             if (pluginName == null)
-            {
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling StorageApi->GetIcon");
-            }
 
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -315,34 +386,24 @@ namespace UnrealPluginManager.WebClient.Api
                 "image/png"
             };
 
+
             var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null)
-            {
-                localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-            }
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
 
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null)
-            {
-                localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-            }
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
             localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
 
-            localVarRequestOptions.Operation = "StorageApi.GetIcon";
-            localVarRequestOptions.OperationIndex = operationIndex;
-
 
             // make the HTTP request
-            var localVarResponse = await this.AsynchronousClient.GetAsync<System.IO.Stream>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/files/icons/{pluginName}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetIcon", localVarResponse);
-                if (_exception != null)
-                {
-                    throw _exception;
-                }
+                if (_exception != null) throw _exception;
             }
 
             return localVarResponse;

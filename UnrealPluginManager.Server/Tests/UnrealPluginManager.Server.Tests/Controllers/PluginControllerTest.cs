@@ -13,7 +13,7 @@ namespace UnrealPluginManager.Server.Tests.Controllers;
 public class PluginControllerTest {
   private TestWebApplicationFactory<Program> _factory;
   private HttpClient _client;
-  private IPluginsApi _pluginsApi;
+  private PluginsApi _pluginsApi;
   private IServiceProvider _serviceProvider;
   
 
@@ -21,7 +21,7 @@ public class PluginControllerTest {
   public void Setup() {
     _factory = new TestWebApplicationFactory<Program>();
     _client = _factory.CreateClient();
-    _pluginsApi = new PluginsApi();
+    _pluginsApi = new PluginsApi(_client);
     _serviceProvider = _factory.Services;
   }
 
@@ -29,6 +29,7 @@ public class PluginControllerTest {
   public void TearDown() {
     _client.Dispose();
     _factory.Dispose();
+    _pluginsApi.Dispose();
   }
 
   [Test]
@@ -139,7 +140,7 @@ public class PluginControllerTest {
 
     var downloaded = await _pluginsApi.DownloadLatestPluginAsync("TestPlugin", "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]);
     Assert.Multiple(() => {
-      Assert.That(downloaded.FileDownloadName, Is.EqualTo("TestPlugin.zip"));
+      Assert.That(downloaded.Name, Is.EqualTo("TestPlugin.zip"));
       Assert.That(downloaded.ContentType, Is.EqualTo("application/zip"));
     });
   }

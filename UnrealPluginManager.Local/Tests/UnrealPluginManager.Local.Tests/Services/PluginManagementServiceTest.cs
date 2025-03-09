@@ -80,8 +80,7 @@ public class PluginManagementServiceTest {
 
     var pageIndex = 0;
     _pluginsApi.Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
-            It.Is(100, EqualityComparer<int>.Default), It.IsAny<int>(),
-            It.IsAny<CancellationToken>()))
+            It.Is(100, EqualityComparer<int>.Default), It.IsAny<CancellationToken>()))
         .Returns((string? _, int? _, int? _, int _, CancellationToken _) => {
           if (pageIndex >= pageList.Count) {
             throw new ApiException(404, "Unreachable");
@@ -197,8 +196,7 @@ public class PluginManagementServiceTest {
         }));
 
     _pluginsApi.Setup(x => x.GetCandidateDependenciesAsync(
-            It.IsAny<List<PluginDependency>>(),
-            It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            It.IsAny<List<PluginDependency>>(), It.IsAny<CancellationToken>()))
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is not "Http" and not "StdLib")
                 .ToDictionary(x => x.Key, x => x.Value
@@ -231,7 +229,7 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>
-            x.GetLatestVersionAsync("TestPlugin", SemVersionRange.All.ToString(), 0, CancellationToken.None))
+            x.GetLatestVersionAsync("TestPlugin", SemVersionRange.All.ToString(), CancellationToken.None))
         .ReturnsAsync(new PluginVersionInfo {
             PluginId = 1,
             Name = "TestPlugin",
