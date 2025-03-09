@@ -81,7 +81,7 @@ public class PluginManagementServiceTest {
     var pageIndex = 0;
     _pluginsApi.Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
             It.Is(100, EqualityComparer<int>.Default), It.IsAny<CancellationToken>()))
-        .Returns((string? _, int? _, int? _, int _, CancellationToken _) => {
+        .Returns((string? _, int? _, int? _, CancellationToken _) => {
           if (pageIndex >= pageList.Count) {
             throw new ApiException(404, "Unreachable");
           }

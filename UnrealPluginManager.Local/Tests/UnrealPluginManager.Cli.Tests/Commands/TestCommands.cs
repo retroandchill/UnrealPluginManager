@@ -54,7 +54,7 @@ public class TestCommands {
         .UseCustomExceptionHandler()
         .UseDependencyInjection(services => {
           services.AddSingleton<IFileSystem>(_filesystem);
-          services.AddSingleton(_environment);
+          services.AddSingleton<IEnvironment>(_environment);
           services.AddSingleton(_engineService.Object);
           services.AddSingleton(_pluginService.Object);
           services.AddSingleton(_pluginManagementService.Object);

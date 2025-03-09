@@ -39,7 +39,7 @@ public partial class EngineServiceTest {
     _enginePlatformService = new Mock<IEnginePlatformService>();
     services.AddSingleton(_enginePlatformService.Object);
     _processRunner = new MockProcessRunner();
-    services.AddSingleton(_processRunner);
+    services.AddSingleton<IProcessRunner>(_processRunner);
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
     _pluginStructureService = new Mock<IPluginStructureService>();

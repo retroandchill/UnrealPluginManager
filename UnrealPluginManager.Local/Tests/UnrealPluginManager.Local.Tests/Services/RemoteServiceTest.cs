@@ -34,7 +34,7 @@ public class RemoteServiceTest {
             [Environment.SpecialFolder.UserProfile] = UserPath
         }
     };
-    services.AddSingleton(_environment);
+    services.AddSingleton<IEnvironment>(_environment);
     
     services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
     services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
