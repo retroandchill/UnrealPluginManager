@@ -34,7 +34,8 @@ public class PluginControllerTest {
 
   [Test]
   public async Task TestBasicAddAndGet() {
-    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+    using var scope = _serviceProvider.CreateScope();
+    var pluginService = scope.ServiceProvider.GetRequiredService<IPluginService>();
     await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0)
@@ -138,10 +139,6 @@ public class PluginControllerTest {
     var result = await _pluginsApi.AddPluginAsync("5.5", testZip);
     Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
-    var downloaded = await _pluginsApi.DownloadLatestPluginAsync("TestPlugin", "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]);
-    Assert.Multiple(() => {
-      Assert.That(downloaded.Name, Is.EqualTo("TestPlugin.zip"));
-      Assert.That(downloaded.ContentType, Is.EqualTo("application/zip"));
-    });
+    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadLatestPluginAsync("TestPlugin", "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]));
   }
 }

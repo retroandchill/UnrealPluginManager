@@ -25,6 +25,6 @@ public static class ApplicationSetupHelpers {
   /// <returns>The updated IServiceCollection with the mock data providers configured.</returns>
   public static IServiceCollection SetUpMockDataProviders(this IServiceCollection services) {
     return services.AddMockSystemAbstractions()
-        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
+        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>(ServiceLifetime.Singleton, ServiceLifetime.Singleton);
   }
 }

@@ -79,7 +79,10 @@ public static class ServerServiceUtils {
         });
     builder.Services.AddCoreServices()
         .AddServerServices()
-        .AddControllers(options => { options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider()); });
+        .AddControllers(options => {
+          options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
+          options.ModelBinderProviders.Insert(1, new SemVersionModelBinderProvider());
+        });
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
