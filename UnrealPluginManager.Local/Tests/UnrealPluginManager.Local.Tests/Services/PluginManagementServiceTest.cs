@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
@@ -61,10 +62,12 @@ public class PluginManagementServiceTest {
     services.AddSingleton(_pluginsApi.Object);
     services.AddScoped<IRemoteService, RemoteService>();
     services.AddScoped<IPluginManagementService, PluginManagementService>();
+    services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
 
     _serviceProvider = services.BuildServiceProvider();
 
-    var realPluginService = new PluginService(null, null, null, null);
+    var jsonService = _serviceProvider.GetRequiredService<IJsonService>();
+    var realPluginService = new PluginService(null, null, null, null, jsonService);
     _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
         .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
             realPluginService.GetDependencyList(root, manifest));

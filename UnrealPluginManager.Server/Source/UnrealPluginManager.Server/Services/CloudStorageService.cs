@@ -20,7 +20,8 @@ public class CloudStorageService : StorageServiceBase {
   /// Provides a cloud storage service implementation for managing plugin files.
   /// This service handles storing and retrieving plugins in a configurable cloud-based directory.
   /// </summary>
-  public CloudStorageService(IFileSystem filesystem, IConfiguration config) : base(filesystem) {
+  public CloudStorageService(IFileSystem filesystem, IConfiguration config, IJsonService jsonService) 
+      : base(filesystem, jsonService) {
     _storageMetadata = new StorageMetadata();
     config.GetSection(StorageMetadata.Name).Bind(_storageMetadata);
 

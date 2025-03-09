@@ -23,6 +23,7 @@ public partial class EngineService : IEngineService {
   private readonly IPluginStructureService _pluginStructureService;
   private readonly IEnginePlatformService _enginePlatformService;
   private readonly IProcessRunner _processRunner;
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public List<InstalledEngine> GetInstalledEngines() {
@@ -75,7 +76,7 @@ public partial class EngineService : IEngineService {
 
     var upluginInfo = _fileSystem.FileInfo.New(upluginFile);
     await using var reader = upluginInfo.OpenRead();
-    var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
+    var pluginDescriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(reader);
     ArgumentNullException.ThrowIfNull(pluginDescriptor);
     return pluginDescriptor.VersionName;
   }
@@ -86,7 +87,7 @@ public partial class EngineService : IEngineService {
     var packageDirectory = _fileSystem.DirectoryInfo.New(installedEngine.PackageDirectory);
     foreach (var file in packageDirectory.EnumerateFiles("*.uplugin", SearchOption.AllDirectories)) {
       await using var reader = file.OpenRead();
-      var pluginDescriptor = await JsonSerializer.DeserializeAsync<PluginDescriptor>(reader);
+      var pluginDescriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(reader);
       ArgumentNullException.ThrowIfNull(pluginDescriptor);
       ArgumentNullException.ThrowIfNull(file.Directory);
       yield return new InstalledPlugin(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName,

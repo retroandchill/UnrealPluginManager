@@ -6,6 +6,7 @@ using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Installation;
 
@@ -21,6 +22,7 @@ public partial class InstallService : IInstallService {
   private readonly IFileSystem _fileSystem;
   private readonly IEngineService _engineService;
   private readonly IPluginManagementService _pluginManagementService;
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public async Task<List<VersionChange>> InstallPlugin(string pluginName, SemVersionRange pluginVersion,
@@ -38,8 +40,8 @@ public partial class InstallService : IInstallService {
                                                              IReadOnlyCollection<string> platforms) {
     IDependencyHolder? descriptor;
     await using (var stream = _fileSystem.File.OpenRead(descriptorFile)) {
-      descriptor = descriptorFile.EndsWith(".uplugin") ? await JsonSerializer.DeserializeAsync<PluginDescriptor>(stream) 
-          : await JsonSerializer.DeserializeAsync<ProjectDescriptor>(stream);
+      descriptor = descriptorFile.EndsWith(".uplugin") ? await _jsonService.DeserializeAsync<PluginDescriptor>(stream) 
+          : await _jsonService.DeserializeAsync<ProjectDescriptor>(stream);
       ArgumentNullException.ThrowIfNull(descriptor);
     }
 
