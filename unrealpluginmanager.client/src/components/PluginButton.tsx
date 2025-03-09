@@ -1,6 +1,5 @@
 ﻿import {PluginOverview} from "../api";
 import {Component} from 'react';
-import Icon128 from "../assets/icon128.png";
 import {iconsPath} from "../config/Globals.ts";
 
 /**
@@ -69,7 +68,7 @@ export class PluginButton extends Component<PluginButtonProps, PluginButtonState
    */
   constructor(props: PluginButtonProps) {
     super(props)
-    this.state = {icon: Icon128}
+    this.state = {icon: process.env.PUBLIC_URL + '/icon128.png'}
   }
 
   componentDidMount() {

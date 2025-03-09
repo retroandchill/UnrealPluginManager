@@ -69,6 +69,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$root", "$root", "{64D07B84
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		update_database.ps1 = update_database.ps1
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Annotations", "UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Annotations\UnrealPluginManager.Core.Annotations.csproj", "{F916A950-C6C5-48C4-917C-D5CDC72C83E5}"

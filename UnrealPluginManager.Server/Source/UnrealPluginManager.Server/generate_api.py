@@ -101,6 +101,21 @@ def move_dotnet_client(out_dir: str, root_dir: str):
     shutil.rmtree(out_dir)
 
 
+def fix_typescipt_client(typescript_client_dir):
+    for root, dirs, files in os.walk(typescript_client_dir):
+        for file in files:
+            if not file.endswith('.ts'):
+                continue
+            
+            with open(os.path.join(root, file), 'r') as f:
+                content = f.read()
+            
+            content = content.replace('/* eslint-disable */', '/* eslint-disable */\n//@ts-nocheck')
+            
+            with open(os.path.join(root, file), 'w') as f:
+                f.write(content)
+
+
 def main():
     script_dir = os.path.dirname(__file__)
     with open(os.path.join(os.path.join(script_dir, 'openapi-spec.json'))) as f:
@@ -138,6 +153,7 @@ def main():
                 '--input-spec', os.path.join(script_dir, 'openapi-spec.json'),
                 '--output', typescript_client_dir]
     subprocess.call(commands, shell=True)
+    fix_typescipt_client(typescript_client_dir)
 
 
 if __name__ == '__main__':
