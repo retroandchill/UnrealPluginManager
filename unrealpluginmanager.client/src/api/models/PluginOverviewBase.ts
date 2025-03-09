@@ -24,10 +24,10 @@ import { mapValues } from '../runtime';
 export interface PluginOverviewBase {
     /**
      * Gets or sets the unique identifier for the plugin.
-     * @type {number}
+     * @type {string}
      * @memberof PluginOverviewBase
      */
-    id: number;
+    id: string;
     /**
      * Gets or sets the name of the plugin.
      * @type {string}

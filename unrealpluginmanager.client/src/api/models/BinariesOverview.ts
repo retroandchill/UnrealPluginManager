@@ -22,10 +22,10 @@ import { mapValues } from '../runtime';
 export interface BinariesOverview {
     /**
      * Gets or sets the unique identifier for the binary file.
-     * @type {number}
+     * @type {string}
      * @memberof BinariesOverview
      */
-    id: number;
+    id: string;
     /**
      * Gets or sets the target platform for which the binary is intended.
      * @type {string}

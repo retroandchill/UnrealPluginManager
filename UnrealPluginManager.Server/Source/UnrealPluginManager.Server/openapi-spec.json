@@ -520,9 +520,9 @@
         "properties": {
           "id": {
             "minimum": 1,
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier for the binary file.",
-            "format": "int64"
+            "format": "uuid"
           },
           "platform": {
             "maxLength": 255,
@@ -573,9 +573,9 @@
         "properties": {
           "id": {
             "minimum": 1,
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier associated with a dependency.\r\nThis identifier is automatically generated and used to distinguish\r\ndependencies within the system.",
-            "format": "int64"
+            "format": "uuid"
           },
           "pluginName": {
             "type": "string",
@@ -679,10 +679,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "minimum": 1,
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier for the plugin.",
-            "format": "int64"
+            "format": "uuid"
           },
           "name": {
             "minLength": 1,
@@ -771,10 +770,9 @@
         "type": "object",
         "properties": {
           "pluginId": {
-            "minimum": 1,
-            "type": "integer",
+            "type": "string",
             "description": "Gets the unique identifier of the plugin.\r\nThis property is required and serves as the primary identifier for the plugin within the system.",
-            "format": "int64"
+            "format": "uuid"
           },
           "name": {
             "minLength": 1,
@@ -788,9 +786,9 @@
           },
           "versionId": {
             "minimum": 1,
-            "type": "integer",
+            "type": "string",
             "description": "Gets the unique identifier of the plugin version.\r\nThis property ensures that each version of a plugin is distinctly identifiable within the system.",
-            "format": "int64"
+            "format": "uuid"
           },
           "version": {
             "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
@@ -822,9 +820,9 @@
         "type": "object",
         "properties": {
           "pluginId": {
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier for a plugin.",
-            "format": "int64"
+            "format": "uuid"
           },
           "name": {
             "type": "string",
@@ -836,9 +834,9 @@
             "nullable": true
           },
           "versionId": {
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier for the plugin version.",
-            "format": "int64"
+            "format": "uuid"
           },
           "version": {
             "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
@@ -897,9 +895,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "Gets or sets the unique identifier for this instance.",
-            "format": "int64"
+            "format": "uuid"
           },
           "version": {
             "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",

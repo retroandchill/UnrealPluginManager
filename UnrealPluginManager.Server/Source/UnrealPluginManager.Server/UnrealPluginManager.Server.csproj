@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>9bc72a2c-d9ab-4d30-a5ea-212409f10125</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <SpaRoot>..\unrealpluginmanager.client</SpaRoot>
+        <SpaRoot>..\..\..\unrealpluginmanager.client</SpaRoot>
         <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
         <SpaProxyServerUrl>https://localhost:60493</SpaProxyServerUrl>
         <TargetFramework>net9.0</TargetFramework>
