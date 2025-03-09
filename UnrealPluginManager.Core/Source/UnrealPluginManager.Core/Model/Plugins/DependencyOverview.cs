@@ -16,7 +16,7 @@ public class DependencyOverview {
   /// </summary>
   [Required]
   [Range(1, long.MaxValue)]
-  public long Id { get; set; }
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the plugin associated with the dependency.

@@ -21,7 +21,7 @@ public class BinariesOverview {
   /// </remarks>
   [Required]
   [Range(1, long.MaxValue)]
-  public long Id { get; set; }
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the target platform for which the binary is intended.

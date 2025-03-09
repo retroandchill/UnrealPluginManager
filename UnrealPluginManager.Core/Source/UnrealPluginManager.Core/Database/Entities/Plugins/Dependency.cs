@@ -23,7 +23,7 @@ public class Dependency : IVersionedEntityChild {
   /// </remarks>
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public long Id { get; set; }
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the unique identifier for the parent plugin associated with the dependency.
@@ -32,7 +32,7 @@ public class Dependency : IVersionedEntityChild {
   /// The <c>ParentId</c> property defines the foreign key relationship between the <c>Dependency</c>
   /// entity and the parent <c>Plugin</c> entity. It is used to associate a dependency with its parent plugin.
   /// </remarks>
-  public long ParentId { get; set; }
+  public Guid ParentId { get; set; }
 
   /// <summary>
   /// Gets or sets the parent plugin for the dependency.

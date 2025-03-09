@@ -57,10 +57,10 @@ public class InstallServiceTest {
     Assert.That(result, Has.Count.EqualTo(0));
 
     var existingPlugin = new PluginVersionInfo {
-        PluginId = 1,
+        PluginId = Guid.NewGuid(),
         Name = "TestPlugin",
         FriendlyName = "Test Plugin",
-        VersionId = 1,
+        VersionId = Guid.NewGuid(),
         Version = new SemVersion(1, 1, 0),
         Dependencies = []
     };
@@ -95,10 +95,10 @@ public class InstallServiceTest {
   [Test]
   public async Task TestInstallPlugin_HasConflicts() {
     var existingPlugin = new PluginVersionInfo {
-        PluginId = 1,
+        PluginId = Guid.NewGuid(),
         Name = "TestPlugin",
         FriendlyName = "Test Plugin",
-        VersionId = 1,
+        VersionId = Guid.NewGuid(),
         Version = new SemVersion(1, 1, 0),
         Dependencies = []
     };
@@ -148,24 +148,24 @@ public class InstallServiceTest {
     _pluginManagementService.Setup(x => x.GetPluginsToInstall(It.IsAny<IDependencyChainNode>(), It.IsAny<string>()))
         .ReturnsAsync(new List<PluginSummary> {
             new() {
-                PluginId = 1,
+                PluginId = Guid.NewGuid(),
                 Name = "Plugin1",
                 FriendlyName = "Plugin 1",
-                VersionId = 1,
+                VersionId = Guid.NewGuid(),
                 Version = new SemVersion(1, 0, 0),
             },
             new() {
-                PluginId = 2,
+                PluginId = Guid.NewGuid(),
                 Name = "Plugin2",
                 FriendlyName = "Plugin 2",
-                VersionId = 2,
+                VersionId = Guid.NewGuid(),
                 Version = new SemVersion(1, 1, 0),
             },
             new() {
-                PluginId = 2,
+                PluginId = Guid.NewGuid(),
                 Name = "Plugin3",
                 FriendlyName = "Plugin 3",
-                VersionId = 2,
+                VersionId = Guid.NewGuid(),
                 Version = new SemVersion(1, 3, 0),
             }
         });

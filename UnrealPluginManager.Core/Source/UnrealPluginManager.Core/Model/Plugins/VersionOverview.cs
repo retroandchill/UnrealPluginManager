@@ -15,7 +15,7 @@ public class VersionOverview {
   /// Gets or sets the unique identifier for this instance.
   /// </summary>
   [Required]
-  public long Id { get; set; }
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the semantic version of the plugin, representing its specific version details.

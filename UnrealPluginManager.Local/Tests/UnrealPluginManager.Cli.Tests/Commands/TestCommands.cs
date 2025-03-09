@@ -186,16 +186,15 @@ public class TestCommands {
         new(1, 0, 0), new(1, 0, 1), new(1, 0, 2), new(1, 0, 3), new(1, 1, 0), new(1, 1, 1), new(1, 2, 0),
         new(2, 0, 0), new(2, 0, 1), new(3, 0, 0)
     };
-
-    var count = 1;
+    
     var plugins = Enumerable.Range(0, 100)
         .Select(i => new PluginOverview {
-            Id = (long)i + 1,
+            Id = Guid.NewGuid(),
             Name = $"TestPlugin{i}",
             Versions = versions
                 .Take((i % 10) + 1)
                 .Select(x => new VersionOverview {
-                    Id = (long)count++,
+                    Id = Guid.NewGuid(),
                     Version = x,
                 })
                 .ToList()

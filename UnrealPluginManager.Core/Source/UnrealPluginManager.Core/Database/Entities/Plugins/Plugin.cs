@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using Semver;
-using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -23,7 +21,7 @@ public class Plugin {
   /// </remarks>
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public long Id { get; set; }
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the plugin.

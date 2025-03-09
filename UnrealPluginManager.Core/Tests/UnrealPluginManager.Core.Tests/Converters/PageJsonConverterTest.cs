@@ -21,15 +21,15 @@ public class PageJsonConverterTest {
   public void TestSerializeComplexPage() {
     var plugins = new List<VersionOverview> {
         new() {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Version = new SemVersion(1, 0, 0)
         },
         new() {
-            Id = 2,
+            Id = Guid.NewGuid(),
             Version = new SemVersion(1, 0, 1)
         },
         new() {
-            Id = 3,
+            Id = Guid.NewGuid(),
             Version = new SemVersion(2, 0, 0)
         }
     };
