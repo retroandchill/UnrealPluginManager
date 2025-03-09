@@ -68,7 +68,36 @@ jobs:
           }
           cd ..
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+  
+  typescript-unit-tests:
+    name: Run Unit Tests for TypeScript Client
+    runs-on: windows-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Node Dependencies
+        shell: powershell
+        working-directory: unrealpluginmanager.client
+        run: |
+          npm ci
           
+      - name: Run Unit Tests
+        shell: powershell
+        working-directory: unrealpluginmanager.client
+        run: npm run coverage
+        
+      - name: Archive coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-unit-test-coverage
+          path: |
+            **/lcov.info
+   
   build-docker:
     name: Build Docker Container
     runs-on: ubuntu-latest
@@ -99,7 +128,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: true #${{ github.ref == 'refs/heads/main' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
@@ -108,4 +137,4 @@ jobs:
         with:
           subject-name: index.docker.io/retroandchill/unreal-plugin-manager
           subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true #${{ github.ref == 'refs/heads/main' }}
+          push-to-registry: true
