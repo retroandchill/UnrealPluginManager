@@ -2,6 +2,7 @@
 using System.IO.Compression;
 using System.Text.Json;
 using LanguageExt;
+using LanguageExt.UnsafeValueAccess;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
@@ -12,6 +13,7 @@ using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
@@ -213,10 +215,12 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, IReadOnlyDictionary<string, TPlatforms> binaries) where TPlatforms : IReadOnlyDictionary<string, Stream> {
-    var (archive, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(source);
-    
-    await _pluginStructureService.ExtractAndStoreIcon(baseName, archive);
+  public async Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, Stream? icon, IReadOnlyDictionary<string, TPlatforms> binaries) where TPlatforms : IReadOnlyDictionary<string, Stream> {
+    var (_, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(source);
+
+    if (icon is not null) {
+      await _storageService.StorePluginIcon(baseName, new StreamFileSource(_fileSystem, icon));
+    }
     await _storageService.StorePluginSource(baseName, descriptor.VersionName, new StreamFileSource(_fileSystem, source));
     var binariesTasks = binaries.Select(x => x.Value
                         .Select(y => _storageService.StorePluginBinaries(baseName, descriptor.VersionName, x.Key, y.Key, new StreamFileSource(_fileSystem, y.Value))))
@@ -334,6 +338,30 @@ public partial class PluginService : IPluginService {
     return targetPlatforms.Select(platform => (platform, _storageService
                                       .RetrievePluginBinaries(pluginName, version, engineVersion, platform)
                                       .OrElseThrow(() => new PluginNotFoundException($"Binaries for {platform} was not found!"))));
+  }
+
+  /// <inheritdoc />
+  public async Task<StoredPluginVersion> GetPluginFileData(Guid pluginId, Guid versionId) {
+    var pluginVersion = await _dbContext.PluginVersions
+        .Include(x => x.Parent)
+        .Include(x => x.Binaries)
+        .Where(x => x.ParentId == pluginId)
+        .Where(x => x.Id == versionId)
+        .FirstOrDefaultAsync();
+    if (pluginVersion is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
+    }
+
+    return new StoredPluginVersion {
+        Source = _storageService.RetrievePluginSource(pluginVersion.Parent.Name, pluginVersion.Version).OrElseThrow(),
+        Icon = _storageService.RetrievePluginIcon(pluginVersion.Parent.Name).ValueUnsafe(),
+        Binaries = pluginVersion.Binaries
+            .Select(x => new StoredBinary(x.EngineVersion, x.Platform,
+                                          _storageService
+                                              .RetrievePluginBinaries(pluginVersion.Parent.Name, pluginVersion.Version,
+                                                                      x.EngineVersion, x.Platform).OrElseThrow()))
+            .ToList()
+    };
   }
 
   /// <inheritdoc />

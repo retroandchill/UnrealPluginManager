@@ -16,6 +16,9 @@ public record struct Remote<T>(string Name, T Api) where T : IApiAccessor;
 /// Represents a service for managing remote resources.
 /// </summary>
 public interface IRemoteService {
+  
+  public string? DefaultRemoteName { get; }
+  
   /// <summary>
   /// Retrieves all configured remotes.
   /// </summary>

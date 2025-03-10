@@ -32,9 +32,6 @@ public interface IPluginStructureService {
   /// <returns>A <see cref="PartitionedPlugin"/> record containing the plugin's source, optional icon, and binaries.</returns>
   Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
                                           ZipArchive zipArchive);
-  
-  Task<IFileInfo?> ExtractAndStoreIcon(string pluginName, ZipArchive zipArchive);
-
   /// <summary>
   /// Retrieves a list of installed binary directories for a given plugin.
   /// </summary>

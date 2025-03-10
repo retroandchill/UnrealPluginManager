@@ -6,6 +6,7 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Exceptions;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
 
@@ -62,8 +63,10 @@ public partial class PluginManagementService : IPluginManagementService {
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(string pluginName, SemVersionRange versionRange) {
     var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
-        .Select(x => x.Api.GetLatestVersionsAsync(pluginName, versionRange.ToString(), 1, 1)
-                    .Map(y => y.Count > 0 ? y[0] : null))
+        .Select(x => pluginName.ToEnumerable()
+                    .PageToEndAsync((y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize))
+                    .FirstOrDefaultAsync()
+                    .ToRef())
         .ToList();
     
     await Task.WhenAll(tasks);
@@ -99,5 +102,36 @@ public partial class PluginManagementService : IPluginManagementService {
         .Select(x => x.Result)
         .Collapse();
     return _pluginService.GetDependencyList(root, dependencyManifest);
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginDetails> UploadPlugin(string pluginName, SemVersion version, string? remote) {
+    var plugin = await _pluginService.ListLatestedVersions(pluginName, SemVersionRange.Equals(version))
+        .Map(x => x.Count > 0 ? x[0] : null);
+    if (plugin is null) {
+      throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
+    }
+
+    var remoteName = remote ?? _remoteService.DefaultRemoteName;
+    if (remoteName is null) {
+      throw new RemoteNotFoundException("No default remote configured.");
+    }
+    
+    var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
+    await using var sourceStream = fileData.Source.OpenRead();
+    await using var iconStream = fileData.Icon?.OpenRead();
+    await using var binariesStream = fileData.Binaries
+        .GroupBy(x => x.EngineVersion)
+        .ToAsyncDisposableDictionary(x => x.Key, 
+                                     x => x.ToAsyncDisposableDictionary(y => y.Platform, 
+                                                                        y => y.File.OpenRead()));
+    
+    var binariesDict = binariesStream.ToDictionary(x => x.Key, 
+                                                   x => x.Value.ToDictionary(y => y.Key, 
+                                                                             y => (FileParameter) y.Value));
+
+    var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
+    return await pluginsApi.SubmitPluginAsync(sourceStream, binariesDict, 
+                                              iconStream is not null ? (FileParameter) iconStream : null);
   }
 }

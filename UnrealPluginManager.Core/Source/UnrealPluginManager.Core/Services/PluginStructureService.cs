@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
-using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
@@ -69,7 +68,12 @@ public partial class PluginStructureService : IPluginStructureService {
   /// <inheritdoc />
   public async Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
                                                        ZipArchive zipArchive) {
-    var pluginIcon = await ExtractAndStoreIcon(pluginName, zipArchive);
+    var iconEntry = zipArchive.GetEntry(Path.Join("Resources", "Icon128.png"));
+    IFileInfo? pluginIcon = null;
+    if (iconEntry is not null) {
+      await using var iconStream = iconEntry.Open();
+      pluginIcon = await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
+    }
 
     IFileInfo pluginSource;
     using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
@@ -95,18 +99,6 @@ public partial class PluginStructureService : IPluginStructureService {
     }
 
     return new PartitionedPlugin(pluginSource, pluginIcon, pluginBinaries);
-  }
-
-  /// <inheritdoc />
-  public async Task<IFileInfo?> ExtractAndStoreIcon(string pluginName, ZipArchive zipArchive) {
-    var iconEntry = zipArchive.GetEntry(Path.Join("Resources", "Icon128.png"));
-    if (iconEntry is null) {
-      return null;
-    }
-    
-    await using var iconStream = iconEntry.Open();
-    return await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
-
   }
 
   /// <inheritdoc />

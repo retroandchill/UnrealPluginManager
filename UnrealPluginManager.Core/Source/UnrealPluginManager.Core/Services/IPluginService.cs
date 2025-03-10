@@ -3,6 +3,7 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 
 namespace UnrealPluginManager.Core.Services;
@@ -132,7 +133,7 @@ public interface IPluginService {
   /// <returns>
   /// A <see cref="PluginDetails"/> object containing detailed information about the submitted plugin.
   /// </returns>
-  Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, IReadOnlyDictionary<string, TPlatforms> binaries)
+  Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, Stream? icon, IReadOnlyDictionary<string, TPlatforms> binaries)
       where TPlatforms : IReadOnlyDictionary<string, Stream>;
 
   /// <summary>
@@ -167,6 +168,18 @@ public interface IPluginService {
   /// </returns>
   Task<IFileInfo> GetPluginBinaries(Guid pluginId, Guid versionId, string engineVersion,
                                     string platform);
+
+
+  /// <summary>
+  /// Retrieves the stored plugin version data, including the source file, optional icon, and list of binaries for the specified plugin and version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the plugin version.</param>
+  /// <returns>
+  /// A <see cref="StoredPluginVersion"/> containing the source file, optional icon, and binaries for the specified plugin version.
+  /// </returns>
+  Task<StoredPluginVersion> GetPluginFileData(Guid pluginId, Guid versionId);
+  
 
   /// <summary>
   /// Retrieves the raw file data for a specified plugin, based on the provided plugin identifier, version range, engine version, and target platforms.
@@ -232,4 +245,6 @@ public interface IPluginService {
   /// </returns>
   IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                                IReadOnlyCollection<string> targetPlatforms);
+  
+  
 }

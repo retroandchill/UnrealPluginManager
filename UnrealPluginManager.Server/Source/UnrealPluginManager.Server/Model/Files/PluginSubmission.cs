@@ -17,6 +17,15 @@ public class PluginSubmission {
   public required IFormFile SourceCode { get; set; }
 
   /// <summary>
+  /// Gets or sets the optional icon file submitted as part of the plugin submission.
+  /// </summary>
+  /// <remarks>
+  /// This property is used to represent a visual icon associated with the Unreal plugin being submitted.
+  /// If provided, it should be a valid image file compliant with the platform's requirements.
+  /// </remarks>
+  public IFormFile? Icon { get; set; }
+
+  /// <summary>
   /// Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.
   /// </summary>
   /// <remarks>

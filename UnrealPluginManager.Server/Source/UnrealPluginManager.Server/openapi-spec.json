@@ -80,6 +80,11 @@
                     "description": "Gets or sets the source code file submitted as part of the plugin submission.",
                     "format": "binary"
                   },
+                  "Icon": {
+                    "type": "string",
+                    "description": "Gets or sets the optional icon file submitted as part of the plugin submission.",
+                    "format": "binary"
+                  },
                   "Binaries": {
                     "type": "object",
                     "additionalProperties": {
@@ -95,6 +100,9 @@
               },
               "encoding": {
                 "SourceCode": {
+                  "style": "form"
+                },
+                "Icon": {
                   "style": "form"
                 },
                 "Binaries": {

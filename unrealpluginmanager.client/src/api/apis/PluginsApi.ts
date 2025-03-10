@@ -102,6 +102,7 @@ export interface GetPluginsRequest {
 export interface SubmitPluginRequest {
     sourceCode: Blob;
     binaries: { [key: string]: { [key: string]: Blob; }; };
+    icon?: Blob;
 }
 
 /**
@@ -577,6 +578,8 @@ export class PluginsApi extends runtime.BaseAPI {
         let useForm = false;
         // use FormData to transmit files using content-type "multipart/form-data"
         useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
         if (useForm) {
             formParams = new FormData();
         } else {
@@ -585,6 +588,10 @@ export class PluginsApi extends runtime.BaseAPI {
 
         if (requestParameters['sourceCode'] != null) {
             formParams.append('SourceCode', requestParameters['sourceCode'] as any);
+        }
+
+        if (requestParameters['icon'] != null) {
+            formParams.append('Icon', requestParameters['icon'] as any);
         }
 
         if (requestParameters['binaries'] != null) {

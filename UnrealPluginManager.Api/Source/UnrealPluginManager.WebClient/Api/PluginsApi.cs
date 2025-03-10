@@ -254,8 +254,9 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <returns>PluginDetails</returns>
-        PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries);
+        PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?));
 
         /// <summary>
         /// Submits a plugin for processing by uploading source code and a collection of binaries.
@@ -266,8 +267,9 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <returns>ApiResponse of PluginDetails</returns>
-        ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries);
+        ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?));
         #endregion Synchronous Operations
     }
 
@@ -552,9 +554,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginDetails</returns>
-        System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Submits a plugin for processing by uploading source code and a collection of binaries.
@@ -565,9 +568,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginDetails)</returns>
-        System.Threading.Tasks.Task<ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -2095,10 +2099,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <returns>PluginDetails</returns>
-        public PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries)
+        public PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = SubmitPluginWithHttpInfo(sourceCode, binaries);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = SubmitPluginWithHttpInfo(sourceCode, binaries, icon);
             return localVarResponse.Data;
         }
 
@@ -2108,8 +2113,9 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <returns>ApiResponse of PluginDetails</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries)
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?))
         {
             // verify the required parameter 'sourceCode' is set
             if (sourceCode == null)
@@ -2137,6 +2143,10 @@ namespace UnrealPluginManager.WebClient.Api
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
             localVarRequestOptions.FileParameters.Add("SourceCode", sourceCode);
+            if (icon != null)
+            {
+                localVarRequestOptions.FileParameters.Add("Icon", icon);
+            }
             localVarRequestOptions.FormParameters.Add("Binaries", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(binaries)); // form parameter
 
 
@@ -2158,11 +2168,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginDetails</returns>
-        public async System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = await SubmitPluginWithHttpInfoAsync(sourceCode, binaries, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = await SubmitPluginWithHttpInfoAsync(sourceCode, binaries, icon, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -2172,9 +2183,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="sourceCode">Gets or sets the source code file submitted as part of the plugin submission.</param>
         /// <param name="binaries">Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform.</param>
+        /// <param name="icon">Gets or sets the optional icon file submitted as part of the plugin submission. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginDetails)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, FileParameter? icon = default(FileParameter?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'sourceCode' is set
             if (sourceCode == null)
@@ -2204,6 +2216,10 @@ namespace UnrealPluginManager.WebClient.Api
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
             localVarRequestOptions.FileParameters.Add("SourceCode", sourceCode);
+            if (icon != null)
+            {
+                localVarRequestOptions.FileParameters.Add("Icon", icon);
+            }
             localVarRequestOptions.FormParameters.Add("Binaries", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(binaries)); // form parameter
 
 

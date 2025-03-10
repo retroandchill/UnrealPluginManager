@@ -83,4 +83,25 @@ public interface IPluginManagementService {
   /// containing the plugins that need to be installed, including their details.
   /// </returns>
   Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion);
+
+  /// <summary>
+  /// Uploads a plugin with the specified name and version to a given remote.
+  /// The method retrieves the plugin's file data, including its binaries and icon (if available),
+  /// and submits it to the specified or default remote.
+  /// </summary>
+  /// <param name="pluginName">
+  /// The name of the plugin to upload.
+  /// </param>
+  /// <param name="version">
+  /// The version of the plugin to upload, represented as a <see cref="SemVersion"/>.
+  /// </param>
+  /// <param name="remote">
+  /// An optional string specifying the name of the remote to which the plugin will be uploaded.
+  /// If null, the default remote is used.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginDetails"/>
+  /// object containing detailed information about the uploaded plugin.
+  /// </returns>
+  Task<PluginDetails> UploadPlugin(string pluginName, SemVersion version, string? remote);
 }

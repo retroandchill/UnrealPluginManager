@@ -19,10 +19,8 @@ public class RemoteService : IRemoteService {
 
   private const string RemoteFile = "remotes.yaml";
 
-  private static OrderedDictionary<string, RemoteConfig> DefaultRemote { get; } = new() {
-      {
-          "default", new Uri("https://localhost:7231")
-      }
+  private static OrderedDictionary<string, RemoteConfig> DefaultRemotes { get; } = new() {
+      ["default"] = new Uri("https://localhost:7231")
   };
 
   /// Provides operations to manage remote configurations and API accessors
@@ -32,12 +30,15 @@ public class RemoteService : IRemoteService {
   public RemoteService(IApiTypeResolver typeResolver, IStorageService storageService,
                        IEnumerable<IApiAccessor> apiAccessors) {
     _storageService = storageService;
-    _remoteConfigs = storageService.GetConfig(RemoteFile, DefaultRemote);
+    _remoteConfigs = storageService.GetConfig(RemoteFile, DefaultRemotes);
     _apiConfigs = _remoteConfigs.ToOrderedDictionary(x => new Configuration {
         BasePath = x.Url.ToString()
     });
     _apiAccessors = apiAccessors.ToDictionary(typeResolver.GetInterfaceType);
   }
+
+  /// <inheritdoc />
+  public string? DefaultRemoteName => _remoteConfigs.Keys.FirstOrDefault();
 
   /// <inheritdoc />
   public OrderedDictionary<string, RemoteConfig> GetAllRemotes() {
