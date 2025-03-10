@@ -546,6 +546,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
     async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
         if (requestParameters['sourceCode'] == null) {
@@ -602,6 +603,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
     async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);

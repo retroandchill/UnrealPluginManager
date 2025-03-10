@@ -63,6 +63,7 @@
         "tags": [
           "Plugins"
         ],
+        "summary": "Submits a plugin for processing by uploading source code and a collection of binaries.",
         "operationId": "submitPlugin",
         "requestBody": {
           "content": {
@@ -76,6 +77,7 @@
                 "properties": {
                   "SourceCode": {
                     "type": "string",
+                    "description": "Gets or sets the source code file submitted as part of the plugin submission.",
                     "format": "binary"
                   },
                   "Binaries": {
@@ -86,7 +88,8 @@
                         "type": "string",
                         "format": "binary"
                       }
-                    }
+                    },
+                    "description": "Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform."
                   }
                 }
               },
