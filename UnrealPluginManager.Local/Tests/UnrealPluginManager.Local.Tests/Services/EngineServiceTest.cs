@@ -91,7 +91,7 @@ public partial class EngineServiceTest {
           using var textReader = new StreamReader(subFileStream);
           capturedTextFile = await textReader.ReadToEndAsync();
           return new PluginDetails {
-              Id = 1,
+              Id = Guid.NewGuid(),
               Name = "MyPlugin",
               Versions = []
           };

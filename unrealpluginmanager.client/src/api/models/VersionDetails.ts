@@ -38,10 +38,10 @@ import {
 export interface VersionDetails {
     /**
      * Gets or sets the unique identifier for this instance.
-     * @type {number}
+     * @type {string}
      * @memberof VersionDetails
      */
-    id: number;
+    id: string;
     /**
      * Gets or sets the semantic version of the plugin, representing its specific version details.
      * @type {string}

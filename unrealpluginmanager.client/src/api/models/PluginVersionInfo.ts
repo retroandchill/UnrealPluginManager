@@ -30,10 +30,10 @@ import {
 export interface PluginVersionInfo {
     /**
      * Gets or sets the unique identifier for a plugin.
-     * @type {number}
+     * @type {string}
      * @memberof PluginVersionInfo
      */
-    pluginId: number;
+    pluginId: string;
     /**
      * Gets the name of the plugin associated with the current version.
      * @type {string}
@@ -48,10 +48,10 @@ export interface PluginVersionInfo {
     friendlyName?: string | null;
     /**
      * Gets or sets the unique identifier for the plugin version.
-     * @type {number}
+     * @type {string}
      * @memberof PluginVersionInfo
      */
-    versionId: number;
+    versionId: string;
     /**
      * Gets the semantic version of the plugin.
      * @type {string}

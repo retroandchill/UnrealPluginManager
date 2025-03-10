@@ -19,6 +19,7 @@ public partial class LocalUnrealPluginManagerContext : UnrealPluginManagerContex
     optionsBuilder.UseSqlite($"Filename={Path.Join(_storageService.BaseDirectory, "cache.sqlite")}", b =>
                                  b.MigrationsAssembly(Assembly.GetCallingAssembly())
                                      .MinBatchSize(1)
-                                     .MaxBatchSize(100));
+                                     .MaxBatchSize(100))
+        .UseSnakeCaseNamingConvention();
   }
 }

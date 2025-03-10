@@ -20,8 +20,8 @@ public class BinariesOverview {
   /// for referencing this binary in various operations.
   /// </remarks>
   [Required]
-  [Range(1, ulong.MaxValue)]
-  public ulong Id { get; set; }
+  [Range(1, long.MaxValue)]
+  public Guid Id { get; set; }
 
   /// <summary>
   /// Gets or sets the target platform for which the binary is intended.

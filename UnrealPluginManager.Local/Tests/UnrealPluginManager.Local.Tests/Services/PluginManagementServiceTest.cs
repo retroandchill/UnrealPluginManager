@@ -98,7 +98,7 @@ public class PluginManagementServiceTest {
   private static List<Page<PluginOverview>> AddPluginsToRemote(int totalCount) {
     return Enumerable.Range(0, totalCount)
         .Select(i => new PluginOverview {
-            Id = (ulong) i + 1,
+            Id = Guid.NewGuid(),
             Name = $"Plugin{i + 1}",
             FriendlyName = $"Plugin {i + 1}",
             Versions = []
@@ -186,8 +186,8 @@ public class PluginManagementServiceTest {
                 .ToDictionary(x => x.Key, x => x.Value
                     .Select(y =>
                         new PluginVersionInfo {
-                            VersionId = 1,
-                            PluginId = 1,
+                            VersionId = Guid.NewGuid(),
+                            PluginId = Guid.NewGuid(),
                             Name = x.Key,
                             Version = y,
                             Dependencies = []
@@ -202,8 +202,8 @@ public class PluginManagementServiceTest {
                 .ToDictionary(x => x.Key, x => x.Value
                     .Select(y =>
                         new PluginVersionInfo {
-                            VersionId = 1,
-                            PluginId = 1,
+                            VersionId = Guid.NewGuid(),
+                            PluginId = Guid.NewGuid(),
                             Name = x.Key,
                             Version = y,
                             Dependencies = []
@@ -231,10 +231,10 @@ public class PluginManagementServiceTest {
     _pluginsApi.Setup(x =>
             x.GetLatestVersionAsync("TestPlugin", SemVersionRange.All.ToString(), CancellationToken.None))
         .ReturnsAsync(new PluginVersionInfo {
-            PluginId = 1,
+            PluginId = Guid.NewGuid(),
             Name = "TestPlugin",
             FriendlyName = "Test Plugin",
-            VersionId = 1,
+            VersionId = Guid.NewGuid(),
             Version = new SemVersion(1, 1, 0),
             Dependencies = []
         });

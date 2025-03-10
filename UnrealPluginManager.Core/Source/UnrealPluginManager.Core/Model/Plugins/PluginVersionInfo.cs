@@ -22,7 +22,7 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// for the plugin it represents and is essential for ensuring reliable identification
   /// across components interacting with the plugin.
   /// </remarks>
-  public required ulong PluginId { get; set; }
+  public required Guid PluginId { get; set; }
 
   /// <summary>
   /// Gets the name of the plugin associated with the current version.
@@ -52,7 +52,7 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// of the plugin. It is used to track and manage individual plugin versions
   /// and their associations with other plugin metadata.
   /// </remarks>
-  public required ulong VersionId { get; set; }
+  public required Guid VersionId { get; set; }
 
   /// <summary>
   /// Gets the semantic version of the plugin.

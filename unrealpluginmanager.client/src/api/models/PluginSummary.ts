@@ -23,10 +23,10 @@ export interface PluginSummary {
     /**
      * Gets the unique identifier of the plugin.
      * This property is required and serves as the primary identifier for the plugin within the system.
-     * @type {number}
+     * @type {string}
      * @memberof PluginSummary
      */
-    pluginId: number;
+    pluginId: string;
     /**
      * Gets the name of the plugin.
      * This property is required and uniquely identifies the plugin within the context of the plugin system.
@@ -45,10 +45,10 @@ export interface PluginSummary {
     /**
      * Gets the unique identifier of the plugin version.
      * This property ensures that each version of a plugin is distinctly identifiable within the system.
-     * @type {number}
+     * @type {string}
      * @memberof PluginSummary
      */
-    versionId: number;
+    versionId: string;
     /**
      * Gets the semantic version of the plugin.
      * This property adheres to the semantic versioning format and is used to specify the version details of the plugin.

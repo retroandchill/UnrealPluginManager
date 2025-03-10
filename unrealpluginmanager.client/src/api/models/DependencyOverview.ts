@@ -32,10 +32,10 @@ export interface DependencyOverview {
      * Gets or sets the unique identifier associated with a dependency.
      * This identifier is automatically generated and used to distinguish
      * dependencies within the system.
-     * @type {number}
+     * @type {string}
      * @memberof DependencyOverview
      */
-    id: number;
+    id: string;
     /**
      * Gets or sets the name of the plugin associated with the dependency.
      * The plugin name is a required field and must adhere to the predefined naming rules.

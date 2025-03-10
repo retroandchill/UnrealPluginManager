@@ -5,6 +5,7 @@ import {Page} from "../../src/util";
 import App from "../../src/App";
 import {pluginsApi} from "../../src/config/Globals";
 import {PluginOverview} from "../../src/api";
+import {v4 as uuid4} from "uuid";
 import userEvent from "@testing-library/user-event";
 
 afterEach(() => {
@@ -19,46 +20,46 @@ test("Load and navigate the plugin grid", async () => {
     count: 3,
     items: [
       {
-        id: 1,
+        id: uuid4(),
         name: "Test Plugin",
         authorName: "Demo",
         versions: [
           {
-            id: 1,
+            id: uuid4(),
             version: "1.0.0"
           },
           {
-            id: 2,
+            id: uuid4(),
             version: "1.0.1"
           },
           {
-            id: 3,
+            id: uuid4(),
             version: "2.0.2"
           }
         ]
       },
       {
-        id: 2,
+        id: uuid4(),
         name: "Sample Plugin",
         authorName: "Demo",
         versions: [
           {
-            id: 4,
+            id: uuid4(),
             version: "1.0.0"
           }
         ]
       },
       {
-        id: 3,
+        id: uuid4(),
         name: "Fake Plugin",
         authorName: "Demo",
         versions: [
           {
-            id: 5,
+            id: uuid4(),
             version: "1.0.0"
           },
           {
-            id: 5,
+            id: uuid4(),
             version: "1.1.0"
           }
         ]
