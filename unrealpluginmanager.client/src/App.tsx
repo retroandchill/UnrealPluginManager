@@ -22,7 +22,7 @@ class App extends Component {
   private readonly router = createBrowserRouter([
     {
       path: '/',
-      element: <PluginDisplayGrid onPluginClick={(plugin) => this.router.navigate(`/plugin/${plugin.name}`)}/>
+      element: <PluginDisplayGrid onPluginClick={(plugin) => this.router.navigate(`/plugin/${plugin.id}`)}/>
     },
     {
       path: '/plugin/:id',

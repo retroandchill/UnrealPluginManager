@@ -62,13 +62,14 @@ public partial class PluginManagementService : IPluginManagementService {
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(string pluginName, SemVersionRange versionRange) {
     var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
-        .Select(x => x.Api.GetLatestVersionAsync(pluginName, versionRange.ToString()))
+        .Select(x => x.Api.GetLatestVersionsAsync(pluginName, versionRange.ToString(), 1, 1)
+                    .Map(y => y.Count > 0 ? y[0] : null))
         .ToList();
     
     await Task.WhenAll(tasks);
     return tasks.Where(version => !version.IsFaulted)
         .Select(x => x.Result)
-        .FirstOrDefault()
+        .FirstOrDefault(version => version is not null)
         .ToOption();
   }
 

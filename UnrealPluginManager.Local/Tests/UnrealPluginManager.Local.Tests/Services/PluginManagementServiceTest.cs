@@ -229,15 +229,16 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>
-            x.GetLatestVersionAsync("TestPlugin", SemVersionRange.All.ToString(), CancellationToken.None))
-        .ReturnsAsync(new PluginVersionInfo {
-            PluginId = Guid.NewGuid(),
-            Name = "TestPlugin",
-            FriendlyName = "Test Plugin",
-            VersionId = Guid.NewGuid(),
-            Version = new SemVersion(1, 1, 0),
-            Dependencies = []
-        });
+            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 1, CancellationToken.None))
+        .ReturnsAsync(new Page<PluginVersionInfo>([
+            new PluginVersionInfo {
+                PluginId = Guid.NewGuid(),
+                Name = "TestPlugin",
+                FriendlyName = "Test Plugin",
+                VersionId = Guid.NewGuid(),
+                Version = new SemVersion(1, 1, 0),
+                Dependencies = []
+            }]));
 
     var targetPlugin = await _pluginManagementService.FindTargetPlugin("TestPlugin", SemVersionRange.All, "5.5");
     Assert.That(targetPlugin, Is.Not.Null);

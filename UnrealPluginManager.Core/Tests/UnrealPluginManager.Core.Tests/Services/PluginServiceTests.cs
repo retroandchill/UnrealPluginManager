@@ -89,12 +89,12 @@ public class PluginServiceTests {
   [Test]
   public async Task TestAddPlugins() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
+    var plugin1 = await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0)
     });
 
-    await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
+    var plugin2 = await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0),
         Plugins = [
@@ -111,7 +111,7 @@ public class PluginServiceTests {
         ]
     });
 
-    await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
+    var plugin3 = await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0),
         Plugins = [
@@ -133,17 +133,17 @@ public class PluginServiceTests {
         ]
     });
 
-    var plugin1List = await pluginService.GetDependencyList("Plugin1");
+    var plugin1List = await pluginService.GetDependencyList(plugin1.Id);
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
 
-    var plugin2List = await pluginService.GetDependencyList("Plugin2");
+    var plugin2List = await pluginService.GetDependencyList(plugin2.Id);
     Assert.That(plugin2List, Has.Count.EqualTo(2));
     var plugin2Names = plugin2List.Select(x => x.Name).ToList();
     Assert.That(plugin2Names, Does.Contain("Plugin1"));
     Assert.That(plugin2Names, Does.Contain("Plugin2"));
 
-    var plugin3List = await pluginService.GetDependencyList("Plugin3");
+    var plugin3List = await pluginService.GetDependencyList(plugin3.Id);
     Assert.That(plugin3List, Has.Count.EqualTo(3));
     var plugin3Names = plugin3List.Select(x => x.Name).ToList();
     Assert.That(plugin3Names, Does.Contain("Plugin1"));
@@ -154,9 +154,9 @@ public class PluginServiceTests {
   [Test]
   public async Task TestAddPluginVersions() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    await pluginService.SetupVersionResolutionTree();
+    var app = await pluginService.SetupVersionResolutionTree();
 
-    var dependencyGraph = await pluginService.GetDependencyList("App");
+    var dependencyGraph = await pluginService.GetDependencyList(app);
     Assert.That(dependencyGraph, Has.Count.EqualTo(5));
     Assert.Multiple(() => {
       Assert.That(dependencyGraph.Find(x => x.Name == "Threads")?.Version, Is.EqualTo(new SemVersion(2, 0, 0)));
@@ -218,9 +218,9 @@ public class PluginServiceTests {
   [Test]
   public async Task TestGetDependencyTreeWithConflicts() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    await pluginService.SetupVersionResolutionTreeWithConflict();
+    var app = await pluginService.SetupVersionResolutionTreeWithConflict();
 
-    var conflictException = Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList("App"));
+    var conflictException = Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList(app));
     Assert.That(conflictException, Is.Not.Null);
     var conflicts = conflictException.Conflicts;
     Assert.That(conflicts, Has.Count.EqualTo(1));
@@ -371,19 +371,19 @@ public class PluginServiceTests {
   public async Task TestRetrievePlugin() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     
-    await SetupTestPluginEnvironment();
+    var (pluginId, _) = await SetupTestPluginEnvironment();
 
     Assert.DoesNotThrowAsync(
-        async () => await pluginService.GetPluginFileData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"]));
+        async () => await pluginService.GetPluginFileData(pluginId, SemVersionRange.All, "5.5", ["Win64"]));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
                                                     await pluginService.GetPluginFileData(
-                                                        "TestPlugin", SemVersionRange.All, "5.4", ["Win64"]));
+                                                        pluginId, SemVersionRange.All, "5.4", ["Win64"]));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
                                                     await pluginService.GetPluginFileData(
-                                                        "OtherPlugin", SemVersionRange.All, "5.5", ["Win64"]));
+                                                        Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
   }
 
-  private async Task SetupTestPluginEnvironment() {
+  private async Task<(Guid, Guid)> SetupTestPluginEnvironment() {
 
     var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
@@ -441,17 +441,19 @@ public class PluginServiceTests {
     };
     await context.Plugins.AddAsync(plugin);
     await context.SaveChangesAsync();
+    
+    return (plugin.Id, plugin.Versions.First().Id);
   }
 
   [Test]
   public async Task TestIterateOverPluginData() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    await SetupTestPluginEnvironment();
+    var (pluginId, versionId) = await SetupTestPluginEnvironment();
 
-    var range = await pluginService.GetAllPluginData("TestPlugin", SemVersionRange.All, "5.5", ["Win64"])
+    var range = await pluginService.GetAllPluginData(pluginId, SemVersionRange.All, "5.5", ["Win64"])
         .ToListAsync();
     
-    var fromSingle = await pluginService.GetAllPluginData("TestPlugin", new SemVersion(1, 0, 0), "5.5", ["Win64"])
+    var fromSingle = await pluginService.GetAllPluginData(pluginId, versionId, "5.5", ["Win64"])
         .ToListAsync();
     
     Assert.That(range, Is.EquivalentTo(fromSingle));

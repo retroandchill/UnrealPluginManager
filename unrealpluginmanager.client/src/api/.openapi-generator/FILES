@@ -14,6 +14,7 @@ models/PluginOverviewPage.ts
 models/PluginSummary.ts
 models/PluginType.ts
 models/PluginVersionInfo.ts
+models/PluginVersionInfoPage.ts
 models/VersionDetails.ts
 models/VersionOverview.ts
 models/index.ts

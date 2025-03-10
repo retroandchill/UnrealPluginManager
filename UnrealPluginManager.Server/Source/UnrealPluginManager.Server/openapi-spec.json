@@ -60,6 +60,70 @@
         }
       }
     },
+    "/api/plugins/latest": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.",
+        "operationId": "getLatestVersions",
+        "parameters": [
+          {
+            "name": "match",
+            "in": "query",
+            "description": "A wildcard string used to filter plugins by name. Defaults to \"*\".",
+            "schema": {
+              "type": "string",
+              "default": "*"
+            }
+          },
+          {
+            "name": "versionRange",
+            "in": "query",
+            "description": "The semantic version range to filter the plugin versions. Defaults to all release versions.",
+            "schema": {
+              "type": "string",
+              "example": ">=1.0.0"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to retrieve.",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The number of items to retrieve per page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginVersionInfoPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plugins/{engineVersion}/submit": {
       "post": {
         "tags": [
@@ -113,7 +177,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest": {
+    "/api/plugins/{pluginId}/latest": {
       "get": {
         "tags": [
           "Plugins"
@@ -122,12 +186,13 @@
         "operationId": "getLatestVersion",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to retrieve the latest version for.",
+            "description": "The unique identifier of the plugin to retrieve the latest version for.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -154,7 +219,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest/dependencies": {
+    "/api/plugins/{pluginId}/latest/dependencies": {
       "get": {
         "tags": [
           "Plugins"
@@ -163,17 +228,18 @@
         "operationId": "getDependencyTree",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin whose dependency tree is to be retrieved.",
+            "description": "The unique identifier of the plugin whose dependency tree is to be retrieved.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "requestBody": {
-          "description": "Optional target version range to filter the dependency tree.",
+          "description": "An optional version range used to filter dependencies for the plugin.",
           "content": {
             "application/json": {
               "schema": {
@@ -212,7 +278,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest/{engineVersion}/download": {
+    "/api/plugins/{pluginId}/latest/{engineVersion}/download": {
       "get": {
         "tags": [
           "Plugins"
@@ -221,12 +287,13 @@
         "operationId": "downloadLatestPlugin",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to be downloaded.",
+            "description": "The unique identifier of the plugin to be downloaded.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -274,7 +341,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/{engineVersion}": {
+    "/api/plugins/{pluginId}/{versionId}/download/{engineVersion}": {
       "get": {
         "tags": [
           "Plugins"
@@ -283,18 +350,29 @@
         "operationId": "downloadPluginVersion",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to download.",
+            "description": "The unique identifier of the plugin to download.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier of the plugin version to download.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
             "name": "engineVersion",
             "in": "path",
-            "description": "The version of the Unreal Engine for which the plugin is compatible.",
+            "description": "The version of Unreal Engine compatible with the plugin.",
             "required": true,
             "schema": {
               "type": "string"
@@ -310,15 +388,6 @@
                 "type": "string"
               }
             }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -336,7 +405,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/source": {
+    "/api/plugins/{pluginId}/{versionId}/download/source": {
       "get": {
         "tags": [
           "Plugins"
@@ -345,21 +414,23 @@
         "operationId": "downloadPluginSource",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to download.",
+            "description": "The unique identifier of the plugin to download.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
-            "name": "version",
+            "name": "versionId",
             "in": "path",
+            "description": "The unique identifier of the specific version of the plugin to download.",
             "required": true,
             "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -378,7 +449,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries": {
+    "/api/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries": {
       "get": {
         "tags": [
           "Plugins"
@@ -387,18 +458,29 @@
         "operationId": "downloadPluginBinaries",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin whose binaries are being requested.",
+            "description": "The unique identifier of the plugin whose binaries are being downloaded.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier of the plugin version to download binaries for.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
             "name": "engineVersion",
             "in": "path",
-            "description": "The version of the engine for which the plugin binaries are targeted.",
+            "description": "The engine version for which the plugin binaries are compatible.",
             "required": true,
             "schema": {
               "type": "string"
@@ -410,15 +492,6 @@
             "description": "The platform for which the plugin binaries are compiled.",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
               "type": "string"
             }
           }
@@ -854,6 +927,52 @@
         },
         "additionalProperties": false,
         "description": "Represents detailed information about a specific version of a plugin."
+      },
+      "PluginVersionInfoPage": {
+        "required": [
+          "pageNumber",
+          "totalPages",
+          "pageSize",
+          "count",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The current page number of the result set.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The total number of pages in the result set.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The number of items on each page.",
+            "format": "int32",
+            "example": 10
+          },
+          "count": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "The total number of items available in the result set.",
+            "format": "int32",
+            "example": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginVersionInfo"
+            },
+            "description": "An array of items on the current page."
+          }
+        },
+        "description": "Represents the output of a paged query of PluginVersionInfo."
       },
       "VersionDetails": {
         "allOf": [

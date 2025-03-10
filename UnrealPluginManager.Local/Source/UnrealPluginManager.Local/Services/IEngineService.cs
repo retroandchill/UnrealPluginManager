@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using Semver;
-using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Plugins;
 

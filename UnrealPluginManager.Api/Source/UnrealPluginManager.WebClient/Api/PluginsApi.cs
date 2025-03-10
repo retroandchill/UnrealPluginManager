@@ -23,6 +23,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 namespace UnrealPluginManager.WebClient.Api
 {
     using PluginOverviewPage = Page<PluginOverview>;
+    using PluginVersionInfoPage = Page<PluginVersionInfo>;
 
 
     /// <summary>
@@ -55,12 +56,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <returns>FileParameter</returns>
-        FileParameter DownloadLatestPlugin(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?));
+        FileParameter DownloadLatestPlugin(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?));
 
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
@@ -69,22 +70,22 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        ApiResponse<FileParameter> DownloadLatestPluginWithHttpInfo(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?));
+        ApiResponse<FileParameter> DownloadLatestPluginWithHttpInfo(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?));
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <returns>FileParameter</returns>
-        FileParameter DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version);
+        FileParameter DownloadPluginBinaries(Guid pluginId, Guid versionId, string engineVersion, string platform);
 
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
@@ -93,20 +94,20 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <returns>ApiResponse of FileParameter</returns>
-        ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version);
+        ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(Guid pluginId, Guid versionId, string engineVersion, string platform);
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <returns>FileParameter</returns>
-        FileParameter DownloadPluginSource(string pluginName, string version);
+        FileParameter DownloadPluginSource(Guid pluginId, Guid versionId);
 
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
@@ -115,20 +116,20 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        ApiResponse<FileParameter> DownloadPluginSourceWithHttpInfo(string pluginName, string version);
+        ApiResponse<FileParameter> DownloadPluginSourceWithHttpInfo(Guid pluginId, Guid versionId);
         /// <summary>
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <returns>FileParameter</returns>
-        FileParameter DownloadPluginVersion(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?));
+        FileParameter DownloadPluginVersion(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?));
 
         /// <summary>
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.
@@ -137,12 +138,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        ApiResponse<FileParameter> DownloadPluginVersionWithHttpInfo(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?));
+        ApiResponse<FileParameter> DownloadPluginVersionWithHttpInfo(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?));
         /// <summary>
         /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
         /// </summary>
@@ -165,10 +166,10 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves the dependency tree for a specified plugin.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <returns>List&lt;PluginSummary&gt;</returns>
-        List<PluginSummary> GetDependencyTree(string pluginName, string? body = default(string?));
+        List<PluginSummary> GetDependencyTree(Guid pluginId, string? body = default(string?));
 
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
@@ -177,18 +178,18 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <returns>ApiResponse of List&lt;PluginSummary&gt;</returns>
-        ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?));
+        ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(Guid pluginId, string? body = default(string?));
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <returns>PluginVersionInfo</returns>
-        PluginVersionInfo GetLatestVersion(string pluginName, string? version = default(string?));
+        PluginVersionInfo GetLatestVersion(Guid pluginId, string? version = default(string?));
 
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
@@ -197,10 +198,34 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <returns>ApiResponse of PluginVersionInfo</returns>
-        ApiResponse<PluginVersionInfo> GetLatestVersionWithHttpInfo(string pluginName, string? version = default(string?));
+        ApiResponse<PluginVersionInfo> GetLatestVersionWithHttpInfo(Guid pluginId, string? version = default(string?));
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>PluginVersionInfoPage</returns>
+        PluginVersionInfoPage GetLatestVersions(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?));
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>ApiResponse of PluginVersionInfoPage</returns>
+        ApiResponse<PluginVersionInfoPage> GetLatestVersionsWithHttpInfo(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?));
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
         /// </summary>
@@ -264,13 +289,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        System.Threading.Tasks.Task<FileParameter> DownloadLatestPluginAsync(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<FileParameter> DownloadLatestPluginAsync(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
@@ -279,13 +304,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadLatestPluginWithHttpInfoAsync(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadLatestPluginWithHttpInfoAsync(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
         /// </summary>
@@ -293,13 +318,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(Guid pluginId, Guid versionId, string engineVersion, string platform, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
@@ -308,13 +333,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(Guid pluginId, Guid versionId, string engineVersion, string platform, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
         /// </summary>
@@ -322,11 +347,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        System.Threading.Tasks.Task<FileParameter> DownloadPluginSourceAsync(string pluginName, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<FileParameter> DownloadPluginSourceAsync(Guid pluginId, Guid versionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads the source code of a specific plugin version as a zip file.
@@ -335,11 +360,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginSourceWithHttpInfoAsync(string pluginName, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginSourceWithHttpInfoAsync(Guid pluginId, Guid versionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.
         /// </summary>
@@ -347,13 +372,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        System.Threading.Tasks.Task<FileParameter> DownloadPluginVersionAsync(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<FileParameter> DownloadPluginVersionAsync(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.
@@ -362,13 +387,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginVersionWithHttpInfoAsync(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<FileParameter>> DownloadPluginVersionWithHttpInfoAsync(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves a dependency manifest containing potential versions for the given list of plugin dependencies.
         /// </summary>
@@ -399,11 +424,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(string pluginName, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(Guid pluginId, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves the dependency tree for a specified plugin.
@@ -412,11 +437,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(Guid pluginId, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
         /// </summary>
@@ -424,11 +449,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginVersionInfo</returns>
-        System.Threading.Tasks.Task<PluginVersionInfo> GetLatestVersionAsync(string pluginName, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<PluginVersionInfo> GetLatestVersionAsync(Guid pluginId, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range.
@@ -437,11 +462,40 @@ namespace UnrealPluginManager.WebClient.Api
         /// 
         /// </remarks>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
-        System.Threading.Tasks.Task<ApiResponse<PluginVersionInfo>> GetLatestVersionWithHttpInfoAsync(string pluginName, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<PluginVersionInfo>> GetLatestVersionWithHttpInfoAsync(Guid pluginId, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginVersionInfoPage</returns>
+        System.Threading.Tasks.Task<PluginVersionInfoPage> GetLatestVersionsAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginVersionInfoPage)</returns>
+        System.Threading.Tasks.Task<ApiResponse<PluginVersionInfoPage>> GetLatestVersionsWithHttpInfoAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
         /// </summary>
@@ -815,14 +869,14 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <returns>FileParameter</returns>
-        public FileParameter DownloadLatestPlugin(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?))
+        public FileParameter DownloadLatestPlugin(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadLatestPluginWithHttpInfo(pluginName, engineVersion, targetVersion, platforms);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadLatestPluginWithHttpInfo(pluginId, engineVersion, targetVersion, platforms);
             return localVarResponse.Data;
         }
 
@@ -830,17 +884,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadLatestPluginWithHttpInfo(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?))
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadLatestPluginWithHttpInfo(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadLatestPlugin");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadLatestPlugin");
@@ -861,7 +911,7 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
             if (targetVersion != null)
             {
@@ -874,7 +924,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginName}/latest/{engineVersion}/download", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginId}/latest/{engineVersion}/download", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -889,15 +939,15 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        public async System.Threading.Tasks.Task<FileParameter> DownloadLatestPluginAsync(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<FileParameter> DownloadLatestPluginAsync(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadLatestPluginWithHttpInfoAsync(pluginName, engineVersion, targetVersion, platforms, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadLatestPluginWithHttpInfoAsync(pluginId, engineVersion, targetVersion, platforms, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -905,18 +955,14 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to be downloaded.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
         /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
         /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified. (optional)</param>
         /// <param name="platforms">The collection of target platforms for which the plugin file is compatible. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadLatestPluginWithHttpInfoAsync(string pluginName, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadLatestPluginWithHttpInfoAsync(Guid pluginId, string engineVersion, string? targetVersion = default(string?), List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadLatestPlugin");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadLatestPlugin");
@@ -939,7 +985,7 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
             if (targetVersion != null)
             {
@@ -953,7 +999,7 @@ namespace UnrealPluginManager.WebClient.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginName}/latest/{engineVersion}/download", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginId}/latest/{engineVersion}/download", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -968,14 +1014,14 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <returns>FileParameter</returns>
-        public FileParameter DownloadPluginBinaries(string pluginName, string engineVersion, string platform, string version)
+        public FileParameter DownloadPluginBinaries(Guid pluginId, Guid versionId, string engineVersion, string platform)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginBinariesWithHttpInfo(pluginName, engineVersion, platform, version);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginBinariesWithHttpInfo(pluginId, versionId, engineVersion, platform);
             return localVarResponse.Data;
         }
 
@@ -983,17 +1029,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <returns>ApiResponse of FileParameter</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(string pluginName, string engineVersion, string platform, string version)
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginBinariesWithHttpInfo(Guid pluginId, Guid versionId, string engineVersion, string platform)
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginBinaries");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadPluginBinaries");
@@ -1001,10 +1043,6 @@ namespace UnrealPluginManager.WebClient.Api
             // verify the required parameter 'platform' is set
             if (platform == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'platform' when calling PluginsApi->DownloadPluginBinaries");
-
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginBinaries");
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -1022,14 +1060,14 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
             localVarRequestOptions.PathParameters.Add("platform", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(platform)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1044,15 +1082,15 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginBinariesAsync(Guid pluginId, Guid versionId, string engineVersion, string platform, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginBinariesWithHttpInfoAsync(pluginName, engineVersion, platform, version, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginBinariesWithHttpInfoAsync(pluginId, versionId, engineVersion, platform, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1060,18 +1098,14 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the binary files of a specified plugin for a given version, engine version, and platform. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose binaries are being requested.</param>
-        /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+        /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
         /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-        /// <param name="version"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(string pluginName, string engineVersion, string platform, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginBinariesWithHttpInfoAsync(Guid pluginId, Guid versionId, string engineVersion, string platform, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginBinaries");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadPluginBinaries");
@@ -1079,10 +1113,6 @@ namespace UnrealPluginManager.WebClient.Api
             // verify the required parameter 'platform' is set
             if (platform == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'platform' when calling PluginsApi->DownloadPluginBinaries");
-
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginBinaries");
 
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -1102,15 +1132,15 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
             localVarRequestOptions.PathParameters.Add("platform", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(platform)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -1125,12 +1155,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the source code of a specific plugin version as a zip file. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <returns>FileParameter</returns>
-        public FileParameter DownloadPluginSource(string pluginName, string version)
+        public FileParameter DownloadPluginSource(Guid pluginId, Guid versionId)
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginSourceWithHttpInfo(pluginName, version);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginSourceWithHttpInfo(pluginId, versionId);
             return localVarResponse.Data;
         }
 
@@ -1138,19 +1168,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the source code of a specific plugin version as a zip file. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginSourceWithHttpInfo(string pluginName, string version)
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginSourceWithHttpInfo(Guid pluginId, Guid versionId)
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginSource");
-
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginSource");
-
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
@@ -1167,12 +1189,12 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginName}/{version}/download/source", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/source", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1187,13 +1209,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the source code of a specific plugin version as a zip file. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginSourceAsync(string pluginName, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginSourceAsync(Guid pluginId, Guid versionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginSourceWithHttpInfoAsync(pluginName, version, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginSourceWithHttpInfoAsync(pluginId, versionId, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1201,20 +1223,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the source code of a specific plugin version as a zip file. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginSourceWithHttpInfoAsync(string pluginName, string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginSourceWithHttpInfoAsync(Guid pluginId, Guid versionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginSource");
-
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginSource");
-
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -1233,13 +1247,13 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginName}/{version}/download/source", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/source", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -1254,14 +1268,14 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <returns>FileParameter</returns>
-        public FileParameter DownloadPluginVersion(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?))
+        public FileParameter DownloadPluginVersion(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginVersionWithHttpInfo(pluginName, engineVersion, version, platforms);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = DownloadPluginVersionWithHttpInfo(pluginId, versionId, engineVersion, platforms);
             return localVarResponse.Data;
         }
 
@@ -1269,25 +1283,17 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <returns>ApiResponse of FileParameter</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginVersionWithHttpInfo(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?))
+        public UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> DownloadPluginVersionWithHttpInfo(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginVersion");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadPluginVersion");
 
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginVersion");
-
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
@@ -1304,9 +1310,9 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
             if (platforms != null)
             {
                 localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("multi", "platforms", platforms));
@@ -1314,7 +1320,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/{engineVersion}", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1329,15 +1335,15 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of FileParameter</returns>
-        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginVersionAsync(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<FileParameter> DownloadPluginVersionAsync(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginVersionWithHttpInfoAsync(pluginName, engineVersion, version, platforms, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter> localVarResponse = await DownloadPluginVersionWithHttpInfoAsync(pluginId, versionId, engineVersion, platforms, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1345,25 +1351,17 @@ namespace UnrealPluginManager.WebClient.Api
         /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to download.</param>
-        /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
-        /// <param name="version"></param>
+        /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+        /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+        /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
         /// <param name="platforms">The collection of target platforms for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (FileParameter)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginVersionWithHttpInfoAsync(string pluginName, string engineVersion, string version, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<FileParameter>> DownloadPluginVersionWithHttpInfoAsync(Guid pluginId, Guid versionId, string engineVersion, List<string>? platforms = default(List<string>?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->DownloadPluginVersion");
-
             // verify the required parameter 'engineVersion' is set
             if (engineVersion == null)
                 throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'engineVersion' when calling PluginsApi->DownloadPluginVersion");
-
-            // verify the required parameter 'version' is set
-            if (version == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'version' when calling PluginsApi->DownloadPluginVersion");
 
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
@@ -1383,9 +1381,9 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
+            localVarRequestOptions.PathParameters.Add("versionId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(versionId)); // path parameter
             localVarRequestOptions.PathParameters.Add("engineVersion", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(engineVersion)); // path parameter
-            localVarRequestOptions.PathParameters.Add("version", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(version)); // path parameter
             if (platforms != null)
             {
                 localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("multi", "platforms", platforms));
@@ -1394,7 +1392,7 @@ namespace UnrealPluginManager.WebClient.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginName}/{version}/download/{engineVersion}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<FileParameter>("/api/plugins/{pluginId}/{versionId}/download/{engineVersion}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -1526,12 +1524,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves the dependency tree for a specified plugin. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <returns>List&lt;PluginSummary&gt;</returns>
-        public List<PluginSummary> GetDependencyTree(string pluginName, string? body = default(string?))
+        public List<PluginSummary> GetDependencyTree(Guid pluginId, string? body = default(string?))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = GetDependencyTreeWithHttpInfo(pluginName, body);
+            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = GetDependencyTreeWithHttpInfo(pluginId, body);
             return localVarResponse.Data;
         }
 
@@ -1539,15 +1537,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves the dependency tree for a specified plugin. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <returns>ApiResponse of List&lt;PluginSummary&gt;</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(string pluginName, string? body = default(string?))
+        public UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> GetDependencyTreeWithHttpInfo(Guid pluginId, string? body = default(string?))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->GetDependencyTree");
-
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
@@ -1567,12 +1561,12 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             localVarRequestOptions.Data = body;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<List<PluginSummary>>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<List<PluginSummary>>("/api/plugins/{pluginId}/latest/dependencies", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1587,13 +1581,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves the dependency tree for a specified plugin. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of List&lt;PluginSummary&gt;</returns>
-        public async System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(string pluginName, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<List<PluginSummary>> GetDependencyTreeAsync(Guid pluginId, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = await GetDependencyTreeWithHttpInfoAsync(pluginName, body, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>> localVarResponse = await GetDependencyTreeWithHttpInfoAsync(pluginId, body, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1601,16 +1595,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves the dependency tree for a specified plugin. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin whose dependency tree is to be retrieved.</param>
-        /// <param name="body">Optional target version range to filter the dependency tree. (optional)</param>
+        /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+        /// <param name="body">An optional version range used to filter dependencies for the plugin. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (List&lt;PluginSummary&gt;)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(string pluginName, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<List<PluginSummary>>> GetDependencyTreeWithHttpInfoAsync(Guid pluginId, string? body = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->GetDependencyTree");
-
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -1632,13 +1622,13 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             localVarRequestOptions.Data = body;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<List<PluginSummary>>("/api/plugins/{pluginName}/latest/dependencies", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<List<PluginSummary>>("/api/plugins/{pluginId}/latest/dependencies", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
@@ -1653,12 +1643,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <returns>PluginVersionInfo</returns>
-        public PluginVersionInfo GetLatestVersion(string pluginName, string? version = default(string?))
+        public PluginVersionInfo GetLatestVersion(Guid pluginId, string? version = default(string?))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> localVarResponse = GetLatestVersionWithHttpInfo(pluginName, version);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> localVarResponse = GetLatestVersionWithHttpInfo(pluginId, version);
             return localVarResponse.Data;
         }
 
@@ -1666,15 +1656,11 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <returns>ApiResponse of PluginVersionInfo</returns>
-        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> GetLatestVersionWithHttpInfo(string pluginName, string? version = default(string?))
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> GetLatestVersionWithHttpInfo(Guid pluginId, string? version = default(string?))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->GetLatestVersion");
-
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
@@ -1691,7 +1677,7 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             if (version != null)
             {
                 localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "version", version));
@@ -1699,7 +1685,7 @@ namespace UnrealPluginManager.WebClient.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<PluginVersionInfo>("/api/plugins/{pluginName}/latest", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<PluginVersionInfo>("/api/plugins/{pluginId}/latest", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1714,13 +1700,13 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of PluginVersionInfo</returns>
-        public async System.Threading.Tasks.Task<PluginVersionInfo> GetLatestVersionAsync(string pluginName, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<PluginVersionInfo> GetLatestVersionAsync(Guid pluginId, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> localVarResponse = await GetLatestVersionWithHttpInfoAsync(pluginName, version, cancellationToken).ConfigureAwait(false);
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo> localVarResponse = await GetLatestVersionWithHttpInfoAsync(pluginId, version, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -1728,16 +1714,12 @@ namespace UnrealPluginManager.WebClient.Api
         /// Retrieves detailed information about the latest version of the specified plugin,  optionally constrained by a version range. 
         /// </summary>
         /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="pluginName">The name of the plugin to retrieve the latest version for.</param>
+        /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
-        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo>> GetLatestVersionWithHttpInfoAsync(string pluginName, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfo>> GetLatestVersionWithHttpInfoAsync(Guid pluginId, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'pluginName' is set
-            if (pluginName == null)
-                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'pluginName' when calling PluginsApi->GetLatestVersion");
-
 
             UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
 
@@ -1756,7 +1738,7 @@ namespace UnrealPluginManager.WebClient.Api
             var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.PathParameters.Add("pluginName", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginName)); // path parameter
+            localVarRequestOptions.PathParameters.Add("pluginId", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(pluginId)); // path parameter
             if (version != null)
             {
                 localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "version", version));
@@ -1765,11 +1747,160 @@ namespace UnrealPluginManager.WebClient.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.GetAsync<PluginVersionInfo>("/api/plugins/{pluginName}/latest", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<PluginVersionInfo>("/api/plugins/{pluginId}/latest", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetLatestVersion", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>PluginVersionInfoPage</returns>
+        public PluginVersionInfoPage GetLatestVersions(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> localVarResponse = GetLatestVersionsWithHttpInfo(match, versionRange, page, size);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>ApiResponse of PluginVersionInfoPage</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> GetLatestVersionsWithHttpInfo(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?))
+        {
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            if (match != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "match", match));
+            }
+            if (versionRange != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "versionRange", versionRange));
+            }
+            if (page != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "page", page));
+            }
+            if (size != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "size", size));
+            }
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Get<PluginVersionInfoPage>("/api/plugins/latest", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetLatestVersions", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginVersionInfoPage</returns>
+        public async System.Threading.Tasks.Task<PluginVersionInfoPage> GetLatestVersionsAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> localVarResponse = await GetLatestVersionsWithHttpInfoAsync(match, versionRange, page, size, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria. 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match">A wildcard string used to filter plugins by name. Defaults to \&quot;*\&quot;. (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions. (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginVersionInfoPage)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage>> GetLatestVersionsWithHttpInfoAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            if (match != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "match", match));
+            }
+            if (versionRange != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "versionRange", versionRange));
+            }
+            if (page != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "page", page));
+            }
+            if (size != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "size", size));
+            }
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.GetAsync<PluginVersionInfoPage>("/api/plugins/latest", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetLatestVersions", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
