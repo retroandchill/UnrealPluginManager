@@ -48,14 +48,14 @@ public partial class PluginManagementService : IPluginManagementService {
   /// <inheritdoc />
   public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
-        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo(pluginName, v)));
+        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo((Guid)pluginName, (Guid)v)));
 
     var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
     return resolved.OrElseThrow(() => new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
-    var cached = await _pluginService.GetPluginVersionInfo(pluginName, versionRange);
+    var cached = await _pluginService.GetPluginVersionInfo((Guid)pluginName, versionRange);
     
     return await cached.OrElseAsync(() => LookupPluginVersionOnCloud(pluginName, versionRange));
   }

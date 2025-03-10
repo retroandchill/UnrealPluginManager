@@ -16,6 +16,9 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
 
+public record RetrievedBinaryInformation(string Name, string Version, List<string> Platforms);
+
+
 /// <summary>
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
@@ -39,17 +42,17 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, Guid versionId) {
     return await _dbContext.PluginVersions
-        .Where(x => x.Parent.Name == pluginName && x.VersionString == version.ToString())
+        .Where(x => x.ParentId == pluginId && x.Id == versionId)
         .ToPluginVersionInfo()
         .FirstOrDefaultAsync();
   }
 
   /// <inheritdoc />
-  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, SemVersionRange versionRange) {
     return await _dbContext.PluginVersions
-        .Where(x => x.Parent.Name == pluginName)
+        .Where(x => x.ParentId == pluginId)
         .WhereVersionInRange(versionRange)
         .OrderByVersionDecending()
         .ToPluginVersionInfo()
@@ -102,11 +105,9 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null) {
+  public async Task<List<PluginSummary>> GetDependencyList(Guid pluginId, SemVersionRange? targetVersion = null) {
     var plugin = await _dbContext.PluginVersions
-        .Include(p => p.Parent)
-        .Include(p => p.Dependencies)
-        .Where(p => p.Parent.Name == pluginName)
+        .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
         .OrderByVersionDecending()
         .ToPluginVersionInfo()
@@ -226,80 +227,74 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<IFileInfo> GetPluginSource(string pluginName, SemVersion targetVersion) {
+  public async Task<IFileInfo> GetPluginSource(Guid pluginId, Guid versionId) {
     var plugin = await _dbContext.PluginVersions
         .Include(p => p.Parent)
-        .Where(p => p.Parent.Name == pluginName)
-        .Where(p => p.VersionString == targetVersion.ToString())
+        .Where(p => p.ParentId == pluginId)
+        .Where(p => p.VersionString == versionId.ToString())
         .FirstOrDefaultAsync();
     if (plugin is null) {
-      throw new PluginNotFoundException($"Plugin {pluginName} was not found!");
+      throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
 
-    return _storageService.RetrievePluginSource(pluginName, plugin.Version)
+    return GetPluginSource(plugin.Parent.Name, plugin.Version);
+  }
+
+  private IFileInfo GetPluginSource(string pluginName, SemVersion version) {
+    return _storageService.RetrievePluginSource(pluginName, version)
         .OrElseThrow(() => new PluginNotFoundException($"Source for {pluginName} was not found!"));
   }
 
   /// <inheritdoc />
-  public async Task<IFileInfo> GetPluginBinaries(string pluginName, SemVersion targetVersion, string engineVersion,
+  public async Task<IFileInfo> GetPluginBinaries(Guid pluginId, Guid versionId, string engineVersion,
                                                  string platform) {
     var plugin = await _dbContext.PluginBinaries
         .Include(b => b.Parent)
         .ThenInclude(v => v.Parent)
-        .Where(b => b.Parent.Parent.Name == pluginName)
-        .Where(b => b.Parent.VersionString == targetVersion.ToString())
+        .Where(b => b.Parent.ParentId == pluginId)
+        .Where(b => b.ParentId == versionId)
         .Where(b => b.EngineVersion == engineVersion)
         .Where(b => b.Platform == platform)
         .FirstOrDefaultAsync();
     if (plugin is null) {
-      throw new PluginNotFoundException($"Binaries for plugin {pluginName} was not found!");
+      throw new PluginNotFoundException($"Binaries for plugin {pluginId} was not found!");
     }
 
-    return _storageService.RetrievePluginBinaries(pluginName, plugin.Parent.Version, engineVersion, platform)
+    return GetPluginBinaries(plugin.Parent.Parent.Name, plugin.Parent.Version, engineVersion, platform);
+  }
+
+  private IFileInfo GetPluginBinaries(string pluginName, SemVersion version, string engineVersion, string platform) {
+    return _storageService.RetrievePluginBinaries(pluginName, version, engineVersion, platform)
         .OrElseThrow(() => new PluginNotFoundException($"Binaries for {pluginName} was not found!"));
   }
 
-  private async IAsyncEnumerable<(string, IFileInfo)> GetPluginBinaries(string pluginName, SemVersion targetVersion,
-                                                                        string engineVersion,
-                                                                        IReadOnlyCollection<string> targetPlatforms) {
-    var binaries = await _dbContext.PluginBinaries
-        .Include(b => b.Parent)
-        .ThenInclude(v => v.Parent)
-        .Where(b => b.Parent.Parent.Name == pluginName)
-        .Where(b => b.Parent.VersionString == targetVersion.ToString())
-        .Where(b => b.EngineVersion == engineVersion)
-        .Where(b => targetPlatforms.Contains(b.Platform))
-        .ToListAsync();
-    if (binaries.Count != targetPlatforms.Count) {
-      throw new PluginNotFoundException($"All binaries for plugin {pluginName} was not found!");
-    }
-
-    foreach (var binary in binaries) {
-      var fileInfo = _storageService
-          .RetrievePluginBinaries(pluginName, binary.Parent.Version, engineVersion, binary.Platform)
-          .OrElseThrow(() => new PluginNotFoundException($"Binaries for {binary.Platform} was not found!"));
-      yield return (binary.Platform, fileInfo);
-    }
+  private IEnumerable<(string, IFileInfo)> GetPluginBinaries(string pluginName, SemVersion version,
+                                                             string engineVersion,
+                                                             IReadOnlyCollection<string> targetPlatforms) {
+    return targetPlatforms.Select(platform => (platform, _storageService
+                                      .RetrievePluginBinaries(pluginName, version, engineVersion, platform)
+                                      .OrElseThrow(() => new PluginNotFoundException($"Binaries for {platform} was not found!"))));
   }
 
   /// <inheritdoc />
-  public async Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+  public async Task<Stream> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                               IReadOnlyCollection<string> targetPlatforms) {
     var latestVersion = await _dbContext.PluginVersions
-        .Where(p => p.Parent.Name == pluginName)
+        .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion)
         .OrderByVersionDecending()
-        .Select(x => x.VersionString)
+        .Select(x => x.Id)
+        .Cast<Guid?>()
         .FirstOrDefaultAsync();
     if (latestVersion is null) {
-      throw new PluginNotFoundException($"Plugin {pluginName} was not found!");
+      throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
 
-    return await GetPluginFileData(pluginName, SemVersion.Parse(latestVersion), engineVersion, targetPlatforms);
+    return await GetPluginFileData(pluginId, latestVersion.Value, engineVersion, targetPlatforms);
   }
 
   /// <inheritdoc/>
-  public async Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
+  public async Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
                                               IReadOnlyCollection<string> targetPlatforms) {
     var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempPath(), Path.GetRandomFileName()),
                                                 FileMode.Create, FileAccess.ReadWrite,
@@ -307,7 +302,7 @@ public partial class PluginService : IPluginService {
 
     try {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
-      await foreach (var archive in GetAllPluginData(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+      await foreach (var archive in GetAllPluginData(pluginId, versionId, engineVersion, targetPlatforms)) {
         await using var data = archive.OpenRead();
         using var zipArchive = new ZipArchive(data);
         await destinationZip.Merge(zipArchive);
@@ -322,32 +317,60 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, Guid versionId, string engineVersion,
                                                             IReadOnlyCollection<string> targetPlatforms) {
-    yield return await GetPluginSource(pluginName, targetVersion);
-
-    await foreach (var (_, archive) in GetPluginBinaries(pluginName, targetVersion, engineVersion, targetPlatforms)) {
+    var binariesData = await RetrieveBinaryInformation(pluginId, versionId, engineVersion, targetPlatforms);
+    var version = SemVersion.Parse(binariesData.Version);
+    
+    yield return GetPluginSource(binariesData.Name, version);
+    foreach (var (_, archive) in GetPluginBinaries(binariesData.Name, version, engineVersion, targetPlatforms)) {
       yield return archive;
     }
   }
 
+  private async Task<RetrievedBinaryInformation> RetrieveBinaryInformation(Guid pluginId, Guid versionId, string engineVersion,
+                                                                            IReadOnlyCollection<string> targetPlatforms) {
+    var binariesData = await _dbContext.PluginVersions
+        .Where(v => v.ParentId == pluginId)
+        .Where(v => v.Id == versionId)
+        .Select(v => new RetrievedBinaryInformation(
+                    v.Parent.Name,
+                    v.VersionString,
+                    v.Binaries
+                        .Where(x => x.EngineVersion == engineVersion)
+                        .Where(x => targetPlatforms.Contains(x.Platform))
+                        .Select(x => x.Platform)
+                        .ToList()))
+        .FirstOrDefaultAsync();
+    if (binariesData is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
+    }
+
+    return binariesData;
+  }
+
   /// <inheritdoc />
-  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersionRange targetVersion,
+  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, SemVersionRange targetVersion,
                                                             string engineVersion,
                                                             IReadOnlyCollection<string> targetPlatforms) {
     var latestVersion = await _dbContext.PluginVersions
-        .Where(p => p.Parent.Name == pluginName)
+        .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion)
         .OrderByVersionDecending()
-        .Select(x => x.VersionString)
+        .Select(x => new RetrievedBinaryInformation(x.Parent.Name, x.VersionString, 
+                                                    x.Binaries
+                                                        .Where(y => y.EngineVersion == engineVersion)
+                                                        .Where(y => targetPlatforms.Contains(y.Platform))
+                                                        .Select(y => y.Platform)
+                                                        .ToList()))
         .FirstOrDefaultAsync()
         .ToOptionAsync()
-        .Map(x => x.OrElseThrow(() => new PluginNotFoundException($"Plugin {pluginName} was not found!")))
-        .Map(x => SemVersion.Parse(x));
+        .Map(x => x.OrElseThrow(() => new PluginNotFoundException($"Plugin {pluginId} was not found!")));
 
-    yield return await GetPluginSource(pluginName, latestVersion);
+    var version = SemVersion.Parse(latestVersion.Version);
+    yield return GetPluginSource(latestVersion.Name, version);
 
-    await foreach (var (_, archive) in GetPluginBinaries(pluginName, latestVersion, engineVersion, targetPlatforms)) {
+    foreach (var (_, archive) in GetPluginBinaries(latestVersion.Name, version, engineVersion, targetPlatforms)) {
       yield return archive;
     }
   }

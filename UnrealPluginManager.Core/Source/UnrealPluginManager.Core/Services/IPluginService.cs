@@ -30,24 +30,24 @@ public interface IPluginService {
   /// <summary>
   /// Retrieves version information for a specific plugin by its name and version.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin for which version information is requested.</param>
-  /// <param name="version">The version of the plugin to retrieve information for.</param>
+  /// <param name="pluginId"></param>
+  /// <param name="versionId"></param>
   /// <returns>
   /// An <see cref="Option{PluginVersionInfo}"/> containing the version information if available,
   /// or an empty result if the plugin version is not found.
   /// </returns>
-  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version);
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, Guid versionId);
 
   /// <summary>
   /// Retrieves detailed version information associated with a specific plugin name and version range.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin to fetch version information for.</param>
+  /// <param name="pluginId"></param>
   /// <param name="versionRange">The range of versions to filter applicable plugin versions.</param>
   /// <returns>
   /// An optional <see cref="PluginVersionInfo"/> containing detailed version information
   /// if a matching plugin version is found; otherwise, an empty option.
   /// </returns>
-  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange);
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, SemVersionRange versionRange);
 
   /// <summary>
   /// Determines and retrieves possible versions of plugins that satisfy the given list of dependencies.
@@ -62,12 +62,12 @@ public interface IPluginService {
   /// <summary>
   /// Retrieves the list of dependencies for a specified plugin, including both direct and transitive dependencies.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin for which to retrieve the dependency list.</param>
+  /// <param name="pluginId"></param>
   /// <param name="targetVersion">An optional version range filter for the plugin dependencies.</param>
   /// <returns>
   /// A collection of <see cref="PluginSummary"/> objects representing the dependencies of the specified plugin.
   /// </returns>
-  Task<List<PluginSummary>> GetDependencyList(string pluginName, SemVersionRange? targetVersion = null);
+  Task<List<PluginSummary>> GetDependencyList(Guid pluginId, SemVersionRange? targetVersion = null);
 
   /// <summary>
   /// Retrieves a list of plugin summaries based on the specified dependency chain root and dependency manifest.
@@ -121,69 +121,67 @@ public interface IPluginService {
   /// <summary>
   /// Retrieves the source code for a specific plugin version.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin for which to retrieve the source code.</param>
-  /// <param name="targetVersion">The specific version of the plugin to retrieve.</param>
+  /// <param name="pluginId"></param>
+  /// <param name="versionId"></param>
   /// <returns>
   /// A <see cref="Stream"/> representing the source code of the specified plugin version.
   /// </returns>
-  Task<IFileInfo> GetPluginSource(string pluginName, SemVersion targetVersion);
+  Task<IFileInfo> GetPluginSource(Guid pluginId, Guid versionId);
 
   /// <summary>
   /// Retrieves the binary data of a specified plugin for a specific version, engine version, and platform.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin for which the binary data is requested.</param>
-  /// <param name="targetVersion">The specific version of the plugin to retrieve.</param>
+  /// <param name="pluginId"></param>
+  /// <param name="versionId"></param>
   /// <param name="engineVersion">The engine version the plugin is associated with.</param>
   /// <param name="platform">The target platform for which the plugin binary is requested.</param>
   /// <returns>
   /// A <see cref="Stream"/> containing the binary data of the requested plugin.
   /// </returns>
-  Task<IFileInfo> GetPluginBinaries(string pluginName, SemVersion targetVersion, string engineVersion,
+  Task<IFileInfo> GetPluginBinaries(Guid pluginId, Guid versionId, string engineVersion,
                                     string platform);
 
   /// <summary>
   /// Retrieves the raw file data for a specified plugin, considering the plugin name, version, engine compatibility, and target platforms.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin for which the file data is to be retrieved.</param>
+  /// <param name="pluginId"></param>
   /// <param name="targetVersion">The target plugin version range to fetch the appropriate file data.</param>
   /// <param name="engineVersion">The version of the engine that the plugin file is intended for.</param>
   /// <param name="targetPlatforms">A collection of target platform identifiers for which the plugin is requested.</param>
   /// <returns>
   /// A <see cref="Stream"/> containing the plugin file data.
   /// </returns>
-  Task<Stream> GetPluginFileData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+  Task<Stream> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
 
   /// <summary>
   /// Retrieves the file data of a specific plugin for a given engine version.
   /// </summary>
-  /// <param name="pluginName">
-  ///     The name of the plugin whose file data is to be retrieved.
-  /// </param>
-  /// <param name="targetVersion"></param>
+  /// <param name="pluginId"></param>
+  /// <param name="versionId"></param>
   /// <param name="engineVersion">
-  ///     The version of the engine for which the plugin file data is needed.
+  ///   The version of the engine for which the plugin file data is needed.
   /// </param>
   /// <param name="targetPlatforms"></param>
   /// <returns>
   /// A stream representing the binary content of the plugin file.
   /// </returns>
-  Task<Stream> GetPluginFileData(string pluginName, SemVersion targetVersion, string engineVersion,
+  Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
                                  IReadOnlyCollection<string> targetPlatforms);
   
-  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion targetVersion, string engineVersion,
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, Guid versionId, string engineVersion,
                                                IReadOnlyCollection<string> targetPlatforms);
 
   /// <summary>
   /// Retrieves all plugin data files matching the specified parameters.
   /// </summary>
-  /// <param name="pluginName">The name of the plugin to retrieve data for.</param>
+  /// <param name="pluginId"></param>
   /// <param name="targetVersion">The version range of the plugin to match.</param>
   /// <param name="engineVersion">The engine version to use when targeting the plugin.</param>
   /// <param name="targetPlatforms">The collection of platforms for which the plugin is targeted.</param>
   /// <returns>
   /// An asynchronous enumerable of <see cref="IFileInfo"/> representing the plugin data files.
   /// </returns>
-  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersionRange targetVersion, string engineVersion,
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                                IReadOnlyCollection<string> targetPlatforms);
 }

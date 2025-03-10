@@ -113,7 +113,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest": {
+    "/api/plugins/{pluginId}/latest": {
       "get": {
         "tags": [
           "Plugins"
@@ -122,12 +122,13 @@
         "operationId": "getLatestVersion",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin to retrieve the latest version for.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -154,7 +155,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest/dependencies": {
+    "/api/plugins/{pluginId}/latest/dependencies": {
       "get": {
         "tags": [
           "Plugins"
@@ -163,12 +164,13 @@
         "operationId": "getDependencyTree",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin whose dependency tree is to be retrieved.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -212,7 +214,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/latest/{engineVersion}/download": {
+    "/api/plugins/{pluginId}/latest/{engineVersion}/download": {
       "get": {
         "tags": [
           "Plugins"
@@ -221,12 +223,13 @@
         "operationId": "downloadLatestPlugin",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin to be downloaded.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -274,7 +277,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/{engineVersion}": {
+    "/api/plugins/{pluginId}/{versionId}/download/{engineVersion}": {
       "get": {
         "tags": [
           "Plugins"
@@ -283,12 +286,23 @@
         "operationId": "downloadPluginVersion",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin to download.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The version of the plugin to download.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -310,15 +324,6 @@
                 "type": "string"
               }
             }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -336,7 +341,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/source": {
+    "/api/plugins/{pluginId}/{versionId}/download/source": {
       "get": {
         "tags": [
           "Plugins"
@@ -345,21 +350,23 @@
         "operationId": "downloadPluginSource",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin to download.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
-            "name": "version",
+            "name": "versionId",
             "in": "path",
+            "description": "The specific version of the plugin to download.",
             "required": true,
             "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -378,7 +385,7 @@
         }
       }
     },
-    "/api/plugins/{pluginName}/{version}/download/{engineVersion}/{platform}/binaries": {
+    "/api/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries": {
       "get": {
         "tags": [
           "Plugins"
@@ -387,12 +394,22 @@
         "operationId": "downloadPluginBinaries",
         "parameters": [
           {
-            "name": "pluginName",
+            "name": "pluginId",
             "in": "path",
             "description": "The name of the plugin whose binaries are being requested.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -410,15 +427,6 @@
             "description": "The platform for which the plugin binaries are compiled.",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
               "type": "string"
             }
           }

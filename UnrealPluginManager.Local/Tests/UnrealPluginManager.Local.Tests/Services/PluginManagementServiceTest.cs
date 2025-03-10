@@ -225,7 +225,7 @@ public class PluginManagementServiceTest {
   public async Task TestFindTargetPlugin() {
     _engineService.Setup(x => x.GetInstalledPluginVersion("TestPlugin", "5.5"))
         .ReturnsAsync(LanguageExt.Option<SemVersion>.None);
-    _pluginService.Setup(x => x.GetPluginVersionInfo("TestPlugin", SemVersionRange.All))
+    _pluginService.Setup(x => x.GetPluginVersionInfo((Guid)"TestPlugin", SemVersionRange.All))
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>

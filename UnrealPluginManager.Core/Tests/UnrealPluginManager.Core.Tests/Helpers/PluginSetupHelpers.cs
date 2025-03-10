@@ -5,8 +5,8 @@ using UnrealPluginManager.Core.Services;
 namespace UnrealPluginManager.Core.Tests.Helpers;
 
 public static class PluginSetupHelpers {
-  public static async Task SetupVersionResolutionTree(this IPluginService pluginService) {
-    await pluginService.AddPlugin("App", new PluginDescriptor {
+  public static async Task<Guid> SetupVersionResolutionTree(this IPluginService pluginService) {
+    var app = await pluginService.AddPlugin("App", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0),
         Plugins = [
@@ -181,10 +181,12 @@ public static class PluginSetupHelpers {
         Version = 5,
         VersionName = new SemVersion(4, 0, 0),
     });
+    
+    return app.Id;
   }
   
-  public static async Task SetupVersionResolutionTreeWithConflict(this IPluginService pluginService) {
-    await pluginService.AddPlugin("App", new PluginDescriptor {
+  public static async Task<Guid> SetupVersionResolutionTreeWithConflict(this IPluginService pluginService) {
+    var app = await pluginService.AddPlugin("App", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0),
         Plugins = [
@@ -221,5 +223,7 @@ public static class PluginSetupHelpers {
         Version = 2,
         VersionName = new SemVersion(2, 0, 0)
     });
+
+    return app.Id;
   }
 }

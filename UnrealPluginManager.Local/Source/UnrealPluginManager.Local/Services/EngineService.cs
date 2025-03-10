@@ -106,7 +106,7 @@ public partial class EngineService : IEngineService {
 
     var destinationDirectory = _fileSystem.Directory.CreateDirectory(installDirectory);
 
-    await foreach (var zipFile in _pluginService.GetAllPluginData(pluginName, pluginVersion, installedEngine.Name,
+    await foreach (var zipFile in _pluginService.GetAllPluginData((Guid)pluginName, (Guid)pluginVersion, installedEngine.Name,
                                                                   targetPlatforms)) {
       await using var fileStream = zipFile.OpenRead();
       using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
