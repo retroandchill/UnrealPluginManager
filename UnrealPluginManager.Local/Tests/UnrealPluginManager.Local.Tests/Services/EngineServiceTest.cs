@@ -158,7 +158,7 @@ public partial class EngineServiceTest {
     }
 
     List<string> targetPlatforms = ["Win64"];
-    _pluginService.Setup(x => x.GetAllPluginData((Guid)"MyPlugin", (Guid)new SemVersion(1, 0, 0), "5.4", targetPlatforms))
+    _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms))
         .Returns((string _, SemVersion _, string _, IReadOnlyCollection<string> _) =>
                      _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
 

@@ -22,6 +22,7 @@ import type {
   PluginOverviewPage,
   PluginSummary,
   PluginVersionInfo,
+  PluginVersionInfoPage,
 } from '../models/index';
 import {
     DependencyManifestFromJSON,
@@ -36,6 +37,8 @@ import {
     PluginSummaryToJSON,
     PluginVersionInfoFromJSON,
     PluginVersionInfoToJSON,
+    PluginVersionInfoPageFromJSON,
+    PluginVersionInfoPageToJSON,
 } from '../models/index';
 
 export interface AddPluginRequest {
@@ -81,6 +84,13 @@ export interface GetDependencyTreeRequest {
 export interface GetLatestVersionRequest {
     pluginId: string;
     version?: string;
+}
+
+export interface GetLatestVersionsRequest {
+    match?: string;
+    versionRange?: string;
+    page?: number;
+    size?: number;
 }
 
 export interface GetPluginsRequest {
@@ -447,6 +457,46 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async getLatestVersion(requestParameters: GetLatestVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfo> {
         const response = await this.getLatestVersionRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getLatestVersionsRaw(requestParameters: GetLatestVersionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionInfoPage>> {
+        const queryParameters: any = {};
+
+        if (requestParameters['match'] != null) {
+            queryParameters['match'] = requestParameters['match'];
+        }
+
+        if (requestParameters['versionRange'] != null) {
+            queryParameters['versionRange'] = requestParameters['versionRange'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins/latest`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginVersionInfoPageFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getLatestVersions(requestParameters: GetLatestVersionsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfoPage> {
+        const response = await this.getLatestVersionsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

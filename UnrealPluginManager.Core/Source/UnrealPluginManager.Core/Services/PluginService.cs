@@ -41,12 +41,14 @@ public partial class PluginService : IPluginService {
         .ToPageAsync(pageable);
   }
 
-  /// <inheritdoc />
-  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, Guid versionId) {
-    return await _dbContext.PluginVersions
-        .Where(x => x.ParentId == pluginId && x.Id == versionId)
+  public Task<Page<PluginVersionInfo>> ListLatestedVersions(string pluginName, SemVersionRange versionRange, Pageable pageable = default) {
+    return _dbContext.PluginVersions
+        .Where(x => EF.Functions.Like(x.Parent.Name, pluginName.Replace("*", "%")))
+        .WhereVersionInRange(versionRange)
+        .GroupBy(x => x.ParentId)
+        .Select(x => x.OrderByDescending(v => v.Version, SemVersion.PrecedenceComparer).First())
         .ToPluginVersionInfo()
-        .FirstOrDefaultAsync();
+        .ToPageAsync(pageable);
   }
 
   /// <inheritdoc />
@@ -54,6 +56,24 @@ public partial class PluginService : IPluginService {
     return await _dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .WhereVersionInRange(versionRange)
+        .OrderByVersionDecending()
+        .ToPluginVersionInfo()
+        .FirstOrDefaultAsync();
+  }
+
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName)
+        .WhereVersionInRange(versionRange)
+        .OrderByVersionDecending()
+        .ToPluginVersionInfo()
+        .FirstOrDefaultAsync();
+  }
+
+  public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.Parent.Name == pluginName)
+        .Where(x => x.VersionString == version.ToString())
         .OrderByVersionDecending()
         .ToPluginVersionInfo()
         .FirstOrDefaultAsync();
@@ -328,8 +348,30 @@ public partial class PluginService : IPluginService {
     }
   }
 
+  /// <inheritdoc />
+  public async IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion pluginVersion, string engineVersion,
+                                                            IReadOnlyCollection<string> targetPlatforms) {
+    var binariesData = await _dbContext.PluginBinaries
+        .Where(x => x.Parent.Parent.Name == pluginName)
+        .Where(x => x.Parent.VersionString == pluginVersion.ToString())
+        .Where(x => x.EngineVersion == engineVersion)
+        .Where(x => targetPlatforms.Contains(x.Platform))
+        .Select(x => x.Platform)
+        .ToListAsync();
+    
+    var missing = binariesData.Except(targetPlatforms).ToList();
+    if (missing.Count > 0) {
+      throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
+    }
+    
+    yield return GetPluginSource(pluginName, pluginVersion);
+    foreach (var (_, archive) in GetPluginBinaries(pluginName, pluginVersion, engineVersion, targetPlatforms)) {
+      yield return archive;
+    }
+  }
+
   private async Task<RetrievedBinaryInformation> RetrieveBinaryInformation(Guid pluginId, Guid versionId, string engineVersion,
-                                                                            IReadOnlyCollection<string> targetPlatforms) {
+                                                                           IReadOnlyCollection<string> targetPlatforms) {
     var binariesData = await _dbContext.PluginVersions
         .Where(v => v.ParentId == pluginId)
         .Where(v => v.Id == versionId)
@@ -344,6 +386,11 @@ public partial class PluginService : IPluginService {
         .FirstOrDefaultAsync();
     if (binariesData is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
+    }
+    
+    var missing = binariesData.Platforms.Except(targetPlatforms).ToList();
+    if (missing.Count > 0) {
+      throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
     }
 
     return binariesData;

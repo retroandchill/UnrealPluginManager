@@ -48,27 +48,28 @@ public partial class PluginManagementService : IPluginManagementService {
   /// <inheritdoc />
   public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
-        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo((Guid)pluginName, (Guid)v)));
+        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo(pluginName, v)));
 
     var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
     return resolved.OrElseThrow(() => new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
-    var cached = await _pluginService.GetPluginVersionInfo((Guid)pluginName, versionRange);
+    var cached = await _pluginService.GetPluginVersionInfo(pluginName, versionRange);
     
     return await cached.OrElseAsync(() => LookupPluginVersionOnCloud(pluginName, versionRange));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(string pluginName, SemVersionRange versionRange) {
     var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
-        .Select(x => x.Api.GetLatestVersionAsync(pluginName, versionRange.ToString()))
+        .Select(x => x.Api.GetLatestVersionsAsync(pluginName, versionRange.ToString(), 1, 1)
+                    .Map(y => y.Count > 0 ? y[0] : null))
         .ToList();
     
     await Task.WhenAll(tasks);
     return tasks.Where(version => !version.IsFaulted)
         .Select(x => x.Result)
-        .FirstOrDefault()
+        .FirstOrDefault(version => version is not null)
         .ToOption();
   }
 

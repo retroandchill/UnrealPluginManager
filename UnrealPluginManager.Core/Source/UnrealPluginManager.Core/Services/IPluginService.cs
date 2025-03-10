@@ -26,17 +26,8 @@ public interface IPluginService {
   /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
   /// </returns>
   Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
-
-  /// <summary>
-  /// Retrieves version information for a specific plugin by its name and version.
-  /// </summary>
-  /// <param name="pluginId"></param>
-  /// <param name="versionId"></param>
-  /// <returns>
-  /// An <see cref="Option{PluginVersionInfo}"/> containing the version information if available,
-  /// or an empty result if the plugin version is not found.
-  /// </returns>
-  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, Guid versionId);
+  
+  Task<Page<PluginVersionInfo>> ListLatestedVersions(string pluginName, SemVersionRange versionRange, Pageable pageable = default);
 
   /// <summary>
   /// Retrieves detailed version information associated with a specific plugin name and version range.
@@ -48,6 +39,10 @@ public interface IPluginService {
   /// if a matching plugin version is found; otherwise, an empty option.
   /// </returns>
   Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, SemVersionRange versionRange);
+  
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange);
+  
+  Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version);
 
   /// <summary>
   /// Determines and retrieves possible versions of plugins that satisfy the given list of dependencies.
@@ -171,7 +166,10 @@ public interface IPluginService {
   
   IAsyncEnumerable<IFileInfo> GetAllPluginData(Guid pluginId, Guid versionId, string engineVersion,
                                                IReadOnlyCollection<string> targetPlatforms);
-
+  
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion pluginVersion, string engineVersion,
+                                               IReadOnlyCollection<string> targetPlatforms);
+  
   /// <summary>
   /// Retrieves all plugin data files matching the specified parameters.
   /// </summary>

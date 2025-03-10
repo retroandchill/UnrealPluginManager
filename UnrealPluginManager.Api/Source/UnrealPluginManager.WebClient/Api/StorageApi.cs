@@ -23,6 +23,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 namespace UnrealPluginManager.WebClient.Api
 {
     using PluginOverviewPage = Page<PluginOverview>;
+    using PluginVersionInfoPage = Page<PluginVersionInfo>;
 
 
     /// <summary>

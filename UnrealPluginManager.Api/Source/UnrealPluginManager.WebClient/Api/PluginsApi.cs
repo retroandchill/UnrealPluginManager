@@ -23,6 +23,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 namespace UnrealPluginManager.WebClient.Api
 {
     using PluginOverviewPage = Page<PluginOverview>;
+    using PluginVersionInfoPage = Page<PluginVersionInfo>;
 
 
     /// <summary>
@@ -201,6 +202,30 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="version">An optional version range to filter the plugin&#39;s versions. Defaults to all released versions. (optional)</param>
         /// <returns>ApiResponse of PluginVersionInfo</returns>
         ApiResponse<PluginVersionInfo> GetLatestVersionWithHttpInfo(Guid pluginId, string? version = default(string?));
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>PluginVersionInfoPage</returns>
+        PluginVersionInfoPage GetLatestVersions(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>ApiResponse of PluginVersionInfoPage</returns>
+        ApiResponse<PluginVersionInfoPage> GetLatestVersionsWithHttpInfo(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?));
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
         /// </summary>
@@ -442,6 +467,35 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
         System.Threading.Tasks.Task<ApiResponse<PluginVersionInfo>> GetLatestVersionWithHttpInfoAsync(Guid pluginId, string? version = default(string?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginVersionInfoPage</returns>
+        System.Threading.Tasks.Task<PluginVersionInfoPage> GetLatestVersionsAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginVersionInfoPage)</returns>
+        System.Threading.Tasks.Task<ApiResponse<PluginVersionInfoPage>> GetLatestVersionsWithHttpInfoAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
         /// </summary>
@@ -1698,6 +1752,155 @@ namespace UnrealPluginManager.WebClient.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetLatestVersion", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>PluginVersionInfoPage</returns>
+        public PluginVersionInfoPage GetLatestVersions(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> localVarResponse = GetLatestVersionsWithHttpInfo(match, versionRange, page, size);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <returns>ApiResponse of PluginVersionInfoPage</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> GetLatestVersionsWithHttpInfo(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?))
+        {
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            if (match != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "match", match));
+            }
+            if (versionRange != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "versionRange", versionRange));
+            }
+            if (page != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "page", page));
+            }
+            if (size != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "size", size));
+            }
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Get<PluginVersionInfoPage>("/api/plugins/latest", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetLatestVersions", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginVersionInfoPage</returns>
+        public async System.Threading.Tasks.Task<PluginVersionInfoPage> GetLatestVersionsAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage> localVarResponse = await GetLatestVersionsWithHttpInfoAsync(match, versionRange, page, size, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="match"> (optional, default to &quot;*&quot;)</param>
+        /// <param name="versionRange"> (optional)</param>
+        /// <param name="page">The page number to retrieve. (optional, default to 1)</param>
+        /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginVersionInfoPage)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginVersionInfoPage>> GetLatestVersionsWithHttpInfoAsync(string? match = default(string?), string? versionRange = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            if (match != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "match", match));
+            }
+            if (versionRange != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "versionRange", versionRange));
+            }
+            if (page != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "page", page));
+            }
+            if (size != null)
+            {
+                localVarRequestOptions.QueryParameters.Add(UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToMultiMap("", "size", size));
+            }
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.GetAsync<PluginVersionInfoPage>("/api/plugins/latest", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetLatestVersions", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

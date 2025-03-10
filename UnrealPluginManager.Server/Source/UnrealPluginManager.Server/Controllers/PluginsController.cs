@@ -46,6 +46,15 @@ public partial class PluginsController : ControllerBase {
     return _pluginService.ListPlugins(match, pageable);
   }
 
+  [HttpGet("latest")]
+  [Produces(MediaTypeNames.Application.Json)]
+  [ProducesResponseType(typeof(Page<PluginVersionInfo>), (int)HttpStatusCode.OK)]
+  public Task<Page<PluginVersionInfo>> GetLatestVersions([FromQuery] string match = "*",
+                                                         [FromQuery] SemVersionRange? versionRange = null,
+                                                         [FromQuery] Pageable pageable = default) {
+    return _pluginService.ListLatestedVersions(match, versionRange ?? SemVersionRange.AllRelease, pageable);
+  }
+
   /// <summary>
   /// Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
   /// </summary>

@@ -60,6 +60,67 @@
         }
       }
     },
+    "/api/plugins/latest": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "operationId": "getLatestVersions",
+        "parameters": [
+          {
+            "name": "match",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "*"
+            }
+          },
+          {
+            "name": "versionRange",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": ">=1.0.0"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to retrieve.",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The number of items to retrieve per page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginVersionInfoPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plugins/{engineVersion}/submit": {
       "post": {
         "tags": [
@@ -862,6 +923,52 @@
         },
         "additionalProperties": false,
         "description": "Represents detailed information about a specific version of a plugin."
+      },
+      "PluginVersionInfoPage": {
+        "required": [
+          "pageNumber",
+          "totalPages",
+          "pageSize",
+          "count",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The current page number of the result set.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The total number of pages in the result set.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "The number of items on each page.",
+            "format": "int32",
+            "example": 10
+          },
+          "count": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "The total number of items available in the result set.",
+            "format": "int32",
+            "example": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginVersionInfo"
+            },
+            "description": "An array of items on the current page."
+          }
+        },
+        "description": "Represents the output of a paged query of PluginVersionInfo."
       },
       "VersionDetails": {
         "allOf": [
