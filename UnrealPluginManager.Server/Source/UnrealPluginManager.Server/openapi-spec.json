@@ -65,11 +65,13 @@
         "tags": [
           "Plugins"
         ],
+        "summary": "Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.",
         "operationId": "getLatestVersions",
         "parameters": [
           {
             "name": "match",
             "in": "query",
+            "description": "A wildcard string used to filter plugins by name. Defaults to \"*\".",
             "schema": {
               "type": "string",
               "default": "*"
@@ -78,6 +80,7 @@
           {
             "name": "versionRange",
             "in": "query",
+            "description": "The semantic version range to filter the plugin versions. Defaults to all release versions.",
             "schema": {
               "type": "string",
               "example": ">=1.0.0"
@@ -185,7 +188,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to retrieve the latest version for.",
+            "description": "The unique identifier of the plugin to retrieve the latest version for.",
             "required": true,
             "schema": {
               "type": "string",
@@ -227,7 +230,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin whose dependency tree is to be retrieved.",
+            "description": "The unique identifier of the plugin whose dependency tree is to be retrieved.",
             "required": true,
             "schema": {
               "type": "string",
@@ -236,7 +239,7 @@
           }
         ],
         "requestBody": {
-          "description": "Optional target version range to filter the dependency tree.",
+          "description": "An optional version range used to filter dependencies for the plugin.",
           "content": {
             "application/json": {
               "schema": {
@@ -286,7 +289,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to be downloaded.",
+            "description": "The unique identifier of the plugin to be downloaded.",
             "required": true,
             "schema": {
               "type": "string",
@@ -349,7 +352,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to download.",
+            "description": "The unique identifier of the plugin to download.",
             "required": true,
             "schema": {
               "type": "string",
@@ -359,7 +362,7 @@
           {
             "name": "versionId",
             "in": "path",
-            "description": "The version of the plugin to download.",
+            "description": "The unique identifier of the plugin version to download.",
             "required": true,
             "schema": {
               "type": "string",
@@ -369,7 +372,7 @@
           {
             "name": "engineVersion",
             "in": "path",
-            "description": "The version of the Unreal Engine for which the plugin is compatible.",
+            "description": "The version of Unreal Engine compatible with the plugin.",
             "required": true,
             "schema": {
               "type": "string"
@@ -413,7 +416,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin to download.",
+            "description": "The unique identifier of the plugin to download.",
             "required": true,
             "schema": {
               "type": "string",
@@ -423,7 +426,7 @@
           {
             "name": "versionId",
             "in": "path",
-            "description": "The specific version of the plugin to download.",
+            "description": "The unique identifier of the specific version of the plugin to download.",
             "required": true,
             "schema": {
               "type": "string",
@@ -457,7 +460,7 @@
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The name of the plugin whose binaries are being requested.",
+            "description": "The unique identifier of the plugin whose binaries are being downloaded.",
             "required": true,
             "schema": {
               "type": "string",
@@ -467,6 +470,7 @@
           {
             "name": "versionId",
             "in": "path",
+            "description": "The unique identifier of the plugin version to download binaries for.",
             "required": true,
             "schema": {
               "type": "string",
@@ -476,7 +480,7 @@
           {
             "name": "engineVersion",
             "in": "path",
-            "description": "The version of the engine for which the plugin binaries are targeted.",
+            "description": "The engine version for which the plugin binaries are compatible.",
             "required": true,
             "schema": {
               "type": "string"

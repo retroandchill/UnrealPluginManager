@@ -461,6 +461,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
      */
     async getLatestVersionsRaw(requestParameters: GetLatestVersionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionInfoPage>> {
         const queryParameters: any = {};
@@ -494,6 +495,7 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
      */
     async getLatestVersions(requestParameters: GetLatestVersionsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfoPage> {
         const response = await this.getLatestVersionsRaw(requestParameters, initOverrides);
