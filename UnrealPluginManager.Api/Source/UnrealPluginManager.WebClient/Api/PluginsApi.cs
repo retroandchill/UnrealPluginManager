@@ -248,6 +248,26 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="size">The number of items to retrieve per page. (optional, default to 10)</param>
         /// <returns>ApiResponse of PluginOverviewPage</returns>
         ApiResponse<PluginOverviewPage> GetPluginsWithHttpInfo(string? match = default(string?), int? page = default(int?), int? size = default(int?));
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <returns>PluginDetails</returns>
+        PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <returns>ApiResponse of PluginDetails</returns>
+        ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries);
         #endregion Synchronous Operations
     }
 
@@ -523,6 +543,31 @@ namespace UnrealPluginManager.WebClient.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (PluginOverviewPage)</returns>
         System.Threading.Tasks.Task<ApiResponse<PluginOverviewPage>> GetPluginsWithHttpInfoAsync(string? match = default(string?), int? page = default(int?), int? size = default(int?), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginDetails</returns>
+        System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginDetails)</returns>
+        System.Threading.Tasks.Task<ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -2038,6 +2083,137 @@ namespace UnrealPluginManager.WebClient.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetPlugins", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <returns>PluginDetails</returns>
+        public PluginDetails SubmitPlugin(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries)
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = SubmitPluginWithHttpInfo(sourceCode, binaries);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <returns>ApiResponse of PluginDetails</returns>
+        public UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> SubmitPluginWithHttpInfo(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries)
+        {
+            // verify the required parameter 'sourceCode' is set
+            if (sourceCode == null)
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'sourceCode' when calling PluginsApi->SubmitPlugin");
+
+            // verify the required parameter 'binaries' is set
+            if (binaries == null)
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'binaries' when calling PluginsApi->SubmitPlugin");
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "multipart/form-data"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.FileParameters.Add("SourceCode", sourceCode);
+            localVarRequestOptions.FormParameters.Add("Binaries", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(binaries)); // form parameter
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<PluginDetails>("/api/plugins", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("SubmitPlugin", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of PluginDetails</returns>
+        public async System.Threading.Tasks.Task<PluginDetails> SubmitPluginAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails> localVarResponse = await SubmitPluginWithHttpInfoAsync(sourceCode, binaries, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="sourceCode"></param>
+        /// <param name="binaries"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (PluginDetails)</returns>
+        public async System.Threading.Tasks.Task<UnrealPluginManager.WebClient.Client.ApiResponse<PluginDetails>> SubmitPluginWithHttpInfoAsync(FileParameter sourceCode, Dictionary<string, Dictionary<string, FileParameter>> binaries, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'sourceCode' is set
+            if (sourceCode == null)
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'sourceCode' when calling PluginsApi->SubmitPlugin");
+
+            // verify the required parameter 'binaries' is set
+            if (binaries == null)
+                throw new UnrealPluginManager.WebClient.Client.ApiException(400, "Missing required parameter 'binaries' when calling PluginsApi->SubmitPlugin");
+
+
+            UnrealPluginManager.WebClient.Client.RequestOptions localVarRequestOptions = new UnrealPluginManager.WebClient.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "multipart/form-data"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = UnrealPluginManager.WebClient.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.FileParameters.Add("SourceCode", sourceCode);
+            localVarRequestOptions.FormParameters.Add("Binaries", UnrealPluginManager.WebClient.Client.ClientUtils.ParameterToString(binaries)); // form parameter
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<PluginDetails>("/api/plugins", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("SubmitPlugin", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

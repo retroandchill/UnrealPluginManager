@@ -170,19 +170,14 @@ public static partial class PluginMapper {
   public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor descriptor);
 
   /// <summary>
-  /// Converts an <see cref="EngineFileData"/> object into a collection of <see cref="UploadedBinaries"/> objects.
+  /// Maps a <see cref="PluginBinaryType"/> to an <see cref="UploadedBinaries"/> representation.
   /// </summary>
-  /// <param name="descriptor">The <see cref="EngineFileData"/> object containing file data to be transformed into a collection of <see cref="UploadedBinaries"/> instances.</param>
-  /// <returns>A collection of <see cref="UploadedBinaries"/> objects corresponding to the transformed file data represented by the provided <see cref="EngineFileData"/>.</returns>
-  public static ICollection<UploadedBinaries> ToPluginBinaries(this EngineFileData? descriptor) {
-    return descriptor.ToEnumerable()
-        .SelectMany(x => x.FileInfo.Binaries.Keys
-                        .Select(y => new UploadedBinaries {
-                            Platform = y,
-                            EngineVersion = x.EngineVersion
-                        }))
-        .ToList();
-  }
+  /// <param name="descriptor">The <see cref="PluginBinaryType"/> instance to be converted.</param>
+  /// <returns>An <see cref="UploadedBinaries"/> object created based on the provided <see cref="PluginBinaryType"/>.</returns>
+  [MapperIgnoreTarget(nameof(UploadedBinaries.Id))]
+  [MapperIgnoreTarget(nameof(UploadedBinaries.ParentId))]
+  [MapperIgnoreTarget(nameof(UploadedBinaries.Parent))]
+  public static partial UploadedBinaries ToUploadedBinaries(this PluginBinaryType descriptor);
 
   /// <summary>
   /// Converts an <see cref="IDependencyHolder"/> instance to a <see cref="DependencyChainRoot"/> representation.

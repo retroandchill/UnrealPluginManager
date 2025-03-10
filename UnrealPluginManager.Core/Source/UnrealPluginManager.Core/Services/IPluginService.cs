@@ -124,6 +124,18 @@ public interface IPluginService {
   Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion);
 
   /// <summary>
+  /// Submits a plugin along with its platform-specific binaries.
+  /// </summary>
+  /// <param name="source">The stream containing the source code of the plugin.</param>
+  /// <param name="binaries">A collection mapping platform identifiers to their corresponding binary streams.</param>
+  /// <typeparam name="TPlatforms">The type of platform-specific binary dictionary. Each entry maps a string identifier to a binary stream.</typeparam>
+  /// <returns>
+  /// A <see cref="PluginDetails"/> object containing detailed information about the submitted plugin.
+  /// </returns>
+  Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, IReadOnlyDictionary<string, TPlatforms> binaries)
+      where TPlatforms : IReadOnlyDictionary<string, Stream>;
+
+  /// <summary>
   /// Submits a plugin from the specified directory for inclusion in the system, including processing metadata and versioning information.
   /// </summary>
   /// <param name="pluginDirectory">The directory containing the plugin's files, including its descriptor.</param>

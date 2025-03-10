@@ -99,6 +99,11 @@ export interface GetPluginsRequest {
     size?: number;
 }
 
+export interface SubmitPluginRequest {
+    sourceCode: Blob;
+    binaries: { [key: string]: { [key: string]: Blob; }; };
+}
+
 /**
  * 
  */
@@ -537,6 +542,69 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async getPlugins(requestParameters: GetPluginsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginOverviewPage> {
         const response = await this.getPluginsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
+        if (requestParameters['sourceCode'] == null) {
+            throw new runtime.RequiredError(
+                'sourceCode',
+                'Required parameter "sourceCode" was null or undefined when calling submitPlugin().'
+            );
+        }
+
+        if (requestParameters['binaries'] == null) {
+            throw new runtime.RequiredError(
+                'binaries',
+                'Required parameter "binaries" was null or undefined when calling submitPlugin().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['sourceCode'] != null) {
+            formParams.append('SourceCode', requestParameters['sourceCode'] as any);
+        }
+
+        if (requestParameters['binaries'] != null) {
+            formParams.append('Binaries', new Blob([JSON.stringify({ [key: string]: { [key: string]: Blob; }; }ToJSON(requestParameters['binaries']))], { type: "application/json", }));
+                    }
+
+        const response = await this.request({
+            path: `/api/plugins`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginDetailsFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+        const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

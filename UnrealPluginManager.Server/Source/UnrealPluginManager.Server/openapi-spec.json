@@ -58,6 +58,61 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Plugins"
+        ],
+        "operationId": "submitPlugin",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "Binaries",
+                  "SourceCode"
+                ],
+                "type": "object",
+                "properties": {
+                  "SourceCode": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "Binaries": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "SourceCode": {
+                  "style": "form"
+                },
+                "Binaries": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginDetails"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/plugins/latest": {

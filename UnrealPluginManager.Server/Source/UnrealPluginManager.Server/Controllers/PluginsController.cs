@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Mime;
 using LanguageExt;
@@ -10,6 +11,7 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Model.Files;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -44,6 +46,25 @@ public partial class PluginsController : ControllerBase {
   public Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*",
                                                [FromQuery] Pageable pageable = default) {
     return _pluginService.ListPlugins(match, pageable);
+  }
+
+  /// <summary>
+  /// Submits a plugin for processing by uploading source code and a collection of binaries.
+  /// </summary>
+  /// <param name="submission">An object containing the plugin's source code file and associated binaries for submission.</param>
+  /// <return>Returns the details of the submitted plugin upon successful processing.</return>
+  [HttpPost]
+  [Consumes(MediaTypeNames.Multipart.FormData)]
+  [Produces(MediaTypeNames.Application.Json)]
+  [ProducesResponseType(typeof(PluginDetails), (int)HttpStatusCode.OK)]
+  public async Task<PluginDetails> SubmitPlugin([FromForm] PluginSubmission submission) {
+    await using var sourceStream = submission.SourceCode.OpenReadStream();
+    await using var binariesStreams = submission.Binaries
+        .ToAsyncDisposableDictionary(x => x.Key.ToString(), 
+                                     x => x.Value
+                                         .ToAsyncDisposableDictionary(y => y.Key, 
+                                                                      y => y.Value.OpenReadStream()));
+    return await _pluginService.SubmitPlugin(sourceStream, binariesStreams);
   }
 
   /// <summary>

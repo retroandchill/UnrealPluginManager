@@ -1,4 +1,4 @@
-﻿namespace UnrealPluginManager.Core.Utils;
+namespace UnrealPluginManager.Core.Utils;
 
 /// <summary>
 /// Provides a set of static methods for extended LINQ functionality, allowing for more flexible
@@ -134,6 +134,27 @@ public static class LinqExtensions {
     return await source.ToAsyncEnumerable()
         .SelectAwait(async x => new KeyValuePair<TKey, TValue>(x.Key, await valueSelector(x.Value)))
         .ToOrderedDictionaryAsync();
+  }
+
+  /// <summary>
+  /// Converts a sequence of elements into an <see cref="AsyncDisposableDictionary{TKey, TValue}"/>
+  /// using the specified key and value selector functions.
+  /// </summary>
+  /// <typeparam name="T">The type of elements in the source sequence.</typeparam>
+  /// <typeparam name="TKey">The type of the keys in the resulting dictionary.</typeparam>
+  /// <typeparam name="TValue">The type of the values in the resulting dictionary, which must implement <see cref="IAsyncDisposable"/>.</typeparam>
+  /// <param name="source">The source sequence to transform into an async-disposable dictionary.</param>
+  /// <param name="keySelector">A function to extract the key for each element.</param>
+  /// <param name="valueSelector">A function to extract the value for each element.</param>
+  /// <returns>An instance of <see cref="AsyncDisposableDictionary{TKey, TValue}"/> containing the transformed elements of the source sequence.</returns>
+  public static AsyncDisposableDictionary<TKey, TValue> ToAsyncDisposableDictionary<T, TKey, TValue>(
+      this IEnumerable<T> source, Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
+      where TKey : notnull where TValue : IAsyncDisposable {
+    var result = new AsyncDisposableDictionary<TKey, TValue>();
+    foreach (var item in source) {
+      result.Add(keySelector(item), valueSelector(item));
+    }
+    return result;
   }
 
 }

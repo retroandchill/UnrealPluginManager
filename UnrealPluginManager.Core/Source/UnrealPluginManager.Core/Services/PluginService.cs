@@ -5,7 +5,9 @@ using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -172,8 +174,16 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
+  public Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
                                              EngineFileData? storedFile = null) {
+    return AddPlugin(pluginName, descriptor, storedFile.ToOption()
+                         .Select(x => x.FileInfo.Binaries
+                                     .Select(y => new PluginBinaryType(x.EngineVersion, y.Key)))
+                         .SelectMany(x => x));
+  }
+
+  private async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
+                                                              IEnumerable<PluginBinaryType> binaries) {
     await using var transaction = await _dbContext.Database.BeginTransactionAsync();
     var plugin = await _dbContext.Plugins
         .Where(x => x.Name == pluginName)
@@ -186,7 +196,7 @@ public partial class PluginService : IPluginService {
 
     var pluginVersion = descriptor.ToPluginVersion();
     pluginVersion.ParentId = plugin.Id;
-    pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
+    pluginVersion.Binaries.AddRange(binaries.Select(x => x.ToUploadedBinaries()));
     _dbContext.PluginVersions.Add(pluginVersion);
     await _dbContext.SaveChangesAsync();
     await transaction.CommitAsync();
@@ -195,7 +205,33 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc/>
   public async Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion) {
-    var archive = new ZipArchive(fileData);
+    var (archive, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(fileData);
+    
+    var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
+                                                                          engineVersion, archive);
+    return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, IReadOnlyDictionary<string, TPlatforms> binaries) where TPlatforms : IReadOnlyDictionary<string, Stream> {
+    var (archive, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(source);
+    
+    await _pluginStructureService.ExtractAndStoreIcon(baseName, archive);
+    await _storageService.StorePluginSource(baseName, descriptor.VersionName, new StreamFileSource(_fileSystem, source));
+    var binariesTasks = binaries.Select(x => x.Value
+                        .Select(y => _storageService.StorePluginBinaries(baseName, descriptor.VersionName, x.Key, y.Key, new StreamFileSource(_fileSystem, y.Value))))
+        .SelectMany(x => x)
+        .ToList();
+    await Task.WhenAll(binariesTasks);
+
+    return await AddPlugin(baseName, descriptor, binaries
+                               .Select(x => x.Value
+                                           .Select(y => new PluginBinaryType(x.Key, y.Key)))
+                               .SelectMany(x => x));
+  }
+
+  private async Task<(ZipArchive archive, string baseName, PluginDescriptor descriptor)> ValidateAndExtractPluginDescriptor(Stream source) {
+    var archive = new ZipArchive(source);
     var pluginDescriptorFile = archive.Entries
         .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
     if (pluginDescriptorFile is null) {
@@ -218,9 +254,7 @@ public partial class PluginService : IPluginService {
       throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
     }
 
-    var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
-                                                                          engineVersion, archive);
-    return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+    return (archive, baseName, descriptor);
   }
 
   /// <inheritdoc />
