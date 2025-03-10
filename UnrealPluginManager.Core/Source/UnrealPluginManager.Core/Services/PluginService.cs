@@ -16,9 +16,6 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
 
-public record RetrievedBinaryInformation(string Name, string Version, List<string> Platforms);
-
-
 /// <summary>
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
@@ -41,14 +38,21 @@ public partial class PluginService : IPluginService {
         .ToPageAsync(pageable);
   }
 
+  /// <inheritdoc />
   public Task<Page<PluginVersionInfo>> ListLatestedVersions(string pluginName, SemVersionRange versionRange, Pageable pageable = default) {
     return _dbContext.PluginVersions
+        .Include(x => x.Parent)
         .Where(x => EF.Functions.Like(x.Parent.Name, pluginName.Replace("*", "%")))
         .WhereVersionInRange(versionRange)
         .GroupBy(x => x.ParentId)
-        .Select(x => x.OrderByDescending(v => v.Version, SemVersion.PrecedenceComparer).First())
-        .ToPluginVersionInfo()
-        .ToPageAsync(pageable);
+        .Select(x => x.OrderByDescending(y => y.Major)
+                    .ThenByDescending(y => y.Minor)
+                    .ThenByDescending(y => y.Patch)
+                    .ThenByDescending(y => y.PrereleaseNumber == null)
+                    .ThenByDescending(y => y.PrereleaseNumber)
+                    .First())
+        .ToPageAsync(pageable)
+        .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
 
   /// <inheritdoc />
@@ -61,6 +65,7 @@ public partial class PluginService : IPluginService {
         .FirstOrDefaultAsync();
   }
 
+  /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
     return await _dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
@@ -70,6 +75,7 @@ public partial class PluginService : IPluginService {
         .FirstOrDefaultAsync();
   }
 
+  /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
     return await _dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
@@ -251,7 +257,7 @@ public partial class PluginService : IPluginService {
     var plugin = await _dbContext.PluginVersions
         .Include(p => p.Parent)
         .Where(p => p.ParentId == pluginId)
-        .Where(p => p.VersionString == versionId.ToString())
+        .Where(p => p.Id == versionId)
         .FirstOrDefaultAsync();
     if (plugin is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");

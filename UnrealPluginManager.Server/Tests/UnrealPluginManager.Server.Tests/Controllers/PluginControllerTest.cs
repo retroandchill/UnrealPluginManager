@@ -119,6 +119,9 @@ public class PluginControllerTest {
       Assert.That(plugin3Constrained.Name, Is.EqualTo("Plugin3"));
       Assert.That(plugin3Constrained.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
     });
+
+    var latest = await _pluginsApi.GetLatestVersionsAsync();
+    Assert.That(latest, Has.Count.EqualTo(4));
   }
 
   [Test]

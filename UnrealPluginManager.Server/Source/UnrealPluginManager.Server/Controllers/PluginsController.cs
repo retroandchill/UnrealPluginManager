@@ -46,6 +46,13 @@ public partial class PluginsController : ControllerBase {
     return _pluginService.ListPlugins(match, pageable);
   }
 
+  /// <summary>
+  /// Retrieves a paginated list of the latest plugin versions filtered by the specified criteria.
+  /// </summary>
+  /// <param name="match">A wildcard string used to filter plugins by name. Defaults to "*".</param>
+  /// <param name="versionRange">The semantic version range to filter the plugin versions. Defaults to all release versions.</param>
+  /// <param name="pageable">Pagination settings including page size, index, and sort order.</param>
+  /// <return>Returns a paginated collection of the latest plugin version information.</return>
   [HttpGet("latest")]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(Page<PluginVersionInfo>), (int)HttpStatusCode.OK)]
@@ -74,7 +81,7 @@ public partial class PluginsController : ControllerBase {
   /// Retrieves detailed information about the latest version of the specified plugin,
   /// optionally constrained by a version range.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin to retrieve the latest version for.</param>
+  /// <param name="pluginId">The unique identifier of the plugin to retrieve the latest version for.</param>
   /// <param name="version">An optional version range to filter the plugin's versions. Defaults to all released versions.</param>
   /// <return>Returns details of the latest version of the specified plugin that satisfies the given version range.</return>
   [HttpGet("{pluginId:guid}/latest")]
@@ -91,8 +98,8 @@ public partial class PluginsController : ControllerBase {
   /// <summary>
   /// Retrieves the dependency tree for a specified plugin.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin whose dependency tree is to be retrieved.</param>
-  /// <param name="targetVersion">Optional target version range to filter the dependency tree.</param>
+  /// <param name="pluginId">The unique identifier of the plugin whose dependency tree is to be retrieved.</param>
+  /// <param name="targetVersion">An optional version range used to filter dependencies for the plugin.</param>
   /// <return>Returns a list of plugin summaries representing the dependency tree.</return>
   [HttpGet("{pluginId:guid}/latest/dependencies")]
   [Produces(MediaTypeNames.Application.Json)]
@@ -100,11 +107,11 @@ public partial class PluginsController : ControllerBase {
   public Task<List<PluginSummary>> GetDependencyTree([FromRoute] Guid pluginId, SemVersionRange? targetVersion = null) {
     return _pluginService.GetDependencyList(pluginId, targetVersion);
   }
-  
+
   /// <summary>
   /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin to be downloaded.</param>
+  /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
   /// <param name="engineVersion">The Unreal Engine version for which the plugin file is requested.</param>
   /// <param name="targetVersion">The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified.</param>
   /// <param name="platforms">The collection of target platforms for which the plugin file is compatible.</param>
@@ -113,11 +120,12 @@ public partial class PluginsController : ControllerBase {
   [Produces(MediaTypeNames.Application.Zip)]
   [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadLatestPlugin([FromRoute] Guid pluginId,
-                                                     [FromRoute] Version engineVersion,
-                                                     [FromQuery] SemVersionRange? targetVersion,
-                                                     [FromQuery] IReadOnlyCollection<string> platforms) {
+                                                           [FromRoute] Version engineVersion,
+                                                           [FromQuery] SemVersionRange? targetVersion,
+                                                           [FromQuery] IReadOnlyCollection<string> platforms) {
     return File(
-        await _pluginService.GetPluginFileData(pluginId, targetVersion ?? SemVersionRange.AllRelease, engineVersion.ToString(), platforms),
+        await _pluginService.GetPluginFileData(pluginId, targetVersion ?? SemVersionRange.AllRelease,
+                                               engineVersion.ToString(), platforms),
         MediaTypeNames.Application.Zip,
         $"{pluginId}.zip");
   }
@@ -126,17 +134,17 @@ public partial class PluginsController : ControllerBase {
   /// <summary>
   /// Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin to download.</param>
-  /// <param name="versionId">The version of the plugin to download.</param>
-  /// <param name="engineVersion">The version of the Unreal Engine for which the plugin is compatible.</param>
+  /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+  /// <param name="versionId">The unique identifier of the plugin version to download.</param>
+  /// <param name="engineVersion">The version of Unreal Engine compatible with the plugin.</param>
   /// <param name="platforms">The collection of target platforms for the plugin.</param>
   /// <return>Returns a ZIP file containing the requested plugin version for the specified engine version and platforms.</return>
   [HttpGet("{pluginId:guid}/{versionId:guid}/download/{engineVersion}")]
   [Produces(MediaTypeNames.Application.Zip)]
   [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadPluginVersion([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
-                                                     [FromRoute] Version engineVersion,
-                                                     [FromQuery] IReadOnlyCollection<string> platforms) {
+                                                            [FromRoute] Version engineVersion,
+                                                            [FromQuery] IReadOnlyCollection<string> platforms) {
     return File(
         await _pluginService.GetPluginFileData(pluginId, versionId, engineVersion.ToString(), platforms),
         MediaTypeNames.Application.Zip,
@@ -146,8 +154,8 @@ public partial class PluginsController : ControllerBase {
   /// <summary>
   /// Downloads the source code of a specific plugin version as a zip file.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin to download.</param>
-  /// <param name="versionId">The specific version of the plugin to download.</param>
+  /// <param name="pluginId">The unique identifier of the plugin to download.</param>
+  /// <param name="versionId">The unique identifier of the specific version of the plugin to download.</param>
   /// <return>Returns a file stream result containing the plugin source code in a zip archive.</return>
   [HttpGet("{pluginId:guid}/{versionId:guid}/download/source")]
   [Produces(MediaTypeNames.Application.Zip)]
@@ -162,17 +170,17 @@ public partial class PluginsController : ControllerBase {
   /// <summary>
   /// Downloads the binary files of a specified plugin for a given version, engine version, and platform.
   /// </summary>
-  /// <param name="pluginId">The name of the plugin whose binaries are being requested.</param>
-  /// <param name="version">The specific version of the plugin to download binaries for.</param>
-  /// <param name="engineVersion">The version of the engine for which the plugin binaries are targeted.</param>
+  /// <param name="pluginId">The unique identifier of the plugin whose binaries are being downloaded.</param>
+  /// <param name="versionId">The unique identifier of the plugin version to download binaries for.</param>
+  /// <param name="engineVersion">The engine version for which the plugin binaries are compatible.</param>
   /// <param name="platform">The platform for which the plugin binaries are compiled.</param>
-  /// <return>Returns the binary files of the plugin as a file stream result in ZIP format.</return>
+  /// <return>Returns the binary files of the specified plugin as a file stream in ZIP format.</return>
   [HttpGet("{pluginId:guid}/{versionId:guid}/download/{engineVersion}/{platform}/binaries")]
   [Produces(MediaTypeNames.Application.Zip)]
   [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
   public async Task<FileStreamResult> DownloadPluginBinaries([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
-                                                     [FromRoute] Version engineVersion,
-                                                     [FromRoute] string platform) {
+                                                             [FromRoute] Version engineVersion,
+                                                             [FromRoute] string platform) {
     return File(
         await _pluginService.GetPluginBinaries(pluginId, versionId, engineVersion.ToString(), platform).Map(x => x.OpenRead()),
         MediaTypeNames.Application.Zip,
