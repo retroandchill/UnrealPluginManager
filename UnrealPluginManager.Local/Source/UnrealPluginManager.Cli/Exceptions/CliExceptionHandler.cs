@@ -2,6 +2,8 @@
 using System.CommandLine.IO;
 using UnrealPluginManager.Core.Annotations.Exceptions;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Local.Exceptions;
+using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Cli.Exceptions;
 
@@ -40,10 +42,16 @@ public partial class CliExceptionHandler {
     return -1;
   }
   
-  [HandlesException(typeof(MissingDependenciesException), typeof(PluginNotFoundException))]
+  [HandlesException(typeof(MissingDependenciesException), typeof(PluginNotFoundException), typeof(RemoteNotFoundException))]
   private int HandleNotFound(UnrealPluginManagerException exception) {
     _console.Out.WriteLine($"{exception.Message}");
     return 12;
+  }
+
+  [HandlesException(typeof(ApiException))]
+  private int HandleApiException(ApiException exception) {
+    _console.Out.WriteLine($"Call to remote server failed with code {exception.ErrorCode}: {exception.Message}");
+    return 34;
   }
   
   [FallbackExceptionHandler]

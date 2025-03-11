@@ -112,14 +112,7 @@ def fix_typescipt_client(typescript_client_dir):
                 content = f.read()
             
             content = content.replace('/* eslint-disable */', '/* eslint-disable */\n//@ts-nocheck')
-
-            # A regular expression to find the problematic inline type usage in the code
-            pattern = r'\[JSON\.stringify\(\{\s*\[key:\s*string]:\s*\{\s*\[key:\s*string]:\s*Blob;\s*};\s*\}ToJSON\((.*?)\)\)\]'
             
-            # Replace with the correct formatting
-            replacement = r'[JSON.stringify(\1)]'
-
-            content = re.sub(pattern, replacement, content)
             with open(os.path.join(root, file), 'w') as f:
                 f.write(content)
 

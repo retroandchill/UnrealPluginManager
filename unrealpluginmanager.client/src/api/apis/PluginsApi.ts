@@ -100,9 +100,7 @@ export interface GetPluginsRequest {
 }
 
 export interface SubmitPluginRequest {
-    sourceCode: Blob;
-    binaries: { [key: string]: { [key: string]: Blob; }; };
-    icon?: Blob;
+    submission?: Blob;
 }
 
 /**
@@ -550,20 +548,6 @@ export class PluginsApi extends runtime.BaseAPI {
      * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
     async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
-        if (requestParameters['sourceCode'] == null) {
-            throw new runtime.RequiredError(
-                'sourceCode',
-                'Required parameter "sourceCode" was null or undefined when calling submitPlugin().'
-            );
-        }
-
-        if (requestParameters['binaries'] == null) {
-            throw new runtime.RequiredError(
-                'binaries',
-                'Required parameter "binaries" was null or undefined when calling submitPlugin().'
-            );
-        }
-
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -578,25 +562,15 @@ export class PluginsApi extends runtime.BaseAPI {
         let useForm = false;
         // use FormData to transmit files using content-type "multipart/form-data"
         useForm = canConsumeForm;
-        // use FormData to transmit files using content-type "multipart/form-data"
-        useForm = canConsumeForm;
         if (useForm) {
             formParams = new FormData();
         } else {
             formParams = new URLSearchParams();
         }
 
-        if (requestParameters['sourceCode'] != null) {
-            formParams.append('SourceCode', requestParameters['sourceCode'] as any);
+        if (requestParameters['submission'] != null) {
+            formParams.append('submission', requestParameters['submission'] as any);
         }
-
-        if (requestParameters['icon'] != null) {
-            formParams.append('Icon', requestParameters['icon'] as any);
-        }
-
-        if (requestParameters['binaries'] != null) {
-            formParams.append('Binaries', new Blob([JSON.stringify(requestParameters['binaries'])], { type: "application/json", }));
-                    }
 
         const response = await this.request({
             path: `/api/plugins`,
@@ -612,7 +586,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
-    async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+    async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }

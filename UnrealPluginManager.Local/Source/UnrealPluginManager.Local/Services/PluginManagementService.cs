@@ -1,4 +1,5 @@
-﻿using LanguageExt;
+﻿using System.Net.Mime;
+using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -117,21 +118,9 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new RemoteNotFoundException("No default remote configured.");
     }
     
-    var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
-    await using var sourceStream = fileData.Source.OpenRead();
-    await using var iconStream = fileData.Icon?.OpenRead();
-    await using var binariesStream = fileData.Binaries
-        .GroupBy(x => x.EngineVersion)
-        .ToAsyncDisposableDictionary(x => x.Key, 
-                                     x => x.ToAsyncDisposableDictionary(y => y.Platform, 
-                                                                        y => y.File.OpenRead()));
-    
-    var binariesDict = binariesStream.ToDictionary(x => x.Key, 
-                                                   x => x.Value.ToDictionary(y => y.Key, 
-                                                                             y => (FileParameter) y.Value));
-
+    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(sourceStream, binariesDict, 
-                                              iconStream is not null ? (FileParameter) iconStream : null);
+    return await pluginsApi.SubmitPluginAsync(new FileParameter($"{pluginName}-{version}.zip", 
+        MediaTypeNames.Application.Zip, fileData));
   }
 }

@@ -69,43 +69,17 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "required": [
-                  "Binaries",
-                  "SourceCode"
-                ],
                 "type": "object",
                 "properties": {
-                  "SourceCode": {
+                  "submission": {
                     "type": "string",
-                    "description": "Gets or sets the source code file submitted as part of the plugin submission.",
+                    "description": "An object containing the plugin's source code file and associated binaries for submission.",
                     "format": "binary"
-                  },
-                  "Icon": {
-                    "type": "string",
-                    "description": "Gets or sets the optional icon file submitted as part of the plugin submission.",
-                    "format": "binary"
-                  },
-                  "Binaries": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string",
-                        "format": "binary"
-                      }
-                    },
-                    "description": "Gets or sets the binary files associated with the plugin submission, organized by Unreal Engine version and platform."
                   }
                 }
               },
               "encoding": {
-                "SourceCode": {
-                  "style": "form"
-                },
-                "Icon": {
-                  "style": "form"
-                },
-                "Binaries": {
+                "submission": {
                   "style": "form"
                 }
               }

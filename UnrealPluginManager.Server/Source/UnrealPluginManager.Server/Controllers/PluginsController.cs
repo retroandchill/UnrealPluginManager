@@ -7,11 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Server.Model.Files;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -57,15 +55,9 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginDetails), (int)HttpStatusCode.OK)]
-  public async Task<PluginDetails> SubmitPlugin([FromForm] PluginSubmission submission) {
-    await using var sourceStream = submission.SourceCode.OpenReadStream();
-    await using var iconStream = submission.Icon?.OpenReadStream();
-    await using var binariesStreams = submission.Binaries
-        .ToAsyncDisposableDictionary(x => x.Key.ToString(), 
-                                     x => x.Value
-                                         .ToAsyncDisposableDictionary(y => y.Key, 
-                                                                      y => y.Value.OpenReadStream()));
-    return await _pluginService.SubmitPlugin(sourceStream, iconStream, binariesStreams);
+  public async Task<PluginDetails> SubmitPlugin(IFormFile submission) {
+    await using var dataStream = submission.OpenReadStream();
+    return await _pluginService.SubmitPlugin(dataStream);
   }
 
   /// <summary>

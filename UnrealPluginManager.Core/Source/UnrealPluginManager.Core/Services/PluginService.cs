@@ -215,20 +215,43 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginDetails> SubmitPlugin<TPlatforms>(Stream source, Stream? icon, IReadOnlyDictionary<string, TPlatforms> binaries) where TPlatforms : IReadOnlyDictionary<string, Stream> {
-    var (_, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(source);
-
-    if (icon is not null) {
-      await _storageService.StorePluginIcon(baseName, new StreamFileSource(_fileSystem, icon));
+  public async Task<PluginDetails> SubmitPlugin(Stream submission) {
+    using var archive = new ZipArchive(submission);
+    var sourceArchive = archive.GetEntry("Source.zip");
+    if (sourceArchive is null) {
+      throw new BadSubmissionException("Source.zip was not found");
     }
-    await _storageService.StorePluginSource(baseName, descriptor.VersionName, new StreamFileSource(_fileSystem, source));
+
+    string pluginName;
+    PluginDescriptor descriptor;
+    await using (var sourceStream = sourceArchive.Open()) {
+      var (_, baseName, desc) = await ValidateAndExtractPluginDescriptor(sourceStream);
+      pluginName = baseName;
+      descriptor = desc;
+    }
+
+    var icon = archive.GetEntry("Icon.png");
+    if (icon is not null) {
+      await using var iconStream = icon.Open();
+      await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
+    }
+    await _storageService.StorePluginSource(pluginName, descriptor.VersionName, new StreamFileSource(_fileSystem, submission));
+    
+    await using var binaries = archive.Entries
+        .Where(x => x.Name.StartsWith("Binaries/") && x.Name.EndsWith(".zip"))
+        .Select(x => (Parts: x.Name.Split('/'), Entry: x))
+        .Where(x => x.Parts.Length == 3)
+        .GroupBy(x => x.Parts[1])
+        .ToAsyncDisposableDictionary(x => x.Key,
+            x => x.ToAsyncDisposableDictionary(y => y.Parts[2].Replace(".zip", ""), y => y.Entry.Open()));
+    
     var binariesTasks = binaries.Select(x => x.Value
-                        .Select(y => _storageService.StorePluginBinaries(baseName, descriptor.VersionName, x.Key, y.Key, new StreamFileSource(_fileSystem, y.Value))))
+                        .Select(y => _storageService.StorePluginBinaries(pluginName, descriptor.VersionName, x.Key, y.Key, new StreamFileSource(_fileSystem, y.Value))))
         .SelectMany(x => x)
         .ToList();
     await Task.WhenAll(binariesTasks);
 
-    return await AddPlugin(baseName, descriptor, binaries
+    return await AddPlugin(pluginName, descriptor, binaries
                                .Select(x => x.Value
                                            .Select(y => new PluginBinaryType(x.Key, y.Key)))
                                .SelectMany(x => x));
@@ -341,7 +364,7 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<StoredPluginVersion> GetPluginFileData(Guid pluginId, Guid versionId) {
+  public async Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId) {
     var pluginVersion = await _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Binaries)
@@ -352,16 +375,41 @@ public partial class PluginService : IPluginService {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
 
-    return new StoredPluginVersion {
-        Source = _storageService.RetrievePluginSource(pluginVersion.Parent.Name, pluginVersion.Version).OrElseThrow(),
-        Icon = _storageService.RetrievePluginIcon(pluginVersion.Parent.Name).ValueUnsafe(),
-        Binaries = pluginVersion.Binaries
-            .Select(x => new StoredBinary(x.EngineVersion, x.Platform,
-                                          _storageService
-                                              .RetrievePluginBinaries(pluginVersion.Parent.Name, pluginVersion.Version,
-                                                                      x.EngineVersion, x.Platform).OrElseThrow()))
-            .ToList()
-    };
+    var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempPath(), Path.GetRandomFileName()),
+        FileMode.Create, FileAccess.ReadWrite,
+        FileShare.Read, 4096, FileOptions.DeleteOnClose);
+    try {
+      using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
+      var source = _storageService.RetrievePluginSource(pluginVersion.Parent.Name, pluginVersion.Version).OrElseThrow();
+      var sourceEntry = destinationZip.CreateEntry("Source.zip");
+      await using var sourceStream = source.OpenRead();
+      await sourceStream.CopyToAsync(sourceEntry.Open());
+      
+      var icon = _storageService.RetrievePluginIcon(pluginVersion.Parent.Name).ValueUnsafe();
+      if (icon is not null) {
+        var iconEntry = destinationZip.CreateEntry("Icon.png");
+        await using var iconStream = icon.OpenRead();
+        await iconStream.CopyToAsync(iconEntry.Open());
+      }
+      
+      destinationZip.CreateEntry("Binaries/");
+      foreach (var binary in pluginVersion.Binaries) {
+        var engineVersionFolder = Path.Join("Binaries", $"{binary.EngineVersion}/");
+        if (destinationZip.Entries.All(x => x.FullName != engineVersionFolder)) {
+          destinationZip.CreateEntry(engineVersionFolder);
+        }
+        
+        var binaryEntry = destinationZip.CreateEntry(Path.Join("Binaries", $"{binary.EngineVersion}", $"{binary.Platform}.zip"));
+        await using var binaryStream = _storageService.RetrievePluginBinaries(pluginVersion.Parent.Name, pluginVersion.Version, binary.EngineVersion, binary.Platform).OrElseThrow().OpenRead();
+        await binaryStream.CopyToAsync(binaryEntry.Open());
+      }
+    } catch (Exception) {
+      // If we encounter an exception we need to close the file stream so that the temp file is properly deleted
+      fileStream.Close();
+      throw;
+    }
+    
+    return fileStream;
   }
 
   /// <inheritdoc />
