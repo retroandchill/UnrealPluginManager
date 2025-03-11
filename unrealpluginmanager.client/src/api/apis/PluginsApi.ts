@@ -595,7 +595,7 @@ export class PluginsApi extends runtime.BaseAPI {
         }
 
         if (requestParameters['binaries'] != null) {
-            formParams.append('Binaries', new Blob([JSON.stringify({ [key: string]: { [key: string]: Blob; }; }ToJSON(requestParameters['binaries']))], { type: "application/json", }));
+            formParams.append('Binaries', new Blob([JSON.stringify(requestParameters['binaries'])], { type: "application/json", }));
                     }
 
         const response = await this.request({
