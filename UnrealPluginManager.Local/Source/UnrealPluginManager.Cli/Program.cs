@@ -14,7 +14,8 @@ var rootCommand = new RootCommand {
     new VersionsCommand(),
     new BuildCommand(),
     new InstallCommand(),
-    new SearchCommand()
+    new SearchCommand(),
+    new UploadCommand()
 };
 
 var builder = new CommandLineBuilder(rootCommand)
