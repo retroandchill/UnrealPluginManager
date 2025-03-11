@@ -234,7 +234,7 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>
-            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 1, CancellationToken.None))
+            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 10, CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([
             new PluginVersionInfo {
                 PluginId = Guid.NewGuid(),
