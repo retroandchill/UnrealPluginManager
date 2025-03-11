@@ -2,6 +2,7 @@
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Local.Services;
@@ -14,8 +15,8 @@ namespace UnrealPluginManager.Local.Services;
 public class RemoteService : IRemoteService {
   private readonly IStorageService _storageService;
   private readonly OrderedDictionary<string, RemoteConfig> _remoteConfigs;
-  private readonly OrderedDictionary<string, Configuration> _apiConfigs;
-  private readonly Dictionary<Type, IApiAccessor> _apiAccessors;
+  private readonly Dictionary<Type, IApiClientFactory> _clientFactories;
+  private readonly Dictionary<Type, Dictionary<string, IApiAccessor>> _apiAccessors;
 
   private const string RemoteFile = "remotes.yaml";
 
@@ -27,14 +28,13 @@ public class RemoteService : IRemoteService {
   /// within the Unreal Plugin Manager CLI. Manages storage and retrieval
   /// of remote configurations, and facilitates API communication through
   /// resolved accessors.
-  public RemoteService(IApiTypeResolver typeResolver, IStorageService storageService,
-                       IEnumerable<IApiAccessor> apiAccessors) {
+  public RemoteService(IStorageService storageService, IEnumerable<IApiClientFactory> clientFactories) {
     _storageService = storageService;
     _remoteConfigs = storageService.GetConfig(RemoteFile, DefaultRemotes);
-    _apiConfigs = _remoteConfigs.ToOrderedDictionary(x => new Configuration {
-        BasePath = x.Url.ToString()
-    });
-    _apiAccessors = apiAccessors.ToDictionary(typeResolver.GetInterfaceType);
+    _clientFactories = clientFactories.ToDictionary(f => f.InterfaceType);
+    _apiAccessors = _clientFactories.ToDictionary(f => f.Key, 
+        f => _remoteConfigs.ToDictionary(x => x.Key, 
+            x => f.Value.Create(x.Value)));
   }
 
   /// <inheritdoc />
@@ -56,6 +56,9 @@ public class RemoteService : IRemoteService {
       throw new ArgumentException($"Remote with name {name} already exists.");
     }
 
+    foreach (var (type, factory) in _clientFactories) {
+      _apiAccessors[type][name] = factory.Create(uri);
+    }
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
@@ -65,6 +68,9 @@ public class RemoteService : IRemoteService {
       throw new ArgumentException($"Remote with name {name} does not exist.");
     }
 
+    foreach (var (type, _) in _clientFactories) {
+      _apiAccessors[type].Remove(name);
+    }
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
@@ -75,42 +81,34 @@ public class RemoteService : IRemoteService {
     }
 
     _remoteConfigs[name] = uri;
+    foreach (var (type, factory) in _clientFactories) {
+      _apiAccessors[type][name] = factory.Create(uri);
+    }
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
   /// <inheritdoc />
-  public Option<IReadableConfiguration> GetRemoteConfig(string name) {
-    return _apiConfigs.TryGetValue(name, out var config) ? config : Option<IReadableConfiguration>.None;
-  }
-
-  /// <inheritdoc />
   public T GetApiAccessor<T>(string name) where T : IApiAccessor {
-    if (!_apiAccessors.TryGetValue(typeof(T), out var accessor)) {
+    if (!_apiAccessors.TryGetValue(typeof(T), out var accessors)) {
       throw new ArgumentException($"No API accessor for type {nameof(T)}");
     }
 
 
-    if (!_apiConfigs.TryGetValue(name, out var config)) {
+    if (!accessors.TryGetValue(name, out var api)) {
       throw new ArgumentException($"No API configuration for remote {name}");
     }
-
-    accessor.Configuration = config;
-    return (T)accessor;
+    
+    return (T) api;
   }
 
   /// <inheritdoc />
   public IEnumerable<Remote<T>> GetApiAccessors<T>() where T : IApiAccessor {
-    if (!_apiAccessors.TryGetValue(typeof(T), out var accessor) || accessor is not T value) {
+    if (!_apiAccessors.TryGetValue(typeof(T), out var accessors)) {
       throw new ArgumentException($"No API accessor for type {nameof(T)}");
     }
 
-    return GetApiAccessorsIterator(value);
-  }
-
-  private IEnumerable<Remote<T>> GetApiAccessorsIterator<T>(T accessor) where T : IApiAccessor {
-    foreach (var (name, config) in _apiConfigs) {
-      accessor.Configuration = config;
-      yield return new Remote<T>(name, accessor);
+    foreach (var (name, api) in accessors) {
+      yield return new Remote<T>(name, (T) api);
     }
   }
 }

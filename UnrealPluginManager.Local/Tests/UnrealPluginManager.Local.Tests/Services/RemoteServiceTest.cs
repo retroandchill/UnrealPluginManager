@@ -8,7 +8,6 @@ using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Services;
-using UnrealPluginManager.Local.Tests.Mocks;
 
 namespace UnrealPluginManager.Local.Tests.Services;
 
@@ -37,7 +36,6 @@ public class RemoteServiceTest {
     services.AddSingleton<IEnvironment>(_environment);
     
     services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
-    services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
     services.AddSingleton<IStorageService, LocalStorageService>();
     services.AddScoped<IRemoteService, RemoteService>();
     _serviceProvider = services.BuildServiceProvider();

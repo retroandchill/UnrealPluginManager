@@ -56,13 +56,6 @@ public interface IRemoteService {
   Task UpdateRemote(string name, RemoteConfig uri);
 
   /// <summary>
-  /// Retrieves the remote configuration associated with the specified remote name, if available.
-  /// </summary>
-  /// <param name="name">The name of the remote for which the configuration is being retrieved.</param>
-  /// <returns>An option containing the readable configuration if the remote is found; otherwise, an empty option.</returns>
-  Option<IReadableConfiguration> GetRemoteConfig(string name);
-
-  /// <summary>
   /// Retrieves an API accessor for a specified remote.
   /// </summary>
   /// <typeparam name="T">The type of the API accessor, which must implement <see cref="IApiAccessor"/>.</typeparam>

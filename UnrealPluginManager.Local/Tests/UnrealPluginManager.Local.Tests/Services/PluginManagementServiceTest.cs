@@ -9,9 +9,9 @@ using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
-using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
 
@@ -44,8 +44,6 @@ public class PluginManagementServiceTest {
             }
         });
 
-    services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
-
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
 
@@ -55,6 +53,12 @@ public class PluginManagementServiceTest {
     _pluginsApi = new Mock<IPluginsApi>();
     services.AddSingleton(_pluginsApi.Object);
     services.AddSingleton<IApiAccessor>(_pluginsApi.Object);
+    
+    var mockClientFactory = new Mock<IApiClientFactory<IPluginsApi>>();
+    mockClientFactory.SetupGet(x => x.InterfaceType).Returns(typeof(IPluginsApi));
+    mockClientFactory.Setup(x => x.Create(It.IsAny<RemoteConfig>()))
+        .Returns(_pluginsApi.Object);
+    services.AddSingleton<IApiClientFactory>(mockClientFactory.Object);
 
     var console = new Mock<IConsole>();
     services.AddSingleton(console.Object);

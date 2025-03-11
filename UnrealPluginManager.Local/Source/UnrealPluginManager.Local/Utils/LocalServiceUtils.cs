@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
@@ -55,10 +56,8 @@ public static class LocalServiceUtils {
   /// <param name="services">The <see cref="IServiceCollection"/> to which the accessor factory is added.</param>
   /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
   private static IServiceCollection AddApi<T, TImpl>(this IServiceCollection services)
-      where T : class, IApiAccessor where TImpl : T, new() {
-    var instance = new TImpl();
-    return services.AddSingleton<T>(instance)
-        .AddSingleton<IApiAccessor>(instance);
+      where T : IApiAccessor where TImpl : class, T {
+    return services.AddSingleton<IApiClientFactory<T>, ApiClientFactory<T, TImpl>>();
   }
 
   /// <summary>
@@ -68,8 +67,7 @@ public static class LocalServiceUtils {
   /// <param name="services">The <see cref="IServiceCollection"/> to which the API factories are registered.</param>
   /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
   public static IServiceCollection AddApis(this IServiceCollection services) {
-    return services.AddSingleton<IApiTypeResolver, ApiTypeResolver>()
-        .AddApi<IPluginsApi, PluginsApi>()
+    return services.AddApi<IPluginsApi, PluginsApi>()
         .AddApi<IStorageApi, StorageApi>();
   }
 }
