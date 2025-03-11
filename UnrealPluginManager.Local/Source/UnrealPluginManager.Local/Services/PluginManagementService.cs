@@ -120,7 +120,6 @@ public partial class PluginManagementService : IPluginManagementService {
     
     await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(new FileParameter($"{pluginName}-{version}.zip", 
-        MediaTypeNames.Application.Zip, fileData));
+    return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData));
   }
 }

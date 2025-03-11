@@ -1,4 +1,5 @@
-﻿using UnrealPluginManager.Local.Config;
+﻿using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local.Config;
 using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.Local.Factories;
@@ -25,6 +26,6 @@ public class ApiClientFactory<TInterface, TImpl> : IApiClientFactory<TInterface>
   public TInterface Create(RemoteConfig config) {
     var constructor = typeof(TImpl).GetConstructor([typeof(string)]);
     ArgumentNullException.ThrowIfNull(constructor);
-    return (TInterface) constructor.Invoke([config.Url.ToString()]);
+    return (TInterface) constructor.Invoke([config.Url.ToStringWithoutTrailingSlash()]);
   }
 }

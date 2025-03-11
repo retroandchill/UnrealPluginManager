@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using LanguageExt;
 using LanguageExt.UnsafeValueAccess;
 using Microsoft.EntityFrameworkCore;
@@ -229,18 +230,22 @@ public partial class PluginService : IPluginService {
       pluginName = baseName;
       descriptor = desc;
     }
+    
+    await using (var sourceStream = sourceArchive.Open()) {
+      await _storageService.StorePluginSource(pluginName, descriptor.VersionName, new StreamFileSource(_fileSystem, sourceStream));
+    }
 
     var icon = archive.GetEntry("Icon.png");
     if (icon is not null) {
       await using var iconStream = icon.Open();
       await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
     }
-    await _storageService.StorePluginSource(pluginName, descriptor.VersionName, new StreamFileSource(_fileSystem, submission));
     
     await using var binaries = archive.Entries
-        .Where(x => x.Name.StartsWith("Binaries/") && x.Name.EndsWith(".zip"))
-        .Select(x => (Parts: x.Name.Split('/'), Entry: x))
+        .Select(x => (Parts: PathSeparatorRegex().Split(x.FullName).Where(y => !string.IsNullOrWhiteSpace(y)).ToArray(), Entry: x))
         .Where(x => x.Parts.Length == 3)
+        .Where(x => x.Parts[0] == "Binaries")
+        .Where(x => x.Parts[2].EndsWith(".zip"))
         .GroupBy(x => x.Parts[1])
         .ToAsyncDisposableDictionary(x => x.Key,
             x => x.ToAsyncDisposableDictionary(y => y.Parts[2].Replace(".zip", ""), y => y.Entry.Open()));
@@ -382,26 +387,31 @@ public partial class PluginService : IPluginService {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
       var source = _storageService.RetrievePluginSource(pluginVersion.Parent.Name, pluginVersion.Version).OrElseThrow();
       var sourceEntry = destinationZip.CreateEntry("Source.zip");
-      await using var sourceStream = source.OpenRead();
-      await sourceStream.CopyToAsync(sourceEntry.Open());
-      
+      await using (var sourceStream = source.OpenRead()) {
+        await using var destStream = sourceEntry.Open();
+        await sourceStream.CopyToAsync(destStream);
+      }
+
       var icon = _storageService.RetrievePluginIcon(pluginVersion.Parent.Name).ValueUnsafe();
       if (icon is not null) {
         var iconEntry = destinationZip.CreateEntry("Icon.png");
         await using var iconStream = icon.OpenRead();
-        await iconStream.CopyToAsync(iconEntry.Open());
+        await using var destStream = iconEntry.Open();
+        await iconStream.CopyToAsync(destStream);
       }
-      
+
+      var createdEngineVersions = new System.Collections.Generic.HashSet<string>();
       destinationZip.CreateEntry("Binaries/");
       foreach (var binary in pluginVersion.Binaries) {
-        var engineVersionFolder = Path.Join("Binaries", $"{binary.EngineVersion}/");
-        if (destinationZip.Entries.All(x => x.FullName != engineVersionFolder)) {
-          destinationZip.CreateEntry(engineVersionFolder);
+        if (!createdEngineVersions.Contains(binary.EngineVersion)) {
+          destinationZip.CreateEntry(Path.Join("Binaries", $"{binary.EngineVersion}/"));
+          createdEngineVersions.Add(binary.EngineVersion);
         }
         
         var binaryEntry = destinationZip.CreateEntry(Path.Join("Binaries", $"{binary.EngineVersion}", $"{binary.Platform}.zip"));
         await using var binaryStream = _storageService.RetrievePluginBinaries(pluginVersion.Parent.Name, pluginVersion.Version, binary.EngineVersion, binary.Platform).OrElseThrow().OpenRead();
-        await binaryStream.CopyToAsync(binaryEntry.Open());
+        await using var destStream = binaryEntry.Open();
+        await binaryStream.CopyToAsync(destStream);
       }
     } catch (Exception) {
       // If we encounter an exception we need to close the file stream so that the temp file is properly deleted
@@ -409,6 +419,7 @@ public partial class PluginService : IPluginService {
       throw;
     }
     
+    fileStream.Seek(0, SeekOrigin.Begin);
     return fileStream;
   }
 
@@ -449,6 +460,7 @@ public partial class PluginService : IPluginService {
       throw;
     }
 
+    fileStream.Seek(0, SeekOrigin.Begin);
     return fileStream;
   }
 
@@ -537,4 +549,7 @@ public partial class PluginService : IPluginService {
       yield return archive;
     }
   }
+
+    [GeneratedRegex(@"[\\/]")]
+    private static partial Regex PathSeparatorRegex();
 }

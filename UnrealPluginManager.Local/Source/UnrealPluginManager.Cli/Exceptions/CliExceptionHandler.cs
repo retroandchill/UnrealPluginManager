@@ -50,7 +50,7 @@ public partial class CliExceptionHandler {
 
   [HandlesException(typeof(ApiException))]
   private int HandleApiException(ApiException exception) {
-    _console.Out.WriteLine($"Call to remote server failed with code {exception.ErrorCode}: {exception.Message}");
+    _console.Out.WriteLine($"Call to remote server failed with code {exception.ErrorCode}.");
     return 34;
   }
   

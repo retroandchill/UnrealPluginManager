@@ -17,7 +17,9 @@ public sealed partial class StreamFileSource : IFileSource {
   /// <inheritdoc />
   public async Task<IFileInfo> CreateFile(string destinationPath) {
     await using var fileStream = _fileSystem.FileStream.New(destinationPath, FileMode.Create);
-    _stream.Seek(0, SeekOrigin.Begin);
+    if (_stream.CanSeek) {
+      _stream.Seek(0, SeekOrigin.Begin);
+    }
     await _stream.CopyToAsync(fileStream);
     return _fileSystem.FileInfo.New(destinationPath);
   }
