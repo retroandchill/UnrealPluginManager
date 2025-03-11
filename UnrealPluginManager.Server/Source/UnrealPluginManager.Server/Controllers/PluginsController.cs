@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Mime;
 using LanguageExt;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -44,6 +44,20 @@ public partial class PluginsController : ControllerBase {
   public Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*",
                                                [FromQuery] Pageable pageable = default) {
     return _pluginService.ListPlugins(match, pageable);
+  }
+
+  /// <summary>
+  /// Submits a plugin for processing by uploading source code and a collection of binaries.
+  /// </summary>
+  /// <param name="submission">An object containing the plugin's source code file and associated binaries for submission.</param>
+  /// <return>Returns the details of the submitted plugin upon successful processing.</return>
+  [HttpPost]
+  [Consumes(MediaTypeNames.Multipart.FormData)]
+  [Produces(MediaTypeNames.Application.Json)]
+  [ProducesResponseType(typeof(PluginDetails), (int)HttpStatusCode.OK)]
+  public async Task<PluginDetails> SubmitPlugin(IFormFile submission) {
+    await using var dataStream = submission.OpenReadStream();
+    return await _pluginService.SubmitPlugin(dataStream);
   }
 
   /// <summary>

@@ -99,8 +99,19 @@ public static class OptionUtils {
   /// <typeparam name="T">The type of the object being converted.</typeparam>
   /// <param name="value">The nullable value to convert to an Option.</param>
   /// <returns>An <see cref="Option{T}"/> containing the value if non-null, or None if the value is null.</returns>
-  public static Option<T> ToOption<T>(this T? value) {
+  public static Option<T> ToOption<T>(this T? value) where T : class {
     return value ?? Option<T>.None;
+  }
+
+  /// <summary>
+  /// Converts a nullable value type to an <see cref="Option{T}"/> instance.
+  /// If the value is non-null, creates an Option with the value. Otherwise, returns <see cref="Option{T}.None"/>.
+  /// </summary>
+  /// <typeparam name="T">The value type to be converted, constrained to value types.</typeparam>
+  /// <param name="value">The nullable value type instance to convert.</param>
+  /// <returns>An <see cref="Option{T}"/> representing the nullable value.</returns>
+  public static Option<T> ToOption<T>(this T? value) where T : struct {
+    return value.HasValue ? Option<T>.Some(value.Value) : Option<T>.None;
   }
 
   /// <summary>
@@ -109,7 +120,7 @@ public static class OptionUtils {
   /// <typeparam name="T">The type of the value that the task might produce.</typeparam>
   /// <param name="value">The task producing a nullable value to be converted to an Option.</param>
   /// <returns>A task that produces an <see cref="Option{T}"/> containing the value if it is not null, or None if it is null.</returns>
-  public static Task<Option<T>> ToOptionAsync<T>(this Task<T?> value) {
+  public static Task<Option<T>> ToOptionAsync<T>(this Task<T?> value) where T : class {
     return value.Map(ToOption);
   }
 

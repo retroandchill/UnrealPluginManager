@@ -58,6 +58,46 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Submits a plugin for processing by uploading source code and a collection of binaries.",
+        "operationId": "submitPlugin",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submission": {
+                    "type": "string",
+                    "description": "An object containing the plugin's source code file and associated binaries for submission.",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "submission": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginDetails"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/plugins/latest": {

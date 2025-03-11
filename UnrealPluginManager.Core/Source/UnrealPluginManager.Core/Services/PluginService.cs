@@ -1,15 +1,20 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using LanguageExt;
+using LanguageExt.UnsafeValueAccess;
 using Microsoft.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
@@ -172,8 +177,16 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
+  public Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
                                              EngineFileData? storedFile = null) {
+    return AddPlugin(pluginName, descriptor, storedFile.ToOption()
+                         .Select(x => x.FileInfo.Binaries
+                                     .Select(y => new PluginBinaryType(x.EngineVersion, y.Key)))
+                         .SelectMany(x => x));
+  }
+
+  private async Task<PluginDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
+                                                              IEnumerable<PluginBinaryType> binaries) {
     await using var transaction = await _dbContext.Database.BeginTransactionAsync();
     var plugin = await _dbContext.Plugins
         .Where(x => x.Name == pluginName)
@@ -186,7 +199,7 @@ public partial class PluginService : IPluginService {
 
     var pluginVersion = descriptor.ToPluginVersion();
     pluginVersion.ParentId = plugin.Id;
-    pluginVersion.Binaries.AddRange(storedFile.ToPluginBinaries());
+    pluginVersion.Binaries.AddRange(binaries.Select(x => x.ToUploadedBinaries()));
     _dbContext.PluginVersions.Add(pluginVersion);
     await _dbContext.SaveChangesAsync();
     await transaction.CommitAsync();
@@ -195,7 +208,62 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc/>
   public async Task<PluginDetails> SubmitPlugin(Stream fileData, string engineVersion) {
-    var archive = new ZipArchive(fileData);
+    var (archive, baseName, descriptor) = await ValidateAndExtractPluginDescriptor(fileData);
+    
+    var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
+                                                                          engineVersion, archive);
+    return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginDetails> SubmitPlugin(Stream submission) {
+    using var archive = new ZipArchive(submission);
+    var sourceArchive = archive.GetEntry("Source.zip");
+    if (sourceArchive is null) {
+      throw new BadSubmissionException("Source.zip was not found");
+    }
+
+    string pluginName;
+    PluginDescriptor descriptor;
+    await using (var sourceStream = sourceArchive.Open()) {
+      var (_, baseName, desc) = await ValidateAndExtractPluginDescriptor(sourceStream);
+      pluginName = baseName;
+      descriptor = desc;
+    }
+    
+    await using (var sourceStream = sourceArchive.Open()) {
+      await _storageService.StorePluginSource(pluginName, descriptor.VersionName, new StreamFileSource(_fileSystem, sourceStream));
+    }
+
+    var icon = archive.GetEntry("Icon.png");
+    if (icon is not null) {
+      await using var iconStream = icon.Open();
+      await _storageService.StorePluginIcon(pluginName, new StreamFileSource(_fileSystem, iconStream));
+    }
+    
+    await using var binaries = archive.Entries
+        .Select(x => (Parts: PathSeparatorRegex().Split(x.FullName).Where(y => !string.IsNullOrWhiteSpace(y)).ToArray(), Entry: x))
+        .Where(x => x.Parts.Length == 3)
+        .Where(x => x.Parts[0] == "Binaries")
+        .Where(x => x.Parts[2].EndsWith(".zip"))
+        .GroupBy(x => x.Parts[1])
+        .ToAsyncDisposableDictionary(x => x.Key,
+            x => x.ToAsyncDisposableDictionary(y => y.Parts[2].Replace(".zip", ""), y => y.Entry.Open()));
+    
+    var binariesTasks = binaries.Select(x => x.Value
+                        .Select(y => _storageService.StorePluginBinaries(pluginName, descriptor.VersionName, x.Key, y.Key, new StreamFileSource(_fileSystem, y.Value))))
+        .SelectMany(x => x)
+        .ToList();
+    await Task.WhenAll(binariesTasks);
+
+    return await AddPlugin(pluginName, descriptor, binaries
+                               .Select(x => x.Value
+                                           .Select(y => new PluginBinaryType(x.Key, y.Key)))
+                               .SelectMany(x => x));
+  }
+
+  private async Task<(ZipArchive archive, string baseName, PluginDescriptor descriptor)> ValidateAndExtractPluginDescriptor(Stream source) {
+    var archive = new ZipArchive(source);
     var pluginDescriptorFile = archive.Entries
         .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
     if (pluginDescriptorFile is null) {
@@ -218,9 +286,7 @@ public partial class PluginService : IPluginService {
       throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
     }
 
-    var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
-                                                                          engineVersion, archive);
-    return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+    return (archive, baseName, descriptor);
   }
 
   /// <inheritdoc />
@@ -303,6 +369,61 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
+  public async Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId) {
+    var pluginVersion = await _dbContext.PluginVersions
+        .Include(x => x.Parent)
+        .Include(x => x.Binaries)
+        .Where(x => x.ParentId == pluginId)
+        .Where(x => x.Id == versionId)
+        .FirstOrDefaultAsync();
+    if (pluginVersion is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
+    }
+
+    var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempPath(), Path.GetRandomFileName()),
+        FileMode.Create, FileAccess.ReadWrite,
+        FileShare.Read, 4096, FileOptions.DeleteOnClose);
+    try {
+      using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
+      var source = _storageService.RetrievePluginSource(pluginVersion.Parent.Name, pluginVersion.Version).OrElseThrow();
+      var sourceEntry = destinationZip.CreateEntry("Source.zip");
+      await using (var sourceStream = source.OpenRead()) {
+        await using var destStream = sourceEntry.Open();
+        await sourceStream.CopyToAsync(destStream);
+      }
+
+      var icon = _storageService.RetrievePluginIcon(pluginVersion.Parent.Name).ValueUnsafe();
+      if (icon is not null) {
+        var iconEntry = destinationZip.CreateEntry("Icon.png");
+        await using var iconStream = icon.OpenRead();
+        await using var destStream = iconEntry.Open();
+        await iconStream.CopyToAsync(destStream);
+      }
+
+      var createdEngineVersions = new System.Collections.Generic.HashSet<string>();
+      destinationZip.CreateEntry("Binaries/");
+      foreach (var binary in pluginVersion.Binaries) {
+        if (!createdEngineVersions.Contains(binary.EngineVersion)) {
+          destinationZip.CreateEntry(Path.Join("Binaries", $"{binary.EngineVersion}/"));
+          createdEngineVersions.Add(binary.EngineVersion);
+        }
+        
+        var binaryEntry = destinationZip.CreateEntry(Path.Join("Binaries", $"{binary.EngineVersion}", $"{binary.Platform}.zip"));
+        await using var binaryStream = _storageService.RetrievePluginBinaries(pluginVersion.Parent.Name, pluginVersion.Version, binary.EngineVersion, binary.Platform).OrElseThrow().OpenRead();
+        await using var destStream = binaryEntry.Open();
+        await binaryStream.CopyToAsync(destStream);
+      }
+    } catch (Exception) {
+      // If we encounter an exception we need to close the file stream so that the temp file is properly deleted
+      fileStream.Close();
+      throw;
+    }
+    
+    fileStream.Seek(0, SeekOrigin.Begin);
+    return fileStream;
+  }
+
+  /// <inheritdoc />
   public async Task<Stream> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                               IReadOnlyCollection<string> targetPlatforms) {
     var latestVersion = await _dbContext.PluginVersions
@@ -339,6 +460,7 @@ public partial class PluginService : IPluginService {
       throw;
     }
 
+    fileStream.Seek(0, SeekOrigin.Begin);
     return fileStream;
   }
 
@@ -427,4 +549,7 @@ public partial class PluginService : IPluginService {
       yield return archive;
     }
   }
+
+    [GeneratedRegex(@"[\\/]")]
+    private static partial Regex PathSeparatorRegex();
 }

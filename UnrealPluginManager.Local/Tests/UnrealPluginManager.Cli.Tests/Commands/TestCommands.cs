@@ -41,7 +41,8 @@ public class TestCommands {
         new BuildCommand(),
         new InstallCommand(),
         new VersionsCommand(),
-        new SearchCommand()
+        new SearchCommand(),
+        new UploadCommand()
     };
 
     _pluginService = new Mock<IPluginService>();
@@ -240,5 +241,12 @@ public class TestCommands {
     returnCode = await _parser.InvokeAsync("search * --remote all");
     Assert.That(returnCode, Is.EqualTo(-1));
     _pluginManagementService.Verify(x => x.GetPlugins("*"));
+  }
+
+  [Test]
+  public async Task TestUploadCommand() {
+    var returnCode = await _parser.InvokeAsync("upload TestPlugin --version 1.0.0");
+    Assert.That(returnCode, Is.EqualTo(0));
+    _pluginManagementService.Verify(x => x.UploadPlugin("TestPlugin", new SemVersion(1, 0, 0), null), Times.Once());
   }
 }

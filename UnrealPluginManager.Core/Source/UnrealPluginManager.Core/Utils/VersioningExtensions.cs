@@ -106,9 +106,9 @@ public static class VersioningExtensions {
 
     Expression<Func<TEntity, bool>> startCompare;
     if (unbrokenRange.StartInclusive) {
-      startCompare = PredicateBuilder.New<TEntity>(x => x.Major >= unbrokenRange.Start.Major)
-          .And(x => x.Minor >= unbrokenRange.Start.Minor)
-          .And(x => x.Patch >= unbrokenRange.Start.Patch);
+      startCompare = PredicateBuilder.New<TEntity>(x => x.Major >= (int) unbrokenRange.Start.Major)
+          .And(x => x.Minor >= (int) unbrokenRange.Start.Minor)
+          .And(x => x.Patch >= (int) unbrokenRange.Start.Patch);
       if (!unbrokenRange.Start.IsPrerelease) {
         return startCompare;
       }
@@ -117,19 +117,19 @@ public static class VersioningExtensions {
       startCompare = startCompare.And(x => x.PrereleaseNumber == null ||
                                            x.PrereleaseNumber.Value >= startPrerelease);
     } else {
-      startCompare = PredicateBuilder.New<TEntity>(x => x.Major > unbrokenRange.Start.Major)
-          .Or(x => x.Major == unbrokenRange.Start.Major && x.Minor > unbrokenRange.Start.Minor)
-          .Or(x => x.Major == unbrokenRange.Start.Major && x.Minor == unbrokenRange.Start.Minor &&
-                   x.Patch > unbrokenRange.Start.Patch);
+      startCompare = PredicateBuilder.New<TEntity>(x => x.Major > (int) unbrokenRange.Start.Major)
+          .Or(x => x.Major == (int) unbrokenRange.Start.Major && x.Minor > (int) unbrokenRange.Start.Minor)
+          .Or(x => x.Major == (int) unbrokenRange.Start.Major && x.Minor == (int) unbrokenRange.Start.Minor &&
+                   x.Patch > (int) unbrokenRange.Start.Patch);
 
       if (!unbrokenRange.Start.IsPrerelease) {
         return startCompare;
       }
 
       var startPrerelease = unbrokenRange.Start.PrereleaseIdentifiers.GetPrereleaseNumber();
-      startCompare = startCompare.Or(x => x.Major == unbrokenRange.Start.Major
-                                          && x.Minor == unbrokenRange.Start.Minor
-                                          && x.Patch == unbrokenRange.Start.Patch
+      startCompare = startCompare.Or(x => x.Major == (int) unbrokenRange.Start.Major
+                                          && x.Minor == (int) unbrokenRange.Start.Minor
+                                          && x.Patch == (int) unbrokenRange.Start.Patch
                                           && (x.PrereleaseNumber == null ||
                                               x.PrereleaseNumber.Value > startPrerelease));
     }
@@ -143,9 +143,9 @@ public static class VersioningExtensions {
 
     Expression<Func<TEntity, bool>> endCompare;
     if (unbrokenRange.EndInclusive) {
-      endCompare = PredicateBuilder.New<TEntity>(x => x.Major <= unbrokenRange.End.Major)
-          .And(x => x.Minor <= unbrokenRange.End.Minor)
-          .And(x => x.Patch <= unbrokenRange.End.Patch);
+      endCompare = PredicateBuilder.New<TEntity>(x => x.Major <= (int) unbrokenRange.End.Major)
+          .And(x => x.Minor <= (int) unbrokenRange.End.Minor)
+          .And(x => x.Patch <= (int) unbrokenRange.End.Patch);
       if (!unbrokenRange.End.IsPrerelease) {
         return endCompare;
       }
@@ -154,19 +154,19 @@ public static class VersioningExtensions {
       endCompare = endCompare.And(x => x.PrereleaseNumber != null &&
                                        x.PrereleaseNumber.Value <= endPrerelease);
     } else {
-      endCompare = PredicateBuilder.New<TEntity>(x => x.Major < unbrokenRange.End.Major)
-          .Or(x => x.Major == unbrokenRange.End.Major && x.Minor < unbrokenRange.End.Minor)
-          .Or(x => x.Major == unbrokenRange.End.Major && x.Minor == unbrokenRange.End.Minor &&
-                   x.Patch < unbrokenRange.End.Patch);
+      endCompare = PredicateBuilder.New<TEntity>(x => x.Major < (int) unbrokenRange.End.Major)
+          .Or(x => x.Major == (int) unbrokenRange.End.Major && x.Minor < (int) unbrokenRange.End.Minor)
+          .Or(x => x.Major == (int) unbrokenRange.End.Major && x.Minor == (int) unbrokenRange.End.Minor &&
+                   x.Patch < (int) unbrokenRange.End.Patch);
 
       if (!unbrokenRange.End.IsPrerelease) {
         return endCompare;
       }
 
       var endPrerelease = unbrokenRange.End.PrereleaseIdentifiers.GetPrereleaseNumber();
-      endCompare = endCompare.Or(x => x.Major == unbrokenRange.End.Major
-                                      && x.Minor == unbrokenRange.End.Minor
-                                      && x.Patch == unbrokenRange.End.Patch
+      endCompare = endCompare.Or(x => x.Major == (int) unbrokenRange.End.Major
+                                      && x.Minor == (int) unbrokenRange.End.Minor
+                                      && x.Patch == (int) unbrokenRange.End.Patch
                                       && x.PrereleaseNumber != null &&
                                       x.PrereleaseNumber.Value < endPrerelease);
     }

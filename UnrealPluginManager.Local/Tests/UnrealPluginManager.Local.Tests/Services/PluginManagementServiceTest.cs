@@ -3,15 +3,16 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
-using UnrealPluginManager.Local.Tests.Mocks;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
 
@@ -44,8 +45,6 @@ public class PluginManagementServiceTest {
             }
         });
 
-    services.AddSingleton<IApiTypeResolver, MockTypeResolver>();
-
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
 
@@ -55,6 +54,12 @@ public class PluginManagementServiceTest {
     _pluginsApi = new Mock<IPluginsApi>();
     services.AddSingleton(_pluginsApi.Object);
     services.AddSingleton<IApiAccessor>(_pluginsApi.Object);
+    
+    var mockClientFactory = new Mock<IApiClientFactory>();
+    mockClientFactory.SetupGet(x => x.InterfaceType).Returns(typeof(IPluginsApi));
+    mockClientFactory.Setup(x => x.Create(It.IsAny<RemoteConfig>()))
+        .Returns(_pluginsApi.Object);
+    services.AddSingleton(mockClientFactory.Object);
 
     var console = new Mock<IConsole>();
     services.AddSingleton(console.Object);
@@ -229,7 +234,7 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>
-            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 1, CancellationToken.None))
+            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 10, CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([
             new PluginVersionInfo {
                 PluginId = Guid.NewGuid(),
@@ -250,5 +255,46 @@ public class PluginManagementServiceTest {
     });
   }
   
+  [Test]
+  public async Task TestUploadPlugin() {
+    var version = new SemVersion(1, 0, 0);
+    var versionMatcher = SemVersionRange.Equals(version);
+
+    var pluginVersion = new PluginVersionInfo {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = []
+    };
+
+    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([ pluginVersion ]));
+
+    var memoryStream = new MemoryStream();
+    _pluginService.Setup(x => x.GetPluginFileData(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync(memoryStream);
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new PluginDetails {
+            Id = pluginVersion.PluginId,
+            Name = "TestPlugin",
+            FriendlyName = "Test Plugin",
+            Versions = []
+        });
+    
+    var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
+    Assert.That(result.Id, Is.EqualTo(pluginVersion.PluginId));
+  }
+  
+  [Test]
+  public void TestUploadPlugin_NotThere() {
+    var version = new SemVersion(1, 0, 0);
+    var versionMatcher = SemVersionRange.Equals(version);
+
+    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([]));
+
+    Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.UploadPlugin("TestPlugin", version, "default"));
+  }
   
 }

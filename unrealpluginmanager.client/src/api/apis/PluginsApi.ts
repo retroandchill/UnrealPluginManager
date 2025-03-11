@@ -99,6 +99,10 @@ export interface GetPluginsRequest {
     size?: number;
 }
 
+export interface SubmitPluginRequest {
+    submission?: Blob;
+}
+
 /**
  * 
  */
@@ -537,6 +541,53 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async getPlugins(requestParameters: GetPluginsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginOverviewPage> {
         const response = await this.getPluginsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Submits a plugin for processing by uploading source code and a collection of binaries.
+     */
+    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['submission'] != null) {
+            formParams.append('submission', requestParameters['submission'] as any);
+        }
+
+        const response = await this.request({
+            path: `/api/plugins`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginDetailsFromJSON(jsonValue));
+    }
+
+    /**
+     * Submits a plugin for processing by uploading source code and a collection of binaries.
+     */
+    async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+        const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -16,6 +16,9 @@ public record struct Remote<T>(string Name, T Api) where T : IApiAccessor;
 /// Represents a service for managing remote resources.
 /// </summary>
 public interface IRemoteService {
+  
+  public string? DefaultRemoteName { get; }
+  
   /// <summary>
   /// Retrieves all configured remotes.
   /// </summary>
@@ -51,13 +54,6 @@ public interface IRemoteService {
   /// <param name="uri">The new URI to associate with the remote.</param>
   /// <returns>A task representing the asynchronous operation.</returns>
   Task UpdateRemote(string name, RemoteConfig uri);
-
-  /// <summary>
-  /// Retrieves the remote configuration associated with the specified remote name, if available.
-  /// </summary>
-  /// <param name="name">The name of the remote for which the configuration is being retrieved.</param>
-  /// <returns>An option containing the readable configuration if the remote is found; otherwise, an empty option.</returns>
-  Option<IReadableConfiguration> GetRemoteConfig(string name);
 
   /// <summary>
   /// Retrieves an API accessor for a specified remote.

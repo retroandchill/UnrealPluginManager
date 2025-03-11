@@ -8,6 +8,7 @@ import pystache
 from pyxtension.streams import stream
 from openapi_typed import OpenAPIObject
 from git import Repo
+import re
 
 
 def pull_template_repository(root_dir: str) -> None:
