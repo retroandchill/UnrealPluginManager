@@ -170,4 +170,44 @@ public class PluginControllerTest {
     Assert.DoesNotThrowAsync(() =>
         _pluginsApi.DownloadLatestPluginAsync(pluginId, "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]));
   }
+  
+  [Test]
+  public async Task TestUploadPluginInParts() {
+    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+    var tempFileName = Path.GetTempFileName();
+    var dirName = Path.GetDirectoryName(tempFileName);
+    Assert.That(dirName, Is.Not.Null);
+    filesystem.Directory.CreateDirectory(dirName);
+
+    using var testZip = new MemoryStream();
+    using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+      zipArchive.CreateEntry("Icon.png");
+      zipArchive.CreateEntry("Binaries/");
+      zipArchive.CreateEntry("Binaries/5.5/");
+      zipArchive.CreateEntry("Binaries/5.5/Win64.zip");
+
+      using var innerZip = new MemoryStream();
+      using (var innerArchive = new ZipArchive(innerZip, ZipArchiveMode.Create, true)) {
+        var entry = innerArchive.CreateEntry("TestPlugin.uplugin");
+        await using var writer = new StreamWriter(entry.Open());
+
+        var descriptor = new PluginDescriptor {
+            FriendlyName = "Test Plugin",
+            VersionName = new SemVersion(1, 0, 0),
+            Description = "Test description"
+        };
+
+        await writer.WriteAsync(JsonSerializer.Serialize(descriptor));
+      }
+      
+      var sourceEntry = zipArchive.CreateEntry("Source.zip");
+      await using var sourceWriter = sourceEntry.Open();
+      innerZip.Seek(0, SeekOrigin.Begin);
+      await innerZip.CopyToAsync(sourceWriter);
+    }
+
+    testZip.Seek(0, SeekOrigin.Begin);
+    var result = await _pluginsApi.SubmitPluginAsync(testZip);
+    Assert.That(result.Name, Is.EqualTo("TestPlugin"));
+  }
 }
