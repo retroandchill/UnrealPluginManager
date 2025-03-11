@@ -90,7 +90,7 @@ public class RemoteService : IRemoteService {
   /// <inheritdoc />
   public T GetApiAccessor<T>(string name) where T : IApiAccessor {
     if (!_apiAccessors.TryGetValue(typeof(T), out var accessors)) {
-      throw new ArgumentException($"No API accessor for type {nameof(T)}");
+      throw new ArgumentException($"No API accessor for type {typeof(T).Name}");
     }
 
 
@@ -104,7 +104,7 @@ public class RemoteService : IRemoteService {
   /// <inheritdoc />
   public IEnumerable<Remote<T>> GetApiAccessors<T>() where T : IApiAccessor {
     if (!_apiAccessors.TryGetValue(typeof(T), out var accessors)) {
-      throw new ArgumentException($"No API accessor for type {nameof(T)}");
+      throw new ArgumentException($"No API accessor for type {typeof(T).Name}");
     }
 
     foreach (var (name, api) in accessors) {
