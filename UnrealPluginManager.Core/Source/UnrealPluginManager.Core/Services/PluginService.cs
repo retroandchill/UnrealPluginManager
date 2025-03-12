@@ -369,7 +369,7 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId) {
+  public async Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId) {
     var pluginVersion = await _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Binaries)
@@ -420,11 +420,11 @@ public partial class PluginService : IPluginService {
     }
     
     fileStream.Seek(0, SeekOrigin.Begin);
-    return fileStream;
+    return new PluginDownload(pluginVersion.Parent.Name, fileStream);
   }
 
   /// <inheritdoc />
-  public async Task<Stream> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
+  public async Task<PluginDownload> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
                                               IReadOnlyCollection<string> targetPlatforms) {
     var latestVersion = await _dbContext.PluginVersions
         .Where(p => p.ParentId == pluginId)
@@ -441,7 +441,7 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc/>
-  public async Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
+  public async Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
                                               IReadOnlyCollection<string> targetPlatforms) {
     var fileStream = _fileSystem.FileStream.New(Path.Join(Path.GetTempPath(), Path.GetRandomFileName()),
                                                 FileMode.Create, FileAccess.ReadWrite,
@@ -461,7 +461,11 @@ public partial class PluginService : IPluginService {
     }
 
     fileStream.Seek(0, SeekOrigin.Begin);
-    return fileStream;
+    var pluginName = _dbContext.Plugins
+        .Where(x => x.Id == pluginId)
+        .Select(x => x.Name)
+        .First();
+    return new PluginDownload(pluginName, fileStream);
   }
 
   /// <inheritdoc />

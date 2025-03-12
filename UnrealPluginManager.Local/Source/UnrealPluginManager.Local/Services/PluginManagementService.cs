@@ -118,7 +118,8 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new RemoteNotFoundException("No default remote configured.");
     }
     
-    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
+    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId)
+        .Map(x => x.FileData);
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
     return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData));
   }

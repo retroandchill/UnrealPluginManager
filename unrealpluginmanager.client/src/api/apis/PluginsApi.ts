@@ -53,6 +53,11 @@ export interface DownloadLatestPluginRequest {
     platforms?: Array<string>;
 }
 
+export interface DownloadPluginRequest {
+    pluginId: string;
+    versionId: string;
+}
+
 export interface DownloadPluginBinariesRequest {
     pluginId: string;
     versionId: string;
@@ -207,6 +212,46 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async downloadLatestPlugin(requestParameters: DownloadLatestPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.downloadLatestPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Downloads the specified plugin version as a zip file.
+     */
+    async downloadPluginRaw(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+        if (requestParameters['pluginId'] == null) {
+            throw new runtime.RequiredError(
+                'pluginId',
+                'Required parameter "pluginId" was null or undefined when calling downloadPlugin().'
+            );
+        }
+
+        if (requestParameters['versionId'] == null) {
+            throw new runtime.RequiredError(
+                'versionId',
+                'Required parameter "versionId" was null or undefined when calling downloadPlugin().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginId}/{versionId}/download`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.BlobApiResponse(response);
+    }
+
+    /**
+     * Downloads the specified plugin version as a zip file.
+     */
+    async downloadPlugin(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.downloadPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -273,7 +273,7 @@ public class PluginManagementServiceTest {
 
     var memoryStream = new MemoryStream();
     _pluginService.Setup(x => x.GetPluginFileData(pluginVersion.PluginId, pluginVersion.VersionId))
-        .ReturnsAsync(memoryStream);
+        .ReturnsAsync(new PluginDownload("TestPlugin", memoryStream));
     _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
         .ReturnsAsync(new PluginDetails {
             Id = pluginVersion.PluginId,

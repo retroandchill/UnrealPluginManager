@@ -123,6 +123,20 @@ public partial class PluginsController : ControllerBase {
   }
 
   /// <summary>
+  /// Downloads the specified plugin version as a zip file.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the plugin version to be downloaded.</param>
+  /// <return>Returns a FileStreamResult containing the plugin version file as a zip archive.</return>
+  [HttpGet("{pluginId:guid}/{versionId:guid}/download")]
+  [Produces(MediaTypeNames.Application.Zip)]
+  [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
+  public async Task<FileStreamResult> DownloadPlugin([FromRoute] Guid pluginId, [FromRoute] Guid versionId) {
+    var (name, data) = await _pluginService.GetPluginFileData(pluginId, versionId);
+    return File(data, MediaTypeNames.Application.Zip, $"{name}.zip");
+  }
+
+  /// <summary>
   /// Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.
   /// </summary>
   /// <param name="pluginId">The unique identifier of the plugin to be downloaded.</param>
@@ -137,11 +151,9 @@ public partial class PluginsController : ControllerBase {
                                                            [FromRoute] Version engineVersion,
                                                            [FromQuery] SemVersionRange? targetVersion,
                                                            [FromQuery] IReadOnlyCollection<string> platforms) {
-    return File(
-        await _pluginService.GetPluginFileData(pluginId, targetVersion ?? SemVersionRange.AllRelease,
-                                               engineVersion.ToString(), platforms),
-        MediaTypeNames.Application.Zip,
-        $"{pluginId}.zip");
+    var (name, data) = await _pluginService.GetPluginFileData(pluginId, 
+        targetVersion ?? SemVersionRange.AllRelease, engineVersion.ToString(), platforms);
+    return File(data, MediaTypeNames.Application.Zip, $"{name}.zip");
   }
 
 
@@ -159,10 +171,8 @@ public partial class PluginsController : ControllerBase {
   public async Task<FileStreamResult> DownloadPluginVersion([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                                             [FromRoute] Version engineVersion,
                                                             [FromQuery] IReadOnlyCollection<string> platforms) {
-    return File(
-        await _pluginService.GetPluginFileData(pluginId, versionId, engineVersion.ToString(), platforms),
-        MediaTypeNames.Application.Zip,
-        $"{pluginId}.zip");
+    var (name, data) = await _pluginService.GetPluginFileData(pluginId, versionId, engineVersion.ToString(), platforms);
+    return File(data, MediaTypeNames.Application.Zip, $"{name}.zip");
   }
 
   /// <summary>

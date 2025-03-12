@@ -318,6 +318,50 @@
         }
       }
     },
+    "/api/plugins/{pluginId}/{versionId}/download": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Downloads the specified plugin version as a zip file.",
+        "operationId": "downloadPlugin",
+        "parameters": [
+          {
+            "name": "pluginId",
+            "in": "path",
+            "description": "The unique identifier of the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier of the plugin version to be downloaded.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plugins/{pluginId}/latest/{engineVersion}/download": {
       "get": {
         "tags": [

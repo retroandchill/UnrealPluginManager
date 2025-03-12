@@ -175,7 +175,7 @@ public interface IPluginService {
   /// <returns>
   /// A <see cref="StoredPluginVersion"/> containing the source file, optional icon, and binaries for the specified plugin version.
   /// </returns>
-  Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId);
+  Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId);
   
 
   /// <summary>
@@ -188,8 +188,8 @@ public interface IPluginService {
   /// <returns>
   /// A <see cref="Stream"/> containing the requested plugin file data.
   /// </returns>
-  Task<Stream> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
-                                 IReadOnlyCollection<string> targetPlatforms);
+  Task<PluginDownload> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
+                                         IReadOnlyCollection<string> targetPlatforms);
 
   /// <summary>
   /// Retrieves the file data of a plugin version for a specified engine version and target platforms.
@@ -201,8 +201,8 @@ public interface IPluginService {
   /// <returns>
   /// A stream containing the binary content of the plugin file.
   /// </returns>
-  Task<Stream> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
-                                 IReadOnlyCollection<string> targetPlatforms);
+  Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
+                                         IReadOnlyCollection<string> targetPlatforms);
 
   /// <summary>
   /// Retrieves all plugin data files for a specific plugin version, engine version, and target platforms.
