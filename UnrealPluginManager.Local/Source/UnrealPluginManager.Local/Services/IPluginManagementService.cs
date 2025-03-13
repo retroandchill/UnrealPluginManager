@@ -10,6 +10,8 @@ namespace UnrealPluginManager.Local.Services;
 /// Represents a service used for remote calls to fetch plugin data.
 /// </summary>
 public interface IPluginManagementService {
+  Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange);
+  
   /// <summary>
   /// Retrieves a list of plugin overviews that optionally match a given search term.
   /// The method aggregates and groups plugins by name, merging relevant details

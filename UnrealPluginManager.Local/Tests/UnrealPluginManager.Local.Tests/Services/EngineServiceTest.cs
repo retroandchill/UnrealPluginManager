@@ -8,6 +8,7 @@ using Moq;
 using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
@@ -90,10 +91,12 @@ public partial class EngineServiceTest {
           await using var subFileStream = _filesystem.File.OpenRead(Path.Join(x.FullName, "Example", "TextFile.txt"));
           using var textReader = new StreamReader(subFileStream);
           capturedTextFile = await textReader.ReadToEndAsync();
-          return new PluginDetails {
-              Id = Guid.NewGuid(),
+          return new PluginVersionDetails {
+              PluginId = Guid.NewGuid(),
               Name = "MyPlugin",
-              Versions = []
+              VersionId = Guid.NewGuid(),
+              Version = new SemVersion(1, 0, 0),
+              Dependencies = []
           };
         });
 
@@ -160,7 +163,8 @@ public partial class EngineServiceTest {
     List<string> targetPlatforms = ["Win64"];
     _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms))
         .Returns((string _, SemVersion _, string _, IReadOnlyCollection<string> _) =>
-                     _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
+                     _filesystem.FileInfo.New(pluginPath).ToEnumerable()
+                         .Select(x => new PluginFileInfo.Source(x)).ToAsyncEnumerable());
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");

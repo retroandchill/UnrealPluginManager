@@ -26,6 +26,10 @@ public partial class PluginManagementService : IPluginManagementService {
 
   private const int DefaultPageSize = 100;
 
+  public Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange) {
+    return _pluginService.GetPluginVersionInfo(pluginName, versionRange);
+  }
+
   /// <inheritdoc />
   public Task<OrderedDictionary<string, Fin<List<PluginOverview>>>> GetPlugins(string searchTerm) {
     return _remoteService.GetApiAccessors<IPluginsApi>()

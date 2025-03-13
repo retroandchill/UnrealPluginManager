@@ -497,8 +497,8 @@ public partial class PluginService : IPluginService {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
 
-    var missing = plugin.Binaries.Select(x => x.Platform)
-        .Except(targetPlatforms)
+    var missing = targetPlatforms
+        .Except( plugin.Binaries.Select(x => x.Platform))
         .ToList();
     if (missing.Count > 0) {
       throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
@@ -527,8 +527,8 @@ public partial class PluginService : IPluginService {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
 
-    var missing = plugin.Binaries.Select(x => x.Platform)
-        .Except(targetPlatforms)
+    var missing = targetPlatforms
+        .Except( plugin.Binaries.Select(x => x.Platform))
         .ToList();
     if (missing.Count > 0) {
       throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
@@ -557,8 +557,8 @@ public partial class PluginService : IPluginService {
       throw new PluginNotFoundException($"Plugin {pluginName} was not found!");
     }
 
-    var missing = plugin.Binaries.Select(x => x.Platform)
-        .Except(targetPlatforms)
+    var missing = targetPlatforms
+        .Except( plugin.Binaries.Select(x => x.Platform))
         .ToList();
     if (missing.Count > 0) {
       throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
