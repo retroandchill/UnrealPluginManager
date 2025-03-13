@@ -272,7 +272,7 @@ public partial class PluginService : IPluginService {
                 new StreamFileSource(_fileSystem, y.Value))))
         .SelectMany(x => x)
         .ToList();
-    await Task.WhenAll(binariesTasks);
+    await SafeTasks.WhenAll(binariesTasks);
 
     return await AddPlugin(pluginName, descriptor, binaries
         .Select(x => x.Value

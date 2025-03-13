@@ -18,9 +18,9 @@ public static class DependencyExtensions {
   /// </summary>
   /// <param name="manifests">An asynchronous enumerable of <see cref="DependencyManifest"/> instances to merge.</param>
   /// <returns>A single <see cref="DependencyManifest"/> containing the merged dependencies and resolved items.</returns>
-  public static DependencyManifest Collapse(this IEnumerable<DependencyManifest> manifests) {
+  public static async Task<DependencyManifest> Collapse(this IAsyncEnumerable<DependencyManifest> manifests) {
     var result = new DependencyManifest();
-    foreach (var manifest in manifests) {
+    await foreach (var manifest in manifests) {
       foreach (var (name, dependencies) in manifest.FoundDependencies) {
         var currentList = result.FoundDependencies.ComputeIfAbsent(name, _ => []);
         currentList.AddDistinctRange(dependencies, x => x.Version);

@@ -71,12 +71,12 @@ public partial class PluginManagementService : IPluginManagementService {
                     .FirstOrDefaultAsync()
                     .ToRef())
         .ToList();
-    
-    await Task.WhenAll(tasks);
-    return tasks.Where(version => !version.IsFaulted)
+
+    return await SafeTasks.WhenEach(tasks)
+        .Where(version => !version.IsFaulted)
         .Select(x => x.Result)
-        .FirstOrDefault(version => version is not null)
-        .ToOption();
+        .FirstOrDefaultAsync(version => version is not null)
+        .Map(x => x.ToOption());
   }
 
   /// <inheritdoc />
@@ -99,9 +99,8 @@ public partial class PluginManagementService : IPluginManagementService {
                     .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
                                 .Map(y => y.SetRemoteIndex(i))))
         .ToList();
-
-    await Task.WhenAll(dependencyTasks);
-    var dependencyManifest = dependencyTasks
+    
+    var dependencyManifest = await SafeTasks.WhenEach(dependencyTasks)
         .Where(x => x.IsCompletedSuccessfully)
         .Select(x => x.Result)
         .Collapse();
