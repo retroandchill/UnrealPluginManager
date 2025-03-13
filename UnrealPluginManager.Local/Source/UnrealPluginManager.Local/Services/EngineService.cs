@@ -27,6 +27,17 @@ public partial class EngineService : IEngineService {
   private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
+  public InstalledEngine GetInstalledEngine(string? engineVersion) {
+    var installedEngines = GetInstalledEngines();
+    var installedEngine = engineVersion is not null
+        ? installedEngines.First(x => x.Name == engineVersion)
+        : installedEngines.Where(x => !x.CustomBuild)
+            .OrderByDescending(x => x.Version)
+            .First();
+    return installedEngine;
+  }
+  
+  /// <inheritdoc />
   public List<InstalledEngine> GetInstalledEngines() {
     return _enginePlatformService.GetInstalledEngines();
   }
@@ -119,15 +130,5 @@ public partial class EngineService : IEngineService {
     }
 
     return 0;
-  }
-
-  private InstalledEngine GetInstalledEngine(string? engineVersion) {
-    var installedEngines = GetInstalledEngines();
-    var installedEngine = engineVersion is not null
-        ? installedEngines.Find(x => x.Name == engineVersion)
-        : installedEngines.Where(x => !x.CustomBuild)
-            .OrderByDescending(x => x.Version)
-            .First();
-    return installedEngine!;
   }
 }

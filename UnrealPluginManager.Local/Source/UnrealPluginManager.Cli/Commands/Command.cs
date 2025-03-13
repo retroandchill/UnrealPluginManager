@@ -26,7 +26,6 @@ public interface ICommandOptionsHandler<in TOptions> {
   /// <summary>
   /// Handles the specified command options asynchronously.
   /// </summary>
-  /// <typeparam name="TOptions">The type of the command options to be processed.</typeparam>
   /// <param name="options">The command options to handle.</param>
   /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
   /// <returns>
@@ -59,9 +58,6 @@ public abstract class Command<TOptions, TOptionsHandler> : Command
   /// Serves as a base class for defining commands in the CLI tool, supporting specific option handlers
   /// for processing command-line arguments and related operations.
   /// </summary>
-  /// <typeparam name="TOptions">The type of options this command processes, adhering to the <see cref="ICommandOptions"/> interface.</typeparam>
-  /// <typeparam name="TOptionsHandler">The type of handler used to process the provided options,
-  /// implementing <see cref="ICommandOptionsHandler{TOptions}"/>.</typeparam>
   /// <remarks>
   /// This abstract class simplifies the process of setting up commands by automatically configuring
   /// a handler that binds the provided options and invokes their corresponding operations through

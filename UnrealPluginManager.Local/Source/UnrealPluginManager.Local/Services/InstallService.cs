@@ -69,8 +69,7 @@ public partial class InstallService : IInstallService {
         continue;
       }
       
-      var currentVersion = _engineService.GetInstalledEngines()
-          .FirstOrDefault(x => x.Name == engineVersion);
+      var currentVersion = _engineService.GetInstalledEngine(engineVersion);
       ArgumentNullException.ThrowIfNull(currentVersion);
       var foundPlugin = await _pluginManagementService.DownloadPlugin(dep.Name, dep.Version, dep.RemoteIndex, 
           currentVersion.Name, platforms.ToList());

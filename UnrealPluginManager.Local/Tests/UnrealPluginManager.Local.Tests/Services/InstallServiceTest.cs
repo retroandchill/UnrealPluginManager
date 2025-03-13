@@ -93,7 +93,7 @@ public class InstallServiceTest {
   }
 
   [Test]
-  public async Task TestInstallPlugin_HasConflicts() {
+  public void TestInstallPlugin_HasConflicts() {
     var existingPlugin = new PluginVersionInfo {
         PluginId = Guid.NewGuid(),
         Name = "TestPlugin",

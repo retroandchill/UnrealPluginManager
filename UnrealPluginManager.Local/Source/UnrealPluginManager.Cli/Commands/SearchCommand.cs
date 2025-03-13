@@ -56,7 +56,7 @@ public class SearchCommandOptions : ICommandOptions {
   /// This property represents the keyword or query used to perform the search operation.
   /// It is required to identify plugins that match the criteria specified by the user.
   /// </remarks>
-  public string SearchTerm { get; set; }
+  public required string SearchTerm { get; set; }
 
   /// <summary>
   /// Gets or sets the name of the remote source to query during the search operation.

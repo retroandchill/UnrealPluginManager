@@ -100,7 +100,8 @@ public partial class PluginManagementService : IPluginManagementService {
                                 .Map(y => y.SetRemoteIndex(i))))
         .ToList();
 
-    var dependencyManifest = await Task.WhenEach(dependencyTasks)
+    await Task.WhenAll(dependencyTasks);
+    var dependencyManifest = dependencyTasks
         .Where(x => x.IsCompletedSuccessfully)
         .Select(x => x.Result)
         .Collapse();
