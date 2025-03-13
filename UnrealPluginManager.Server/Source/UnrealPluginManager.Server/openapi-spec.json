@@ -92,7 +92,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginDetails"
+                  "$ref": "#/components/schemas/PluginVersionDetails"
                 }
               }
             }
@@ -209,7 +209,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginDetails"
+                  "$ref": "#/components/schemas/PluginVersionDetails"
                 }
               }
             }
@@ -318,50 +318,6 @@
         }
       }
     },
-    "/api/plugins/{pluginId}/{versionId}/download": {
-      "get": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Downloads the specified plugin version as a zip file.",
-        "operationId": "downloadPlugin",
-        "parameters": [
-          {
-            "name": "pluginId",
-            "in": "path",
-            "description": "The unique identifier of the plugin.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "versionId",
-            "in": "path",
-            "description": "The unique identifier of the plugin version to be downloaded.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/plugins/{pluginId}/latest/{engineVersion}/download": {
       "get": {
         "tags": [
@@ -407,6 +363,15 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "separated",
+            "in": "query",
+            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -471,6 +436,15 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "separated",
+            "in": "query",
+            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -965,6 +939,29 @@
         ],
         "type": "string",
         "description": "Specifies the type of plugin in the Unreal Plugin Manager system."
+      },
+      "PluginVersionDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PluginVersionInfo"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "binaries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BinariesOverview"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
       },
       "PluginVersionInfo": {
         "required": [

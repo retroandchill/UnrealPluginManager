@@ -182,7 +182,7 @@ public static class PluginSetupHelpers {
         VersionName = new SemVersion(4, 0, 0),
     });
     
-    return app.Id;
+    return app.PluginId;
   }
   
   public static async Task<Guid> SetupVersionResolutionTreeWithConflict(this IPluginService pluginService) {
@@ -224,6 +224,6 @@ public static class PluginSetupHelpers {
         VersionName = new SemVersion(2, 0, 0)
     });
 
-    return app.Id;
+    return app.PluginId;
   }
 }

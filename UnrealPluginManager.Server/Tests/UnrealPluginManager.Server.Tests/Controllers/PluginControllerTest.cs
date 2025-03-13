@@ -87,17 +87,17 @@ public class PluginControllerTest {
         Plugins = []
     }, null);
 
-    var plugin1List = await _pluginsApi.GetDependencyTreeAsync(plugin1.Id);
+    var plugin1List = await _pluginsApi.GetDependencyTreeAsync(plugin1.PluginId);
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
 
-    var plugin2List = await _pluginsApi.GetDependencyTreeAsync(plugin2.Id);
+    var plugin2List = await _pluginsApi.GetDependencyTreeAsync(plugin2.PluginId);
     Assert.That(plugin2List, Has.Count.EqualTo(2));
     var plugin2Names = plugin2List.Select(x => x.Name).ToList();
     Assert.That(plugin2Names, Does.Contain("Plugin1"));
     Assert.That(plugin2Names, Does.Contain("Plugin2"));
 
-    var plugin3List = await _pluginsApi.GetDependencyTreeAsync(plugin3.Id);
+    var plugin3List = await _pluginsApi.GetDependencyTreeAsync(plugin3.PluginId);
     Assert.That(plugin3List, Has.Count.EqualTo(3));
     var plugin3Names = plugin3List.Select(x => x.Name).ToList();
     Assert.That(plugin3Names, Does.Contain("Plugin1"));
@@ -107,14 +107,14 @@ public class PluginControllerTest {
     var allPluginsList = await _pluginsApi.GetPluginsAsync();
     Assert.That(allPluginsList, Has.Count.EqualTo(4));
 
-    var plugin3Latest = await _pluginsApi.GetLatestVersionAsync(plugin3.Id);
+    var plugin3Latest = await _pluginsApi.GetLatestVersionAsync(plugin3.PluginId);
     Assert.Multiple(() => {
       Assert.That(plugin3Latest.Name, Is.EqualTo("Plugin3"));
       Assert.That(plugin3Latest.Version, Is.EqualTo(new SemVersion(1, 2, 1)));
     });
 
     var plugin3Constrained =
-        await _pluginsApi.GetLatestVersionAsync(plugin3.Id, SemVersionRange.Parse("<1.2.0").ToString());
+        await _pluginsApi.GetLatestVersionAsync(plugin3.PluginId, SemVersionRange.Parse("<1.2.0").ToString());
     Assert.Multiple(() => {
       Assert.That(plugin3Constrained.Name, Is.EqualTo("Plugin3"));
       Assert.That(plugin3Constrained.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
@@ -156,8 +156,8 @@ public class PluginControllerTest {
     var result = await _pluginsApi.AddPluginAsync("5.5", testZip);
     Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
-    var pluginId = result.Id;
-    var version = result.Versions.First().Id;
+    var pluginId = result.PluginId;
+    var version = result.VersionId;
 
     Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginSourceAsync(pluginId, version));
     Assert.ThrowsAsync<ApiException>(() => _pluginsApi.DownloadPluginSourceAsync(pluginId, Guid.NewGuid()));

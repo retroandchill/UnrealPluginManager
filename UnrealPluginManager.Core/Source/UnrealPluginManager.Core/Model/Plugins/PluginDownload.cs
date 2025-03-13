@@ -14,4 +14,15 @@
 /// The file data of the plugin in the form of a stream.
 /// This could represent the content of the plugin file, allowing for reading or saving the file.
 /// </param>
-public record struct PluginDownload(string PluginName, Stream FileData);
+public readonly record struct PluginDownload(string PluginName, Stream FileData) : IDisposable, IAsyncDisposable {
+
+  /// <inheritdoc />
+  public void Dispose() {
+    FileData.Dispose();
+  }
+  
+  /// <inheritdoc />
+  public async ValueTask DisposeAsync() {
+    await FileData.DisposeAsync();
+  }
+}

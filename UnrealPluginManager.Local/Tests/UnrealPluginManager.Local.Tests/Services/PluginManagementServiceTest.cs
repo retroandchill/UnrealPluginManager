@@ -260,7 +260,7 @@ public class PluginManagementServiceTest {
     var version = new SemVersion(1, 0, 0);
     var versionMatcher = SemVersionRange.Equals(version);
 
-    var pluginVersion = new PluginVersionInfo {
+    var pluginVersion = new PluginVersionDetails {
         PluginId = Guid.NewGuid(),
         Name = "TestPlugin",
         VersionId = Guid.NewGuid(),
@@ -268,22 +268,17 @@ public class PluginManagementServiceTest {
         Dependencies = []
     };
 
-    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([ pluginVersion ]));
 
     var memoryStream = new MemoryStream();
     _pluginService.Setup(x => x.GetPluginFileData(pluginVersion.PluginId, pluginVersion.VersionId))
         .ReturnsAsync(new PluginDownload("TestPlugin", memoryStream));
     _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new PluginDetails {
-            Id = pluginVersion.PluginId,
-            Name = "TestPlugin",
-            FriendlyName = "Test Plugin",
-            Versions = []
-        });
+        .ReturnsAsync(pluginVersion);
     
     var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
-    Assert.That(result.Id, Is.EqualTo(pluginVersion.PluginId));
+    Assert.That(result.PluginId, Is.EqualTo(pluginVersion.PluginId));
   }
   
   [Test]
@@ -291,7 +286,7 @@ public class PluginManagementServiceTest {
     var version = new SemVersion(1, 0, 0);
     var versionMatcher = SemVersionRange.Equals(version);
 
-    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([]));
 
     Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.UploadPlugin("TestPlugin", version, "default"));

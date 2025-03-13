@@ -18,9 +18,9 @@ import * as runtime from '../runtime';
 import type {
   DependencyManifest,
   PluginDependency,
-  PluginDetails,
   PluginOverviewPage,
   PluginSummary,
+  PluginVersionDetails,
   PluginVersionInfo,
   PluginVersionInfoPage,
 } from '../models/index';
@@ -29,12 +29,12 @@ import {
     DependencyManifestToJSON,
     PluginDependencyFromJSON,
     PluginDependencyToJSON,
-    PluginDetailsFromJSON,
-    PluginDetailsToJSON,
     PluginOverviewPageFromJSON,
     PluginOverviewPageToJSON,
     PluginSummaryFromJSON,
     PluginSummaryToJSON,
+    PluginVersionDetailsFromJSON,
+    PluginVersionDetailsToJSON,
     PluginVersionInfoFromJSON,
     PluginVersionInfoToJSON,
     PluginVersionInfoPageFromJSON,
@@ -51,11 +51,7 @@ export interface DownloadLatestPluginRequest {
     engineVersion: string;
     targetVersion?: string;
     platforms?: Array<string>;
-}
-
-export interface DownloadPluginRequest {
-    pluginId: string;
-    versionId: string;
+    separated?: boolean;
 }
 
 export interface DownloadPluginBinariesRequest {
@@ -75,6 +71,7 @@ export interface DownloadPluginVersionRequest {
     versionId: string;
     engineVersion: string;
     platforms?: Array<string>;
+    separated?: boolean;
 }
 
 export interface GetCandidateDependenciesRequest {
@@ -116,7 +113,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
-    async addPluginRaw(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
+    async addPluginRaw(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionDetails>> {
         if (requestParameters['engineVersion'] == null) {
             throw new runtime.RequiredError(
                 'engineVersion',
@@ -156,13 +153,13 @@ export class PluginsApi extends runtime.BaseAPI {
             body: formParams,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PluginDetailsFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginVersionDetailsFromJSON(jsonValue));
     }
 
     /**
      * Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.
      */
-    async addPlugin(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+    async addPlugin(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionDetails> {
         const response = await this.addPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -195,6 +192,10 @@ export class PluginsApi extends runtime.BaseAPI {
             queryParameters['platforms'] = requestParameters['platforms'];
         }
 
+        if (requestParameters['separated'] != null) {
+            queryParameters['separated'] = requestParameters['separated'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -212,46 +213,6 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async downloadLatestPlugin(requestParameters: DownloadLatestPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
         const response = await this.downloadLatestPluginRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Downloads the specified plugin version as a zip file.
-     */
-    async downloadPluginRaw(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
-        if (requestParameters['pluginId'] == null) {
-            throw new runtime.RequiredError(
-                'pluginId',
-                'Required parameter "pluginId" was null or undefined when calling downloadPlugin().'
-            );
-        }
-
-        if (requestParameters['versionId'] == null) {
-            throw new runtime.RequiredError(
-                'versionId',
-                'Required parameter "versionId" was null or undefined when calling downloadPlugin().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/plugins/{pluginId}/{versionId}/download`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.BlobApiResponse(response);
-    }
-
-    /**
-     * Downloads the specified plugin version as a zip file.
-     */
-    async downloadPlugin(requestParameters: DownloadPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
-        const response = await this.downloadPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -378,6 +339,10 @@ export class PluginsApi extends runtime.BaseAPI {
 
         if (requestParameters['platforms'] != null) {
             queryParameters['platforms'] = requestParameters['platforms'];
+        }
+
+        if (requestParameters['separated'] != null) {
+            queryParameters['separated'] = requestParameters['separated'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -592,7 +557,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
-    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginDetails>> {
+    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionDetails>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -625,13 +590,13 @@ export class PluginsApi extends runtime.BaseAPI {
             body: formParams,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PluginDetailsFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PluginVersionDetailsFromJSON(jsonValue));
     }
 
     /**
      * Submits a plugin for processing by uploading source code and a collection of binaries.
      */
-    async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginDetails> {
+    async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionDetails> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }

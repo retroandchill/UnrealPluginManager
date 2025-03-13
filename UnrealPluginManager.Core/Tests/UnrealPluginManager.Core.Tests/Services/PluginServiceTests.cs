@@ -133,17 +133,17 @@ public class PluginServiceTests {
         ]
     });
 
-    var plugin1List = await pluginService.GetDependencyList(plugin1.Id);
+    var plugin1List = await pluginService.GetDependencyList(plugin1.PluginId);
     Assert.That(plugin1List, Has.Count.EqualTo(1));
     Assert.That(plugin1List[0].Name, Is.EqualTo("Plugin1"));
 
-    var plugin2List = await pluginService.GetDependencyList(plugin2.Id);
+    var plugin2List = await pluginService.GetDependencyList(plugin2.PluginId);
     Assert.That(plugin2List, Has.Count.EqualTo(2));
     var plugin2Names = plugin2List.Select(x => x.Name).ToList();
     Assert.That(plugin2Names, Does.Contain("Plugin1"));
     Assert.That(plugin2Names, Does.Contain("Plugin2"));
 
-    var plugin3List = await pluginService.GetDependencyList(plugin3.Id);
+    var plugin3List = await pluginService.GetDependencyList(plugin3.PluginId);
     Assert.That(plugin3List, Has.Count.EqualTo(3));
     var plugin3Names = plugin3List.Select(x => x.Name).ToList();
     Assert.That(plugin3Names, Does.Contain("Plugin1"));
@@ -267,8 +267,7 @@ public class PluginServiceTests {
     Assert.Multiple(() => {
       Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
       Assert.That(summary.Description, Is.EqualTo("Test description"));
-      Assert.That(summary.Versions, Has.Count.EqualTo(1));
-      Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
     });
   }
 
@@ -304,8 +303,7 @@ public class PluginServiceTests {
     Assert.Multiple(() => {
       Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
       Assert.That(summary.Description, Is.EqualTo("Test description"));
-      Assert.That(summary.Versions, Has.Count.EqualTo(1));
-      Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
     });
   }
 
@@ -403,8 +401,7 @@ public class PluginServiceTests {
     Assert.Multiple(() => {
       Assert.That(summary.Name, Is.EqualTo("TestPlugin"));
       Assert.That(summary.Description, Is.EqualTo("Test description"));
-      Assert.That(summary.Versions, Has.Count.EqualTo(1));
-      Assert.That(summary.Versions, Has.One.Property("Version").EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(summary.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
     });
   }
 
@@ -500,19 +497,5 @@ public class PluginServiceTests {
     await context.SaveChangesAsync();
     
     return (plugin.Id, plugin.Versions.First().Id);
-  }
-
-  [Test]
-  public async Task TestIterateOverPluginData() {
-    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    var (pluginId, versionId) = await SetupTestPluginEnvironment();
-
-    var range = await pluginService.GetAllPluginData(pluginId, SemVersionRange.All, "5.5", ["Win64"])
-        .ToListAsync();
-    
-    var fromSingle = await pluginService.GetAllPluginData(pluginId, versionId, "5.5", ["Win64"])
-        .ToListAsync();
-    
-    Assert.That(range, Is.EquivalentTo(fromSingle));
   }
 }

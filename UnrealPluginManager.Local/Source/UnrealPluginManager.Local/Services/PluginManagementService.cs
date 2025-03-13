@@ -1,7 +1,9 @@
 ﻿using System.Net.Mime;
 using LanguageExt;
+using LanguageExt.UnsafeValueAccess;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
@@ -106,8 +108,8 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginDetails> UploadPlugin(string pluginName, SemVersion version, string? remote) {
-    var plugin = await _pluginService.ListLatestedVersions(pluginName, SemVersionRange.Equals(version))
+  public async Task<PluginVersionDetails> UploadPlugin(string pluginName, SemVersion version, string? remote) {
+    var plugin = await _pluginService.ListLatestVersions(pluginName, SemVersionRange.Equals(version))
         .Map(x => x.Count > 0 ? x[0] : null);
     if (plugin is null) {
       throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
@@ -118,9 +120,34 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new RemoteNotFoundException("No default remote configured.");
     }
     
-    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId)
-        .Map(x => x.FileData);
+    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData));
+    return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData.FileData));
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginVersionDetails> DownloadPlugin(string pluginName, SemVersion version,
+                                                         int? remote, string engineVersion,
+                                                         List<string> platforms) {
+    var plugin = await _pluginService.GetPluginVersionDetails(pluginName, version);
+    return await plugin.OrElseGetAsync(async () => {
+      if (!remote.HasValue) {
+        throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version} in the local cache.");
+      }
+      
+      var (remoteName, _) = _remoteService.GetAllRemotes().GetAt(remote.Value);
+      var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
+      var pluginToDownload = await pluginName.ToEnumerable()
+          .PageToEndAsync((y, p) => pluginsApi.GetLatestVersionsAsync(y, version.ToString(), p.PageNumber, p.PageSize))
+          .FirstOrDefaultAsync();
+      if (pluginToDownload is null) {
+        throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
+      }
+
+      await using var pluginDownload = await pluginsApi.DownloadPluginVersionAsync(pluginToDownload.PluginId,
+              pluginToDownload.VersionId, engineVersion, platforms, true)
+          .Map(x => x.Content);
+      return await _pluginService.SubmitPlugin(pluginDownload);
+    });
   }
 }
