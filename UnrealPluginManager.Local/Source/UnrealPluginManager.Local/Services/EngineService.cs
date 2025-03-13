@@ -6,6 +6,7 @@ using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
@@ -25,6 +26,17 @@ public partial class EngineService : IEngineService {
   private readonly IProcessRunner _processRunner;
   private readonly IJsonService _jsonService;
 
+  /// <inheritdoc />
+  public InstalledEngine GetInstalledEngine(string? engineVersion) {
+    var installedEngines = GetInstalledEngines();
+    var installedEngine = engineVersion is not null
+        ? installedEngines.First(x => x.Name == engineVersion)
+        : installedEngines.Where(x => !x.CustomBuild)
+            .OrderByDescending(x => x.Version)
+            .First();
+    return installedEngine;
+  }
+  
   /// <inheritdoc />
   public List<InstalledEngine> GetInstalledEngines() {
     return _enginePlatformService.GetInstalledEngines();
@@ -108,21 +120,15 @@ public partial class EngineService : IEngineService {
 
     await foreach (var zipFile in _pluginService.GetAllPluginData(pluginName, pluginVersion, installedEngine.Name,
                                                                   targetPlatforms)) {
-      await using var fileStream = zipFile.OpenRead();
+      if (zipFile is PluginFileInfo.Icon) {
+        continue;
+      }
+      
+      await using var fileStream = zipFile.File.OpenRead();
       using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
       await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
     }
 
     return 0;
-  }
-
-  private InstalledEngine GetInstalledEngine(string? engineVersion) {
-    var installedEngines = GetInstalledEngines();
-    var installedEngine = engineVersion is not null
-        ? installedEngines.Find(x => x.Name == engineVersion)
-        : installedEngines.Where(x => !x.CustomBuild)
-            .OrderByDescending(x => x.Version)
-            .First();
-    return installedEngine!;
   }
 }

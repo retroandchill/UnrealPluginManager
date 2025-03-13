@@ -260,7 +260,7 @@ public class PluginManagementServiceTest {
     var version = new SemVersion(1, 0, 0);
     var versionMatcher = SemVersionRange.Equals(version);
 
-    var pluginVersion = new PluginVersionInfo {
+    var pluginVersion = new PluginVersionDetails {
         PluginId = Guid.NewGuid(),
         Name = "TestPlugin",
         VersionId = Guid.NewGuid(),
@@ -268,22 +268,17 @@ public class PluginManagementServiceTest {
         Dependencies = []
     };
 
-    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([ pluginVersion ]));
 
     var memoryStream = new MemoryStream();
     _pluginService.Setup(x => x.GetPluginFileData(pluginVersion.PluginId, pluginVersion.VersionId))
-        .ReturnsAsync(memoryStream);
+        .ReturnsAsync(new PluginDownload("TestPlugin", memoryStream));
     _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new PluginDetails {
-            Id = pluginVersion.PluginId,
-            Name = "TestPlugin",
-            FriendlyName = "Test Plugin",
-            Versions = []
-        });
+        .ReturnsAsync(pluginVersion);
     
     var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
-    Assert.That(result.Id, Is.EqualTo(pluginVersion.PluginId));
+    Assert.That(result.PluginId, Is.EqualTo(pluginVersion.PluginId));
   }
   
   [Test]
@@ -291,10 +286,65 @@ public class PluginManagementServiceTest {
     var version = new SemVersion(1, 0, 0);
     var versionMatcher = SemVersionRange.Equals(version);
 
-    _pluginService.Setup(x => x.ListLatestedVersions("TestPlugin", versionMatcher, default))
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([]));
 
     Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.UploadPlugin("TestPlugin", version, "default"));
+  }
+
+  [Test]
+  public async Task TestDownloadPlugin_AlreadyDownloaded() {
+    var pluginDetails = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = new SemVersion(1, 0, 0),
+        Dependencies = []
+    };
+    _pluginService.Setup(x => x.GetPluginVersionDetails("TestPlugin", new SemVersion(1, 0, 0)))
+        .ReturnsAsync(pluginDetails);
+    var result = await _pluginManagementService.DownloadPlugin("TestPlugin", new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]);
+    
+    Assert.That(result, Is.EqualTo(pluginDetails));
+  }
+  
+  [Test]
+  public void TestDownloadPlugin_NotDownloadedLocalOnly() {
+    Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.DownloadPlugin("TestPlugin", 
+        new SemVersion(1, 0, 0), null, "5.5", ["Win54"]));
+  }
+  
+  [Test]
+  public void TestDownloadPlugin_NothingOnCloud() {
+    _pluginsApi.Setup(x => x.GetLatestVersionsAsync("TestPlugin", "1.0.0", 1, 10, CancellationToken.None))
+        .ReturnsAsync(new Page<PluginVersionInfo>([]));
+    Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.DownloadPlugin("TestPlugin", 
+        new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]));
+  }
+  
+  [Test]
+  public async Task TestDownloadPlugin() {
+    var pluginDetails = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = new SemVersion(1, 0, 0),
+        Dependencies = []
+    };
+    
+    _pluginsApi.Setup(x => x.GetLatestVersionsAsync("TestPlugin", "1.0.0", 1, 10, CancellationToken.None))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginDetails]));
+    
+    var dummyStream = new MemoryStream();
+    _pluginsApi.Setup(x => x.DownloadPluginVersionAsync(pluginDetails.PluginId, pluginDetails.VersionId, "5.5", new List<string> { "Win64" }, true, CancellationToken.None))
+        .ReturnsAsync(dummyStream);
+
+    _pluginService.Setup(x => x.SubmitPlugin(dummyStream))
+        .ReturnsAsync(pluginDetails);
+
+    var result = await _pluginManagementService.DownloadPlugin("TestPlugin",
+        new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);
+    Assert.That(result, Is.EqualTo(pluginDetails));
   }
   
 }

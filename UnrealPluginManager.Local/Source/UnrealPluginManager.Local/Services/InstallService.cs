@@ -32,7 +32,7 @@ public partial class InstallService : IInstallService {
         .Map(x => x.Where(pluginVersion.Contains));
     return await existingVersion
         .Select(_ => new List<VersionChange>())
-        .OrElseAsync(() => TryInstall(pluginName, pluginVersion, engineVersion, platforms));
+        .OrElseGetAsync(() => TryInstall(pluginName, pluginVersion, engineVersion, platforms));
   }
 
   /// <inheritdoc />
@@ -67,6 +67,25 @@ public partial class InstallService : IInstallService {
       if (currentlyInstalled.TryGetValue(dep.Name, out var current) && current.Version == dep.Version 
                                                                     && platforms.All(x => current.Platforms.Contains(x))) {
         continue;
+      }
+      
+      var currentVersion = _engineService.GetInstalledEngine(engineVersion);
+      ArgumentNullException.ThrowIfNull(currentVersion);
+      var cachedPlugin = await _pluginManagementService.FindLocalPlugin(dep.Name, dep.Version);
+      if (cachedPlugin.IsNone) {
+        var foundPlugin = await _pluginManagementService.DownloadPlugin(dep.Name, dep.Version, dep.RemoteIndex,
+            currentVersion.Name, platforms.ToList());
+
+        var missingPlatforms = foundPlugin.Binaries
+            .Where(x => x.EngineVersion == currentVersion.Name)
+            .Select(x => x.Platform)
+            .Except(platforms)
+            .ToList();
+        if (missingPlatforms.Count > 0) {
+          // TODO: Build for missing platforms
+          throw new PlatformNotSupportedException(
+              $"Unable to install plugin {dep.Name} with version {dep.Version} on platforms {string.Join(", ", missingPlatforms)}.");
+        }
       }
 
       await _engineService.InstallPlugin(dep.Name, dep.Version, engineVersion, platforms);

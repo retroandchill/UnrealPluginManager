@@ -22,7 +22,6 @@ public class LocalUnrealPluginManagerContextFactory : IDesignTimeDbContextFactor
     var environment = new SystemEnvironment();
     var jsonService = new JsonService(new JsonSerializerOptions {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
         AllowTrailingCommas = true
     });

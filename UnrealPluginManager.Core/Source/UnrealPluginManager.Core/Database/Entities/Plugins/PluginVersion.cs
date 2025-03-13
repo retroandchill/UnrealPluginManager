@@ -65,8 +65,7 @@ public class PluginVersion : IVersionedEntity {
   /// <summary>
   /// Gets or sets the major version number of the plugin version.
   /// </summary>
-  [DefaultValue(1)]
-  public int Major { get; private set; } = 1;
+  public int Major { get; private set; }
 
   /// <summary>
   /// Gets or sets the minor version number of the plugin.
@@ -125,9 +124,5 @@ public class PluginVersion : IVersionedEntity {
 
     modelBuilder.Entity<PluginVersion>()
         .Ignore(x => x.Version);
-
-    modelBuilder.Entity<PluginVersion>()
-        .Property(x => x.Major)
-        .HasDefaultValue(1);
   }
 }

@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
@@ -70,10 +71,12 @@ public class InstallServiceTest {
         .ReturnsAsync(existingPlugin);
 
     _pluginManagementService.Setup(x => x.GetPluginsToInstall(existingPlugin, "5.5"))
-        .ReturnsAsync(new List<PluginSummary> {
-            existingPlugin.ToPluginSummary()
-        });
+        .ReturnsAsync([existingPlugin.ToPluginSummary()]);
+    _pluginManagementService.Setup(x => x.FindLocalPlugin("TestPlugin", new SemVersion(1, 1, 0)))
+        .ReturnsAsync(existingPlugin);
 
+    _engineService.Setup(x => x.GetInstalledEngine("5.5"))
+        .Returns(new InstalledEngine("5.5", new Version(5, 5), null!));
     _engineService.Setup(x => x.GetInstalledPlugins("5.5"))
         .Returns((new List<InstalledPlugin> {
             new("TestPlugin", new SemVersion(1, 0, 0), ["Win64"])
@@ -93,7 +96,7 @@ public class InstallServiceTest {
   }
 
   [Test]
-  public async Task TestInstallPlugin_HasConflicts() {
+  public void TestInstallPlugin_HasConflicts() {
     var existingPlugin = new PluginVersionInfo {
         PluginId = Guid.NewGuid(),
         Name = "TestPlugin",
@@ -175,8 +178,31 @@ public class InstallServiceTest {
         new("Plugin2", new SemVersion(1, 0, 0), ["Win64"]),
         new("Plugin3", new SemVersion(1, 3, 0), []),
     };
+    _engineService.Setup(x => x.GetInstalledEngine("5.5"))
+        .Returns(new InstalledEngine("5.5", new Version(5, 5), null!));
     _engineService.Setup(x => x.GetInstalledPlugins("5.5"))
         .Returns(installedPlugins.ToAsyncEnumerable());
+    
+    var plugin2 = new PluginVersionInfo {
+        PluginId = Guid.NewGuid(),
+        Name = "Plugin2",
+        FriendlyName = "Test Plugin",
+        VersionId = Guid.NewGuid(),
+        Version = new SemVersion(1, 0, 0),
+        Dependencies = []
+    };
+    var plugin3 = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "Plugin2",
+        FriendlyName = "Test Plugin",
+        VersionId = Guid.NewGuid(),
+        Version = new SemVersion(1, 3, 0),
+        Dependencies = []
+    };
+    _pluginManagementService.Setup(x => x.FindLocalPlugin("Plugin2", new SemVersion(1, 1, 0)))
+        .ReturnsAsync(plugin2);
+    _pluginManagementService.Setup(x => x.DownloadPlugin("Plugin3", new SemVersion(1, 3, 0), null, "5.5", new List<string> { "Win64" }))
+        .ReturnsAsync(plugin3);
     
     var changes = await _installService.InstallRequirements("Project.uproject", "5.5", ["Win64"]);
     Assert.That(changes, Has.Count.EqualTo(2));

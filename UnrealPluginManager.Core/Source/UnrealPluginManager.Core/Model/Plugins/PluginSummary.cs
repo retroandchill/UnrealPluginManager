@@ -49,4 +49,29 @@ public record PluginSummary {
   [Required]
   [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; init; }
+  
+  /// <summary>
+  /// Indicates whether the plugin version is currently installed.
+  /// </summary>
+  /// <remarks>
+  /// This property specifies the installation status of the plugin version. It can be
+  /// used to determine if a plugin version is available on the system for use or
+  /// requires installation. The value `true` represents that the plugin is installed,
+  /// while `false` indicates it is not installed.
+  /// </remarks>
+  [JsonIgnore]
+  public bool Installed { get; set; }
+
+
+  /// <summary>
+  /// Gets or sets the index of the plugin version as retrieved from a remote source.
+  /// </summary>
+  /// <remarks>
+  /// This property is used to track the position or order of the plugin version
+  /// in a dataset originating from an external or remote repository. It is
+  /// primarily utilized for managing or querying the plugin's metadata
+  /// in scenarios involving remote data synchronization or retrieval.
+  /// </remarks>
+  [JsonIgnore]
+  public int? RemoteIndex { get; set; }
 }

@@ -113,9 +113,7 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnName("id");
 
                     b.Property<int>("Major")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(1)
                         .HasColumnName("major");
 
                     b.Property<string>("Metadata")

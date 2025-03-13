@@ -92,7 +92,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginDetails"
+                  "$ref": "#/components/schemas/PluginVersionDetails"
                 }
               }
             }
@@ -209,7 +209,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginDetails"
+                  "$ref": "#/components/schemas/PluginVersionDetails"
                 }
               }
             }
@@ -364,6 +364,15 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "separated",
+            "in": "query",
+            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -427,6 +436,15 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "separated",
+            "in": "query",
+            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -921,6 +939,29 @@
         ],
         "type": "string",
         "description": "Specifies the type of plugin in the Unreal Plugin Manager system."
+      },
+      "PluginVersionDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PluginVersionInfo"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "binaries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BinariesOverview"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
       },
       "PluginVersionInfo": {
         "required": [

@@ -10,6 +10,8 @@ namespace UnrealPluginManager.Local.Services;
 /// Represents a service used for remote calls to fetch plugin data.
 /// </summary>
 public interface IPluginManagementService {
+  Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange);
+  
   /// <summary>
   /// Retrieves a list of plugin overviews that optionally match a given search term.
   /// The method aggregates and groups plugins by name, merging relevant details
@@ -103,5 +105,31 @@ public interface IPluginManagementService {
   /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginDetails"/>
   /// object containing detailed information about the uploaded plugin.
   /// </returns>
-  Task<PluginDetails> UploadPlugin(string pluginName, SemVersion version, string? remote);
+  Task<PluginVersionDetails> UploadPlugin(string pluginName, SemVersion version, string? remote);
+
+  /// <summary>
+  /// Downloads the specified version of a plugin from a remote source.
+  /// If the plugin cannot be fetched from the remote, alternative handling might occur,
+  /// such as returning a default or fallback value.
+  /// </summary>
+  /// <param name="pluginName">
+  ///   The name of the plugin to be downloaded. This value must not be null or empty.
+  /// </param>
+  /// <param name="version">
+  ///   The semantic version of the plugin to be downloaded.
+  /// </param>
+  /// <param name="remote">
+  ///   An optional string specifying the remote source from which to download the plugin.
+  ///   If null, a default remote source may be used.
+  /// </param>
+  /// <param name="engineVersion"></param>
+  /// <param name="platforms"></param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion,
+  /// returns a <see cref="PluginDetails"/> object containing detailed
+  /// information about the downloaded plugin, including its versions.
+  /// </returns>
+  Task<PluginVersionDetails> DownloadPlugin(string pluginName, SemVersion version, int? remote,
+                                            string engineVersion,
+                                            List<string> platforms);
 }

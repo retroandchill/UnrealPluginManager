@@ -84,6 +84,17 @@ public static partial class PluginMapper {
   /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
   /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
   public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfo(this IQueryable<PluginVersion> versions);
+  
+  [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionDetails.PluginId))]
+  [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionDetails.Name))]
+  [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionDetails.FriendlyName))]
+  [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionDetails.VersionId))]
+  [MapProperty(nameof(PluginVersion.Parent.Description), nameof(PluginVersionDetails.Description))]
+  [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
+  [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
+  public static partial PluginVersionDetails ToPluginVersionDetails(this PluginVersion version);
+  
+  public static partial IQueryable<PluginVersionDetails> ToPluginVersionDetails(this IQueryable<PluginVersion> versions);
 
   /// <summary>
   /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
@@ -158,6 +169,8 @@ public static partial class PluginMapper {
   /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
   /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
   public static partial PluginDependency ToPluginDependency(this Dependency dependency);
+  
+  public static partial PluginDependency ToPluginDependency(this DependencyOverview dependency);
 
   /// <summary>
   /// Maps a <see cref="PluginReferenceDescriptor"/> to a <see cref="PluginDependency"/> representation.

@@ -10,6 +10,18 @@ namespace UnrealPluginManager.Local.Services;
 /// Provides functionalities related to engine management within the Unreal Plugin Manager CLI.
 /// </summary>
 public interface IEngineService {
+
+  /// <summary>
+  /// Retrieves the installed Unreal Engine based on the specified version.
+  /// </summary>
+  /// <param name="engineVersion">
+  /// The version of the Unreal Engine to retrieve. If null, retrieves the default or latest installed version.
+  /// </param>
+  /// <returns>
+  /// An <see cref="InstalledEngine"/> object that represents the installed Unreal Engine corresponding to the specified version.
+  /// </returns>
+  InstalledEngine GetInstalledEngine(string? engineVersion);
+  
   /// <summary>
   /// Retrieves a list of installed Unreal Engine versions available on the system.
   /// </summary>

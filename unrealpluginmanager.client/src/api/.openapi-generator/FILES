@@ -13,6 +13,7 @@ models/PluginOverviewBase.ts
 models/PluginOverviewPage.ts
 models/PluginSummary.ts
 models/PluginType.ts
+models/PluginVersionDetails.ts
 models/PluginVersionInfo.ts
 models/PluginVersionInfoPage.ts
 models/VersionDetails.ts

@@ -1,4 +1,7 @@
-﻿namespace UnrealPluginManager.Core.Model.Plugins;
+﻿using System.Text.Json.Serialization;
+using UnrealPluginManager.Core.Converters;
+
+namespace UnrealPluginManager.Core.Model.Plugins;
 
 /// <summary>
 /// Represents a manifest of plugin dependencies resolved by the dependency resolution process.
@@ -17,6 +20,7 @@ public class DependencyManifest {
   /// and the values are lists of <see cref="PluginVersionInfo"/> objects, which provide detailed
   /// versioning and metadata information for each resolved dependency.
   /// </remarks>
+  [JsonConverter(typeof(StringKeyDictionaryConverter<List<PluginVersionInfo>>))]
   public Dictionary<string, List<PluginVersionInfo>> FoundDependencies { get; set; } = [];
 
   /// <summary>
