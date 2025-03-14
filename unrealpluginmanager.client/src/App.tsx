@@ -1,4 +1,3 @@
-import {Component} from 'react';
 import './App.css';
 import {PluginDisplayGrid} from "./components";
 import AppBar from '@mui/material/AppBar';
@@ -17,12 +16,12 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
  *
  * @extends Component
  */
-class App extends Component {
+function App() {
 
-  private readonly router = createBrowserRouter([
+  const router = createBrowserRouter([
     {
       path: '/',
-      element: <PluginDisplayGrid onPluginClick={(plugin) => this.router.navigate(`/plugin/${plugin.id}`)}/>
+      element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.id}`)}/>
     },
     {
       path: '/plugin/:id',
@@ -30,30 +29,28 @@ class App extends Component {
     }
   ]);
 
-  render() {
-    return <div>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{mr: 2}}
-          >
-            <MenuIcon/>
-          </IconButton>
-          <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
-            Unreal Plugin Manager
-          </Typography>
-          <Button color="inherit">Login</Button>
-        </Toolbar>
-      </AppBar>
-      <div style={{padding: '2%'}}>
-        <RouterProvider router={this.router}/>
-      </div>
-    </div>;
-  }
+  return <div>
+    <AppBar position="static">
+      <Toolbar>
+        <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{mr: 2}}
+        >
+          <MenuIcon/>
+        </IconButton>
+        <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
+          Unreal Plugin Manager
+        </Typography>
+        <Button color="inherit">Login</Button>
+      </Toolbar>
+    </AppBar>
+    <div style={{padding: '2%'}}>
+      <RouterProvider router={router}/>
+    </div>
+  </div>;
 
 }
 

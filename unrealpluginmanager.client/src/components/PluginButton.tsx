@@ -1,5 +1,4 @@
 ﻿import {PluginOverview} from "../api";
-import {Component} from 'react';
 import {iconsPath} from "../config/Globals.ts";
 
 /**
@@ -46,52 +45,33 @@ interface PluginButtonProps {
   onClick?: PluginCallback;
 }
 
-interface PluginButtonState {
-  icon: string;
-}
-
 /**
- * A React component that represents a button for a plugin. When clicked, it triggers an action
- * defined by the onClick handler passed in the props. It displays basic plugin details such as
- * the latest version, author name (if available), and description.
+ * Renders a button component for a plugin.
+ * Displays plugin details such as name, latest release, and author, and triggers a click handler when clicked.
  *
- * @extends Component
- *
- * @template PluginButtonProps, PluginButtonState
+ * @param {PluginButtonProps} props - The properties for the PluginButton component.
+ * @param {Object} props.plugin - The plugin object containing information about the plugin.
+ * @param {string} props.plugin.name - The name of the plugin.
+ * @param {Array<Object>} props.plugin.versions - The array of versions for the plugin.
+ * @param {string} props.plugin.authorName - The name of the plugin author.
+ * @param {Function} [props.onClick] - Optional onClick handler to be executed when the button is clicked.
+ * @return {JSX.Element} A button element displaying plugin details.
  */
-export class PluginButton extends Component<PluginButtonProps, PluginButtonState> {
+export function PluginButton(props: PluginButtonProps) {
+  let latestVersion = props.plugin.versions[props.plugin.versions.length - 1];
 
-  /**
-   * Constructs a new instance of the PluginButton.
-   *
-   * @param {PluginButtonProps} props - The properties used to initialize the PluginButton.=
-   */
-  constructor(props: PluginButtonProps) {
-    super(props)
-    this.state = {icon: process.env.PUBLIC_URL + '/icon128.png'}
-  }
-
-  componentDidMount() {
-    this.setState({icon: `${iconsPath}/${this.props.plugin.name}`})
-  }
-
-  render() {
-    let latestVersion = this.props.plugin.versions[this.props.plugin.versions.length - 1];
-
-    return <button onClick={() => {
-      if (this.props.onClick) {
-        this.props.onClick(this.props.plugin);
-      }
-    }}>
-      <img src={this.state.icon} alt="Plugin Icon"/>
-      <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
-        <h2>{this.props.plugin.name}</h2>
-      </header>
-      <ul style={{listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
-        <li><b>Latest Release:</b> {latestVersion.version}</li>
-        <li><b>Author:</b> {this.props.plugin.authorName ? `${this.props.plugin.authorName}` : 'Unknown'}</li>
-      </ul>
-    </button>
-  }
-
+  return <button onClick={() => {
+    if (props.onClick) {
+      props.onClick(props.plugin);
+    }
+  }}>
+    <img src={`${iconsPath}/${props.plugin.name}`} alt="Plugin Icon"/>
+    <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
+      <h2>{props.plugin.name}</h2>
+    </header>
+    <ul style={{listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
+      <li><b>Latest Release:</b> {latestVersion.version}</li>
+      <li><b>Author:</b> {props.plugin.authorName ? `${props.plugin.authorName}` : 'Unknown'}</li>
+    </ul>
+  </button>
 }
