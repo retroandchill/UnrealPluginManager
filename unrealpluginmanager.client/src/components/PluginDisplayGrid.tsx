@@ -34,7 +34,7 @@ export function PluginDisplayGrid(props: PluginGridProps) {
       size: 25
     });
     
-    setPlugins(prev => prev.concat(response.items));
+    setPlugins(response.items);
     setLastPage(response);
   }
 
