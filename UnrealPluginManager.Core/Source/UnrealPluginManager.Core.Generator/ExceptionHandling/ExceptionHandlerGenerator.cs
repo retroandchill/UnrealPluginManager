@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using HandlebarsDotNet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,7 +17,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
   private static readonly DiagnosticDescriptor RequiresPartialWarning = new(
       "UEPM001",
       "Target class must be partial", 
-      "Target class '{0}' must be partial.",
+      "Target class '{0}' must be partial",
       "ExceptionHandlerGenerator",
       DiagnosticSeverity.Warning, 
       isEnabledByDefault: true);
@@ -29,7 +25,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
   private static readonly DiagnosticDescriptor NoNestedError = new(
       "UEPM002",
       "Target class may not be nested",
-      "Target class '{0}' may not be nested.",
+      "Target class '{0}' may not be nested",
       "ExceptionHandlerGenerator",
       DiagnosticSeverity.Error,
       isEnabledByDefault: true);
@@ -62,7 +58,7 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
     var semanticModel = compilation.GetSemanticModel(handlerClass.SyntaxTree);
     var classSymbol = semanticModel.GetDeclaredSymbol(handlerClass);
     if (classSymbol is null) {
-      throw new ArgumentNullException();
+      throw new ArgumentNullException(nameof(handlerClass));
     }
     var attributeData = classSymbol
         .GetAttributes()
@@ -82,17 +78,6 @@ public class ExceptionHandlerGenerator : IIncrementalGenerator {
       context.ReportDiagnostic(Diagnostic.Create(NoNestedError, handlerClass.Identifier.GetLocation(),
           handlerClass.Identifier.Text));
       return;
-    }
-    
-    
-    var arguments = attributeData.NamedArguments
-        .ToDictionary(x => x.Key, x => x.Value.Value);
-    
-    var defaultExitCode = "33";
-    if (arguments.TryGetValue("DefaultHandlerMethod", out var handlerMethod) && handlerMethod is string method) {
-      defaultExitCode = $"{method}(ex)";
-    } else if (arguments.TryGetValue("DefaultExitCode", out var exitCode) && exitCode is int code) {
-      defaultExitCode = $"{code}";
     }
     
     var allMethods = handlerClass.Members
