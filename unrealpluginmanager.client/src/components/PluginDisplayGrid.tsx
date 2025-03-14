@@ -22,7 +22,7 @@ interface PluginGridProps {
   onPluginClick?: PluginCallback;
 }
 
-export function PluginDisplayGrid(props: PluginGridProps) {
+export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
   const [plugins, setPlugins] = useState<PluginOverview[]>([]);
   const [lastPage, setLastPage] = useState<Page<PluginOverview> | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);

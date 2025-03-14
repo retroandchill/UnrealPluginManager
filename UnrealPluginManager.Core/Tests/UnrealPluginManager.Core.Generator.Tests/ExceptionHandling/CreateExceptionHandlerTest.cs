@@ -10,7 +10,6 @@ using static UnrealPluginManager.Core.Generator.Tests.Helpers.GeneratorTestHelpe
 namespace UnrealPluginManager.Core.Generator.Tests.ExceptionHandling;
 
 public class CreateExceptionHandlerTest {
-  
   [Test]
   public void TestCreateExceptionHandler() {
     var inputCompilation = CreateCompilation("""
@@ -39,12 +38,12 @@ public class CreateExceptionHandlerTest {
                                              """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
-    
+
     var driver = CSharpGeneratorDriver.Create(generator);
-    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-    Assert.That(diagnostics.Length, Is.EqualTo(0));
+    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _, out var diagnostics);
+    Assert.That(diagnostics, Is.Empty);
   }
-  
+
   [Test]
   public void TestCreateExceptionHandler_NoPartialClass() {
     var inputCompilation = CreateCompilation("""
@@ -64,15 +63,16 @@ public class CreateExceptionHandlerTest {
                                              """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
-    
+
     var driver = CSharpGeneratorDriver.Create(generator);
-    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-    Assert.That(diagnostics.Length, Is.EqualTo(1));
-    
-    Assert.That(diagnostics[0].Id, Is.EqualTo("UEPM001"));
-    Assert.That(diagnostics[0].Severity, Is.EqualTo(DiagnosticSeverity.Warning));
+    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _, out var diagnostics);
+    Assert.That(diagnostics, Has.Length.EqualTo(1));
+    Assert.Multiple(() => {
+      Assert.That(diagnostics[0].Id, Is.EqualTo("UEPM001"));
+      Assert.That(diagnostics[0].Severity, Is.EqualTo(DiagnosticSeverity.Warning));
+    });
   }
-  
+
   [Test]
   public void TestCreateExceptionHandler_NestedClass() {
     var inputCompilation = CreateCompilation("""
@@ -82,7 +82,7 @@ public class CreateExceptionHandlerTest {
 
                                              namespace Test;
 
-                                             
+
                                              public partial class TestHandler {
                                                [ExceptionHandler]
                                                public partial class NestedHandler {
@@ -95,14 +95,14 @@ public class CreateExceptionHandlerTest {
                                              """, typeof(ExceptionHandlerAttribute), typeof(PluginNotFoundException));
 
     var generator = new ExceptionHandlerGenerator();
-    
-    var driver = CSharpGeneratorDriver.Create(generator);
-    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-    Assert.That(diagnostics.Length, Is.EqualTo(1));
-    
-    Assert.That(diagnostics[0].Id, Is.EqualTo("UEPM002"));
-    Assert.That(diagnostics[0].Severity, Is.EqualTo(DiagnosticSeverity.Error));
-  }
 
-  
+    var driver = CSharpGeneratorDriver.Create(generator);
+    driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _, out var diagnostics);
+    Assert.That(diagnostics, Has.Length.EqualTo(1));
+
+    Assert.Multiple(() => {
+      Assert.That(diagnostics[0].Id, Is.EqualTo("UEPM002"));
+      Assert.That(diagnostics[0].Severity, Is.EqualTo(DiagnosticSeverity.Error));
+    });
+  }
 }

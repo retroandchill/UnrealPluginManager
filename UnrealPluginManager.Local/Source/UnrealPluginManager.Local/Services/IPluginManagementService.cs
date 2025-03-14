@@ -10,6 +10,19 @@ namespace UnrealPluginManager.Local.Services;
 /// Represents a service used for remote calls to fetch plugin data.
 /// </summary>
 public interface IPluginManagementService {
+  /// <summary>
+  /// Searches for a locally stored plugin matching the specified name and version range.
+  /// </summary>
+  /// <param name="pluginName">
+  /// The name of the plugin to search for. This is a required string identifying the plugin.
+  /// </param>
+  /// <param name="versionRange">
+  /// The semantic version range that the plugin must match.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns an <see cref="Option{T}"/>
+  /// containing a <see cref="PluginVersionInfo"/> if a matching plugin is found, or <see cref="Option{T}.None"/> if no match exists.
+  /// </returns>
   Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange);
   
   /// <summary>

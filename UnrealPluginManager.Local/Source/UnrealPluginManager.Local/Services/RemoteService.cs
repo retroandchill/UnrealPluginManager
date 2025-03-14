@@ -107,6 +107,10 @@ public class RemoteService : IRemoteService {
       throw new ArgumentException($"No API accessor for type {typeof(T).Name}");
     }
 
+    return IterateOverApiAccessors<T>(accessors);
+  }
+
+  private static IEnumerable<Remote<T>> IterateOverApiAccessors<T>(Dictionary<string, IApiAccessor> accessors) where T : IApiAccessor {
     foreach (var (name, api) in accessors) {
       yield return new Remote<T>(name, (T) api);
     }

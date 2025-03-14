@@ -110,7 +110,7 @@ public struct PageRequest {
   /// paginated dataset, with the current page size maintained. It is useful for resetting
   /// pagination to the beginning of the dataset while preserving the page size configuration.
   /// </remarks>
-  public PageRequest First => new PageRequest(1, PageSize);
+  public PageRequest First => new(1, PageSize);
 
   /// <summary>
   /// Retrieves the next page request in the pagination sequence.
@@ -189,7 +189,16 @@ public struct Pageable {
   /// </remarks>
   public bool IsUnpaged => !_request.IsValid;
 
-  public static Pageable Unpaged = new();
+  /// <summary>
+  /// Represents a pre-configured pageable instance with no pagination applied.
+  /// </summary>
+  /// <remarks>
+  /// This static property is used to define a state where pagination is not applied to a collection
+  /// or dataset. It signifies an unpaged configuration, meaning all available data should be retrieved
+  /// without dividing it into pages. This is typically utilized in scenarios where pagination is optional
+  /// or unnecessary, ensuring the entire data set is processed as a single unit.
+  /// </remarks>
+  public static Pageable Unpaged { get; } = new();
 
   /// <summary>
   /// Represents a pageable abstraction for managing pagination settings and behavior.
@@ -208,10 +217,29 @@ public struct Pageable {
     _request = new PageRequest(pageNumber, pageSize);
   }
 
+  /// <summary>
+  /// Provides support for handling pagination in data collections or queries through the use of a page request configuration.
+  /// </summary>
+  /// <remarks>
+  /// The <see cref="Pageable"/> struct enables operations that depend on pagination, offering mechanisms to identify
+  /// whether the pagination is configured (paged) or not configured (unpaged). It supports conversion between pageable instances
+  /// and page requests, facilitates conditional logic based on pagination state, and offers methods for advanced matching logic to
+  /// handle paginated or non-paginated scenarios effectively.
+  /// </remarks>
   public Pageable(PageRequest request) {
     _request = request;
   }
 
+  /// <summary>
+  /// Defines an implicit conversion operator that enables converting a <see cref="PageRequest"/> instance
+  /// into a <see cref="Pageable"/> object.
+  /// </summary>
+  /// <remarks>
+  /// This operator simplifies the process of wrapping a <see cref="PageRequest"/> into a <see cref="Pageable"/> object.
+  /// It provides seamless interoperability for scenarios where pagination logic requires transitioning between
+  /// these two types. The conversion will result in a new <see cref="Pageable"/> instance configured with
+  /// the specified <see cref="PageRequest"/>.
+  /// </remarks>
   public static implicit operator Pageable(PageRequest request) {
     return new Pageable(request);
   }

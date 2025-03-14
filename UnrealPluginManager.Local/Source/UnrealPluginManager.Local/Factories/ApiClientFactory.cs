@@ -18,6 +18,7 @@ public class ApiClientFactory<TInterface, TImpl> : IApiClientFactory<TInterface>
   /// <inheritdoc />
   public Type InterfaceType => typeof(TInterface);
 
+  /// <inheritdoc />
   IApiAccessor IApiClientFactory.Create(RemoteConfig config) {
     return Create(config);
   }

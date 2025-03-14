@@ -280,34 +280,6 @@ public partial class PluginService : IPluginService {
         .SelectMany(x => x));
   }
 
-  private async Task<(ZipArchive archive, string baseName, PluginDescriptor descriptor)>
-      ValidateAndExtractPluginDescriptor(Stream source) {
-    var archive = new ZipArchive(source);
-    var pluginDescriptorFile = archive.Entries
-        .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
-    if (pluginDescriptorFile is null) {
-      throw new BadSubmissionException("Uplugin file was not found");
-    }
-
-    var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
-
-    PluginDescriptor descriptor;
-    try {
-      await using var upluginFile = pluginDescriptorFile.Open();
-      descriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(upluginFile);
-    } catch (JsonException e) {
-      throw new BadSubmissionException("Uplugin file was malformed", e);
-    }
-
-    var exists = await _dbContext.PluginVersions.AnyAsync(x => x.Parent.Name == baseName
-                                                               && x.VersionString == descriptor.VersionName.ToString());
-    if (exists) {
-      throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
-    }
-
-    return (archive, baseName, descriptor);
-  }
-
   /// <inheritdoc />
   public async Task<PluginVersionDetails> SubmitPlugin(IDirectoryInfo pluginDirectory, string engineVersion) {
     var pluginDescriptorFile = pluginDirectory.GetFiles("*.uplugin", SearchOption.TopDirectoryOnly)
@@ -335,6 +307,34 @@ public partial class PluginService : IPluginService {
     var partitionedPlugin = await _pluginStructureService.PartitionPlugin(baseName, descriptor.VersionName,
         engineVersion, pluginDirectory);
     return await AddPlugin(baseName, descriptor, new EngineFileData(engineVersion, partitionedPlugin));
+  }
+  
+  private async Task<(ZipArchive archive, string baseName, PluginDescriptor descriptor)>
+      ValidateAndExtractPluginDescriptor(Stream source) {
+    var archive = new ZipArchive(source);
+    var pluginDescriptorFile = archive.Entries
+        .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
+    if (pluginDescriptorFile is null) {
+      throw new BadSubmissionException("Uplugin file was not found");
+    }
+
+    var baseName = Path.GetFileNameWithoutExtension(pluginDescriptorFile.FullName);
+
+    PluginDescriptor descriptor;
+    try {
+      await using var upluginFile = pluginDescriptorFile.Open();
+      descriptor = await _jsonService.DeserializeAsync<PluginDescriptor>(upluginFile);
+    } catch (JsonException e) {
+      throw new BadSubmissionException("Uplugin file was malformed", e);
+    }
+
+    var exists = await _dbContext.PluginVersions.AnyAsync(x => x.Parent.Name == baseName
+                                                               && x.VersionString == descriptor.VersionName.ToString());
+    if (exists) {
+      throw new BadSubmissionException($"Plugin {baseName} version {descriptor.VersionName} already exists");
+    }
+
+    return (archive, baseName, descriptor);
   }
 
   /// <inheritdoc />
@@ -377,14 +377,6 @@ public partial class PluginService : IPluginService {
   private IFileInfo GetPluginBinaries(string pluginName, SemVersion version, string engineVersion, string platform) {
     return _storageService.RetrievePluginBinaries(pluginName, version, engineVersion, platform)
         .OrElseThrow(() => new PluginNotFoundException($"Binaries for {pluginName} was not found!"));
-  }
-
-  private IEnumerable<(string, IFileInfo)> GetPluginBinaries(string pluginName, SemVersion version,
-                                                             string engineVersion,
-                                                             IReadOnlyCollection<string> targetPlatforms) {
-    return targetPlatforms.Select(platform => (platform, _storageService
-        .RetrievePluginBinaries(pluginName, version, engineVersion, platform)
-        .OrElseThrow(() => new PluginNotFoundException($"Binaries for {platform} was not found!"))));
   }
 
   private async Task<Stream> CreateStructuredFileData(IEnumerable<PluginFileInfo> pluginFiles) {

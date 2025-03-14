@@ -1,11 +1,7 @@
-﻿using System.Net.Mime;
-using LanguageExt;
-using LanguageExt.UnsafeValueAccess;
+﻿using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
-using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -26,6 +22,7 @@ public partial class PluginManagementService : IPluginManagementService {
 
   private const int DefaultPageSize = 100;
 
+  /// <inheritdoc />
   public Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange) {
     return _pluginService.GetPluginVersionInfo(pluginName, versionRange);
   }

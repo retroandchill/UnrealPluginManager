@@ -121,14 +121,14 @@ public static class OptionUtils {
   }
 
   /// <summary>
-  /// Executes pattern matching logic on a nullable class type <see cref="T"/> value and produces a result of type <see cref="TResult"/>.
+  /// Executes pattern matching logic on a nullable class type T value and produces a result of type TResult.
   /// </summary>
   /// <typeparam name="T">The type of the nullable class to be matched.</typeparam>
   /// <typeparam name="TResult">The type of the result produced by the matching logic.</typeparam>
   /// <param name="value">The nullable class instance to apply the match operation on.</param>
   /// <param name="some">The function to execute if the value is non-null.</param>
   /// <param name="none">The function to execute if the value is null.</param>
-  /// <returns>The result of type <see cref="TResult"/> determined by executing either the <paramref name="some"/> or <paramref name="none"/> function.</returns>
+  /// <returns>The result of type TResult determined by executing either the <paramref name="some"/> or <paramref name="none"/> function.</returns>
   public static TResult Match<T, TResult>(this T? value, Func<T, TResult> some, Func<TResult> none) where T : class {
     return value is not null ? some(value) : none();
   }

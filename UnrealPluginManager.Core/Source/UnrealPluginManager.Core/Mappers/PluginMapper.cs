@@ -1,12 +1,9 @@
 ﻿using Riok.Mapperly.Abstractions;
 using Semver;
-using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Project;
-using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Mappers;
@@ -84,7 +81,12 @@ public static partial class PluginMapper {
   /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
   /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
   public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfo(this IQueryable<PluginVersion> versions);
-  
+
+  /// <summary>
+  /// Maps a <see cref="PluginVersion"/> entity to a <see cref="PluginVersionDetails"/> model.
+  /// </summary>
+  /// <param name="version">The instance of <see cref="PluginVersion"/> to be mapped.</param>
+  /// <returns>An instance of <see cref="PluginVersionDetails"/> that represents the provided <see cref="PluginVersion"/>.</returns>
   [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionDetails.PluginId))]
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionDetails.Name))]
   [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionDetails.FriendlyName))]
@@ -93,7 +95,12 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
   public static partial PluginVersionDetails ToPluginVersionDetails(this PluginVersion version);
-  
+
+  /// <summary>
+  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionDetails}"/> representation.
+  /// </summary>
+  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
+  /// <returns>An <see cref="IQueryable{PluginVersionDetails}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
   public static partial IQueryable<PluginVersionDetails> ToPluginVersionDetails(this IQueryable<PluginVersion> versions);
 
   /// <summary>
@@ -169,8 +176,6 @@ public static partial class PluginMapper {
   /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
   /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
   public static partial PluginDependency ToPluginDependency(this Dependency dependency);
-  
-  public static partial PluginDependency ToPluginDependency(this DependencyOverview dependency);
 
   /// <summary>
   /// Maps a <see cref="PluginReferenceDescriptor"/> to a <see cref="PluginDependency"/> representation.
