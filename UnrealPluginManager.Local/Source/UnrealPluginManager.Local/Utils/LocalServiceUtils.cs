@@ -40,7 +40,7 @@ public static class LocalServiceUtils {
     };
 
     return services.AddScoped<IEngineService, EngineService>()
-        .AddScoped<IStorageService, LocalStorageService>()
+        .AddSingleton<IStorageService, LocalStorageService>()
         .AddScoped<IRemoteService, RemoteService>()
         .AddScoped<IPluginManagementService, PluginManagementService>()
         .AddScoped<IInstallService, InstallService>()

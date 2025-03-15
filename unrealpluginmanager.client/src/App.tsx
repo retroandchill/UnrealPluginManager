@@ -21,7 +21,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.id}`)}/>
+        element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.pluginId}`)}/>
     },
     {
       path: '/plugin/:id',

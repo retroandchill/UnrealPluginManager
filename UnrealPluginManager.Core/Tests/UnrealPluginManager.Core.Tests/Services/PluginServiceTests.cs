@@ -38,7 +38,7 @@ public class PluginServiceTests {
     services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
     services.AddScoped<IPluginService, PluginService>();
     services.AddScoped<IPluginStructureService, PluginStructureService>();
-    services.AddScoped<IStorageService, MockStorageService>();
+    services.AddSingleton<IStorageService, MockStorageService>();
     _serviceProvider = services.BuildServiceProvider();
 
     _storageService = _serviceProvider.GetRequiredService<IStorageService>();

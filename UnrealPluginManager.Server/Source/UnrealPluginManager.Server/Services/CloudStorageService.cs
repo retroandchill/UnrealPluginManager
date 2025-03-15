@@ -32,9 +32,14 @@ public class CloudStorageService : StorageServiceBase {
       directoryInfo.Create();
     }
 
-    var resourceDirectory = Path.Combine(directoryInfo.FullName, storageMetadata.ResourceDirectory);
-    if (!FileSystem.Directory.Exists(resourceDirectory)) {
-      FileSystem.Directory.CreateDirectory(resourceDirectory);
+    BaseDirectory = directoryInfo.FullName;
+
+    var resourceDirectory = FileSystem.DirectoryInfo.New(Path.GetFullPath(storageMetadata.ResourceDirectory,
+        FileSystem.Directory.GetCurrentDirectory()));
+    if (!resourceDirectory.Exists) {
+      resourceDirectory.Create();
     }
+
+    ResourceDirectory = resourceDirectory.FullName;
   }
 }

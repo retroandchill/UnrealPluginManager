@@ -38,6 +38,8 @@ public partial class PluginService : IPluginService {
   public Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
     return _dbContext.Plugins
         .Where(x => EF.Functions.Like(x.Name, matcher.Replace("*", "%")))
+        .Include(x => x.Versions)
+        .ThenInclude(x => x.Icon)
         .OrderByDescending(x => x.Name)
         .ToPluginOverview()
         .ToPageAsync(pageable);
@@ -48,6 +50,7 @@ public partial class PluginService : IPluginService {
                                                           Pageable pageable = default) {
     return _dbContext.PluginVersions
         .Include(x => x.Parent)
+        .Include(x => x.Icon)
         .Where(x => EF.Functions.Like(x.Parent.Name, pluginName.Replace("*", "%")))
         .WhereVersionInRange(versionRange)
         .GroupBy(x => x.ParentId)
@@ -483,6 +486,8 @@ public partial class PluginService : IPluginService {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Source)
+        .Include(x => x.Icon)
+        .Include(x => x.Readme)
         .Where(x => x.Id == versionId)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries)
@@ -505,6 +510,8 @@ public partial class PluginService : IPluginService {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Source)
+        .Include(x => x.Icon)
+        .Include(x => x.Readme)
         .WhereVersionInRange(targetVersion)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries
@@ -537,6 +544,8 @@ public partial class PluginService : IPluginService {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Source)
+        .Include(x => x.Icon)
+        .Include(x => x.Readme)
         .Where(x => x.Id == versionId)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries

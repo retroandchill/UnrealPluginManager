@@ -1,6 +1,6 @@
 ﻿import {useEffect, useState} from 'react';
-import {Page, debounce} from "../util";
-import {PluginOverview} from "../api";
+import {debounce, Page} from "../util";
+import {PluginVersionInfo} from "../api";
 import {pluginsApi} from "../config/Globals";
 import {PluginButton, PluginCallback} from "./PluginButton.tsx";
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -23,12 +23,12 @@ interface PluginGridProps {
 }
 
 export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
-  const [plugins, setPlugins] = useState<PluginOverview[]>([]);
-  const [lastPage, setLastPage] = useState<Page<PluginOverview> | undefined>(undefined);
+    const [plugins, setPlugins] = useState<PluginVersionInfo[]>([]);
+    const [lastPage, setLastPage] = useState<Page<PluginVersionInfo> | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
   async function updateSearchTerm(newSearchTerm: string) {
-    const response = await pluginsApi.getPlugins({
+      const response = await pluginsApi.getLatestVersions({
       match: newSearchTerm ? `${newSearchTerm}*` : undefined,
       page: 1,
       size: 25
@@ -46,7 +46,7 @@ export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
   }
 
   async function populatePluginList() {
-    const response = await pluginsApi.getPlugins({
+      const response = await pluginsApi.getLatestVersions({
       match: searchTerm ? `${searchTerm}*` : undefined,
       page: lastPage ? lastPage.pageNumber + 1 : 1,
       size: 25
@@ -83,7 +83,7 @@ export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
 
       <table className="table table-striped" aria-labelledby="tableLabel">
         <tbody>
-        {plugins.map(plugin => <PluginButton key={plugin.id} plugin={plugin}
+        {plugins.map(plugin => <PluginButton key={plugin.pluginId} plugin={plugin}
                                              onClick={props.onPluginClick}/>)}
         </tbody>
       </table>

@@ -70,14 +70,14 @@ public partial class PluginStructureService : IPluginStructureService {
   /// <inheritdoc />
   public async Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
                                                        ZipArchive zipArchive) {
-    var iconEntry = zipArchive.GetEntry(Path.Join("Resources", "Icon128.png"));
+    var iconEntry = zipArchive.GetEntry("Resources/Icon128.png");
     ResourceHandle? pluginIcon = null;
     if (iconEntry is not null) {
       await using var iconStream = iconEntry.Open();
       pluginIcon = await _storageService.AddResource(new StreamFileSource(_fileSystem, iconStream));
     }
 
-    var readmeEntry = zipArchive.GetEntry(Path.Join("README.md"));
+    var readmeEntry = zipArchive.GetEntry("README.md");
     ResourceHandle? pluginReadme = null;
     if (readmeEntry is not null) {
       await using var readmeStream = readmeEntry.Open();

@@ -25,4 +25,4 @@ export const pluginsApi = new PluginsApi(apiConfig);
  * Represents the complete API path to access resources.
  * It is a concatenation of the base API URL and the resources endpoint.
  */
-export const apiResourcesPath = `${apiBaseUrl}/resources`
+export const apiResourcesPath = `${apiBaseUrl}/storage`

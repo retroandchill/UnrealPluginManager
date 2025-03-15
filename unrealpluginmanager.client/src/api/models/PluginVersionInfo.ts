@@ -13,14 +13,10 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { PluginDependency } from './PluginDependency';
-import {
-    PluginDependencyFromJSON,
-    PluginDependencyFromJSONTyped,
-    PluginDependencyToJSON,
-    PluginDependencyToJSONTyped,
-} from './PluginDependency';
+import type {ResourceInfo} from './ResourceInfo';
+import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
+import type {PluginDependency} from './PluginDependency';
+import {PluginDependencyFromJSON, PluginDependencyToJSON,} from './PluginDependency';
 
 /**
  * Represents detailed information about a specific version of a plugin.
@@ -47,6 +43,12 @@ export interface PluginVersionInfo {
      */
     friendlyName?: string | null;
     /**
+     * Gets or sets the name of the author associated with the plugin.
+     * @type {string}
+     * @memberof PluginVersionInfo
+     */
+    authorName?: string | null;
+    /**
      * Gets or sets the unique identifier for the plugin version.
      * @type {string}
      * @memberof PluginVersionInfo
@@ -58,6 +60,12 @@ export interface PluginVersionInfo {
      * @memberof PluginVersionInfo
      */
     version: string;
+    /**
+     *
+     * @type {ResourceInfo}
+     * @memberof PluginVersionInfo
+     */
+    icon?: ResourceInfo;
     /**
      * Gets or sets the list of dependencies for the current plugin version.
      * @type {Array<PluginDependency>}
@@ -91,8 +99,10 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
         'pluginId': json['pluginId'],
         'name': json['name'],
         'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
+        'authorName': json['authorName'] == null ? undefined : json['authorName'],
         'versionId': json['versionId'],
         'version': json['version'],
+        'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
     };
 }
@@ -111,8 +121,10 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
         'pluginId': value['pluginId'],
         'name': value['name'],
         'friendlyName': value['friendlyName'],
+        'authorName': value['authorName'],
         'versionId': value['versionId'],
         'version': value['version'],
+        'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
     };
 }

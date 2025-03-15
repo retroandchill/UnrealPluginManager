@@ -2,18 +2,11 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
-using Semver;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Binding;
-using UnrealPluginManager.Server.Controllers;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Exceptions;
 using UnrealPluginManager.Server.Services;
@@ -44,7 +37,7 @@ public static class ServerServiceUtils {
   public static IServiceCollection AddServerServices(this IServiceCollection services) {
     return services
         .AddExceptionHandler<ServerExceptionHandler>()
-        .AddScoped<IStorageService, CloudStorageService>()
+        .AddSingleton<IStorageService, CloudStorageService>()
         .AddSingleton<IJsonService>(provider => {
           var options = provider.GetRequiredService<IOptions<JsonOptions>>();
           return new JsonService(options.Value.JsonSerializerOptions);

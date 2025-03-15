@@ -54,10 +54,6 @@ export default defineConfig({
       '^/api': {
         target,
         secure: false
-      },
-      '^/files': {
-        target,
-        secure: false
       }
     },
     port: 60493,
