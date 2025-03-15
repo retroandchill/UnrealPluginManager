@@ -320,16 +320,6 @@ public class PluginServiceTests {
       await writer.WriteAsync("This is not a JSON file");
     }
 
-    _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
-        .Returns(async (Stream input) => {
-          var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
-          await using var stream = dummyInfo.Create();
-          input.Seek(0, SeekOrigin.Begin);
-          await input.CopyToAsync(stream);
-          stream.Seek(0, SeekOrigin.Begin);
-          return new StoredPluginData { ZipFile = dummyInfo };
-        });
-
     Assert.ThrowsAsync<BadSubmissionException>(async () =>
                                                    await pluginService.SubmitPlugin(testZip, "5.5"));
   }
@@ -351,16 +341,6 @@ public class PluginServiceTests {
 
       await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
     }
-
-    _mockStorageService.Setup(x => x.StorePlugin(It.IsAny<Stream>()))
-        .Returns(async (Stream input) => {
-          var dummyInfo = filesystem.FileInfo.New("dummyFile.zip");
-          await using var stream = dummyInfo.Create();
-          input.Seek(0, SeekOrigin.Begin);
-          await input.CopyToAsync(stream);
-          stream.Seek(0, SeekOrigin.Begin);
-          return new StoredPluginData { ZipFile = dummyInfo };
-        });
 
     Assert.ThrowsAsync<BadSubmissionException>(async () =>
                                                    await pluginService.SubmitPlugin(testZip, "5.5"));
@@ -463,9 +443,6 @@ public class PluginServiceTests {
       await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
     }
 
-    _mockStorageService.Setup(x => x.RetrievePluginSource("TestPlugin", new SemVersion(1, 0, 0)))
-        .Returns(Option<IFileInfo>.Some(zipFile));
-
     var binaries = filesystem.FileInfo.New("Binaries.zip");
     await using var binZip = binaries.Create();
     using (var zipArchive = new ZipArchive(binZip, ZipArchiveMode.Create)) {
@@ -473,9 +450,6 @@ public class PluginServiceTests {
       await using var writer = new StreamWriter(entry.Open());
       await writer.WriteAsync("TestPlugin.dll");
     }
-
-    _mockStorageService.Setup(x => x.RetrievePluginBinaries("TestPlugin", new SemVersion(1, 0, 0), "5.5", "Win64"))
-        .Returns(Option<IFileInfo>.Some(binaries));
 
     var plugin = new Plugin {
         Name = "TestPlugin",
@@ -485,13 +459,17 @@ public class PluginServiceTests {
         Versions = [
             new PluginVersion {
                 Version = new SemVersion(1, 0, 0),
+                Source = new FileResource {
+                    OriginalFilename = "Source.zip",
+                    FilePath = zipFile
+                },
                 Binaries = [
                     new UploadedBinaries {
                         EngineVersion = "5.5",
                         Platform = "Win64",
                         File = new FileResource {
                             OriginalFilename = "Win64.zip",
-                            FilePath = filesystem.FileInfo.New("Win64.zip")
+                            FilePath = binaries
                         }
                     }
                 ]

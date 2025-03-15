@@ -42,7 +42,7 @@ public partial class CliExceptionHandler {
     return -1;
   }
   
-  [HandlesException(typeof(MissingDependenciesException), typeof(PluginNotFoundException), typeof(RemoteNotFoundException))]
+  [HandlesException]
   private int HandleNotFound(UnrealPluginManagerException exception) {
     _console.Out.WriteLine($"{exception.Message}");
     return 12;

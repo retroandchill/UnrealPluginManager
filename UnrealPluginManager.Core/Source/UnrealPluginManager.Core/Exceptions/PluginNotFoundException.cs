@@ -12,4 +12,4 @@
 /// </remarks>
 /// <seealso cref="UnrealPluginManagerException" />
 public class PluginNotFoundException(string? message = null, Exception? innerException = null)
-    : UnrealPluginManagerException(message, innerException);
+    : ContentNotFoundException(message, innerException);

@@ -40,23 +40,6 @@ public class CloudStorageServiceTest {
   }
 
   [Test]
-  public async Task TestStorePlugin() {
-    var storageService = _serviceProvider.GetService<IStorageService>()!;
-
-    using var testZip = new MemoryStream();
-    using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
-      zipArchive.CreateEntry("TestPlugin.uplugin");
-    }
-
-    var fileInfo = await storageService.StorePlugin(testZip);
-    Assert.Multiple(() => {
-      Assert.That(fileInfo.ZipFile.Exists, Is.True);
-      Assert.That(fileInfo.ZipFile.Name, Does.StartWith("TestPlugin"));
-      Assert.That(fileInfo.ZipFile.Name, Does.EndWith(".zip"));
-    });
-  }
-
-  [Test]
   public void TestSynchronousConfiguration() {
     var storageService = _serviceProvider.GetRequiredService<IStorageService>();
     var baseConfig = storageService.GetConfig<ProjectDescriptor>("TestProject");

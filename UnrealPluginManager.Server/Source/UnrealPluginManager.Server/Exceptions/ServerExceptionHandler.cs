@@ -53,13 +53,13 @@ public partial class ServerExceptionHandler : IExceptionHandler {
     return details;
   }
 
-  [HandlesException(typeof(PluginNotFoundException), typeof(MissingDependenciesException))]
-  private ProblemDetails GetNotFoundProblemDetails(Exception exception, HttpContext httpContext) {
+  [HandlesException]
+  private ProblemDetails GetNotFoundProblemDetails(ContentNotFoundException exception, HttpContext httpContext) {
     return CreateProblemDetails(httpContext, StatusCodes.Status404NotFound, exception);
   }
   
-  [HandlesException(typeof(BadSubmissionException))]
-  private ProblemDetails GetBadRequestProblemDetails(Exception exception, HttpContext httpContext) {
+  [HandlesException]
+  private ProblemDetails GetBadRequestProblemDetails(BadArgumentException exception, HttpContext httpContext) {
     return CreateProblemDetails(httpContext, StatusCodes.Status400BadRequest, exception);
   }
   
