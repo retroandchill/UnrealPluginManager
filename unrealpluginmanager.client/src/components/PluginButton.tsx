@@ -57,7 +57,7 @@ interface PluginButtonProps {
  * @param {Function} [props.onClick] - Optional onClick handler to be executed when the button is clicked.
  * @return {JSX.Element} A button element displaying plugin details.
  */
-export function PluginButton(props: PluginButtonProps) {
+export function PluginButton(props: Readonly<PluginButtonProps>) {
   let latestVersion = props.plugin.versions[props.plugin.versions.length - 1];
 
   return <button onClick={() => {

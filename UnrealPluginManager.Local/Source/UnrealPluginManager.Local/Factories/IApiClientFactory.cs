@@ -19,9 +19,9 @@ public interface IApiClientFactory {
   /// This method leverages the factory's implementation to establish instances of API accessors
   /// tailored to interact with specific remote services.
   /// </summary>
-  /// <param name="baseUrl">The remote configuration providing the base URL and optional credentials for the API accessor.</param>
+  /// <param name="config">The remote configuration providing the base URL and optional credentials for the API accessor.</param>
   /// <returns>An instance of <see cref="IApiAccessor"/> configured to interact with the designated remote service.</returns>
-  IApiAccessor Create(RemoteConfig baseUrl);
+  IApiAccessor Create(RemoteConfig config);
   
 }
 

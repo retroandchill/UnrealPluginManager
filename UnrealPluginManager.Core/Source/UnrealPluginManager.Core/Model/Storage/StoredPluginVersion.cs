@@ -29,6 +29,6 @@ public class StoredPluginVersion {
   /// Each binary represents a specific build of the plugin for a given engine version and platform.
   /// This property allows access to the plugin's compiled files for various configurations.
   /// </summary>
-  public List<StoredBinary> Binaries { get; set; }
-  
+  public List<StoredBinary> Binaries { get; set; } = [];
+
 }

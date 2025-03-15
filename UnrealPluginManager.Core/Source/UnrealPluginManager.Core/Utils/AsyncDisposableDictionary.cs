@@ -22,5 +22,6 @@ public class AsyncDisposableDictionary<TKey, TValue> : Dictionary<TKey, TValue>,
     foreach (var value in Values) {
       await value.DisposeAsync();
     }
+    GC.SuppressFinalize(this);
   }
 }

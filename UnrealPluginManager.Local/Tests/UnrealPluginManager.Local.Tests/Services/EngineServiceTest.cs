@@ -85,7 +85,7 @@ public partial class EngineServiceTest {
     _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<IDirectoryInfo>(),
                                              It.Is("5.5", EqualityComparer<string>.Default)))
         .Returns(async (IDirectoryInfo x, string _) => {
-          var entry = x.GetFiles("*.uplugin").First();
+          var entry = x.GetFiles("*.uplugin")[0];
           await using var entryStream = entry.OpenRead();
           capturedData = await JsonSerializer.DeserializeAsync<PluginDescriptor>(entryStream, JsonOptions);
           await using var subFileStream = _filesystem.File.OpenRead(Path.Join(x.FullName, "Example", "TextFile.txt"));

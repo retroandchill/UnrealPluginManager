@@ -16,7 +16,7 @@ public static partial class EngineVersionUtils {
   /// <param name="fileSystem">The file system abstraction used to access files.</param>
   /// <param name="installDirectory">The root directory of the Unreal Engine installation.</param>
   /// <returns>
-  /// A <see cref="Version"/> object representing the engine's major, minor, and optional patch version.
+  /// A <see cref="System.Version"/> object representing the engine's major, minor, and optional patch version.
   /// </returns>
   /// <exception cref="InvalidDataException">
   /// Thrown if the version file cannot be found or the version data cannot be successfully parsed.

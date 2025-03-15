@@ -2,6 +2,8 @@
 
 namespace UnrealPluginManager.Core.Annotations.Exceptions;
 
+#pragma warning disable 9113
+
 /// <summary>
 /// Indicates that the decorated method is designed to handle specific exception types.
 /// This attribute should be applied to methods that are intended to catch and process exceptions
@@ -24,3 +26,5 @@ namespace UnrealPluginManager.Core.Annotations.Exceptions;
 /// </example>
 [AttributeUsage(AttributeTargets.Method)]
 public class HandlesExceptionAttribute(params Type[] exceptionTypes) : Attribute;
+
+#pragma warning restore 9113

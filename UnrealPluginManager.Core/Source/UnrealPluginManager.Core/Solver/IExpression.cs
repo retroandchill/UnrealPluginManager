@@ -5,6 +5,29 @@ using UnrealPluginManager.Core.Model.Resolution;
 
 namespace UnrealPluginManager.Core.Solver;
 
+
+/// <summary>
+/// Represents the result of an evaluation process with information about its outcome, 
+/// the source of the requirement, and the specific plugin dependency involved.
+/// </summary>
+/// <param name="Result">
+/// A boolean value indicating the result of the evaluation:
+/// <c>true</c> if the evaluation succeeded, and <c>false</c> otherwise.
+/// </param>
+/// <param name="RequiredBy">
+/// A string that specifies the entity or component requiring the evaluation. 
+/// This provides traceability for understanding which part of the system 
+/// or dependency chain is involved.
+/// </param>
+/// <param name="Dependency">
+/// The plugin dependency involved in the evaluation. 
+/// This captures details about the specific plugin or library related to the evaluation result.
+/// </param>
+/// <remarks>
+/// The <see cref="EvaluationResult"/> is commonly used in the context of evaluating 
+/// logical expressions and plugin dependencies. It standardizes the output format 
+/// for evaluations performed during plugin resolution workflows.
+/// </remarks>
 public record struct EvaluationResult(bool Result, string RequiredBy, PluginDependency Dependency);
 
 /// <summary>

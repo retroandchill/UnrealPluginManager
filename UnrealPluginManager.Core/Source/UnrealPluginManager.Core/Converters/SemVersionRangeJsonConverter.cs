@@ -14,9 +14,6 @@ namespace UnrealPluginManager.Core.Converters;
 /// string representation as a <see cref="SemVersionRange"/> object. Similarly, it converts a <see cref="SemVersionRange"/>
 /// object back into its string representation when serializing to JSON.
 /// </remarks>
-/// <typeparam name="SemVersionRange">
-/// The type of object being converted (semantic version range).
-/// </typeparam>
 public class SemVersionRangeJsonConverter : JsonConverter<SemVersionRange> {
   /// <inheritdoc/>
   public override SemVersionRange Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {

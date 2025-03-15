@@ -47,7 +47,6 @@ public class MockRegistryKey : IRegistryKey {
           .Where(x => x.Key.Equals(splitString[0], StringComparison.OrdinalIgnoreCase))
           .Select(x => x.Value)
           .FirstOrDefault();
-      ;
     }
 
     var key = splitString[0];
