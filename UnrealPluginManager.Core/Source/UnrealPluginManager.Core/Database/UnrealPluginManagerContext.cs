@@ -1,9 +1,6 @@
-﻿using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Semver;
+﻿using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -15,15 +12,6 @@ namespace UnrealPluginManager.Core.Database;
 /// It leverages the configuration provided by the <see cref="DbContextOptions{TContext}"/> to establish the connection and behavior for the database.
 /// </remarks>
 public abstract class UnrealPluginManagerContext : DbContext {
-  /// <summary>
-  /// Represents the entity framework database context for managing plugin data and related entities in the Unreal Plugin Manager application.
-  /// </summary>
-  /// <remarks>
-  /// This abstract class serves as the base context for interacting with plugin-related data across multiple implementations.
-  /// It leverages the provided <see cref="IFileSystem"/> instance to handle file-related operations relevant to the database and application logic.
-  /// </remarks>
-  protected UnrealPluginManagerContext(IFileSystem filesystem) {
-  }
 
   /// <summary>
   /// Represents the database set for storing and managing plugin data within the UnrealPluginManager context.
@@ -52,6 +40,16 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// Plugin binaries include platform-specific and engine version-specific binaries associated with a plugin version.
   /// </remarks>
   public DbSet<UploadedBinaries> PluginBinaries { get; init; }
+
+  /// <summary>
+  /// Represents the database set for storing and managing file resources within the Unreal Plugin Manager context.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of file resource entities persisted in the database.
+  /// It is primarily used for operations such as adding, updating, or querying information about file resources
+  /// associated with plugins or other related entities.
+  /// </remarks>
+  public DbSet<FileResource> FileResources { get; init; }
 
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {

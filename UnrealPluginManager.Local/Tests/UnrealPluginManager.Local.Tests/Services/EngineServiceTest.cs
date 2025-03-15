@@ -8,7 +8,6 @@ using Moq;
 using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
@@ -45,7 +44,7 @@ public partial class EngineServiceTest {
     services.AddSingleton(_pluginService.Object);
     _pluginStructureService = new Mock<IPluginStructureService>();
     services.AddSingleton(_pluginStructureService.Object);
-    
+
     services.AddSingleton<IJsonService>(new JsonService(JsonOptions));
     services.AddSingleton<IEngineService, EngineService>();
 
@@ -83,7 +82,7 @@ public partial class EngineServiceTest {
     PluginDescriptor? capturedData = null;
     string? capturedTextFile = null;
     _pluginService.Setup(x => x.SubmitPlugin(It.IsAny<IDirectoryInfo>(),
-                                             It.Is("5.5", EqualityComparer<string>.Default)))
+            It.Is("5.5", EqualityComparer<string>.Default)))
         .Returns(async (IDirectoryInfo x, string _) => {
           var entry = x.GetFiles("*.uplugin")[0];
           await using var entryStream = entry.OpenRead();
@@ -102,7 +101,7 @@ public partial class EngineServiceTest {
 
     var batchFilePath = Path.GetFullPath("C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat");
     _processRunner.Setup(x => x.RunProcess(It.Is<string>(y => y == batchFilePath),
-                                           It.Is<string[]>(y => y.Length == 3)))
+            It.Is<string[]>(y => y.Length == 3)))
         .Returns(async (string _, string[] args) => {
           var match = PackageRegex().Match(args[2]);
           Assert.That(match.Success);
@@ -163,8 +162,7 @@ public partial class EngineServiceTest {
     List<string> targetPlatforms = ["Win64"];
     _pluginService.Setup(x => x.GetAllPluginData("MyPlugin", new SemVersion(1, 0, 0), "5.4", targetPlatforms))
         .Returns((string _, SemVersion _, string _, IReadOnlyCollection<string> _) =>
-                     _filesystem.FileInfo.New(pluginPath).ToEnumerable()
-                         .Select(x => new PluginFileInfo.Source(x)).ToAsyncEnumerable());
+            _filesystem.FileInfo.New(pluginPath).ToEnumerable().ToAsyncEnumerable());
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
@@ -173,8 +171,8 @@ public partial class EngineServiceTest {
     Assert.Multiple(() => {
       Assert.That(returnCode, Is.EqualTo(0));
       Assert.That(_filesystem.Directory.Exists(
-                      Path.Join("C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin")),
-                  Is.True);
+              Path.Join("C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin")),
+          Is.True);
     });
 
     installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
@@ -202,7 +200,7 @@ public partial class EngineServiceTest {
     };
     var subDir1 = newDir.CreateSubdirectory("MyPlugin");
     await _filesystem.File.WriteAllTextAsync(Path.Join(subDir1.FullName, "MyPlugin.uplugin"),
-                                             JsonSerializer.Serialize(descriptor1));
+        JsonSerializer.Serialize(descriptor1));
 
     var descriptor2 = new PluginDescriptor {
         Version = 1,
@@ -212,7 +210,7 @@ public partial class EngineServiceTest {
     };
     var subDir2 = newDir.CreateSubdirectory("SecondPlugin");
     await _filesystem.File.WriteAllTextAsync(Path.Join(subDir2.FullName, "SecondPlugin.uplugin"),
-                                             JsonSerializer.Serialize(descriptor2));
+        JsonSerializer.Serialize(descriptor2));
 
     var descriptor3 = new PluginDescriptor {
         Version = 1,
@@ -222,7 +220,7 @@ public partial class EngineServiceTest {
     };
     var subDir3 = newDir.CreateSubdirectory("AnotherPlugin");
     await _filesystem.File.WriteAllTextAsync(Path.Join(subDir3.FullName, "AnotherPlugin.uplugin"),
-                                             JsonSerializer.Serialize(descriptor3));
+        JsonSerializer.Serialize(descriptor3));
 
     _pluginStructureService.Setup(x => x.GetInstalledBinaries(It.IsAny<IDirectoryInfo>()))
         .Returns(["Win64"]);

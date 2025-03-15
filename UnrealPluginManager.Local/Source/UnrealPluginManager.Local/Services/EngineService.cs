@@ -120,11 +120,7 @@ public partial class EngineService : IEngineService {
 
     await foreach (var zipFile in _pluginService.GetAllPluginData(pluginName, pluginVersion, installedEngine.Name,
                                                                   targetPlatforms)) {
-      if (zipFile is PluginFileInfo.Icon) {
-        continue;
-      }
-      
-      await using var fileStream = zipFile.File.OpenRead();
+      await using var fileStream = zipFile.OpenRead();
       using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
       await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
     }

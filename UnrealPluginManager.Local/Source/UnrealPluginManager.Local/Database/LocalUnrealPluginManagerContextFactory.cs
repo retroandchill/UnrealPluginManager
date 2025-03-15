@@ -26,6 +26,6 @@ public class LocalUnrealPluginManagerContextFactory : IDesignTimeDbContextFactor
         AllowTrailingCommas = true
     });
     var storageService = new LocalStorageService(environment, filesystem, jsonService);
-    return new LocalUnrealPluginManagerContext(storageService, filesystem);
+    return new LocalUnrealPluginManagerContext(storageService);
   }
 }

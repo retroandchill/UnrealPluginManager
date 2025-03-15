@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,32 +27,15 @@ public class CloudStorageServiceTest {
     var mockSection = new Mock<IConfigurationSection>();
 
     mockConfig.Setup(x => x.GetSection(StorageMetadata.Name)).Returns(mockSection.Object);
-    
+
     services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
-    services.AddScoped<IStorageService, CloudStorageService>();
+    services.AddSingleton<IStorageService, CloudStorageService>();
     _serviceProvider = services.BuildServiceProvider();
   }
 
   [TearDown]
   public void TearDown() {
     _serviceProvider.Dispose();
-  }
-
-  [Test]
-  public async Task TestStorePlugin() {
-    var storageService = _serviceProvider.GetService<IStorageService>()!;
-
-    using var testZip = new MemoryStream();
-    using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
-      zipArchive.CreateEntry("TestPlugin.uplugin");
-    }
-
-    var fileInfo = await storageService.StorePlugin(testZip);
-    Assert.Multiple(() => {
-      Assert.That(fileInfo.ZipFile.Exists, Is.True);
-      Assert.That(fileInfo.ZipFile.Name, Does.StartWith("TestPlugin"));
-      Assert.That(fileInfo.ZipFile.Name, Does.EndWith(".zip"));
-    });
   }
 
   [Test]

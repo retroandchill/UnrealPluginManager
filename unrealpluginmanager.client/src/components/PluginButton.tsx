@@ -1,5 +1,5 @@
-﻿import {PluginOverview} from "../api";
-import {iconsPath} from "../config/Globals.ts";
+﻿import {PluginVersionInfo} from "../api";
+import {apiResourcesPath} from "../config/Globals.ts";
 
 /**
  * A callback function type that is executed with a plugin as its argument.
@@ -7,9 +7,9 @@ import {iconsPath} from "../config/Globals.ts";
  * This type is used for defining functions that operate on or process a `PluginOverview` instance.
  *
  * @callback PluginCallback
- * @param {PluginOverview} plugin - The plugin instance passed to the callback function.
+ * @param {PluginVersionInfo} plugin - The plugin instance passed to the callback function.
  */
-export type PluginCallback = (plugin: PluginOverview) => void;
+export type PluginCallback = (plugin: PluginVersionInfo) => void;
 
 /**
  * Represents the properties for a plugin button component.
@@ -27,7 +27,7 @@ interface PluginButtonProps {
    * the lifecycle of the plugin, such as loading, enabling, disabling, or interacting
    * with its functionality.
    */
-  plugin: PluginOverview;
+  plugin: PluginVersionInfo;
 
   /**
    * Callback function to handle click events.
@@ -58,19 +58,18 @@ interface PluginButtonProps {
  * @return {JSX.Element} A button element displaying plugin details.
  */
 export function PluginButton(props: Readonly<PluginButtonProps>) {
-  let latestVersion = props.plugin.versions[props.plugin.versions.length - 1];
-
   return <button onClick={() => {
     if (props.onClick) {
       props.onClick(props.plugin);
     }
   }}>
-    <img src={`${iconsPath}/${props.plugin.name}`} alt="Plugin Icon"/>
+      <img src={props.plugin.icon ? `${apiResourcesPath}/${props.plugin.icon.storedFilename}` : "Icon128.png"}
+           alt="Plugin Icon"/>
     <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
       <h2>{props.plugin.name}</h2>
     </header>
     <ul style={{listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
-      <li><b>Latest Release:</b> {latestVersion.version}</li>
+        <li><b>Latest Release:</b> {props.plugin.version}</li>
       <li><b>Author:</b> {props.plugin.authorName ? `${props.plugin.authorName}` : 'Unknown'}</li>
     </ul>
   </button>

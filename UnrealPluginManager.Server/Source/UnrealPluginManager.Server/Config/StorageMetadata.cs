@@ -1,4 +1,6 @@
-﻿namespace UnrealPluginManager.Server.Config;
+﻿using JetBrains.Annotations;
+
+namespace UnrealPluginManager.Server.Config;
 
 /// <summary>
 /// Represents metadata configuration for storage settings.
@@ -17,9 +19,6 @@ public class StorageMetadata {
   /// </remarks>
   public const string Name = "CloudStorage";
 
-
-  private string _baseDirectory = Directory.GetCurrentDirectory();
-
   /// <summary>
   /// Represents the base directory used for storage operations.
   /// </summary>
@@ -28,8 +27,16 @@ public class StorageMetadata {
   /// are saved or retrieved. It is resolved relative to the current working directory
   /// if a relative path is provided, and converted to an absolute path accordingly.
   /// </remarks>
-  public string BaseDirectory {
-    get => _baseDirectory;
-    set => _baseDirectory = Path.GetFullPath(value, Directory.GetCurrentDirectory());
-  }
+  [UsedImplicitly]
+  public string BaseDirectory { get; set; } = ".";
+
+  /// <summary>
+  /// Represents the directory path where resource files are stored.
+  /// </summary>
+  /// <remarks>
+  /// This property is used to manage the location of resources for storage-related operations.
+  /// The path can be set relative to the current working directory, and it will be converted
+  /// to an absolute path during assignment.
+  /// </remarks>
+  public string ResourceDirectory { get; set; } = "resources";
 }

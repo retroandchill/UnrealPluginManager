@@ -14,7 +14,7 @@
 /// may throw this exception if unresolved dependencies are detected in a dependency manifest.
 /// </example>
 public class MissingDependenciesException(IEnumerable<string> pluginNames, Exception? innerException = null)
-    : UnrealPluginManagerException(GetMessage(pluginNames), innerException) {
+    : ContentNotFoundException(GetMessage(pluginNames), innerException) {
 
   private static string GetMessage(IEnumerable<string> pluginNames) {
     return $"The following plugins could not be found: {string.Join(", ", pluginNames)}";

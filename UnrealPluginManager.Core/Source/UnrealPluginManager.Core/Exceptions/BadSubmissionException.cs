@@ -10,4 +10,4 @@
 /// It is primarily used in scenarios where plugins are submitted for storage or validation.
 /// </remarks>
 public class BadSubmissionException(string? message = null, Exception? innerException = null)
-    : UnrealPluginManagerException(message, innerException);
+    : BadArgumentException(message, innerException);

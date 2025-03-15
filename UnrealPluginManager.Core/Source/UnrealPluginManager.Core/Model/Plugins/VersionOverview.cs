@@ -2,10 +2,10 @@
 using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
+using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
-#nullable disable
 
 /// <summary>
 /// Represents a specific version of a plugin, identified by a unique ID and version number.
@@ -22,5 +22,10 @@ public class VersionOverview {
   /// </summary>
   [Required]
   [JsonConverter(typeof(SemVersionJsonConverter))]
-  public SemVersion Version { get; set; }
+  public required SemVersion Version { get; set; }
+
+  /// <summary>
+  /// Gets or sets the icon resource associated with a version of a plugin.
+  /// </summary>
+  public ResourceInfo? Icon { get; set; }
 }

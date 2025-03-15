@@ -114,12 +114,12 @@ public interface IPluginService {
   /// <param name="descriptor">
   ///   A <see cref="PluginDescriptor"/> object containing detailed metadata about the plugin, such as version, description, and other attributes.
   /// </param>
-  /// <param name="storedFile">The information about the stored file for the plugin</param>
+  /// <param name="fileData"></param>
   /// <returns>
   /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
   /// </returns>
   Task<PluginVersionDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
-                                       EngineFileData? storedFile = null);
+                                       PartitionedPlugin? fileData = null);
 
   /// <summary>
   /// Submits a plugin file for processing and storage, associating it with a specific engine version.
@@ -227,8 +227,8 @@ public interface IPluginService {
   /// <returns>
   /// An asynchronous enumerable collection of <see cref="IFileInfo"/> representing plugin data files.
   /// </returns>
-  IAsyncEnumerable<PluginFileInfo> GetAllPluginData(string pluginName, SemVersion pluginVersion, string engineVersion,
-                                                    IReadOnlyCollection<string> targetPlatforms);
+  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion pluginVersion, string engineVersion,
+                                               IReadOnlyCollection<string> targetPlatforms);
 
 
 }

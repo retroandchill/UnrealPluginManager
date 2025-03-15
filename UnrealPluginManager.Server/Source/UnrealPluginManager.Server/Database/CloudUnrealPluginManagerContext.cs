@@ -1,6 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Server.Config;
 
@@ -25,14 +23,14 @@ public class CloudUnrealPluginManagerContext : UnrealPluginManagerContext {
   /// This context handles plugin data, including plugin uploads, metadata, and related interactions.
   /// Initialization includes loading database configuration settings from an external configuration source.
   /// </remarks>
-  public CloudUnrealPluginManagerContext(IConfiguration config, IFileSystem fileSystem) : base(fileSystem) {
+  public CloudUnrealPluginManagerContext(IConfiguration config) {
     _config = new PostgresConfig();
     config.GetSection("Postgresql").Bind(_config);
   }
-  
+
   /// <inheritdoc />
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    optionsBuilder.UseNpgsql(_config.ConnectionString,  b => b.MinBatchSize(1)
+    optionsBuilder.UseNpgsql(_config.ConnectionString, b => b.MinBatchSize(1)
             .MaxBatchSize(100))
         .UseSnakeCaseNamingConvention();
   }

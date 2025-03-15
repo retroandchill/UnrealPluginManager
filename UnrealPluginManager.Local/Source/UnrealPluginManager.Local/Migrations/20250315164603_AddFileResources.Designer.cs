@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UnrealPluginManager.Local.Database;
 
@@ -10,9 +11,11 @@ using UnrealPluginManager.Local.Database;
 namespace UnrealPluginManager.Local.Migrations
 {
     [DbContext(typeof(LocalUnrealPluginManagerContext))]
-    partial class LocalUnrealPluginManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20250315164603_AddFileResources")]
+    partial class AddFileResources
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.2");

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
+using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -45,6 +46,11 @@ public class PluginVersionInfo : IDependencyChainNode {
   public string? FriendlyName { get; set; }
 
   /// <summary>
+  /// Gets or sets the name of the author associated with the plugin.
+  /// </summary>
+  public string? AuthorName { get; set; }
+
+  /// <summary>
   /// Gets or sets the unique identifier for the plugin version.
   /// </summary>
   /// <remarks>
@@ -63,6 +69,16 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// </remarks>
   [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; set; }
+
+  /// <summary>
+  /// Gets or sets the resource information for the plugin icon.
+  /// </summary>
+  /// <remarks>
+  /// This property holds the metadata or path information related to the plugin's icon.
+  /// It is used to define and manage visual representation for the plugin within the system.
+  /// The icon is optional and can be null if no specific icon is associated with the plugin.
+  /// </remarks>
+  public ResourceInfo? Icon { get; set; }
 
   /// <summary>
   /// Gets or sets the list of dependencies for the current plugin version.

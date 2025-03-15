@@ -13,24 +13,16 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { PluginDependency } from './PluginDependency';
-import {
-    PluginDependencyFromJSON,
-    PluginDependencyFromJSONTyped,
-    PluginDependencyToJSON,
-    PluginDependencyToJSONTyped,
-} from './PluginDependency';
-import type { BinariesOverview } from './BinariesOverview';
-import {
-    BinariesOverviewFromJSON,
-    BinariesOverviewFromJSONTyped,
-    BinariesOverviewToJSON,
-    BinariesOverviewToJSONTyped,
-} from './BinariesOverview';
+import type {ResourceInfo} from './ResourceInfo';
+import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
+import type {PluginDependency} from './PluginDependency';
+import {PluginDependencyFromJSON, PluginDependencyToJSON,} from './PluginDependency';
+import type {BinariesOverview} from './BinariesOverview';
+import {BinariesOverviewFromJSON, BinariesOverviewToJSON,} from './BinariesOverview';
 
 /**
- * 
+ * Represents detailed information about a specific plugin version,
+ * including a description and an overview of its binaries.
  * @export
  * @interface PluginVersionDetails
  */
@@ -54,6 +46,12 @@ export interface PluginVersionDetails {
      */
     friendlyName?: string | null;
     /**
+     * Gets or sets the name of the author associated with the plugin.
+     * @type {string}
+     * @memberof PluginVersionDetails
+     */
+    authorName?: string | null;
+    /**
      * Gets or sets the unique identifier for the plugin version.
      * @type {string}
      * @memberof PluginVersionDetails
@@ -66,19 +64,27 @@ export interface PluginVersionDetails {
      */
     version: string;
     /**
+     *
+     * @type {ResourceInfo}
+     * @memberof PluginVersionDetails
+     */
+    icon?: ResourceInfo;
+    /**
      * Gets or sets the list of dependencies for the current plugin version.
      * @type {Array<PluginDependency>}
      * @memberof PluginVersionDetails
      */
     dependencies: Array<PluginDependency>;
     /**
-     * 
+     * Gets or sets a brief explanation or summary of the plugin version.
+     * This provides additional context or details about the plugin functionality or purpose.
      * @type {string}
      * @memberof PluginVersionDetails
      */
     description?: string | null;
     /**
-     * 
+     * Gets or sets the collection of binaries associated with the plugin version.
+     * This provides details about the compiled binaries, such as their configurations or associated metadata.
      * @type {Array<BinariesOverview>}
      * @memberof PluginVersionDetails
      */
@@ -110,8 +116,10 @@ export function PluginVersionDetailsFromJSONTyped(json: any, ignoreDiscriminator
         'pluginId': json['pluginId'],
         'name': json['name'],
         'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
+        'authorName': json['authorName'] == null ? undefined : json['authorName'],
         'versionId': json['versionId'],
         'version': json['version'],
+        'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
         'description': json['description'] == null ? undefined : json['description'],
         'binaries': json['binaries'] == null ? undefined : ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
@@ -132,8 +140,10 @@ export function PluginVersionDetailsToJSONTyped(value?: PluginVersionDetails | n
         'pluginId': value['pluginId'],
         'name': value['name'],
         'friendlyName': value['friendlyName'],
+        'authorName': value['authorName'],
         'versionId': value['versionId'],
         'version': value['version'],
+        'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
         'description': value['description'],
         'binaries': value['binaries'] == null ? undefined : ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),
