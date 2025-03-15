@@ -482,9 +482,11 @@ public partial class PluginService : IPluginService {
   public async Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId) {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
+        .Include(x => x.Source)
         .Where(x => x.Id == versionId)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries)
+        .ThenInclude(x => x.File)
         .FirstOrDefaultAsync();
     if (plugin is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
@@ -502,11 +504,13 @@ public partial class PluginService : IPluginService {
                                                       bool separated = false) {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
+        .Include(x => x.Source)
         .WhereVersionInRange(targetVersion)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries
             .Where(y => y.EngineVersion == engineVersion)
             .Where(y => targetPlatforms.Contains(y.Platform)))
+        .ThenInclude(x => x.File)
         .FirstOrDefaultAsync();
     if (plugin is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
@@ -532,11 +536,13 @@ public partial class PluginService : IPluginService {
                                                       bool separated = false) {
     var plugin = await _dbContext.PluginVersions
         .Include(x => x.Parent)
+        .Include(x => x.Source)
         .Where(x => x.Id == versionId)
         .Where(x => x.ParentId == pluginId)
         .Include(x => x.Binaries
             .Where(y => y.EngineVersion == engineVersion)
             .Where(y => targetPlatforms.Contains(y.Platform)))
+        .ThenInclude(x => x.File)
         .FirstOrDefaultAsync();
     if (plugin is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");

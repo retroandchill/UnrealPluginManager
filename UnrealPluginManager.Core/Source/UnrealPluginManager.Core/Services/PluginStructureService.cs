@@ -26,11 +26,11 @@ public partial class PluginStructureService : IPluginStructureService {
                                                        IDirectoryInfo pluginDirectory) {
     var icon = pluginDirectory.File(Path.Join("Resources", "Icon128.png"));
 
-    ResourceHandle? pluginIcon = icon is not null ? await _storageService.AddResource(new CopyFileSource(icon)) : null;
+    ResourceHandle? pluginIcon = icon.Exists ? await _storageService.AddResource(new CopyFileSource(icon)) : null;
 
     var readme = pluginDirectory.File("README.md");
     ResourceHandle? pluginReadme =
-        readme is not null ? await _storageService.AddResource(new CopyFileSource(readme)) : null;
+        readme.Exists ? await _storageService.AddResource(new CopyFileSource(readme)) : null;
 
 
     ResourceHandle pluginSource;

@@ -3,18 +3,19 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
+using UnrealPluginManager.Core.Tests.Mocks;
 
 namespace UnrealPluginManager.Core.Tests.Services;
 
@@ -24,7 +25,7 @@ public class PluginServiceTests {
   };
 
   private ServiceProvider _serviceProvider;
-  private Mock<IStorageService> _mockStorageService;
+  private IStorageService _storageService;
 
   [SetUp]
   public void Setup() {
@@ -33,14 +34,14 @@ public class PluginServiceTests {
     var mockFilesystem = new MockFileSystem();
     services.AddSingleton<IFileSystem>(mockFilesystem);
 
-    _mockStorageService = new Mock<IStorageService>();
-    services.AddSingleton(_mockStorageService.Object);
-
     services.AddSingleton<IJsonService>(new JsonService(JsonOptions));
     services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
     services.AddScoped<IPluginService, PluginService>();
     services.AddScoped<IPluginStructureService, PluginStructureService>();
+    services.AddScoped<IStorageService, MockStorageService>();
     _serviceProvider = services.BuildServiceProvider();
+
+    _storageService = _serviceProvider.GetRequiredService<IStorageService>();
   }
 
   [TearDown]
@@ -448,6 +449,9 @@ public class PluginServiceTests {
       await writer.WriteAsync("TestPlugin.dll");
     }
 
+    var (zipName, _) = await _storageService.AddResource(new CopyFileSource(zipFile));
+    var (binName, _) = await _storageService.AddResource(new CopyFileSource(binaries));
+
     var plugin = new Plugin {
         Name = "TestPlugin",
         FriendlyName = "Test Plugin",
@@ -458,7 +462,7 @@ public class PluginServiceTests {
                 Version = new SemVersion(1, 0, 0),
                 Source = new FileResource {
                     OriginalFilename = "Source.zip",
-                    StoredFilename = zipFile.Name,
+                    StoredFilename = zipName,
                 },
                 Binaries = [
                     new UploadedBinaries {
@@ -466,7 +470,7 @@ public class PluginServiceTests {
                         Platform = "Win64",
                         File = new FileResource {
                             OriginalFilename = "Win64.zip",
-                            StoredFilename = binaries.Name
+                            StoredFilename = binName
                         }
                     }
                 ]
