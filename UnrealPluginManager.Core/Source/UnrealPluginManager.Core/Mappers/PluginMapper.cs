@@ -71,6 +71,7 @@ public static partial class PluginMapper {
   [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionInfo.PluginId))]
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
   [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
+  [MapProperty(nameof(PluginVersion.Parent.AuthorName), nameof(PluginVersionInfo.AuthorName))]
   [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionInfo.VersionId))]
   [MapperIgnoreTarget(nameof(PluginVersionInfo.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteIndex))]
@@ -92,6 +93,7 @@ public static partial class PluginMapper {
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionDetails.Name))]
   [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionDetails.FriendlyName))]
   [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionDetails.VersionId))]
+  [MapProperty(nameof(PluginVersion.Parent.AuthorName), nameof(PluginVersionInfo.AuthorName))]
   [MapProperty(nameof(PluginVersion.Parent.Description), nameof(PluginVersionDetails.Description))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
@@ -102,7 +104,8 @@ public static partial class PluginMapper {
   /// </summary>
   /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
   /// <returns>An <see cref="IQueryable{PluginVersionDetails}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
-  public static partial IQueryable<PluginVersionDetails> ToPluginVersionDetails(this IQueryable<PluginVersion> versions);
+  public static partial IQueryable<PluginVersionDetails>
+      ToPluginVersionDetails(this IQueryable<PluginVersion> versions);
 
   /// <summary>
   /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
