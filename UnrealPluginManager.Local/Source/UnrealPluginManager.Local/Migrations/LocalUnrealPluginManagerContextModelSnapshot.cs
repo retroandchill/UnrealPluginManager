@@ -74,6 +74,10 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("author_website");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT")
@@ -107,6 +111,14 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("IconId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("icon_id");
+
                     b.Property<int>("Major")
                         .HasColumnType("INTEGER")
                         .HasColumnName("major");
@@ -136,6 +148,14 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("prerelease_number");
 
+                    b.Property<Guid?>("ReadmeId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("readme_id");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("source_id");
+
                     b.Property<string>("VersionString")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -145,8 +165,17 @@ namespace UnrealPluginManager.Local.Migrations
                     b.HasKey("Id")
                         .HasName("pk_plugin_versions");
 
+                    b.HasIndex("IconId")
+                        .HasDatabaseName("ix_plugin_versions_icon_id");
+
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_plugin_versions_parent_id");
+
+                    b.HasIndex("ReadmeId")
+                        .HasDatabaseName("ix_plugin_versions_readme_id");
+
+                    b.HasIndex("SourceId")
+                        .HasDatabaseName("ix_plugin_versions_source_id");
 
                     b.ToTable("plugin_versions", (string)null);
                 });
@@ -158,11 +187,19 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("EngineVersion")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("TEXT")
                         .HasColumnName("engine_version");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("file_id");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT")
@@ -177,6 +214,9 @@ namespace UnrealPluginManager.Local.Migrations
                     b.HasKey("Id")
                         .HasName("pk_plugin_binaries");
 
+                    b.HasIndex("FileId")
+                        .HasDatabaseName("ix_plugin_binaries_file_id");
+
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_plugin_binaries_parent_id");
 
@@ -185,6 +225,35 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasDatabaseName("ix_plugin_binaries_parent_id_engine_version_platform");
 
                     b.ToTable("plugin_binaries", (string)null);
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("file_path");
+
+                    b.Property<string>("OriginalFilename")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("original_filename");
+
+                    b.HasKey("Id")
+                        .HasName("pk_file_resources");
+
+                    b.ToTable("file_resources", (string)null);
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
@@ -201,6 +270,12 @@ namespace UnrealPluginManager.Local.Migrations
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "Icon")
+                        .WithMany()
+                        .HasForeignKey("IconId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_plugin_versions_file_resources_icon_id");
+
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Parent")
                         .WithMany("Versions")
                         .HasForeignKey("ParentId")
@@ -208,17 +283,45 @@ namespace UnrealPluginManager.Local.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_plugin_versions_plugins_parent_id");
 
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "Readme")
+                        .WithMany()
+                        .HasForeignKey("ReadmeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_plugin_versions_file_resources_readme_id");
+
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "Source")
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_versions_file_resources_source_id");
+
+                    b.Navigation("Icon");
+
                     b.Navigation("Parent");
+
+                    b.Navigation("Readme");
+
+                    b.Navigation("Source");
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.UploadedBinaries", b =>
                 {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "File")
+                        .WithMany()
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_binaries_file_resources_file_id");
+
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "Parent")
                         .WithMany("Binaries")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_plugin_binaries_plugin_versions_parent_id");
+
+                    b.Navigation("File");
 
                     b.Navigation("Parent");
                 });

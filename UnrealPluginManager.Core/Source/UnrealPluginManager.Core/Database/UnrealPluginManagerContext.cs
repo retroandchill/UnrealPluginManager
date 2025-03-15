@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -15,6 +16,9 @@ namespace UnrealPluginManager.Core.Database;
 /// It leverages the configuration provided by the <see cref="DbContextOptions{TContext}"/> to establish the connection and behavior for the database.
 /// </remarks>
 public abstract class UnrealPluginManagerContext : DbContext {
+  
+  private readonly IFileSystem _fileSystem;
+  
   /// <summary>
   /// Represents the entity framework database context for managing plugin data and related entities in the Unreal Plugin Manager application.
   /// </summary>
@@ -23,6 +27,7 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// It leverages the provided <see cref="IFileSystem"/> instance to handle file-related operations relevant to the database and application logic.
   /// </remarks>
   protected UnrealPluginManagerContext(IFileSystem filesystem) {
+    _fileSystem = filesystem;
   }
 
   /// <summary>
@@ -53,11 +58,22 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// </remarks>
   public DbSet<UploadedBinaries> PluginBinaries { get; init; }
 
+  /// <summary>
+  /// Represents the database set for storing and managing file resources within the Unreal Plugin Manager context.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of file resource entities persisted in the database.
+  /// It is primarily used for operations such as adding, updating, or querying information about file resources
+  /// associated with plugins or other related entities.
+  /// </remarks>
+  public DbSet<FileResource> FileResources { get; init; }
+
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     Plugin.DefineModelMetadata(modelBuilder);
     PluginVersion.DefineModelMetadata(modelBuilder);
     Dependency.DefineModelMetadata(modelBuilder);
     UploadedBinaries.DefineModelMetadata(modelBuilder);
+    FileResource.DefineModelMetadata(modelBuilder, _fileSystem);
   }
 }

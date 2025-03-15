@@ -142,6 +142,7 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(Plugin.Versions))]
   [MapProperty(nameof(PluginDescriptor.CreatedBy), nameof(Plugin.AuthorName))]
   [MapProperty(nameof(PluginDescriptor.CreatedByUrl), nameof(Plugin.AuthorWebsite))]
+  [MapperIgnoreTarget(nameof(PluginVersion.CreatedAt))]
   public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name);
 
   /// <summary>
@@ -155,6 +156,13 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(PluginVersion.Binaries))]
   [MapProperty(nameof(PluginDescriptor.VersionName), nameof(PluginVersion.Version))]
   [MapProperty(nameof(PluginDescriptor.Plugins), nameof(PluginVersion.Dependencies))]
+  [MapperIgnoreTarget(nameof(PluginVersion.CreatedAt))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Source))]
+  [MapperIgnoreTarget(nameof(PluginVersion.SourceId))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Icon))]
+  [MapperIgnoreTarget(nameof(PluginVersion.IconId))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Readme))]
+  [MapperIgnoreTarget(nameof(PluginVersion.ReadmeId))]
   public static partial PluginVersion ToPluginVersion(this PluginDescriptor descriptor);
 
   /// <summary>
@@ -195,6 +203,9 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(UploadedBinaries.Id))]
   [MapperIgnoreTarget(nameof(UploadedBinaries.ParentId))]
   [MapperIgnoreTarget(nameof(UploadedBinaries.Parent))]
+  [MapperIgnoreTarget(nameof(UploadedBinaries.FileId))]
+  [MapperIgnoreTarget(nameof(UploadedBinaries.File))]
+  [MapperIgnoreTarget(nameof(UploadedBinaries.CreatedAt))]
   public static partial UploadedBinaries ToUploadedBinaries(this PluginBinaryType descriptor);
 
   /// <summary>

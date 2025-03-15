@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Semver;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -18,8 +19,7 @@ public class PluginVersion : IVersionedEntity {
   /// Gets or sets the unique identifier for the plugin version.
   /// </summary>
   [Key]
-  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public Guid Id { get; set; }
+  public Guid Id { get; set; } = Guid.CreateVersion7();
 
   /// <summary>
   /// Gets or sets the unique identifier for the parent entity associated with the plugin version.
@@ -110,6 +110,43 @@ public class PluginVersion : IVersionedEntity {
   /// </summary>
   public ICollection<UploadedBinaries> Binaries { get; set; } = new List<UploadedBinaries>();
 
+  /// <summary>
+  /// Gets or sets the timestamp indicating when the plugin version was created.
+  /// </summary>
+  public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+  /// <summary>
+  /// Gets or sets the source file resource associated with this plugin version.
+  /// Represents a file entity that contains the actual source content for the given plugin version.
+  /// This property is required and establishes a relationship with the <see cref="FileResource"/> class.
+  /// </summary>
+  public FileResource Source { get; set; } = null!;
+
+  /// <summary>
+  /// Gets or sets the unique identifier of the source file resource associated with this plugin version.
+  /// </summary>
+  public Guid SourceId { get; set; }
+
+  /// <summary>
+  /// Gets or sets the associated icon for the plugin version.
+  /// This property references a file resource that represents the icon.
+  /// </summary>
+  public FileResource? Icon { get; set; }
+
+  /// <summary>
+  /// Gets or sets the unique identifier of the icon associated with this plugin version.
+  /// </summary>
+  public Guid? IconId { get; set; }
+
+  /// <summary>
+  /// Gets or sets the associated readme file resource for the plugin version.
+  /// </summary>
+  public FileResource? Readme { get; set; }
+
+  /// <summary>
+  /// Gets or sets the unique identifier for the readme file associated with the plugin version.
+  /// </summary>
+  public Guid? ReadmeId { get; set; }
 
   internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
     modelBuilder.Entity<PluginVersion>()
@@ -124,5 +161,24 @@ public class PluginVersion : IVersionedEntity {
 
     modelBuilder.Entity<PluginVersion>()
         .Ignore(x => x.Version);
+    
+    modelBuilder.Entity<PluginVersion>()
+        .HasOne(x => x.Source)
+        .WithMany()
+        .HasForeignKey(x => x.SourceId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .IsRequired();
+    
+    modelBuilder.Entity<PluginVersion>()
+        .HasOne(x => x.Icon)
+        .WithMany()
+        .HasForeignKey(x => x.IconId)
+        .OnDelete(DeleteBehavior.NoAction);
+    
+    modelBuilder.Entity<PluginVersion>()
+        .HasOne(x => x.Readme)
+        .WithMany()
+        .HasForeignKey(x => x.ReadmeId)
+        .OnDelete(DeleteBehavior.NoAction);
   }
 }

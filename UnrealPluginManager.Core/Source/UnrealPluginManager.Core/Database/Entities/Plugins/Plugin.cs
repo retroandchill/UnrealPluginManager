@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using UnrealPluginManager.Core.Database.Entities.Storage;
+using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -20,8 +22,7 @@ public class Plugin {
   /// It is an auto-generated identifier that uniquely distinguishes each plugin record.
   /// </remarks>
   [Key]
-  [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-  public Guid Id { get; set; }
+  public Guid Id { get; set; } = Guid.CreateVersion7();
 
   /// <summary>
   /// Gets or sets the name of the plugin.
@@ -82,6 +83,15 @@ public class Plugin {
   /// </remarks>
   [MaxLength(255)]
   public Uri? AuthorWebsite { get; set; }
+
+  /// <summary>
+  /// Gets or sets the timestamp at which the plugin entity was created.
+  /// </summary>
+  /// <remarks>
+  /// This property is automatically set to the current UTC timestamp upon initialization.
+  /// It provides a record of the creation time for the plugin entity within the database.
+  /// </remarks>
+  public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
   /// <summary>
   /// Gets or sets the collection of versions associated with the plugin.

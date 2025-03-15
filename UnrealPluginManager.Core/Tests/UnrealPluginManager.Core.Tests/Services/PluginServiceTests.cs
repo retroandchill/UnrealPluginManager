@@ -10,6 +10,7 @@ using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
@@ -487,7 +488,11 @@ public class PluginServiceTests {
                 Binaries = [
                     new UploadedBinaries {
                         EngineVersion = "5.5",
-                        Platform = "Win64"
+                        Platform = "Win64",
+                        File = new FileResource {
+                            OriginalFilename = "Win64.zip",
+                            FilePath = filesystem.FileInfo.New("Win64.zip")
+                        }
                     }
                 ]
             }
