@@ -14,6 +14,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ResourceInfo } from './ResourceInfo';
+import {
+    ResourceInfoFromJSON,
+    ResourceInfoFromJSONTyped,
+    ResourceInfoToJSON,
+    ResourceInfoToJSONTyped,
+} from './ResourceInfo';
 import type { BinariesOverview } from './BinariesOverview';
 import {
     BinariesOverviewFromJSON,
@@ -48,6 +55,12 @@ export interface VersionDetails {
      * @memberof VersionDetails
      */
     version: string;
+    /**
+     * 
+     * @type {ResourceInfo}
+     * @memberof VersionDetails
+     */
+    icon?: ResourceInfo;
     /**
      * A collection of dependency overviews associated with a specific version of a plugin.
      * Each dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality.
@@ -87,6 +100,7 @@ export function VersionDetailsFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'id': json['id'],
         'version': json['version'],
+        'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(DependencyOverviewFromJSON)),
         'binaries': ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
     };
@@ -105,6 +119,7 @@ export function VersionDetailsToJSONTyped(value?: VersionDetails | null, ignoreD
         
         'id': value['id'],
         'version': value['version'],
+        'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(DependencyOverviewToJSON)),
         'binaries': ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),
     };

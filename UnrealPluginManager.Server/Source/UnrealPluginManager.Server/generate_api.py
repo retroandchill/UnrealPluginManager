@@ -135,21 +135,6 @@ def main():
         else:
             find_schema(import_mappings, schema_name, search_dirs)
 
-    config_file = os.path.join(script_dir, 'openapitools.json')
-    out_dir = os.path.join(root_dir, 'generated', 'server')
-    commands = ['openapi-generator-cli', 'generate', '--generator-name', 'aspnetcore ',
-                '--config', config_file, '--additional-properties', 'operationIsAsync=true',
-                '--additional-properties', 'operationIsResultTask=true',
-                '--additional-properties', 'operationModifier=abstract',
-                '--additional-properties', 'classModifier=abstract',
-                '--additional-properties', 'isLibrary=true',
-                '--additional-properties', 'useNewtonsoft=false', '--additional-properties', 'useNewtonsoft=false',
-                '--input-spec', os.path.join(script_dir, 'openapi-spec.json'),
-                '--output', out_dir, ' --template-dir', os.path.join(root_dir, 'openapi-template'),
-                '--package-name', 'UnrealPluginManager.WebServer', ]
-    subprocess.call(commands, shell=True)
-    exit(0)
-
     pull_template_repository(root_dir)
     config_file = os.path.join(script_dir, 'openapitools.json')
     out_dir = os.path.join(root_dir, 'generated', 'dotnet')

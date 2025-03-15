@@ -1,4 +1,4 @@
-﻿import {Configuration, PluginsApi, StorageApi} from "../api";
+﻿import {Configuration, PluginsApi} from "../api";
 
 /**
  * The base URL of the API used for making HTTP requests.
@@ -22,15 +22,6 @@ const apiConfig = new Configuration({
  * @param {Object} apiConfig - The configuration object used to initialize the PluginsApi instance.
  */
 export const pluginsApi = new PluginsApi(apiConfig);
-/**
- * Represents an instance of the StorageApi class used to interact with storage functionalities.
- *
- * This variable serves as an interface for managing storage-related operations using the provided API configuration.
- *
- * @type {StorageApi}
- * @param {Object} apiConfig - The configuration object for the StorageApi instance, including required credentials, endpoints, and additional options.
- */
-export const storageApi = new StorageApi(apiConfig);
 
 /**
  * Defines the file path for accessing the icons.
@@ -39,4 +30,4 @@ export const storageApi = new StorageApi(apiConfig);
  *
  * @type {string}
  */
-export const iconsPath = `${apiBaseUrl}/files/icons`
+export const iconsPath = `${apiBaseUrl}/storage`

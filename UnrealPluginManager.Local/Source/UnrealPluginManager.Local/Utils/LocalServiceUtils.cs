@@ -69,7 +69,6 @@ public static class LocalServiceUtils {
   /// <param name="services">The <see cref="IServiceCollection"/> to which the API factories are registered.</param>
   /// <returns>The same <see cref="IServiceCollection"/> instance so that multiple calls can be chained.</returns>
   public static IServiceCollection AddApis(this IServiceCollection services) {
-    return services.AddApi<IPluginsApi, PluginsApi>()
-        .AddApi<IStorageApi, StorageApi>();
+    return services.AddApi<IPluginsApi, PluginsApi>();
   }
 }

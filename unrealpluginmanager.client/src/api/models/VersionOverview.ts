@@ -14,6 +14,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ResourceInfo } from './ResourceInfo';
+import {
+    ResourceInfoFromJSON,
+    ResourceInfoFromJSONTyped,
+    ResourceInfoToJSON,
+    ResourceInfoToJSONTyped,
+} from './ResourceInfo';
+
 /**
  * Represents a specific version of a plugin, identified by a unique ID and version number.
  * @export
@@ -32,6 +40,12 @@ export interface VersionOverview {
      * @memberof VersionOverview
      */
     version: string;
+    /**
+     * 
+     * @type {ResourceInfo}
+     * @memberof VersionOverview
+     */
+    icon?: ResourceInfo;
 }
 
 /**
@@ -55,6 +69,7 @@ export function VersionOverviewFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'id': json['id'],
         'version': json['version'],
+        'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
     };
 }
 
@@ -71,6 +86,7 @@ export function VersionOverviewToJSONTyped(value?: VersionOverview | null, ignor
         
         'id': value['id'],
         'version': value['version'],
+        'icon': ResourceInfoToJSON(value['icon']),
     };
 }
 

@@ -604,39 +604,6 @@
           }
         }
       }
-    },
-    "/files/icons/{pluginName}": {
-      "get": {
-        "tags": [
-          "Storage"
-        ],
-        "summary": "Retrieves an icon as a stream for the specified file name.",
-        "operationId": "getIcon",
-        "parameters": [
-          {
-            "name": "pluginName",
-            "in": "path",
-            "description": "The name of the plugin to search for",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "image/png": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -950,18 +917,21 @@
             "properties": {
               "description": {
                 "type": "string",
+                "description": "Gets or sets a brief explanation or summary of the plugin version.\r\nThis provides additional context or details about the plugin functionality or purpose.",
                 "nullable": true
               },
               "binaries": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/BinariesOverview"
-                }
+                },
+                "description": "Gets or sets the collection of binaries associated with the plugin version.\r\nThis provides details about the compiled binaries, such as their configurations or associated metadata."
               }
             },
             "additionalProperties": false
           }
-        ]
+        ],
+        "description": "Represents detailed information about a specific plugin version,\r\nincluding a description and an overview of its binaries."
       },
       "PluginVersionInfo": {
         "required": [
@@ -1055,6 +1025,30 @@
         },
         "description": "Represents the output of a paged query of PluginVersionInfo."
       },
+      "ResourceInfo": {
+        "required": [
+          "originalFilename"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gets or sets the unique identifier for the resource.",
+            "format": "uuid"
+          },
+          "originalFilename": {
+            "type": "string",
+            "description": "Gets or sets the original filename of the resource before any processing or storage modifications."
+          },
+          "storedFilename": {
+            "type": "string",
+            "description": "Gets the name of the file as stored in the underlying file system.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents metadata and file-related information for a resource."
+      },
       "VersionDetails": {
         "allOf": [
           {
@@ -1104,6 +1098,9 @@
             "type": "string",
             "description": "Gets or sets the semantic version of the plugin, representing its specific version details.",
             "example": "1.0.0"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ResourceInfo"
           }
         },
         "additionalProperties": false,

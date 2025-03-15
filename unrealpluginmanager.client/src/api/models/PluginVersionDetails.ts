@@ -30,7 +30,8 @@ import {
 } from './BinariesOverview';
 
 /**
- * 
+ * Represents detailed information about a specific plugin version,
+ * including a description and an overview of its binaries.
  * @export
  * @interface PluginVersionDetails
  */
@@ -72,13 +73,15 @@ export interface PluginVersionDetails {
      */
     dependencies: Array<PluginDependency>;
     /**
-     * 
+     * Gets or sets a brief explanation or summary of the plugin version.
+     * This provides additional context or details about the plugin functionality or purpose.
      * @type {string}
      * @memberof PluginVersionDetails
      */
     description?: string | null;
     /**
-     * 
+     * Gets or sets the collection of binaries associated with the plugin version.
+     * This provides details about the compiled binaries, such as their configurations or associated metadata.
      * @type {Array<BinariesOverview>}
      * @memberof PluginVersionDetails
      */

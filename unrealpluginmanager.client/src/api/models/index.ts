@@ -14,5 +14,6 @@ export * from './PluginType';
 export * from './PluginVersionDetails';
 export * from './PluginVersionInfo';
 export * from './PluginVersionInfoPage';
+export * from './ResourceInfo';
 export * from './VersionDetails';
 export * from './VersionOverview';

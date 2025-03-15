@@ -16,6 +16,7 @@ namespace UnrealPluginManager.Core.Mappers;
 /// Utilizes Riok.Mapperly library for advanced mapping configurations.
 /// </summary>
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[UseStaticMapper(typeof(ResourceMapper))]
 public static partial class PluginMapper {
   /// <summary>
   /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.
