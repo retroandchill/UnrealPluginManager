@@ -1,29 +1,18 @@
 ﻿import {render, screen} from '@testing-library/react'
 import {expect, test} from 'vitest'
 import {PluginButton} from "../../src/components";
-import {PluginOverview} from "../../src/api";
+import {PluginVersionInfo} from "../../src/api";
 import '@testing-library/jest-dom/vitest';
-import {v4 as uuid4} from "uuid";
+import {v7 as uuid7} from "uuid";
 
 test("Plugin Button Renders", () => {
-  let plugin: PluginOverview = {
-    id: uuid4(),
+    let plugin: PluginVersionInfo = {
+        pluginId: uuid7(),
     name: "Test Plugin",
     authorName: "Demo",
-    versions: [
-      {
-        id: uuid4(),
-        version: "1.0.0"
-      },
-      {
-        id: uuid4(),
-        version: "1.0.1"
-      },
-      {
-        id: uuid4(),
-        version: "2.0.2"
-      }
-    ]
+        versionId: uuid7(),
+        version: "2.0.2",
+        dependencies: []
   }
   render(<PluginButton plugin={plugin} onClick={() => {
   }}/>)
