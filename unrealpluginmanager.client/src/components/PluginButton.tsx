@@ -1,5 +1,5 @@
 ﻿import {PluginOverview} from "../api";
-import {iconsPath} from "../config/Globals.ts";
+import {apiResourcesPath} from "../config/Globals.ts";
 
 /**
  * A callback function type that is executed with a plugin as its argument.
@@ -65,7 +65,8 @@ export function PluginButton(props: Readonly<PluginButtonProps>) {
       props.onClick(props.plugin);
     }
   }}>
-    <img src={latestVersion.icon ? `${iconsPath}/${latestVersion.icon.storedFilename}` : "Icon128.png"} alt="Plugin Icon"/>
+      <img src={latestVersion.icon ? `${apiResourcesPath}/${latestVersion.icon.storedFilename}` : "Icon128.png"}
+           alt="Plugin Icon"/>
     <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
       <h2>{props.plugin.name}</h2>
     </header>

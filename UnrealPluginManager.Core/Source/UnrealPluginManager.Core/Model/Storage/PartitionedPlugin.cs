@@ -1,5 +1,4 @@
-﻿using System.IO.Abstractions;
-using UnrealPluginManager.Core.Model.Engine;
+﻿using UnrealPluginManager.Core.Model.Engine;
 
 namespace UnrealPluginManager.Core.Model.Storage;
 
@@ -11,4 +10,8 @@ namespace UnrealPluginManager.Core.Model.Storage;
 /// It contains references to the main source file of the plugin, an optional icon file (if available),
 /// and a dictionary of binary files categorized by platform or other identifying keys.
 /// </remarks>
-public record PartitionedPlugin(IFileInfo Source, IFileInfo? Icon, IFileInfo? Readme, Dictionary<PluginBinaryType, IFileInfo> Binaries);
+public record PartitionedPlugin(
+    ResourceHandle Source,
+    ResourceHandle? Icon,
+    ResourceHandle? Readme,
+    Dictionary<PluginBinaryType, ResourceHandle> Binaries);

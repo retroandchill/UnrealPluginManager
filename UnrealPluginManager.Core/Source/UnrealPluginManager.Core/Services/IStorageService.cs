@@ -1,7 +1,7 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
-using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Files;
+using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -18,11 +18,32 @@ public interface IStorageService {
   string BaseDirectory { get; }
 
   /// <summary>
+  /// Represents the directory path used for storing resource files specific to the storage service.
+  /// This property combines the base directory and a predefined folder name to provide
+  /// a consistent location for resource management within the application.
+  /// </summary>
+  string ResourceDirectory { get; }
+
+  /// <summary>
   /// Adds a file to the storage system based on the provided file source.
   /// </summary>
   /// <param name="fileSource">The source of the file to be added. It defines the origin and content of the file.</param>
   /// <returns>A task that represents the asynchronous operation, containing the file information of the added file.</returns>
-  Task<IFileInfo> AddFile(IFileSource fileSource);
+  Task<ResourceHandle> AddResource(IFileSource fileSource);
+
+  /// <summary>
+  /// Retrieves information about a resource file from the storage system using the provided filename.
+  /// </summary>
+  /// <param name="filename">The name of the resource file to retrieve information for.</param>
+  /// <returns>An <see cref="IFileInfo"/> instance representing the file information of the specified resource file.</returns>
+  ResourceHandle RetrieveResourceInfo(string filename);
+
+  /// <summary>
+  /// Retrieves a read-only file stream for the specified resource file.
+  /// </summary>
+  /// <param name="filename">The name of the resource file to retrieve the stream for.</param>
+  /// <returns>A stream that provides read-only access to the contents of the resource file.</returns>
+  Stream GetResourceStream(string filename);
 
   /// <summary>
   /// Retrieves the configuration object of a specified type from the given configuration file.

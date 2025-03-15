@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UnrealPluginManager.Local.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFiledResources : Migration
+    public partial class AddFileResources : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,7 +65,7 @@ namespace UnrealPluginManager.Local.Migrations
                     id = table.Column<Guid>(type: "TEXT", nullable: false),
                     original_filename = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
-                    file_path = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
+                    stored_filename = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
                 {

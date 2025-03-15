@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
 
 namespace UnrealPluginManager.Core.Database.Entities.Storage;
 
@@ -45,20 +43,14 @@ public class FileResource {
   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
   /// <summary>
-  /// Gets or sets the file system path associated with the file resource.
+  /// Gets or sets the name of the file as stored in the file system.
   /// </summary>
   /// <remarks>
-  /// This property represents the physical location of the file within the file system.
-  /// It is stored as an <see cref="IFileInfo"/> object, providing an abstraction for file operations
-  /// and enabling interaction with the file system in a testable manner.
+  /// This property represents the file's actual name on the storage medium, which may differ from its original name.
+  /// It is used to ensure that the file is uniquely identifiable within the storage location.
+  /// The filename is subject to a maximum length constraint of 255 characters.
   /// </remarks>
   [MaxLength(255)]
-  public required IFileInfo FilePath { get; set; }
+  public required string StoredFilename { get; set; }
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder, IFileSystem fileSystem) {
-    modelBuilder.Entity<FileResource>()
-        .Property(x => x.FilePath)
-        .HasConversion(x => x.FullName, x => fileSystem.FileInfo.New(x));
-  }
-  
 }

@@ -243,17 +243,17 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("file_path");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("original_filename");
+
+                    b.Property<string>("StoredFilename")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("stored_filename");
 
                     b.HasKey("Id")
                         .HasName("pk_file_resources");

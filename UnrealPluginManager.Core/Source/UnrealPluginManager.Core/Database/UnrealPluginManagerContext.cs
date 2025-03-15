@@ -1,8 +1,4 @@
-﻿using System.IO.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Semver;
+﻿using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 
@@ -16,19 +12,6 @@ namespace UnrealPluginManager.Core.Database;
 /// It leverages the configuration provided by the <see cref="DbContextOptions{TContext}"/> to establish the connection and behavior for the database.
 /// </remarks>
 public abstract class UnrealPluginManagerContext : DbContext {
-  
-  private readonly IFileSystem _fileSystem;
-  
-  /// <summary>
-  /// Represents the entity framework database context for managing plugin data and related entities in the Unreal Plugin Manager application.
-  /// </summary>
-  /// <remarks>
-  /// This abstract class serves as the base context for interacting with plugin-related data across multiple implementations.
-  /// It leverages the provided <see cref="IFileSystem"/> instance to handle file-related operations relevant to the database and application logic.
-  /// </remarks>
-  protected UnrealPluginManagerContext(IFileSystem filesystem) {
-    _fileSystem = filesystem;
-  }
 
   /// <summary>
   /// Represents the database set for storing and managing plugin data within the UnrealPluginManager context.
@@ -74,6 +57,5 @@ public abstract class UnrealPluginManagerContext : DbContext {
     PluginVersion.DefineModelMetadata(modelBuilder);
     Dependency.DefineModelMetadata(modelBuilder);
     UploadedBinaries.DefineModelMetadata(modelBuilder);
-    FileResource.DefineModelMetadata(modelBuilder, _fileSystem);
   }
 }

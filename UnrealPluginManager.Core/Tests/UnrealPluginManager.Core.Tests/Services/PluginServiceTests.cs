@@ -2,9 +2,6 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using LanguageExt;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
@@ -14,7 +11,6 @@ using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
-using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
@@ -221,7 +217,8 @@ public class PluginServiceTests {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     var app = await pluginService.SetupVersionResolutionTreeWithConflict();
 
-    var conflictException = Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList(app));
+    var conflictException =
+        Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList(app));
     Assert.That(conflictException, Is.Not.Null);
     var conflicts = conflictException.Conflicts;
     Assert.That(conflicts, Has.Count.EqualTo(1));
@@ -230,13 +227,13 @@ public class PluginServiceTests {
       Assert.That(conflicts[0].Versions, Has.Count.EqualTo(2));
     });
     Assert.That(conflicts[0].Versions,
-                Has.Exactly(1)
-                    .Matches<PluginRequirement>(x => x.RequiredBy == "App"
-                                                     && x.RequiredVersion == SemVersionRange.Parse("=1.0.0")));
+        Has.Exactly(1)
+            .Matches<PluginRequirement>(x => x.RequiredBy == "App"
+                                             && x.RequiredVersion == SemVersionRange.Parse("=1.0.0")));
     Assert.That(conflicts[0].Versions,
-                Has.Exactly(1)
-                    .Matches<PluginRequirement>(x => x.RequiredBy == "Sql"
-                                                     && x.RequiredVersion == SemVersionRange.Parse("=2.0.0")));
+        Has.Exactly(1)
+            .Matches<PluginRequirement>(x => x.RequiredBy == "Sql"
+                                             && x.RequiredVersion == SemVersionRange.Parse("=2.0.0")));
   }
 
   [Test]
@@ -321,7 +318,7 @@ public class PluginServiceTests {
     }
 
     Assert.ThrowsAsync<BadSubmissionException>(async () =>
-                                                   await pluginService.SubmitPlugin(testZip, "5.5"));
+        await pluginService.SubmitPlugin(testZip, "5.5"));
   }
 
   [Test]
@@ -343,9 +340,9 @@ public class PluginServiceTests {
     }
 
     Assert.ThrowsAsync<BadSubmissionException>(async () =>
-                                                   await pluginService.SubmitPlugin(testZip, "5.5"));
+        await pluginService.SubmitPlugin(testZip, "5.5"));
   }
-  
+
   [Test]
   public async Task TestSubmitPluginAsParts() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
@@ -369,7 +366,7 @@ public class PluginServiceTests {
 
         await writer.WriteAsync(JsonSerializer.Serialize(descriptor, JsonOptions));
       }
-      
+
       var sourceEntry = zipArchive.CreateEntry("Source.zip");
       await using var sourceWriter = sourceEntry.Open();
       innerZip.Seek(0, SeekOrigin.Begin);
@@ -389,33 +386,33 @@ public class PluginServiceTests {
   [Test]
   public async Task TestRetrievePlugin() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    
+
     var (pluginId, _) = await SetupTestPluginEnvironment();
 
     Assert.DoesNotThrowAsync(
         async () => await pluginService.GetPluginFileData(pluginId, SemVersionRange.All, "5.5", ["Win64"]));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        pluginId, SemVersionRange.All, "5.4", ["Win64"]));
+        await pluginService.GetPluginFileData(
+            pluginId, SemVersionRange.All, "5.4", ["Win64"]));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
+        await pluginService.GetPluginFileData(
+            Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
   }
-  
+
   [Test]
   public async Task TestRetrievePluginParts() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    
+
     var (pluginId, versionId) = await SetupTestPluginEnvironment();
 
     Assert.DoesNotThrowAsync(
         async () => await pluginService.GetPluginFileData(pluginId, versionId));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        pluginId, SemVersionRange.All, "5.4", ["Win64"]));
+        await pluginService.GetPluginFileData(
+            pluginId, SemVersionRange.All, "5.4", ["Win64"]));
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
-                                                    await pluginService.GetPluginFileData(
-                                                        Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
+        await pluginService.GetPluginFileData(
+            Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
   }
 
   private async Task<(Guid, Guid)> SetupTestPluginEnvironment() {
@@ -461,7 +458,7 @@ public class PluginServiceTests {
                 Version = new SemVersion(1, 0, 0),
                 Source = new FileResource {
                     OriginalFilename = "Source.zip",
-                    FilePath = zipFile
+                    StoredFilename = zipFile.Name,
                 },
                 Binaries = [
                     new UploadedBinaries {
@@ -469,7 +466,7 @@ public class PluginServiceTests {
                         Platform = "Win64",
                         File = new FileResource {
                             OriginalFilename = "Win64.zip",
-                            FilePath = binaries
+                            StoredFilename = binaries.Name
                         }
                     }
                 ]
@@ -478,7 +475,7 @@ public class PluginServiceTests {
     };
     await context.Plugins.AddAsync(plugin);
     await context.SaveChangesAsync();
-    
+
     return (plugin.Id, plugin.Versions.First().Id);
   }
 }

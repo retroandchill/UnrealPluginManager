@@ -238,17 +238,17 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("file_path");
-
                     b.Property<string>("OriginalFilename")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("TEXT")
                         .HasColumnName("original_filename");
+
+                    b.Property<string>("StoredFilename")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("stored_filename");
 
                     b.HasKey("Id")
                         .HasName("pk_file_resources");

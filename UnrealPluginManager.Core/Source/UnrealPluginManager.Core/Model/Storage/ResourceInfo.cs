@@ -1,7 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.Text.Json.Serialization;
-
-namespace UnrealPluginManager.Core.Model.Storage;
+﻿namespace UnrealPluginManager.Core.Model.Storage;
 
 /// <summary>
 /// Represents metadata and file-related information for a resource.
@@ -31,17 +28,6 @@ public class ResourceInfo {
   public required string OriginalFilename { get; set; }
 
   /// <summary>
-  /// Gets or sets the file path of the resource.
-  /// </summary>
-  /// <remarks>
-  /// This property provides access to the file system information associated with the resource.
-  /// It is represented as an abstraction of the file path, enabling compatibility with various
-  /// file system implementations.
-  /// </remarks>
-  [JsonIgnore]
-  public required IFileInfo FilePath { get; set; }
-
-  /// <summary>
   /// Gets the name of the file as stored in the underlying file system.
   /// </summary>
   /// <remarks>
@@ -49,6 +35,6 @@ public class ResourceInfo {
   /// within the application. It reflects the actual name used in the storage
   /// system, which may differ from the original filename provided by the user.
   /// </remarks>
-  public string StoredFilename => FilePath.Name;
-  
+  public string StoredFilename { get; set; }
+
 }

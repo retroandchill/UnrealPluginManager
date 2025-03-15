@@ -1042,8 +1042,7 @@
           },
           "storedFilename": {
             "type": "string",
-            "description": "Gets the name of the file as stored in the underlying file system.",
-            "readOnly": true
+            "description": "Gets the name of the file as stored in the underlying file system."
           }
         },
         "additionalProperties": false,

@@ -209,12 +209,18 @@ public partial class PluginService : IPluginService {
     if (fileData is not null) {
       pluginVersion.Source = new FileResource {
           OriginalFilename = $"{pluginName}_{descriptor.VersionName}_Source.zip",
-          FilePath = fileData.Source
+          StoredFilename = fileData.Source.ResourceName
       };
-      if (fileData.Icon is not null) {
+      if (fileData.Icon.HasValue) {
         pluginVersion.Icon = new FileResource {
             OriginalFilename = $"{pluginName}_{descriptor.VersionName}.png",
-            FilePath = fileData.Icon
+            StoredFilename = fileData.Icon.Value.ResourceName
+        };
+      }
+      if (fileData.Readme.HasValue) {
+        pluginVersion.Readme = new FileResource {
+            OriginalFilename = $"{pluginName}_{descriptor.VersionName}.md",
+            StoredFilename = fileData.Readme.Value.ResourceName
         };
       }
 
@@ -223,7 +229,7 @@ public partial class PluginService : IPluginService {
           Platform = x.Key.Platform,
           File = new FileResource {
               OriginalFilename = $"{pluginName}_{descriptor.VersionName}_{x.Key.EngineVersion}_{x.Key.Platform}.zip",
-              FilePath = x.Value
+              StoredFilename = x.Value.ResourceName
           }
       }));
     }
@@ -258,23 +264,23 @@ public partial class PluginService : IPluginService {
       descriptor = desc;
     }
 
-    IFileInfo sourceFile;
+    ResourceHandle sourceFile;
     await using (var sourceStream = sourceArchive.Open()) {
-      sourceFile = await _storageService.AddFile(new StreamFileSource(_fileSystem, sourceStream));
+      sourceFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, sourceStream));
     }
 
-    IFileInfo? iconFile = null;
+    ResourceHandle? iconFile = null;
     var icon = archive.GetEntry("Icon.png");
     if (icon is not null) {
       await using var iconStream = icon.Open();
-      iconFile = await _storageService.AddFile(new StreamFileSource(_fileSystem, iconStream));
+      iconFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, iconStream));
     }
-    
-    IFileInfo? readmeFile = null;
+
+    ResourceHandle? readmeFile = null;
     var readme = archive.GetEntry("README.md");
     if (readme is not null) {
       await using var readmeStream = readme.Open();
-      readmeFile = await _storageService.AddFile(new StreamFileSource(_fileSystem, readmeStream));
+      readmeFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, readmeStream));
     }
 
     var binaries = await archive.Entries
@@ -289,7 +295,7 @@ public partial class PluginService : IPluginService {
           var platform = x.Parts[2][..^4]; // Remove .zip from the end of the filename
           await using var binaryStream = x.Entry.Open();
           return (EngineVersion: engineVersion, Platform: platform,
-              File: await _storageService.AddFile(new StreamFileSource(_fileSystem, binaryStream)));
+              File: await _storageService.AddResource(new StreamFileSource(_fileSystem, binaryStream)));
         })
         .ToDictionaryAsync(x => new PluginBinaryType(x.EngineVersion, x.Platform),
             x => x.File);
@@ -359,13 +365,13 @@ public partial class PluginService : IPluginService {
     var fileInfo = await _dbContext.PluginVersions
         .Where(p => p.ParentId == pluginId)
         .Where(p => p.Id == versionId)
-        .Select(x => x.Source.FilePath)
+        .Select(x => x.Source.StoredFilename)
         .FirstOrDefaultAsync();
     if (fileInfo is null) {
       throw new PluginNotFoundException($"Plugin {pluginId} was not found!");
     }
-    
-    return fileInfo;
+
+    return _storageService.RetrieveResourceInfo(fileInfo).File;
   }
 
   /// <inheritdoc />
@@ -378,13 +384,13 @@ public partial class PluginService : IPluginService {
         .Where(b => b.ParentId == versionId)
         .Where(b => b.EngineVersion == engineVersion)
         .Where(b => b.Platform == platform)
-        .Select(b => b.File.FilePath)
+        .Select(b => b.File.StoredFilename)
         .FirstOrDefaultAsync();
     if (fileInfo is null) {
       throw new PluginNotFoundException($"Binaries for plugin {pluginId} was not found!");
     }
 
-    return fileInfo;
+    return _storageService.RetrieveResourceInfo(fileInfo).File;
   }
 
   private async Task<Stream> CreateStructuredFileData(PluginVersion pluginVersion) {
@@ -396,28 +402,28 @@ public partial class PluginService : IPluginService {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
 
       var sourceEntry = destinationZip.CreateEntry("Source.zip");
-      await using (var sourceStream = pluginVersion.Source.FilePath.OpenRead())
+      await using (var sourceStream = _storageService.GetResourceStream(pluginVersion.Source.StoredFilename))
       await using (var destStream = sourceEntry.Open()) {
         await sourceStream.CopyToAsync(destStream);
       }
 
       if (pluginVersion.Icon is not null) {
         var iconEntry = destinationZip.CreateEntry("Icon.png");
-        await using var iconStream = pluginVersion.Icon.FilePath.OpenRead();
+        await using var iconStream = _storageService.GetResourceStream(pluginVersion.Icon.StoredFilename);
         await using var destStream = iconEntry.Open();
         await iconStream.CopyToAsync(destStream);
       }
-      
+
       if (pluginVersion.Readme is not null) {
         var readmeEntry = destinationZip.CreateEntry("Readme.md");
-        await using var readmeStream = pluginVersion.Readme.FilePath.OpenRead();
+        await using var readmeStream = _storageService.GetResourceStream(pluginVersion.Readme.StoredFilename);
         await using var destStream = readmeEntry.Open();
         await readmeStream.CopyToAsync(destStream);
       }
 
       var createdEngineVersions = new System.Collections.Generic.HashSet<string>();
       destinationZip.CreateEntry("Binaries/");
-      
+
       foreach (var binaries in pluginVersion.Binaries) {
         if (!createdEngineVersions.Contains(binaries.EngineVersion)) {
           destinationZip.CreateEntry(Path.Join("Binaries", $"{binaries.EngineVersion}/"));
@@ -427,7 +433,7 @@ public partial class PluginService : IPluginService {
         var binaryEntry =
             destinationZip.CreateEntry(Path.Join("Binaries", $"{binaries.EngineVersion}",
                 $"{binaries.Platform}.zip"));
-        await using var binaryStream = binaries.File.FilePath.OpenRead();
+        await using var binaryStream = _storageService.GetResourceStream(binaries.File.StoredFilename);
         await using var destStream = binaryEntry.Open();
         await binaryStream.CopyToAsync(destStream);
       }
@@ -448,17 +454,17 @@ public partial class PluginService : IPluginService {
 
     try {
       using var destinationZip = new ZipArchive(fileStream, ZipArchiveMode.Create, true);
-      await using (var sourceStream = pluginVersion.Source.FilePath.OpenRead()) {
+      await using (var sourceStream = _storageService.GetResourceStream(pluginVersion.Source.StoredFilename)) {
         using var zipArchive = new ZipArchive(sourceStream);
         await destinationZip.Merge(zipArchive);
       }
-      
+
       foreach (var binaries in pluginVersion.Binaries) {
         if (binaries.EngineVersion != engineVersion) {
           continue;
         }
 
-        await using var data = binaries.File.FilePath.OpenRead();
+        await using var data = _storageService.GetResourceStream(binaries.File.StoredFilename);
         using var zipArchive = new ZipArchive(data);
         await destinationZip.Merge(zipArchive);
       }
@@ -574,11 +580,11 @@ public partial class PluginService : IPluginService {
     if (missing.Count > 0) {
       throw new PluginNotFoundException($"Missing binaries for {string.Join(", ", missing)}");
     }
-    
-    yield return plugin.Source.FilePath;
+
+    yield return _storageService.RetrieveResourceInfo(plugin.Source.StoredFilename).File;
 
     foreach (var binaries in plugin.Binaries) {
-      yield return binaries.File.FilePath;
+      yield return _storageService.RetrieveResourceInfo(binaries.File.StoredFilename).File;
     }
   }
 

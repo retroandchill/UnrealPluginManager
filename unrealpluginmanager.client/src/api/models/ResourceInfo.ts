@@ -13,7 +13,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
 /**
  * Represents metadata and file-related information for a resource.
  * @export
@@ -37,7 +36,7 @@ export interface ResourceInfo {
      * @type {string}
      * @memberof ResourceInfo
      */
-    readonly storedFilename?: string;
+    storedFilename?: string;
 }
 
 /**
@@ -68,7 +67,7 @@ export function ResourceInfoToJSON(json: any): ResourceInfo {
     return ResourceInfoToJSONTyped(json, false);
 }
 
-export function ResourceInfoToJSONTyped(value?: Omit<ResourceInfo, 'storedFilename'> | null, ignoreDiscriminator: boolean = false): any {
+export function ResourceInfoToJSONTyped(value?: ResourceInfo | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -77,6 +76,7 @@ export function ResourceInfoToJSONTyped(value?: Omit<ResourceInfo, 'storedFilena
         
         'id': value['id'],
         'originalFilename': value['originalFilename'],
+        'storedFilename': value['storedFilename'],
     };
 }
 

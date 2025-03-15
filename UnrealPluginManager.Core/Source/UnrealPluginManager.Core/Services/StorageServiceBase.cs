@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using UnrealPluginManager.Core.Files;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Services;
@@ -20,7 +21,7 @@ public abstract partial class StorageServiceBase : IStorageService {
   /// and custom implementations.
   /// </summary>
   [field: AutoConstructorInject(initializer: "filesystem",
-                                injectedType: typeof(IFileSystem), parameterName: "filesystem")]
+      injectedType: typeof(IFileSystem), parameterName: "filesystem")]
   protected IFileSystem FileSystem { get; }
 
   private readonly IJsonService _jsonService;
@@ -28,11 +29,27 @@ public abstract partial class StorageServiceBase : IStorageService {
   /// <inheritdoc />
   public abstract string BaseDirectory { get; }
 
-  private string ConfigDirectory => Path.Join(BaseDirectory, "Config");
 
   /// <inheritdoc />
-  public Task<IFileInfo> AddFile(IFileSource fileSource) {
-    return fileSource.CreateFile(Path.Join(BaseDirectory, FileSystem.Path.GetRandomFileName()));
+  public abstract string ResourceDirectory { get; }
+
+  private string ConfigDirectory => Path.Join(BaseDirectory, "config");
+
+  /// <inheritdoc />
+  public async Task<ResourceHandle> AddResource(IFileSource fileSource) {
+    var filename = FileSystem.Path.GetRandomFileName();
+    return new ResourceHandle(filename, await fileSource.CreateFile(Path.Join(ResourceDirectory, filename)));
+  }
+
+  /// <inheritdoc />
+  public ResourceHandle RetrieveResourceInfo(string filename) {
+    var fileInfo = FileSystem.FileInfo.New(Path.Join(ResourceDirectory, filename));
+    return new ResourceHandle(filename, fileInfo);
+  }
+
+  /// <inheritdoc />
+  public Stream GetResourceStream(string filename) {
+    return RetrieveResourceInfo(filename).File.OpenRead();
   }
 
   /// <inheritdoc />

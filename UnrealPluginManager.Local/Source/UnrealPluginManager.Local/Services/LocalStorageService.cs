@@ -21,4 +21,7 @@ public partial class LocalStorageService : StorageServiceBase {
   public sealed override string BaseDirectory =>
       _environment.GetEnvironmentVariable(EnvironmentVariables.StorageDirectory) ??
       Path.Join(_environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".unrealpluginmanager");
+
+  /// <inheritdoc />
+  public sealed override string ResourceDirectory => Path.Join(BaseDirectory, "resources");
 }
