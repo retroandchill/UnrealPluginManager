@@ -21,5 +21,6 @@ public class TestUnrealPluginManagerContext : UnrealPluginManagerContext {
   public override void Dispose() {
     base.Dispose();
     _dbConnection?.Dispose();
+    GC.SuppressFinalize(this);
   }
 }

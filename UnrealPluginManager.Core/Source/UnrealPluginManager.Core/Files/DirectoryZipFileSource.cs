@@ -16,6 +16,7 @@ public sealed partial class DirectoryZipFileSource : IFileSource {
     return _directoryInfo.FileSystem.CreateZipFile(destinationPath, _directoryInfo.FullName);
   }
 
+  /// <inheritdoc />
   public Task OverwriteFile(IFileInfo fileInfo) {
     return _directoryInfo.FileSystem.CreateZipFile(fileInfo.FullName, _directoryInfo.FullName);
   }
