@@ -17,9 +17,8 @@ public class TextMarkdownInputFormatter : TextInputFormatter {
   public TextMarkdownInputFormatter() {
     SupportedMediaTypes.Add(MediaTypeNames.Text.Markdown);
 
-    SupportedEncodings.Add(Encoding.UTF8);
-    SupportedEncodings.Add(Encoding.Unicode);
-
+    SupportedEncodings.Add(UTF8EncodingWithoutBOM);
+    SupportedEncodings.Add(UTF16EncodingLittleEndian);
   }
 
   /// <inheritdoc />

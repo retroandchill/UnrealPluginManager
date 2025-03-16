@@ -164,10 +164,11 @@ public partial class PluginsController : ControllerBase {
   /// <param name="readme">The README content in markdown format to be added or updated.</param>
   /// <return>Returns the updated README content as a string.</return>
   [HttpPost("{pluginId:guid}/{versionId:guid}/readme")]
-  [Consumes(MediaTypeNames.Text.Markdown)]
+  [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-  public Task<string> AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId, [FromBody] string readme) {
+  public Task<string>? AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
+                                       [FromBody] string readme) {
     return _pluginService.AddPluginReadme(pluginId, versionId, readme);
   }
 
@@ -179,7 +180,7 @@ public partial class PluginsController : ControllerBase {
   /// <param name="readme">The new README content to replace the existing one.</param>
   /// <return>Returns the updated README content as a string.</return>
   [HttpPut("{pluginId:guid}/{versionId:guid}/readme")]
-  [Consumes(MediaTypeNames.Text.Markdown)]
+  [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,

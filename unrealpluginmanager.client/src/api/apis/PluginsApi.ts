@@ -727,7 +727,7 @@ export class PluginsApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'text/markdown';
 
         const response = await this.request({
-            path: `/api/plugins/{pluginId}/latest/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+            path: `/api/plugins/{pluginId}/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
             method: 'PUT',
             headers: headerParameters,
             query: queryParameters,

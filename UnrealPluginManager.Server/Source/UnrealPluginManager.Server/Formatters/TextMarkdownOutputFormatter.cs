@@ -26,7 +26,6 @@ public class TextMarkdownOutputFormatter : TextOutputFormatter {
 
     SupportedEncodings.Add(Encoding.UTF8);
     SupportedEncodings.Add(Encoding.Unicode);
-
   }
 
   /// <inheritdoc />

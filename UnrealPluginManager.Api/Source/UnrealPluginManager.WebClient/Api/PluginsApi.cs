@@ -1182,7 +1182,7 @@ namespace UnrealPluginManager.WebClient.Api {
       RequestOptions localVarRequestOptions = new RequestOptions();
 
       string[] _contentTypes = new string[] {
-          "text/markdown"
+          "text/markdown", "application/json"
       };
 
       // to determine the Accept header
@@ -1246,7 +1246,7 @@ namespace UnrealPluginManager.WebClient.Api {
       RequestOptions localVarRequestOptions = new RequestOptions();
 
       string[] _contentTypes = new string[] {
-          "text/markdown"
+          "text/markdown", "application/json"
       };
 
       // to determine the Accept header
@@ -2791,7 +2791,7 @@ namespace UnrealPluginManager.WebClient.Api {
       RequestOptions localVarRequestOptions = new RequestOptions();
 
       string[] _contentTypes = new string[] {
-          "text/markdown"
+          "text/markdown", "application/json"
       };
 
       // to determine the Accept header
@@ -2812,7 +2812,7 @@ namespace UnrealPluginManager.WebClient.Api {
 
 
       // make the HTTP request
-      var localVarResponse = this.Client.Put<string>("/api/plugins/{pluginId}/latest/{versionId}/readme",
+      var localVarResponse = this.Client.Put<string>("/api/plugins/{pluginId}/{versionId}/readme",
           localVarRequestOptions, this.Configuration);
 
       if (this.ExceptionFactory != null) {
@@ -2856,7 +2856,7 @@ namespace UnrealPluginManager.WebClient.Api {
       RequestOptions localVarRequestOptions = new RequestOptions();
 
       string[] _contentTypes = new string[] {
-          "text/markdown"
+          "text/markdown", "application/json"
       };
 
       // to determine the Accept header
@@ -2880,8 +2880,8 @@ namespace UnrealPluginManager.WebClient.Api {
       // make the HTTP request
 
       var localVarResponse = await this.AsynchronousClient
-          .PutAsync<string>("/api/plugins/{pluginId}/latest/{versionId}/readme", localVarRequestOptions,
-              this.Configuration, cancellationToken).ConfigureAwait(false);
+          .PutAsync<string>("/api/plugins/{pluginId}/{versionId}/readme", localVarRequestOptions, this.Configuration,
+              cancellationToken).ConfigureAwait(false);
 
       if (this.ExceptionFactory != null) {
         Exception _exception = this.ExceptionFactory("UpdatePluginReadme", localVarResponse);

@@ -467,6 +467,11 @@
               "schema": {
                 "type": "string"
               }
+            },
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
             }
           }
         },
@@ -482,9 +487,7 @@
             }
           }
         }
-      }
-    },
-    "/api/plugins/{pluginId}/latest/{versionId}/readme": {
+      },
       "put": {
         "tags": [
           "Plugins"
@@ -517,6 +520,11 @@
           "description": "The new README content to replace the existing one.",
           "content": {
             "text/markdown": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/json": {
               "schema": {
                 "type": "string"
               }
