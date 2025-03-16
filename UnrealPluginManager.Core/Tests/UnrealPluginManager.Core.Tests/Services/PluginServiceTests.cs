@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
@@ -24,6 +25,8 @@ public class PluginServiceTests {
       AllowTrailingCommas = true
   };
 
+  private MockFileSystem _mockFilesystem;
+  private UnrealPluginManagerContext _context;
   private ServiceProvider _serviceProvider;
   private IStorageService _storageService;
 
@@ -31,11 +34,14 @@ public class PluginServiceTests {
   public void Setup() {
     var services = new ServiceCollection();
 
-    var mockFilesystem = new MockFileSystem();
-    services.AddSingleton<IFileSystem>(mockFilesystem);
+    _mockFilesystem = new MockFileSystem();
+    services.AddSingleton<IFileSystem>(_mockFilesystem);
 
     services.AddSingleton<IJsonService>(new JsonService(JsonOptions));
-    services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
+
+    _context = new TestUnrealPluginManagerContext();
+    _context.Database.EnsureCreated();
+    services.AddSingleton(_context);
     services.AddScoped<IPluginService, PluginService>();
     services.AddScoped<IPluginStructureService, PluginStructureService>();
     services.AddSingleton<IStorageService, MockStorageService>();
@@ -47,6 +53,7 @@ public class PluginServiceTests {
   [TearDown]
   public void TearDown() {
     _serviceProvider.Dispose();
+    _context.Dispose();
   }
 
   [Test]
@@ -59,10 +66,18 @@ public class PluginServiceTests {
                 FriendlyName = "Plugin" + i,
                 Versions = [
                     new PluginVersion {
-                        Version = new SemVersion(1, 0, 0)
+                        Version = new SemVersion(1, 0, 0),
+                        Source = new FileResource {
+                            OriginalFilename = "Source.zip",
+                            StoredFilename = "Dummy"
+                        }
                     },
                     new PluginVersion {
-                        Version = new SemVersion(1, 2, 2)
+                        Version = new SemVersion(1, 2, 2),
+                        Source = new FileResource {
+                            OriginalFilename = "Source.zip",
+                            StoredFilename = "Dummy"
+                        }
                     }
                 ]
             }
@@ -86,11 +101,14 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestAddPlugins() {
+    var dummy = _mockFilesystem.FileInfo.New("Dummy");
+    var partitioned = new PartitionedPlugin(new ResourceHandle("Source", dummy), null, null, []);
+
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     var plugin1 = await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0)
-    });
+    }, partitioned);
 
     var plugin2 = await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
         Version = 1,
@@ -107,7 +125,7 @@ public class PluginServiceTests {
                 VersionMatcher = SemVersionRange.Parse(">=1.0.0")
             }
         ]
-    });
+    }, partitioned);
 
     var plugin3 = await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
         Version = 1,
@@ -118,7 +136,7 @@ public class PluginServiceTests {
                 PluginType = PluginType.Provided
             }
         ]
-    });
+    }, partitioned);
 
     await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
         Version = 1,
@@ -129,7 +147,7 @@ public class PluginServiceTests {
                 PluginType = PluginType.Provided
             }
         ]
-    });
+    }, partitioned);
 
     var plugin1List = await pluginService.GetDependencyList(plugin1.PluginId);
     Assert.That(plugin1List, Has.Count.EqualTo(1));
@@ -151,8 +169,10 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestAddPluginVersions() {
+    var dummy = _mockFilesystem.FileInfo.New("Dummy");
+    var partitioned = new PartitionedPlugin(new ResourceHandle("Source", dummy), null, null, []);
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    var app = await pluginService.SetupVersionResolutionTree();
+    var app = await pluginService.SetupVersionResolutionTree(partitioned);
 
     var dependencyGraph = await pluginService.GetDependencyList(app);
     Assert.That(dependencyGraph, Has.Count.EqualTo(5));
@@ -167,8 +187,10 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestAddPluginVersionsWithPreInstalledPlugins() {
+    var dummy = _mockFilesystem.FileInfo.New("Dummy");
+    var partitioned = new PartitionedPlugin(new ResourceHandle("Source", dummy), null, null, []);
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    await pluginService.SetupVersionResolutionTree();
+    await pluginService.SetupVersionResolutionTree(partitioned);
 
     List<PluginDependency> pluginDependencies = [
         new() {
@@ -215,8 +237,10 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestGetDependencyTreeWithConflicts() {
+    var dummy = _mockFilesystem.FileInfo.New("Dummy");
+    var partitioned = new PartitionedPlugin(new ResourceHandle("Source", dummy), null, null, []);
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    var app = await pluginService.SetupVersionResolutionTreeWithConflict();
+    var app = await pluginService.SetupVersionResolutionTreeWithConflict(partitioned);
 
     var conflictException =
         Assert.ThrowsAsync<DependencyConflictException>(async () => await pluginService.GetDependencyList(app));
@@ -308,7 +332,6 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestSubmitPlugin_MalformedDescriptor() {
-    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     using var testZip = new MemoryStream();
     using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
@@ -324,7 +347,6 @@ public class PluginServiceTests {
 
   [Test]
   public async Task TestSubmitPlugin_NoUpluginFile() {
-    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
     using var testZip = new MemoryStream();
     using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
@@ -387,14 +409,16 @@ public class PluginServiceTests {
   [Test]
   public async Task TestRetrievePlugin() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-
     var (pluginId, _) = await SetupTestPluginEnvironment();
+    _context.ChangeTracker.Clear();
 
     Assert.DoesNotThrowAsync(
         async () => await pluginService.GetPluginFileData(pluginId, SemVersionRange.All, "5.5", ["Win64"]));
+    _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(
             pluginId, SemVersionRange.All, "5.4", ["Win64"]));
+    _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(
             Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
@@ -403,17 +427,48 @@ public class PluginServiceTests {
   [Test]
   public async Task TestRetrievePluginParts() {
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-
     var (pluginId, versionId) = await SetupTestPluginEnvironment();
+    _context.ChangeTracker.Clear();
 
     Assert.DoesNotThrowAsync(
         async () => await pluginService.GetPluginFileData(pluginId, versionId));
+    _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(
             pluginId, SemVersionRange.All, "5.4", ["Win64"]));
+    _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(
             Guid.NewGuid(), SemVersionRange.All, "5.5", ["Win64"]));
+  }
+
+  [Test]
+  public async Task TestAddAndUpdateReadme() {
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+    var (pluginId, versionId) = await SetupTestPluginEnvironment();
+
+    Assert.ThrowsAsync<PluginNotFoundException>(() => pluginService.GetPluginReadme(pluginId, versionId));
+
+    const string readmeText = "This is a readme";
+    Assert.ThrowsAsync<PluginNotFoundException>(() =>
+        pluginService.UpdatePluginReadme(Guid.NewGuid(), versionId, readmeText));
+    Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.UpdatePluginReadme(pluginId, versionId, readmeText));
+
+    var added = await pluginService.AddPluginReadme(pluginId, versionId, readmeText);
+    Assert.ThrowsAsync<PluginNotFoundException>(() =>
+        pluginService.AddPluginReadme(Guid.NewGuid(), versionId, readmeText));
+    Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.AddPluginReadme(pluginId, versionId, readmeText));
+    Assert.That(added, Is.EqualTo(readmeText));
+
+    var retrieved = await pluginService.GetPluginReadme(pluginId, versionId);
+    Assert.That(retrieved, Is.EqualTo(readmeText));
+
+    const string updatedReadmeText = "This is an updated readme";
+    var updated = await pluginService.UpdatePluginReadme(pluginId, versionId, updatedReadmeText);
+    Assert.That(updated, Is.EqualTo(updatedReadmeText));
+
+    retrieved = await pluginService.GetPluginReadme(pluginId, versionId);
+    Assert.That(retrieved, Is.EqualTo(updatedReadmeText));
   }
 
   private async Task<(Guid, Guid)> SetupTestPluginEnvironment() {

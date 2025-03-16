@@ -390,6 +390,153 @@
         }
       }
     },
+    "/api/plugins/{pluginId}/{versionId}/readme": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Retrieves the readme content for a specific version of a plugin.",
+        "operationId": "getPluginReadme",
+        "parameters": [
+          {
+            "name": "pluginId",
+            "in": "path",
+            "description": "The unique identifier of the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier of the plugin version.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Adds or updates the README content for the specified plugin version.",
+        "operationId": "addPluginReadme",
+        "parameters": [
+          {
+            "name": "pluginId",
+            "in": "path",
+            "description": "The unique identifier for the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier for the specific version of the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The README content in markdown format to be added or updated.",
+          "content": {
+            "text/markdown": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{pluginId}/latest/{versionId}/readme": {
+      "put": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Updates the README content for a specific plugin version.",
+        "operationId": "updatePluginReadme",
+        "parameters": [
+          {
+            "name": "pluginId",
+            "in": "path",
+            "description": "The unique identifier of the plugin whose README is being updated.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier for the specific version of the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The new README content to replace the existing one.",
+          "content": {
+            "text/markdown": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plugins/{pluginId}/{versionId}/download/{engineVersion}": {
       "get": {
         "tags": [

@@ -4,11 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Tests.Database;
 
 public class VersionRangePredicateTest {
+  private UnrealPluginManagerContext _context;
   private ServiceProvider _serviceProvider;
 
   [SetUp]
@@ -18,13 +20,16 @@ public class VersionRangePredicateTest {
     var mockFilesystem = new MockFileSystem();
     services.AddSingleton<IFileSystem>(mockFilesystem);
 
-    services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
+    _context = new TestUnrealPluginManagerContext();
+    _context.Database.EnsureCreated();
+    services.AddSingleton(_context);
     _serviceProvider = services.BuildServiceProvider();
   }
 
   [TearDown]
   public void TearDown() {
     _serviceProvider.Dispose();
+    _context.Dispose();
   }
 
   private static void AddTestPlugins(UnrealPluginManagerContext context) {
@@ -45,7 +50,11 @@ public class VersionRangePredicateTest {
         Name = "Test Plugin",
         Versions = versions
             .Select(x => new PluginVersion {
-                Version = x
+                Version = x,
+                Source = new FileResource {
+                    OriginalFilename = "Source.zip",
+                    StoredFilename = "Dummy"
+                }
             })
             .ToList()
     };

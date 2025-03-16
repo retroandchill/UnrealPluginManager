@@ -23,4 +23,14 @@ public sealed partial class StreamFileSource : IFileSource {
     await _stream.CopyToAsync(fileStream);
     return _fileSystem.FileInfo.New(destinationPath);
   }
+
+  /// <inheritdoc />
+  public async Task OverwriteFile(IFileInfo fileInfo) {
+    await using var fileStream = fileInfo.Open(FileMode.Truncate, FileAccess.Write);
+    if (_stream.CanSeek) {
+      _stream.Seek(0, SeekOrigin.Begin);
+    }
+    await _stream.CopyToAsync(fileStream);
+  }
+
 }

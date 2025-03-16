@@ -1,13 +1,15 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
-using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
+using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Tests.Helpers;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace UnrealPluginManager.Server.Tests.Controllers;
 
@@ -24,6 +26,8 @@ public class PluginControllerTest {
     _client = _factory.CreateClient();
     _pluginsApi = new PluginsApi(_client);
     _serviceProvider = _factory.Services;
+    _serviceProvider.GetRequiredService<UnrealPluginManagerContext>()
+        .Database.EnsureCreated();
   }
 
   [TearDown]
@@ -36,11 +40,13 @@ public class PluginControllerTest {
   [Test]
   public async Task TestBasicAddAndGet() {
     using var scope = _serviceProvider.CreateScope();
+    var dummy = _serviceProvider.GetRequiredService<IFileSystem>().FileInfo.New("Dummy");
+    var partitioned = new PartitionedPlugin(new ResourceHandle("Source", dummy), null, null, []);
     var pluginService = scope.ServiceProvider.GetRequiredService<IPluginService>();
     var plugin1 = await pluginService.AddPlugin("Plugin1", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 0, 0)
-    }, null);
+    }, partitioned);
 
     var plugin2 = await pluginService.AddPlugin("Plugin2", new PluginDescriptor {
         Version = 1,
@@ -57,7 +63,7 @@ public class PluginControllerTest {
                 VersionMatcher = SemVersionRange.Parse(">=1.0.0")
             }
         ]
-    }, null);
+    }, partitioned);
 
     var plugin3 = await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
         Version = 1,
@@ -68,7 +74,7 @@ public class PluginControllerTest {
                 PluginType = PluginType.Provided
             }
         ]
-    }, null);
+    }, partitioned);
 
     var plugin4 = await pluginService.AddPlugin("Plugin3", new PluginDescriptor {
         Version = 1,
@@ -79,13 +85,13 @@ public class PluginControllerTest {
                 PluginType = PluginType.Provided
             }
         ]
-    }, null);
+    }, partitioned);
 
     await pluginService.AddPlugin("Plugin4", new PluginDescriptor {
         Version = 1,
         VersionName = new SemVersion(1, 2, 1),
         Plugins = []
-    }, null);
+    }, partitioned);
 
     var plugin1List = await _pluginsApi.GetDependencyTreeAsync(plugin1.PluginId);
     Assert.That(plugin1List, Has.Count.EqualTo(1));
@@ -161,7 +167,7 @@ public class PluginControllerTest {
 
     Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginSourceAsync(pluginId, version));
     Assert.ThrowsAsync<ApiException>(() => _pluginsApi.DownloadPluginSourceAsync(pluginId, Guid.NewGuid()));
-    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginBinariesAsync(pluginId,  version, "5.5", "Win64"));
+    Assert.DoesNotThrowAsync(() => _pluginsApi.DownloadPluginBinariesAsync(pluginId, version, "5.5", "Win64"));
     Assert.ThrowsAsync<ApiException>(() =>
         _pluginsApi.DownloadPluginBinariesAsync(pluginId, version, "5.5", "Linux"));
     Assert.ThrowsAsync<ApiException>(() =>
@@ -170,7 +176,55 @@ public class PluginControllerTest {
     Assert.DoesNotThrowAsync(() =>
         _pluginsApi.DownloadLatestPluginAsync(pluginId, "5.5", SemVersionRange.AllRelease.ToString(), ["Win64"]));
   }
-  
+
+  [Test]
+  public async Task TestAddReadme() {
+    var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
+    var tempFileName = Path.GetTempFileName();
+    var dirName = Path.GetDirectoryName(tempFileName);
+    Assert.That(dirName, Is.Not.Null);
+    filesystem.Directory.CreateDirectory(dirName);
+
+    using var testZip = new MemoryStream();
+    using (var zipArchive = new ZipArchive(testZip, ZipArchiveMode.Create, true)) {
+      zipArchive.CreateEntry("Resources/");
+      zipArchive.CreateEntry("Resources/Icon128.png");
+      zipArchive.CreateEntry("Binaries/");
+      zipArchive.CreateEntry("Binaries/Win64/");
+      zipArchive.CreateEntry("Binaries/Win64/TestPlugin.dll");
+
+      var entry = zipArchive.CreateEntry("TestPlugin.uplugin");
+      await using var writer = new StreamWriter(entry.Open());
+
+      var descriptor = new PluginDescriptor {
+          FriendlyName = "Test Plugin",
+          VersionName = new SemVersion(1, 0, 0),
+          Description = "Test description"
+      };
+
+      await writer.WriteAsync(JsonSerializer.Serialize(descriptor));
+    }
+
+    testZip.Seek(0, SeekOrigin.Begin);
+    var result = await _pluginsApi.AddPluginAsync("5.5", testZip);
+    Assert.That(result.Name, Is.EqualTo("TestPlugin"));
+
+    var pluginId = result.PluginId;
+    var version = result.VersionId;
+
+    Assert.ThrowsAsync<ApiException>(() => _pluginsApi.GetPluginReadmeAsync(pluginId, version));
+
+    const string readme = "Test readme";
+    await _pluginsApi.AddPluginReadmeAsync(pluginId, version, readme);
+    var readmeResult = await _pluginsApi.GetPluginReadmeAsync(pluginId, version);
+    Assert.That(readmeResult, Is.EqualTo(readme));
+
+    const string readme2 = "Test readme 2";
+    await _pluginsApi.UpdatePluginReadmeAsync(pluginId, version, readme2);
+    var readmeResult2 = await _pluginsApi.GetPluginReadmeAsync(pluginId, version);
+    Assert.That(readmeResult2, Is.EqualTo(readme2));
+  }
+
   [Test]
   public async Task TestUploadPluginInParts() {
     var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
@@ -199,7 +253,7 @@ public class PluginControllerTest {
 
         await writer.WriteAsync(JsonSerializer.Serialize(descriptor));
       }
-      
+
       var sourceEntry = zipArchive.CreateEntry("Source.zip");
       await using var sourceWriter = sourceEntry.Open();
       innerZip.Seek(0, SeekOrigin.Begin);

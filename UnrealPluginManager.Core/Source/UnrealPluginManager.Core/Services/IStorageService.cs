@@ -32,6 +32,14 @@ public interface IStorageService {
   Task<ResourceHandle> AddResource(IFileSource fileSource);
 
   /// <summary>
+  /// Updates an existing file in the storage system with the content from the provided file source.
+  /// </summary>
+  /// <param name="filename">The name of the existing file in the storage system to be updated.</param>
+  /// <param name="fileSource">The source containing the new content to overwrite the existing file.</param>
+  /// <returns>A task that represents the asynchronous operation, containing the updated resource information.</returns>
+  Task<ResourceHandle> UpdateResource(string filename, IFileSource fileSource);
+
+  /// <summary>
   /// Retrieves information about a resource file from the storage system using the provided filename.
   /// </summary>
   /// <param name="filename">The name of the resource file to retrieve information for.</param>

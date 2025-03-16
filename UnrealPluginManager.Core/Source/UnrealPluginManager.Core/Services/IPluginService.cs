@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using Semver;
-using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Pagination;
@@ -31,7 +30,8 @@ public interface IPluginService {
   /// <returns>
   /// A <see cref="Page{PluginVersionInfo}"/> containing the filtered and paginated plugin version information.
   /// </returns>
-  Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange, Pageable pageable = default);
+  Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange,
+                                                   Pageable pageable = default);
 
   /// <summary>
   /// Retrieves detailed information about a specific plugin, including its versions and metadata.
@@ -119,7 +119,39 @@ public interface IPluginService {
   /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
   /// </returns>
   Task<PluginVersionDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
-                                       PartitionedPlugin? fileData = null);
+                                       PartitionedPlugin fileData);
+
+  /// <summary>
+  /// Retrieves the README file content for a specific plugin version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the specific plugin version.</param>
+  /// <returns>
+  /// A string containing the content of the README file associated with the specified plugin version.
+  /// </returns>
+  Task<string> GetPluginReadme(Guid pluginId, Guid versionId);
+
+  /// <summary>
+  /// Adds a README file for a specific plugin version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier for the specific version of the plugin.</param>
+  /// <param name="readme">The content of the README file to be added.</param>
+  /// <returns>
+  /// The content of the README file after it has been successfully added.
+  /// </returns>
+  Task<string> AddPluginReadme(Guid pluginId, Guid versionId, string readme);
+
+  /// <summary>
+  /// Updates the readme content for a specific plugin version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the plugin version.</param>
+  /// <param name="readme">The updated readme content to be associated with the plugin version.</param>
+  /// <returns>
+  /// The updated readme content as a string.
+  /// </returns>
+  Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme);
 
   /// <summary>
   /// Submits a plugin file for processing and storage, associating it with a specific engine version.
