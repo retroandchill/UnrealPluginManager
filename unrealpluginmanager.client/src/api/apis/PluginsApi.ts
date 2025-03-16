@@ -16,34 +16,33 @@
 
 import * as runtime from '../runtime';
 import type {
-  DependencyManifest,
-  PluginDependency,
-  PluginOverviewPage,
-  PluginSummary,
-  PluginVersionDetails,
-  PluginVersionInfo,
-  PluginVersionInfoPage,
+    DependencyManifest,
+    PluginDependency,
+    PluginOverviewPage,
+    PluginSummary,
+    PluginVersionDetails,
+    PluginVersionInfo,
+    PluginVersionInfoPage,
 } from '../models/index';
 import {
     DependencyManifestFromJSON,
-    DependencyManifestToJSON,
-    PluginDependencyFromJSON,
     PluginDependencyToJSON,
     PluginOverviewPageFromJSON,
-    PluginOverviewPageToJSON,
     PluginSummaryFromJSON,
-    PluginSummaryToJSON,
     PluginVersionDetailsFromJSON,
-    PluginVersionDetailsToJSON,
     PluginVersionInfoFromJSON,
-    PluginVersionInfoToJSON,
     PluginVersionInfoPageFromJSON,
-    PluginVersionInfoPageToJSON,
 } from '../models/index';
 
 export interface AddPluginRequest {
     engineVersion: string;
     pluginFile?: Blob;
+}
+
+export interface AddPluginReadmeRequest {
+    pluginId: string;
+    versionId: string;
+    body?: string;
 }
 
 export interface DownloadLatestPluginRequest {
@@ -95,6 +94,11 @@ export interface GetLatestVersionsRequest {
     size?: number;
 }
 
+export interface GetPluginReadmeRequest {
+    pluginId: string;
+    versionId: string;
+}
+
 export interface GetPluginsRequest {
     match?: string;
     page?: number;
@@ -103,6 +107,12 @@ export interface GetPluginsRequest {
 
 export interface SubmitPluginRequest {
     submission?: Blob;
+}
+
+export interface UpdatePluginReadmeRequest {
+    pluginId: string;
+    versionId: string;
+    body?: string;
 }
 
 /**
@@ -161,6 +171,53 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async addPlugin(requestParameters: AddPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionDetails> {
         const response = await this.addPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Adds or updates the README content for the specified plugin version.
+     */
+    async addPluginReadmeRaw(requestParameters: AddPluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['pluginId'] == null) {
+            throw new runtime.RequiredError(
+                'pluginId',
+                'Required parameter "pluginId" was null or undefined when calling addPluginReadme().'
+            );
+        }
+
+        if (requestParameters['versionId'] == null) {
+            throw new runtime.RequiredError(
+                'versionId',
+                'Required parameter "versionId" was null or undefined when calling addPluginReadme().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'text/markdown';
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginId}/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Adds or updates the README content for the specified plugin version.
+     */
+    async addPluginReadme(requestParameters: AddPluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.addPluginReadmeRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -517,6 +574,50 @@ export class PluginsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Retrieves the readme content for a specific version of a plugin.
+     */
+    async getPluginReadmeRaw(requestParameters: GetPluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['pluginId'] == null) {
+            throw new runtime.RequiredError(
+                'pluginId',
+                'Required parameter "pluginId" was null or undefined when calling getPluginReadme().'
+            );
+        }
+
+        if (requestParameters['versionId'] == null) {
+            throw new runtime.RequiredError(
+                'versionId',
+                'Required parameter "versionId" was null or undefined when calling getPluginReadme().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginId}/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Retrieves the readme content for a specific version of a plugin.
+     */
+    async getPluginReadme(requestParameters: GetPluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.getPluginReadmeRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
      */
     async getPluginsRaw(requestParameters: GetPluginsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginOverviewPage>> {
@@ -598,6 +699,53 @@ export class PluginsApi extends runtime.BaseAPI {
      */
     async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionDetails> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Updates the README content for a specific plugin version.
+     */
+    async updatePluginReadmeRaw(requestParameters: UpdatePluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['pluginId'] == null) {
+            throw new runtime.RequiredError(
+                'pluginId',
+                'Required parameter "pluginId" was null or undefined when calling updatePluginReadme().'
+            );
+        }
+
+        if (requestParameters['versionId'] == null) {
+            throw new runtime.RequiredError(
+                'versionId',
+                'Required parameter "versionId" was null or undefined when calling updatePluginReadme().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'text/markdown';
+
+        const response = await this.request({
+            path: `/api/plugins/{pluginId}/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Updates the README content for a specific plugin version.
+     */
+    async updatePluginReadme(requestParameters: UpdatePluginReadmeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.updatePluginReadmeRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -13,6 +13,11 @@ public sealed partial class CopyFileSource : IFileSource {
 
   /// <inheritdoc />
   public Task<IFileInfo> CreateFile(string destinationPath) {
-    return Task.FromResult(_fileInfo.CopyTo(destinationPath, true));
+    return Task.FromResult(_fileInfo.CopyTo(destinationPath, false));
+  }
+
+  /// <inheritdoc />
+  public Task OverwriteFile(IFileInfo fileInfo) {
+    return Task.FromResult(_fileInfo.CopyTo(fileInfo.FullName, true));
   }
 }

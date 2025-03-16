@@ -13,4 +13,11 @@ public interface IFileSource {
   /// <returns>A task that represents the asynchronous operation. The task result contains a reference to the created
   /// file as an <see cref="IFileInfo"/>.</returns>
   Task<IFileInfo> CreateFile(string destinationPath);
+
+  /// <summary>
+  /// Overwrites the contents of the specified file using the provided stream.
+  /// </summary>
+  /// <param name="fileInfo">The file to be overwritten.</param>
+  /// <returns>A task that represents the asynchronous operation.</returns>
+  Task OverwriteFile(IFileInfo fileInfo);
 }

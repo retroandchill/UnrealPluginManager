@@ -18,7 +18,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
         typeof(IProcessRunner),
         typeof(IRegistry)
     ];
-    
+
     builder.ConfigureServices(services => {
       foreach (var service in types.SelectValid(t => services.Single(s => s.ServiceType == t))) {
         services.Remove(service);
@@ -26,8 +26,8 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 
       services.SetUpMockDataProviders();
     });
-    
+
     builder.UseEnvironment("Development");
   }
-  
+
 }

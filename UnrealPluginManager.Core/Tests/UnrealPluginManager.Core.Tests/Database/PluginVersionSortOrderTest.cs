@@ -1,17 +1,17 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Mappers;
-using UnrealPluginManager.Core.Services;
 
 namespace UnrealPluginManager.Core.Tests.Database;
 
 public class PluginVersionSortOrderTest {
   private ServiceProvider _serviceProvider;
+  private UnrealPluginManagerContext _context;
 
   [SetUp]
   public void Setup() {
@@ -20,13 +20,16 @@ public class PluginVersionSortOrderTest {
     var mockFilesystem = new MockFileSystem();
     services.AddSingleton<IFileSystem>(mockFilesystem);
 
-    services.AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>();
+    _context = new TestUnrealPluginManagerContext();
+    _context.Database.EnsureCreated();
+    services.AddSingleton(_context);
     _serviceProvider = services.BuildServiceProvider();
   }
 
   [TearDown]
   public void TearDown() {
     _serviceProvider.Dispose();
+    _context.Dispose();
   }
 
   [Test]
@@ -46,7 +49,11 @@ public class PluginVersionSortOrderTest {
         Name = "Test Plugin",
         Versions = versions
             .Select(x => new PluginVersion {
-                Version = x
+                Version = x,
+                Source = new FileResource {
+                    OriginalFilename = "Source.zip",
+                    StoredFilename = "Dummy"
+                }
             })
             .ToList()
     };
@@ -61,8 +68,8 @@ public class PluginVersionSortOrderTest {
 
 
     Assert.That(retrievedPlugins, Is.EqualTo(versions
-                                                 .OrderBy(x => x, SemVersion.PrecedenceComparer)
-                                                 .ToList()));
+        .OrderBy(x => x, SemVersion.PrecedenceComparer)
+        .ToList()));
   }
 
   [Test]
@@ -82,7 +89,11 @@ public class PluginVersionSortOrderTest {
         Name = "Test Plugin",
         Versions = versions
             .Select(x => new PluginVersion {
-                Version = x
+                Version = x,
+                Source = new FileResource {
+                    OriginalFilename = "Source.zip",
+                    StoredFilename = "Dummy"
+                }
             })
             .ToList()
     };
@@ -97,8 +108,8 @@ public class PluginVersionSortOrderTest {
 
 
     Assert.That(retrievedPlugins, Is.EqualTo(versions
-                                                 .OrderByDescending(x => x, SemVersion.PrecedenceComparer)
-                                                 .ToList()));
+        .OrderByDescending(x => x, SemVersion.PrecedenceComparer)
+        .ToList()));
   }
 
   [Test]
@@ -128,7 +139,7 @@ public class PluginVersionSortOrderTest {
 
 
     Assert.That(retrievedPlugins, Is.EqualTo(versions
-                                                 .OrderByDescending(x => x, SemVersion.PrecedenceComparer)
-                                                 .ToList()));
+        .OrderByDescending(x => x, SemVersion.PrecedenceComparer)
+        .ToList()));
   }
 }

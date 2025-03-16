@@ -196,8 +196,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc/>
   public async Task<PluginVersionDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
-                                                    PartitionedPlugin? fileData = null) {
-    await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                                                    PartitionedPlugin fileData) {
     var plugin = await _dbContext.Plugins
         .Where(x => x.Name == pluginName)
         .FirstOrDefaultAsync();
@@ -209,37 +208,104 @@ public partial class PluginService : IPluginService {
 
     var pluginVersion = descriptor.ToPluginVersion();
     pluginVersion.ParentId = plugin.Id;
-    if (fileData is not null) {
-      pluginVersion.Source = new FileResource {
-          OriginalFilename = $"{pluginName}_{descriptor.VersionName}_Source.zip",
-          StoredFilename = fileData.Source.ResourceName
+    pluginVersion.Source = new FileResource {
+        OriginalFilename = $"{pluginName}_{descriptor.VersionName}_Source.zip",
+        StoredFilename = fileData.Source.ResourceName
+    };
+    if (fileData.Icon.HasValue) {
+      pluginVersion.Icon = new FileResource {
+          OriginalFilename = $"{pluginName}_{descriptor.VersionName}.png",
+          StoredFilename = fileData.Icon.Value.ResourceName
       };
-      if (fileData.Icon.HasValue) {
-        pluginVersion.Icon = new FileResource {
-            OriginalFilename = $"{pluginName}_{descriptor.VersionName}.png",
-            StoredFilename = fileData.Icon.Value.ResourceName
-        };
-      }
-      if (fileData.Readme.HasValue) {
-        pluginVersion.Readme = new FileResource {
-            OriginalFilename = $"{pluginName}_{descriptor.VersionName}.md",
-            StoredFilename = fileData.Readme.Value.ResourceName
-        };
-      }
-
-      pluginVersion.Binaries.AddRange(fileData.Binaries.Select(x => new UploadedBinaries {
-          EngineVersion = x.Key.EngineVersion,
-          Platform = x.Key.Platform,
-          File = new FileResource {
-              OriginalFilename = $"{pluginName}_{descriptor.VersionName}_{x.Key.EngineVersion}_{x.Key.Platform}.zip",
-              StoredFilename = x.Value.ResourceName
-          }
-      }));
     }
+    if (fileData.Readme.HasValue) {
+      pluginVersion.Readme = new FileResource {
+          OriginalFilename = $"{pluginName}_{descriptor.VersionName}.md",
+          StoredFilename = fileData.Readme.Value.ResourceName
+      };
+    }
+
+    pluginVersion.Binaries.AddRange(fileData.Binaries.Select(x => new UploadedBinaries {
+        EngineVersion = x.Key.EngineVersion,
+        Platform = x.Key.Platform,
+        File = new FileResource {
+            OriginalFilename = $"{pluginName}_{descriptor.VersionName}_{x.Key.EngineVersion}_{x.Key.Platform}.zip",
+            StoredFilename = x.Value.ResourceName
+        }
+    }));
+
     _dbContext.PluginVersions.Add(pluginVersion);
     await _dbContext.SaveChangesAsync();
-    await transaction.CommitAsync();
     return pluginVersion.ToPluginVersionDetails();
+  }
+
+  /// <inheritdoc />
+  public async Task<string> GetPluginReadme(Guid pluginId, Guid versionId) {
+    var readmeName = await _dbContext.PluginVersions
+        .Where(x => x.ParentId == pluginId)
+        .Where(x => x.Id == versionId)
+        .Select(x => x.Readme != null ? x.Readme.StoredFilename : null)
+        .FirstOrDefaultAsync();
+    if (readmeName is null) {
+      throw new PluginNotFoundException($"Readme for plugin {pluginId} version {versionId} was not found!");
+    }
+
+    await using var readmeStream = _storageService.GetResourceStream(readmeName);
+    using var reader = new StreamReader(readmeStream);
+    return await reader.ReadToEndAsync();
+  }
+
+  /// <inheritdoc />
+  public async Task<string> AddPluginReadme(Guid pluginId, Guid versionId, string readme) {
+    var pluginVersion = await _dbContext.PluginVersions
+        .Where(x => x.ParentId == pluginId)
+        .Where(x => x.Id == versionId)
+        .Include(x => x.Parent)
+        .Include(x => x.Readme)
+        .FirstOrDefaultAsync();
+    if (pluginVersion is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} version {versionId} was not found!");
+    }
+
+    if (pluginVersion.Readme is not null) {
+      throw new BadSubmissionException($"Readme for plugin {pluginId} version {versionId} was already exists!");
+    }
+
+    await using var stream = readme.ToStream();
+    var (storedFilename, _) = await _storageService.AddResource(new StreamFileSource(_fileSystem, stream));
+    var resource = new FileResource {
+        OriginalFilename = $"{pluginVersion.Parent.Name}_{pluginVersion.Version}.md",
+        StoredFilename = storedFilename
+    };
+    _dbContext.FileResources.Add(resource);
+    pluginVersion.ReadmeId = resource.Id;
+    pluginVersion.Readme = resource;
+
+
+    await _dbContext.SaveChangesAsync();
+    return readme;
+  }
+
+  /// <inheritdoc />
+  public async Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme) {
+    var pluginVersion = await _dbContext.PluginVersions
+        .Where(x => x.ParentId == pluginId)
+        .Where(x => x.Id == versionId)
+        .Include(x => x.Parent)
+        .Include(x => x.Readme)
+        .FirstOrDefaultAsync();
+    if (pluginVersion is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} version {versionId} was not found!");
+    }
+
+    if (pluginVersion.Readme is null) {
+      throw new BadSubmissionException($"Readme for plugin {pluginId} version {versionId} was already does notexists!");
+    }
+
+    await using var stream = readme.ToStream();
+    await _storageService.UpdateResource(pluginVersion.Readme.StoredFilename,
+        new StreamFileSource(_fileSystem, stream));
+    return readme;
   }
 
   /// <inheritdoc/>

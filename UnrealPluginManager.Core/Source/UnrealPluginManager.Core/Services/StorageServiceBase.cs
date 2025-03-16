@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
+using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Utils;
@@ -42,8 +43,18 @@ public abstract partial class StorageServiceBase : IStorageService {
   }
 
   /// <inheritdoc />
+  public async Task<ResourceHandle> UpdateResource(string filename, IFileSource fileSource) {
+    var handle = RetrieveResourceInfo(filename);
+    await fileSource.OverwriteFile(handle.File);
+    return handle;
+  }
+
+  /// <inheritdoc />
   public ResourceHandle RetrieveResourceInfo(string filename) {
     var fileInfo = FileSystem.FileInfo.New(Path.Join(ResourceDirectory, filename));
+    if (!fileInfo.Exists) {
+      throw new ResourceNotFoundException($"Resource file {filename} not found.");
+    }
     return new ResourceHandle(filename, fileInfo);
   }
 

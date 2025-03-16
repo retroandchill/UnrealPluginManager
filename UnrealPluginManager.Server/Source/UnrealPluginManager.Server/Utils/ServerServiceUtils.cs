@@ -9,6 +9,7 @@ using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Binding;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Exceptions;
+using UnrealPluginManager.Server.Formatters;
 using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Utils;
@@ -64,7 +65,13 @@ public static class ServerServiceUtils {
   /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance to configure.</param>
   /// <returns>The updated <see cref="WebApplicationBuilder"/> with common configurations applied.</returns>
   public static WebApplicationBuilder SetUpCommonConfiguration(this WebApplicationBuilder builder) {
-    builder.Services.AddControllers()
+    builder.Services.AddControllers(options => {
+          options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
+          options.ModelBinderProviders.Insert(1, new SemVersionModelBinderProvider());
+
+          options.InputFormatters.Insert(0, new TextMarkdownInputFormatter());
+          options.OutputFormatters.Insert(0, new TextMarkdownOutputFormatter());
+        })
         .AddJsonOptions(o => {
           o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
           o.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
@@ -72,11 +79,7 @@ public static class ServerServiceUtils {
           o.JsonSerializerOptions.AllowTrailingCommas = true;
         });
     builder.Services.AddCoreServices()
-        .AddServerServices()
-        .AddControllers(options => {
-          options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
-          options.ModelBinderProviders.Insert(1, new SemVersionModelBinderProvider());
-        });
+        .AddServerServices();
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
@@ -94,6 +97,7 @@ public static class ServerServiceUtils {
     app.MapStaticAssets();
     app.UseHttpsRedirection();
     app.UseAuthorization();
+    app.UseRouting();
     app.MapControllers();
     app.MapFallbackToFile("/index.html");
 

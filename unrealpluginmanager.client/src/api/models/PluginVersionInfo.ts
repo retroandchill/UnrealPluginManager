@@ -61,7 +61,7 @@ export interface PluginVersionInfo {
      */
     version: string;
     /**
-     *
+     * 
      * @type {ResourceInfo}
      * @memberof PluginVersionInfo
      */
