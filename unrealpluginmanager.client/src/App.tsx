@@ -6,7 +6,12 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createBrowserRouter} from "react-router-dom";
+import {RouterProvider} from "react-router";
+
+interface AppProps {
+  routerFactory: typeof createBrowserRouter;
+}
 
 /**
  * The App class is a React component that manages and displays a list of plugins.
@@ -16,9 +21,9 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
  *
  * @extends Component
  */
-function App() {
+function App(props: AppProps) {
 
-  const router = createBrowserRouter([
+  const router = props.routerFactory([
     {
       path: '/',
         element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.pluginId}`)}/>
