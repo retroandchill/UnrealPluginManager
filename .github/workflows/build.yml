@@ -20,7 +20,7 @@ jobs:
         run: |
           cd unrealpluginmanager.client
           npm ci
-      - name: Run Vitest
+      - name: Run Cypress
         shell: powershell
         run: |
           cd unrealpluginmanager.client
@@ -48,7 +48,7 @@ jobs:
         run: |
           cd unrealpluginmanager.client
           npm ci
-      - name: Run Cypress
+      - name: Run Vitest
         shell: powershell
         run: |
           cd unrealpluginmanager.client
