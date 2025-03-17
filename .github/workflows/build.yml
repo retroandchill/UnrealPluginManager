@@ -66,6 +66,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
           }
+          Rename-Item -Path ./coverage -NewName coverage-vitest
+          npm run cypress:coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          Rename-Item -Path ./coverage -NewName coverage-cypress
           cd ..
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
    

@@ -23,6 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 coverage
+coverage-cypress
+coverage-vitest
 .nyc_output
 
 public/storage
