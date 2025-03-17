@@ -23,6 +23,7 @@ jobs:
       - name: Run Vitest
         shell: powershell
         run: |
+          cd unrealpluginmanager.client
           npm run cypress:coverage
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
@@ -50,6 +51,7 @@ jobs:
       - name: Run Cypress
         shell: powershell
         run: |
+          cd unrealpluginmanager.client
           npm run coverage
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
