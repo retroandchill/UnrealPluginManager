@@ -43,7 +43,7 @@ jobs:
         run: dotnet tool install --global dotnet-coverage
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 23
       - name: Install Node Dependencies
         shell: powershell
         run: |
