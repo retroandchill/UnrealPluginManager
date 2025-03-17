@@ -1,2 +1,2 @@
-﻿export * from "./PluginButton.tsx";
-export * from "./PluginDisplayGrid.tsx";
+﻿export {default as PluginButton} from "./PluginButton.tsx";
+export {default as PluginDisplayGrid} from "./PluginDisplayGrid.tsx";

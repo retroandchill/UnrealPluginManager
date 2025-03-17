@@ -1,15 +1,6 @@
 ﻿import {PluginVersionInfo} from "../api";
 import {apiResourcesPath} from "../config/Globals.ts";
-
-/**
- * A callback function type that is executed with a plugin as its argument.
- *
- * This type is used for defining functions that operate on or process a `PluginOverview` instance.
- *
- * @callback PluginCallback
- * @param {PluginVersionInfo} plugin - The plugin instance passed to the callback function.
- */
-export type PluginCallback = (plugin: PluginVersionInfo) => void;
+import {PluginCallback} from "../util";
 
 /**
  * Represents the properties for a plugin button component.
@@ -57,7 +48,7 @@ interface PluginButtonProps {
  * @param {Function} [props.onClick] - Optional onClick handler to be executed when the button is clicked.
  * @return {JSX.Element} A button element displaying plugin details.
  */
-export function PluginButton(props: Readonly<PluginButtonProps>) {
+function PluginButton(props: Readonly<PluginButtonProps>) {
   return <button onClick={() => {
     if (props.onClick) {
       props.onClick(props.plugin);
@@ -74,3 +65,5 @@ export function PluginButton(props: Readonly<PluginButtonProps>) {
     </ul>
   </button>
 }
+
+export default PluginButton;
