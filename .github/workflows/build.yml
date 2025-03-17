@@ -7,8 +7,8 @@ on:
     types: [opened, synchronize, reopened]
   merge_group:
 jobs:
-  vitest:
-    name: Run TypeScript Tests
+  cypress:
+    name: Run Component Tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +33,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-coverage
-          path: unrealpluginmanager.client/coverage-vitest/**/*
+          path: unrealpluginmanager.client/coverage-cypress/**/*
           
-  cypress:
-    name: Run Component Tests
+  vitest:
+    name: Run TypeScript Tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
