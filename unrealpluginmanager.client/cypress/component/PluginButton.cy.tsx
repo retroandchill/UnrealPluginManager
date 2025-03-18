@@ -1,6 +1,6 @@
 import React from 'react'
-import {PluginButton} from "../../src/components";
-import {PluginVersionInfo} from "../../src/api";
+import {PluginButton} from "@/components";
+import {PluginVersionInfo} from "@/api";
 import {v7 as uuid7} from "uuid";
 import {mount} from 'cypress/react'
 

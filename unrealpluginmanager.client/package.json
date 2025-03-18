@@ -10,9 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "instrument-build": "cross-env INSTRUMENT_BUILD=true npm run build",
     "cypress": "npx cypress run --component",
-    "cypress:coverage": "npm run instrument-build && cypress run --component --quiet --reporter spec"
+    "cypress:coverage": "cross-env CYPRESS=true cypress run --component --quiet --reporter spec"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -31,6 +30,7 @@
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.26.0",
     "@cypress/code-coverage": "^3.13.12",
+    "@cypress/vite-dev-server": "^6.0.2",
     "@eslint/js": "^9.22.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@testing-library/jest-dom": "^6.6.3",

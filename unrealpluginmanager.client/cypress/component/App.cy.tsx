@@ -1,10 +1,10 @@
 import React from 'react'
-import App from '../../src/App'
+import App from '@/App'
 import {mount} from 'cypress/react'
-import {Page} from "../../src/util";
-import {PluginVersionInfo} from "../../src/api";
+import {Page} from "@/util";
+import {PluginVersionInfo} from "@/api";
 import {v7 as uuid7} from "uuid";
-import {pluginsApi} from "../../src/config/Globals";
+import {pluginsApi} from "@/config/Globals";
 import {createMemoryRouter} from "react-router";
 
 

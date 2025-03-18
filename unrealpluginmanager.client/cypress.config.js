@@ -1,21 +1,18 @@
 import {defineConfig} from "cypress";
 import codeCoverageTask from "@cypress/code-coverage/task";
+import useBabelRc from '@cypress/code-coverage/use-babelrc';
+import path from 'path';
+const __dirname = import.meta.dirname;
 
 export default defineConfig({
   component: {
     devServer: {
       framework: "react",
       bundler: "vite",
-      viteConfig: {
-        server: {
-          https: false,
-        },
-      },
     },
     setupNodeEvents(on, config) {
       codeCoverageTask(on, config);
-      // `on` is used to hook into various events Cypress emits
-      // `config` is the resolved Cypress config
+      on('file:preprocessor', useBabelRc)
       return config;
     },
   },

@@ -1,5 +1,3 @@
-import {fileURLToPath, URL} from 'node:url';
-
 import {defineConfig} from 'vite';
 import plugin from '@vitejs/plugin-react';
 import fs from 'fs';
@@ -42,6 +40,8 @@ if (env.ASPNETCORE_HTTPS_PORT) {
   target = env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7231';
 }
 
+const isCypress = process.env.CYPRESS === 'true';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -51,19 +51,20 @@ export default defineConfig({
       exclude: ['node_modules', 'test/*', 'cypress/*'],
       extension: ['.ts', '.tsx'],
       cypress: true,
-      requireEnv: true
+      requireEnv: false,
+      forceBuildInstrument: Boolean(process.env.INSTRUMENT_BUILD)
     }),
   ],
   build: {
     sourcemap: true, // IMPORTANT: Enable source maps for accurate coverage
   },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  },
   optimizeDeps: {
     entries: ['cypress/**/*']
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   server: {
     proxy: {
@@ -73,7 +74,7 @@ export default defineConfig({
       }
     },
     port: 60493,
-    https: {
+    https: isCypress ? undefined : {
       key: fs.readFileSync(keyFilePath),
       cert: fs.readFileSync(certFilePath),
     }

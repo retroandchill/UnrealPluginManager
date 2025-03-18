@@ -1,10 +1,10 @@
 import React from 'react'
-import {PluginDisplayGrid} from "../../src/components";
-import {GetLatestVersionsRequest, PluginVersionInfo} from "../../src/api";
+import {PluginDisplayGrid} from "@/components";
+import {GetLatestVersionsRequest, PluginVersionInfo} from "@/api";
 import {v7 as uuid7} from "uuid";
 import {mount} from 'cypress/react'
-import {Page} from "../../src/util";
-import {pluginsApi} from "../../src/config/Globals";
+import {Page} from "@/util";
+import {pluginsApi} from "@/config/Globals";
 
 
 describe('<PluginButton />', () => {
