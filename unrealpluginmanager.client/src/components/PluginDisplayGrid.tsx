@@ -1,8 +1,8 @@
 ﻿import {useEffect, useState} from 'react';
-import {debounce, Page} from "../util";
+import {debounce, Page, PluginCallback} from "../util";
 import {PluginVersionInfo} from "../api";
 import {pluginsApi} from "../config/Globals";
-import {PluginButton, PluginCallback} from "./PluginButton.tsx";
+import PluginButton from "./PluginButton.tsx";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import TextField from "@mui/material/TextField";
 
@@ -22,7 +22,7 @@ interface PluginGridProps {
   onPluginClick?: PluginCallback;
 }
 
-export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
+function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
     const [plugins, setPlugins] = useState<PluginVersionInfo[]>([]);
     const [lastPage, setLastPage] = useState<Page<PluginVersionInfo> | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
@@ -90,3 +90,5 @@ export function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
     </InfiniteScroll>
   </div>
 }
+
+export default PluginDisplayGrid;

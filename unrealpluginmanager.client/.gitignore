@@ -23,5 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 coverage
+coverage-*/
+.nyc_output
 
 public/storage

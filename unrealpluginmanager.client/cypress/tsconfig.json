@@ -1,0 +1,10 @@
+﻿{
+  "compilerOptions": {
+    "baseUrl": "../src", // Set the base directory for resolving modules
+    "paths": {
+      "@/*": ["*"] // Define aliases here
+    },
+    "jsx": "react"
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

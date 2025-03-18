@@ -18,9 +18,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "types": [
+      "cypress"
+    ],
+    "paths": {
+      "@/*": ["src/*"] // Setup alias for Vite's `@` pointing to `src`
+    }
   },
   "include": [
-    "vite.config.ts"
+    "vite.config.ts",
+    "cypress.config.js",
+    "cypress/**/*.ts"
   ]
 }
