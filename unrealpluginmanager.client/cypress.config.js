@@ -14,12 +14,6 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       codeCoverageTask(on, config);
       on('file:preprocessor', useBabelRc)
-
-      on("after:spec", async (spec, results) => {
-        const specName = path.basename(spec.name, path.extname(spec.name)); // Get spec name (without extension)
-        const outputDir = path.join(__dirname, "coverage");
-        fs.rename(outputDir, path.join(__dirname, `coverage-${specName}`))
-      });
       
       return config;
     },
