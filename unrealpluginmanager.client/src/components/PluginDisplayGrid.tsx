@@ -22,7 +22,7 @@ interface PluginGridProps {
   onPluginClick?: PluginCallback;
 }
 
-function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
+function PluginDisplayGrid({onPluginClick}: Readonly<PluginGridProps>) {
     const [plugins, setPlugins] = useState<PluginVersionInfo[]>([]);
     const [lastPage, setLastPage] = useState<Page<PluginVersionInfo> | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
@@ -84,7 +84,7 @@ function PluginDisplayGrid(props: Readonly<PluginGridProps>) {
       <table className="table table-striped" aria-labelledby="tableLabel">
         <tbody>
         {plugins.map(plugin => <PluginButton key={plugin.pluginId} plugin={plugin}
-                                             onClick={props.onPluginClick}/>)}
+                                             onClick={onPluginClick}/>)}
         </tbody>
       </table>
     </InfiniteScroll>
