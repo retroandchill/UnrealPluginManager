@@ -84,7 +84,7 @@ describe('<PluginButton />', () => {
     cy.get("@searchBar").type("test");
 
     // Verify that the grid shows only one plugin after filtering
-    cy.contains(/(?:Test|Sample|Fake) Plugin/i)
+    cy.get("button")
         .should("have.length", 1)
         .and("contain", "Test Plugin");
   });
