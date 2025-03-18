@@ -62,6 +62,11 @@ jobs:
             exit $LASTEXITCODE
           }
           cd unrealpluginmanager.client
+          npm run coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          Rename-Item -Path ./coverage -NewName coverage-vitest
           npm run cypress:coverage
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
