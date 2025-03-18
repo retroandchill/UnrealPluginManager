@@ -1,6 +1,6 @@
-﻿import {PluginVersionInfo} from "../api";
-import {apiResourcesPath} from "../config/Globals.ts";
-import {PluginCallback} from "../util";
+﻿import {PluginVersionInfo} from "@/api";
+import {apiResourcesPath} from "@/config/Globals.ts";
+import {PluginCallback} from "@/util";
 
 /**
  * Represents the properties for a plugin button component.

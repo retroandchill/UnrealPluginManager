@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
-import {debounce, Page, PluginCallback} from "../util";
-import {PluginVersionInfo} from "../api";
-import {pluginsApi} from "../config/Globals";
+import {debounce, Page, PluginCallback} from "@/util";
+import {PluginVersionInfo} from "@/api";
+import {pluginsApi} from "@/config";
 import PluginButton from "./PluginButton.tsx";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import TextField from "@mui/material/TextField";
