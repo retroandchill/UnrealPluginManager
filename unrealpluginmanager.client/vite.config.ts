@@ -50,9 +50,9 @@ export default defineConfig({
       include: 'src/**/*.{ts,tsx}',
       exclude: ['node_modules', 'test/*', 'cypress/*'],
       extension: ['.ts', '.tsx'],
-      cypress: true,
+      cypress: isCypress,
       requireEnv: false,
-      forceBuildInstrument: Boolean(process.env.INSTRUMENT_BUILD)
+      forceBuildInstrument: isCypress
     }),
   ],
   build: {
