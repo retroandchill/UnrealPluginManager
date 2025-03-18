@@ -7,67 +7,9 @@ on:
     types: [opened, synchronize, reopened]
   merge_group:
 jobs:
-  cypress:
-    name: Run Component Tests
+  build:
+    name: Build and analyze
     runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-      - name: Install Node Dependencies
-        shell: powershell
-        run: |
-          cd unrealpluginmanager.client
-          npm ci
-      - name: Run Cypress
-        shell: powershell
-        run: |
-          cd unrealpluginmanager.client
-          npm run cypress:coverage
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-          Rename-Item -Path ./coverage -NewName coverage-cypress
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-coverage
-          path: unrealpluginmanager.client/coverage-cypress/**/*
-          
-  vitest:
-    name: Run TypeScript Tests
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 23
-      - name: Install Node Dependencies
-        shell: powershell
-        run: |
-          cd unrealpluginmanager.client
-          npm ci
-      - name: Run Vitest
-        shell: powershell
-        run: |
-          cd unrealpluginmanager.client
-          npm run coverage
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-          Rename-Item -Path ./coverage -NewName coverage-vitest
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: vitest-coverage
-          path: unrealpluginmanager.client/coverage-vitest/**/*
-          
-  
-  build-dotnet:
-    name: Build .NET Project
-    runs-on: windows-latest
-    needs: [vitest, cypress]
     steps:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -99,16 +41,15 @@ jobs:
       - name: Install dotnet-coverage
         shell: powershell
         run: dotnet tool install --global dotnet-coverage
-      - name: Download Vitest Coverage
-        uses: actions/download-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: vitest-coverage
-          path: unrealpluginmanager.client/coverage-vitest
-      - name: Download Cypress Coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: cypress-coverage
-          path: unrealpluginmanager.client/coverage-cypress
+          node-version: 23
+      - name: Install Node Dependencies
+        shell: powershell
+        run: |
+          cd unrealpluginmanager.client
+          npm ci
+          cd ..
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -120,8 +61,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
           }
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"  
-  
+          cd unrealpluginmanager.client
+          npm run coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          Rename-Item -Path ./coverage -NewName coverage-vitest
+          npm run cypress:coverage
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+          Rename-Item -Path ./coverage -NewName coverage-cypress
+          cd ..
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+   
   build-docker:
     name: Build Docker Container
     runs-on: ubuntu-latest
