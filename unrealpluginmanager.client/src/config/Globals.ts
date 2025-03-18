@@ -1,4 +1,4 @@
-﻿import {Configuration, PluginsApi} from "../api";
+﻿import {Configuration, PluginsApi} from "@/api";
 
 /**
  * The base URL of the API used for making HTTP requests.
