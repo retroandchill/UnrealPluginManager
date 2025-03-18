@@ -21,7 +21,10 @@
     "noUncheckedSideEffectImports": true,
     "types": [
       "cypress"
-    ]
+    ],
+    "paths": {
+      "@/*": ["src/*"] // Setup alias for Vite's `@` pointing to `src`
+    }
   },
   "include": [
     "vite.config.ts",

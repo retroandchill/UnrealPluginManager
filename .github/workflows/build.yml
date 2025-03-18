@@ -103,10 +103,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vitest-coverage
+          path: unrealpluginmanager.client/coverage-vitest
       - name: Download Cypress Coverage
         uses: actions/download-artifact@v4
         with:
           name: cypress-coverage
+          path: unrealpluginmanager.client/coverage-cypress
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
