@@ -59,7 +59,8 @@ export default defineConfig({
     sourcemap: true, // IMPORTANT: Enable source maps for accurate coverage
   },
   optimizeDeps: {
-    entries: ['cypress/**/*']
+    entries: ['cypress/**/*'],
+    include: ['react-router-dom']
   },
   resolve: {
     alias: {
