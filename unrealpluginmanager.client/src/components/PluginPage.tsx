@@ -5,6 +5,8 @@ import {Box, Grid2, Stack, Tab} from "@mui/material";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import {useParams, useSearchParams} from 'react-router';
 import {PluginReadmeDisplay} from "@/components";
+import {CopyBlock, dracula} from 'react-code-blocks';
+import {getInstallCommand} from "@/util";
 
 /**
  * Renders the PluginPage component that displays plugin details including icon, name, version, and several tabs like Readme, Dependencies, and Download.
@@ -33,6 +35,10 @@ function PluginPage() {
           <Grid2 size="grow">
             <h2>{plugin.friendlyName ? plugin.friendlyName : plugin.name}</h2>
             <h4>{plugin.version}</h4>
+          </Grid2>
+          <Grid2 size="grow">
+            <CopyBlock text={getInstallCommand(plugin)} language="none" theme={dracula} codeBlock={true}
+                       showLineNumbers={false}/>
           </Grid2>
         </Grid2>
         <TabContext value={searchParams.get("currentTab") ?? "readme"}>
