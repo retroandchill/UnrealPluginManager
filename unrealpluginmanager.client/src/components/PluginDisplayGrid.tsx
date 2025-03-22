@@ -23,8 +23,8 @@ interface PluginGridProps {
 }
 
 function PluginDisplayGrid({onPluginClick}: Readonly<PluginGridProps>) {
-    const [plugins, setPlugins] = useState<PluginVersionInfo[]>([]);
-    const [lastPage, setLastPage] = useState<Page<PluginVersionInfo> | undefined>(undefined);
+  const [plugins, setPlugins] = useState<PluginVersionInfo[]>([]);
+  const [lastPage, setLastPage] = useState<Page<PluginVersionInfo> | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
   async function updateSearchTerm(newSearchTerm: string) {

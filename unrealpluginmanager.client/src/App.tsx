@@ -45,7 +45,7 @@ function App({routerFactory}: Readonly<AppProps>) {
     },
     {
       path: '/plugin/:id',
-      element: <PluginPage plugin={}/>
+      element: <PluginPage/>
     }
   ]);
 

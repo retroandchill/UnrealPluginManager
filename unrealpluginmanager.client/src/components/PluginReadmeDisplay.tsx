@@ -1,5 +1,5 @@
-﻿import { pluginsApi } from "@/config";
-import {useEffect, useState } from "react";
+﻿import {pluginsApi} from "@/config";
+import {useEffect, useState} from "react";
 import Markdown from "react-markdown";
 
 /**
@@ -41,7 +41,7 @@ function PluginReadmeDisplay({pluginId, versionId} : Readonly<PluginReadmeDispla
   useEffect(() => {
     pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId})
         .then(r => setReadme(r))
-  });
+  }, []);
   
   return (
       <Markdown>{readme ?? "Loading..."}</Markdown>
