@@ -46,7 +46,7 @@ function PluginPage() {
             <TabList onChange={(_, v) => setSearchParams({currentTab: v})} aria-label="lab API tabs example">
               <Tab label="Readme" value="readme" />
               <Tab label="Dependencies" value="dependencies" />
-              <Tab label="Dependencies" value="download" />
+              <Tab label="Download" value="download"/>
             </TabList>
           </Box>
           <TabPanel value="readme"><PluginReadmeDisplay pluginId={pluginId} versionId={plugin.versionId}/></TabPanel>
