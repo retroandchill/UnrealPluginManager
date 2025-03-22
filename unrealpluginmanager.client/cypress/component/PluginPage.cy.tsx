@@ -20,6 +20,7 @@ describe('<PluginPage />', () => {
   beforeEach(() => {
     // Mock the API method `getLatestVersion`
     cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPluginData);
+    cy.stub(pluginsApi, 'getPluginReadme').resolves("Readme Content");
   });
 
   const mountWithRouter = (initialPath: string) => {
@@ -43,7 +44,7 @@ describe('<PluginPage />', () => {
     mountWithRouter('/plugins/123');
 
     // Validate loading state
-    cy.contains('Loading...').should('be.visible');
+    cy.contains('Readme Content').should('be.visible');
   });
 
   it('renders plugin details correctly', () => {
@@ -70,7 +71,7 @@ describe('<PluginPage />', () => {
     cy.contains('Loading...').should('not.exist');
 
     // Check default tab (Readme is active)
-    cy.contains('Readme Content').should('not.exist'); // You need to mock `PluginReadmeDisplay` as well
+    cy.contains('Readme Content').should('be.visible');
     cy.contains('Coming soon!').should('not.exist');
 
     // Switch to Dependencies tab
