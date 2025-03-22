@@ -1,4 +1,4 @@
-﻿import {debounce} from '../../src/util';
+﻿import {debounce} from '@/util';
 import {expect, test} from "vitest";
 
 test('debouncer only fires once', () => {
