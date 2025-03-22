@@ -38,12 +38,20 @@ jobs:
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Cache .Net Tools
+        uses: actions/cache@v4
+        with:
+          path: ~\.dotnet\tools
+          key: ${{ runner.os }}-dotnet
+          restore-keys: ${{ runner.os }}-dotnet
       - name: Install dotnet-coverage
         shell: powershell
         run: dotnet tool install --global dotnet-coverage
       - uses: actions/setup-node@v4
         with:
           node-version: 23
+          cache: 'npm'
+          cache-dependency-path: unrealpluginmanager.client/package-lock.json
       - name: Install Node Dependencies
         shell: powershell
         run: |

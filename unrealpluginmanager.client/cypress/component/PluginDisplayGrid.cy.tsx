@@ -7,7 +7,7 @@ import {Page} from "@/util";
 import {pluginsApi} from "@/config/Globals";
 
 
-describe('<PluginButton />', () => {
+describe('<PluginDIsplayGrid />', () => {
   const plugins: Page<PluginVersionInfo> = {
     pageNumber: 1,
     pageSize: 10,

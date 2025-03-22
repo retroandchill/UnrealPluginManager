@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["*"] // Define aliases here
     },
-    "jsx": "react"
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }
