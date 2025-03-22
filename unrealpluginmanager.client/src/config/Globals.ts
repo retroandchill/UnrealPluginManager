@@ -26,3 +26,5 @@ export const pluginsApi = new PluginsApi(apiConfig);
  * It is a concatenation of the base API URL and the resources endpoint.
  */
 export const apiResourcesPath = `${apiBaseUrl}/storage`
+
+export const exeName = "uepm";

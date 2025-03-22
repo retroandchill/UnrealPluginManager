@@ -1117,6 +1117,11 @@
             "description": "Gets or sets the name of the author associated with the plugin.",
             "nullable": true
           },
+          "authorWebsite": {
+            "type": "string",
+            "description": "Gets or sets the URL associated with the author of the plugin.",
+            "nullable": true
+          },
           "versionId": {
             "type": "string",
             "description": "Gets or sets the unique identifier for the plugin version.",

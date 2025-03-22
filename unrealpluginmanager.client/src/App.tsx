@@ -1,4 +1,3 @@
-import './App.css';
 import {PluginDisplayGrid} from "./components";
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -8,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import {createBrowserRouter} from "react-router-dom";
 import {RouterProvider} from "react-router";
+import PluginPage from "@/components/PluginPage.tsx";
 
 /**
  * Represents the properties required by an application.
@@ -35,16 +35,15 @@ interface AppProps {
  * The component communicates with an ASP.NET backend and showcases an example
  * integration between JavaScript and ASP.NET.
  */
-function App(props: Readonly<AppProps>) {
-
-  const router = props.routerFactory([
+function App({routerFactory}: Readonly<AppProps>) {
+  const router = routerFactory([
     {
       path: '/',
         element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.pluginId}`)}/>
     },
     {
       path: '/plugin/:id',
-      element: <div>This is a test!</div>
+      element: <PluginPage/>
     }
   ]);
 
@@ -70,7 +69,6 @@ function App(props: Readonly<AppProps>) {
       <RouterProvider router={router}/>
     </div>
   </div>;
-
 }
 
 export default App;

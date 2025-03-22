@@ -16,22 +16,22 @@
 
 import * as runtime from '../runtime';
 import type {
-    DependencyManifest,
-    PluginDependency,
-    PluginOverviewPage,
-    PluginSummary,
-    PluginVersionDetails,
-    PluginVersionInfo,
-    PluginVersionInfoPage,
+  DependencyManifest,
+  PluginDependency,
+  PluginOverviewPage,
+  PluginSummary,
+  PluginVersionDetails,
+  PluginVersionInfo,
+  PluginVersionInfoPage,
 } from '../models/index';
 import {
-    DependencyManifestFromJSON,
-    PluginDependencyToJSON,
-    PluginOverviewPageFromJSON,
-    PluginSummaryFromJSON,
-    PluginVersionDetailsFromJSON,
-    PluginVersionInfoFromJSON,
-    PluginVersionInfoPageFromJSON,
+  DependencyManifestFromJSON,
+  PluginDependencyToJSON,
+  PluginOverviewPageFromJSON,
+  PluginSummaryFromJSON,
+  PluginVersionDetailsFromJSON,
+  PluginVersionInfoFromJSON,
+  PluginVersionInfoPageFromJSON,
 } from '../models/index';
 
 export interface AddPluginRequest {

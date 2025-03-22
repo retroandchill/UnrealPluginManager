@@ -48,20 +48,20 @@ interface PluginButtonProps {
  * @param {Function} [props.onClick] - Optional onClick handler to be executed when the button is clicked.
  * @return {JSX.Element} A button element displaying plugin details.
  */
-function PluginButton(props: Readonly<PluginButtonProps>) {
+function PluginButton({plugin, onClick}: Readonly<PluginButtonProps>) {
   return <button onClick={() => {
-    if (props.onClick) {
-      props.onClick(props.plugin);
+    if (onClick) {
+      onClick(plugin);
     }
   }}>
-      <img src={props.plugin.icon ? `${apiResourcesPath}/${props.plugin.icon.storedFilename}` : "Icon128.png"}
+      <img src={plugin.icon ? `${apiResourcesPath}/${plugin.icon.storedFilename}` : "Icon128.png"}
            alt="Plugin Icon"/>
     <header style={{textAlign: 'left', padding: 0, margin: 0,}}>
-      <h2>{props.plugin.name}</h2>
+      <h2>{plugin.name}</h2>
     </header>
     <ul style={{listStyleType: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
-        <li><b>Latest Release:</b> {props.plugin.version}</li>
-      <li><b>Author:</b> {props.plugin.authorName ? `${props.plugin.authorName}` : 'Unknown'}</li>
+        <li><b>Latest Release:</b> {plugin.version}</li>
+      <li><b>Author:</b> {plugin.authorName ? `${plugin.authorName}` : 'Unknown'}</li>
     </ul>
   </button>
 }

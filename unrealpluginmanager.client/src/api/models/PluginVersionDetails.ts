@@ -52,6 +52,12 @@ export interface PluginVersionDetails {
      */
     authorName?: string | null;
     /**
+     * Gets or sets the URL associated with the author of the plugin.
+     * @type {string}
+     * @memberof PluginVersionDetails
+     */
+    authorWebsite?: string | null;
+  /**
      * Gets or sets the unique identifier for the plugin version.
      * @type {string}
      * @memberof PluginVersionDetails
@@ -117,6 +123,7 @@ export function PluginVersionDetailsFromJSONTyped(json: any, ignoreDiscriminator
         'name': json['name'],
         'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
         'authorName': json['authorName'] == null ? undefined : json['authorName'],
+      'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
         'versionId': json['versionId'],
         'version': json['version'],
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
@@ -141,6 +148,7 @@ export function PluginVersionDetailsToJSONTyped(value?: PluginVersionDetails | n
         'name': value['name'],
         'friendlyName': value['friendlyName'],
         'authorName': value['authorName'],
+      'authorWebsite': value['authorWebsite'],
         'versionId': value['versionId'],
         'version': value['version'],
         'icon': ResourceInfoToJSON(value['icon']),

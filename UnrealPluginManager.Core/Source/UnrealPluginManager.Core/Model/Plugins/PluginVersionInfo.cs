@@ -50,6 +50,18 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// </summary>
   public string? AuthorName { get; set; }
 
+
+  /// <summary>
+  /// Gets or sets the URL associated with the author of the plugin.
+  /// </summary>
+  /// <remarks>
+  /// This property contains a link to additional information about the plugin's author,
+  /// such as a personal website, portfolio, or profile page. It provides users with
+  /// a way to learn more about the author or contact them if necessary. The value is
+  /// optional and may be null if no URL is provided.
+  /// </remarks>
+  public string? AuthorWebsite { get; set; }
+
   /// <summary>
   /// Gets or sets the unique identifier for the plugin version.
   /// </summary>
