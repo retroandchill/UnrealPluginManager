@@ -1,6 +1,13 @@
 ﻿import {pluginsApi} from "@/config";
 import {useEffect, useState} from "react";
 import Markdown from "react-markdown";
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {dracula} from "react-syntax-highlighter/dist/cjs/styles/prism";
+import Typography from "@mui/material/Typography";
+import remarkGfm from 'remark-gfm'
+import {remarkAlert} from 'remark-github-blockquote-alert'
+import 'remark-github-blockquote-alert/alert.css'
+
 
 /**
  * Represents properties required to display the README of a specific plugin version.
@@ -37,14 +44,54 @@ interface PluginReadmeDisplayProps {
  */
 function PluginReadmeDisplay({pluginId, versionId} : Readonly<PluginReadmeDisplayProps>) {
   const [readme, setReadme] = useState<string>()
+  const [error, setError] = useState<string>();
+
 
   useEffect(() => {
     pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId})
         .then(r => setReadme(r))
-  }, []);
-  
+        .catch(() => setError("Failed to fetch plugin README."));
+  }, [pluginId, versionId]);
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
+
+
+
   return (
-      <Markdown>{readme ?? "Loading..."}</Markdown>
+      <div className="markdown-container" style={{all: "revert"}}>
+        <Markdown remarkPlugins={[remarkGfm, remarkAlert]} components={{
+          // Customize how code blocks are rendered
+          code: ({node, className, children, style, ref, ...props}) => {
+            const match = /language-(\w+)/.exec(className || ""); // Match the language (e.g., language-js)
+            return match ? (
+                <SyntaxHighlighter
+                    style={dracula} // Use your preferred highlighting theme
+                    language={match[1]} // Extracted language
+                    PreTag="div" // Prevent breaking layout
+                    {...props}
+                >
+                  {String(children).trim()}
+                </SyntaxHighlighter>
+            ) : (
+                <code
+                    style={{
+                      backgroundColor: "#282a36",
+                      padding: "0.2em 0.4em",
+                      borderRadius: "4px",
+                      fontSize: "0.95rem",
+                    }}
+                    {...props}
+                >
+                  {children}
+                </code>
+            );
+          }
+        }}>
+          {readme}
+        </Markdown>
+      </div>
   );
 }
 

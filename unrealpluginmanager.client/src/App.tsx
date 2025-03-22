@@ -1,4 +1,3 @@
-import './App.css';
 import {PluginDisplayGrid} from "./components";
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -37,7 +36,6 @@ interface AppProps {
  * integration between JavaScript and ASP.NET.
  */
 function App({routerFactory}: Readonly<AppProps>) {
-
   const router = routerFactory([
     {
       path: '/',
@@ -71,7 +69,6 @@ function App({routerFactory}: Readonly<AppProps>) {
       <RouterProvider router={router}/>
     </div>
   </div>;
-
 }
 
 export default App;

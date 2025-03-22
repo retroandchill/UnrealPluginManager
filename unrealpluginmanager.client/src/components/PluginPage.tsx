@@ -44,9 +44,10 @@ function PluginPage() {
             </TabList>
           </Box>
           <TabPanel value="readme"><PluginReadmeDisplay pluginId={pluginId} versionId={plugin.versionId}/></TabPanel>
+          <TabPanel value="dependencies">Coming soon!</TabPanel>
+          <TabPanel value="download">Coming soon!</TabPanel>
         </TabContext>
       </Stack>
-      
   );
 }
 
