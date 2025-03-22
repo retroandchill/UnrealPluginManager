@@ -77,7 +77,8 @@ export default defineConfig({
     https: isCypress ? undefined : {
       key: fs.readFileSync(keyFilePath),
       cert: fs.readFileSync(certFilePath),
-    }
+    },
+    hmr: !isCypress
   },
   assetsInclude: ['/src/assets/**/*']
 })
