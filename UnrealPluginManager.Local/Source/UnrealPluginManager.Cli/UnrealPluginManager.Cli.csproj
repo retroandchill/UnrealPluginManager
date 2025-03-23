@@ -24,10 +24,10 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.13.0"/>
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
         <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1"/>
+        <PackageReference Include="AutoExceptionHandler" Version="1.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
         <ProjectReference Include="..\..\..\UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj"/>
         <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj"/>

@@ -33,13 +33,13 @@
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1"/>
+        <PackageReference Include="AutoExceptionHandler" Version="1.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\unrealpluginmanager.client\unrealpluginmanager.client.esproj">
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
-        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
     </ItemGroup>
 

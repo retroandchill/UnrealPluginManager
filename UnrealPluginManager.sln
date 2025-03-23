@@ -27,10 +27,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Local.Tests", "UnrealPluginManager.Local\Tests\UnrealPluginManager.Local.Tests\UnrealPluginManager.Local.Tests.csproj", "{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator", "UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Generator\UnrealPluginManager.Core.Generator.csproj", "{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Generator.Tests", "UnrealPluginManager.Core\Tests\UnrealPluginManager.Core.Generator.Tests\UnrealPluginManager.Core.Generator.Tests.csproj", "{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnrealPluginManager.Core", "UnrealPluginManager.Core", "{F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{AECF1712-0CA8-443B-8F9A-C02E746E36C0}"
@@ -75,8 +71,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$root", "$root", "{64D07B84
 		postgres.env = postgres.env
 		reverse_database_change.ps1 = reverse_database_change.ps1
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnrealPluginManager.Core.Annotations", "UnrealPluginManager.Core\Source\UnrealPluginManager.Core.Annotations\UnrealPluginManager.Core.Annotations.csproj", "{F916A950-C6C5-48C4-917C-D5CDC72C83E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -134,18 +128,6 @@ Global
 		{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B877C0F0-C0D8-4E20-B28B-6BC2E1F5C333}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F916A950-C6C5-48C4-917C-D5CDC72C83E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F916A950-C6C5-48C4-917C-D5CDC72C83E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F916A950-C6C5-48C4-917C-D5CDC72C83E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F916A950-C6C5-48C4-917C-D5CDC72C83E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -153,10 +135,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AECF1712-0CA8-443B-8F9A-C02E746E36C0} = {F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}
 		{9A758204-7132-4CA0-A70C-BA59C0FBF0BA} = {AECF1712-0CA8-443B-8F9A-C02E746E36C0}
-		{FFC24B49-55C4-4DB7-9F70-95549F3A1B6D} = {AECF1712-0CA8-443B-8F9A-C02E746E36C0}
 		{C11E29E4-4A66-462B-9796-611E0DD5AD6D} = {F2AE114F-F6C3-43CE-9914-F6A12E9E42C6}
 		{F4529935-7CAC-4257-8228-DE20D74AD955} = {C11E29E4-4A66-462B-9796-611E0DD5AD6D}
-		{0B418603-8EBB-43D1-8724-F70B4F0CDEFB} = {C11E29E4-4A66-462B-9796-611E0DD5AD6D}
 		{1CAA98C5-4873-45E8-847B-8C2BC6CBE603} = {6CF35F2A-78C2-4D6D-9381-1DF1E61FC194}
 		{1AF09A44-ED09-4C18-9F59-554A5437FBF4} = {1CAA98C5-4873-45E8-847B-8C2BC6CBE603}
 		{5881A07A-27DD-46C6-A316-1EF0C3E57144} = {6CF35F2A-78C2-4D6D-9381-1DF1E61FC194}
@@ -173,6 +153,5 @@ Global
 		{613D5350-AD38-45BA-B6B2-E12C9402E811} = {4792B0DC-7E08-42FA-A0E3-35BD18D25ADF}
 		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2} = {F07D3997-D624-4010-86D9-C196B3188F9A}
 		{E25AC043-6879-4D78-BD03-F56844C9C235} = {25ADB3D4-36C4-45F5-8D79-5D79E27BADEF}
-		{F916A950-C6C5-48C4-917C-D5CDC72C83E5} = {AECF1712-0CA8-443B-8F9A-C02E746E36C0}
 	EndGlobalSection
 EndGlobal
