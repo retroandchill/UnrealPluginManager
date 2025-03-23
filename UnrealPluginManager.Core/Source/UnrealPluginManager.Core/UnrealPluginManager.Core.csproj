@@ -38,8 +38,4 @@
         <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.12"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\UnrealPluginManager.Core.Annotations\UnrealPluginManager.Core.Annotations.csproj" />
-    </ItemGroup>
-
 </Project>
