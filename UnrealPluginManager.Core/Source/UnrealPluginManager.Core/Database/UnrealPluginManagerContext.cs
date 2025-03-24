@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
+using UnrealPluginManager.Core.Database.Entities.Users;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -51,11 +52,21 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// </remarks>
   public DbSet<FileResource> FileResources { get; init; }
 
+  /// <summary>
+  /// Represents the database set for storing and managing user data within the UnrealPluginManager context.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of users persisted in the database.
+  /// It is used for performing CRUD operations and querying user-related information stored in the system.
+  /// </remarks>
+  public DbSet<User> Users { get; init; }
+
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     Plugin.DefineModelMetadata(modelBuilder);
     PluginVersion.DefineModelMetadata(modelBuilder);
     Dependency.DefineModelMetadata(modelBuilder);
     UploadedBinaries.DefineModelMetadata(modelBuilder);
+    User.DefineModelMetadata(modelBuilder);
   }
 }
