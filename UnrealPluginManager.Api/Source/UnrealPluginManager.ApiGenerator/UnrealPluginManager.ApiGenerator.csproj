@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.3.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0"/>
     </ItemGroup>
 
 </Project>
