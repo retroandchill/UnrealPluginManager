@@ -61,6 +61,15 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// </remarks>
   public DbSet<User> Users { get; init; }
 
+  /// <summary>
+  /// Represents the database set for managing API keys in the Unreal Plugin Manager context.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of API key entities in the database.
+  /// It is utilized for performing CRUD operations and validating user credentials and permissions through API keys.
+  /// </remarks>
+  public DbSet<ApiKey> ApiKeys { get; init; }
+
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     Plugin.DefineModelMetadata(modelBuilder);
@@ -68,5 +77,6 @@ public abstract class UnrealPluginManagerContext : DbContext {
     Dependency.DefineModelMetadata(modelBuilder);
     UploadedBinaries.DefineModelMetadata(modelBuilder);
     User.DefineModelMetadata(modelBuilder);
+    ApiKey.DefineModelMetadata(modelBuilder);
   }
 }

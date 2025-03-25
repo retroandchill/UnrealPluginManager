@@ -39,6 +39,17 @@ public class User {
   public required string Username { get; set; }
 
   /// <summary>
+  /// Gets or sets the hashed representation of the user's password.
+  /// </summary>
+  /// <remarks>
+  /// This property stores the securely hashed and salted version of the user's password.
+  /// It is used for authentication and is never stored in plaintext.
+  /// The maximum length is constrained to 255 characters, adhering to database design constraints.
+  /// </remarks>
+  [MaxLength(255)]
+  public string? PasswordHash { get; set; }
+
+  /// <summary>
   /// Gets or sets the email address associated with the user.
   /// </summary>
   /// <remarks>
@@ -79,6 +90,17 @@ public class User {
   /// with its respective metadata and ownership structure within the system.
   /// </remarks>
   public ICollection<Plugin> Plugins { get; set; } = new List<Plugin>();
+
+  /// <summary>
+  /// Gets or sets the collection of API keys associated with the user.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the API keys that belong to the user. Each API key is tied
+  /// to a specific user and can be used to authenticate or authorize actions within the
+  /// Unreal Plugin Manager system. The collection is maintained as a one-to-many
+  /// relationship between the <see cref="User"/> and <see cref="ApiKey"/> entities.
+  /// </remarks>
+  public ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
   internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
     modelBuilder.Entity<User>()
