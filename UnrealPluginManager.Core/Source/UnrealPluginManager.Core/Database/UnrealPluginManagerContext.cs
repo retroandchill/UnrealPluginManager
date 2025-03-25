@@ -62,6 +62,15 @@ public abstract class UnrealPluginManagerContext : DbContext {
   public DbSet<User> Users { get; init; }
 
   /// <summary>
+  /// Represents the database set for managing associations between plugins and their respective owners.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of plugin ownership data, enabling CRUD operations and querying of plugin-owner relationships.
+  /// It is a key component for defining and maintaining the ownership link between users and plugins within the Unreal Plugin Manager application.
+  /// </remarks>
+  public DbSet<PluginOwner> PluginOwners { get; init; }
+
+  /// <summary>
   /// Represents the database set for managing API keys in the Unreal Plugin Manager context.
   /// </summary>
   /// <remarks>
@@ -69,6 +78,15 @@ public abstract class UnrealPluginManagerContext : DbContext {
   /// It is utilized for performing CRUD operations and validating user credentials and permissions through API keys.
   /// </remarks>
   public DbSet<ApiKey> ApiKeys { get; init; }
+
+  /// <summary>
+  /// Represents the database set for managing allowed plugins associated with API keys in the Unreal Plugin Manager system.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of allowed plugins stored in the database.
+  /// It is primarily used to associate specific plugins with API keys, enabling fine-grained access control and management.
+  /// </remarks>
+  public DbSet<AllowedPlugin> AllowedPlugins { get; init; }
 
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
@@ -78,5 +96,7 @@ public abstract class UnrealPluginManagerContext : DbContext {
     UploadedBinaries.DefineModelMetadata(modelBuilder);
     User.DefineModelMetadata(modelBuilder);
     ApiKey.DefineModelMetadata(modelBuilder);
+    PluginOwner.DefineModelMetadata(modelBuilder);
+    AllowedPlugin.DefineModelMetadata(modelBuilder);
   }
 }

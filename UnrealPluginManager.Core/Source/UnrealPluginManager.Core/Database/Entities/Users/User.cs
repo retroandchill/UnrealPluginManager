@@ -105,6 +105,25 @@ public class User {
   internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
     modelBuilder.Entity<User>()
         .HasMany(x => x.Plugins)
-        .WithMany(x => x.Owners);
+        .WithMany(x => x.Owners)
+        .UsingEntity<PluginOwner>();
+
+    modelBuilder.Entity<User>()
+        .Property(x => x.Username)
+        .HasMaxLength(31);
+    
+    modelBuilder.Entity<User>()
+        .Property(x => x.PasswordHash)
+        .HasMaxLength(255);
+    
+    modelBuilder.Entity<User>()
+        .Property(x => x.Email)
+        .HasMaxLength(255);
+    
+    modelBuilder.Entity<User>()
+        .HasOne(x => x.ProfilePicture)
+        .WithMany()
+        .HasForeignKey(x => x.ProfilePictureId)
+        .OnDelete(DeleteBehavior.NoAction);
   }
 }

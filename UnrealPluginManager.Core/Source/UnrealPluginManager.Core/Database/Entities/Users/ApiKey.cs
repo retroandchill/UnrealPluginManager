@@ -48,6 +48,7 @@ public class ApiKey {
   /// This property stores the actual API key string associated with the entity, which is utilized to validate access to system resources.
   /// It must be provided during creation and is required for all API key operations.
   /// </remarks>
+  [MaxLength(255)]
   public required string Key { get; set; }
 
   /// <summary>
@@ -66,6 +67,7 @@ public class ApiKey {
   /// This property defines a pattern that can be used to match plugin identifiers, specifying which plugins the associated API key has access to.
   /// If null or not set, the API key is not restricted by any plugin-specific limitations.
   /// </remarks>
+  [MaxLength(255)]
   public string? PluginGlob { get; set; }
 
   /// <summary>
@@ -86,6 +88,15 @@ public class ApiKey {
 
     modelBuilder.Entity<ApiKey>()
         .HasMany(x => x.Plugins)
-        .WithMany();
+        .WithMany()
+        .UsingEntity<AllowedPlugin>();
+    
+    modelBuilder.Entity<ApiKey>()
+        .Property(x => x.Key)
+        .HasMaxLength(255);
+    
+    modelBuilder.Entity<ApiKey>()
+        .Property(x => x.PluginGlob)
+        .HasMaxLength(255);
   }
 }
