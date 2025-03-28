@@ -1,8 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.Linq.Expressions;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database.Entities;
+﻿using UnrealPluginManager.Core.Database.Entities;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -48,7 +44,7 @@ public static class DbModelExtensions {
   /// <returns>
   /// Returns an <see cref="IOrderedQueryable{T}"/> where the elements are ordered by their version in descending order.
   /// </returns>
-  public static IOrderedQueryable<TSource> OrderByVersionDecending<TSource>(this IQueryable<TSource> source)
+  public static IOrderedQueryable<TSource> OrderByVersionDescending<TSource>(this IQueryable<TSource> source)
       where TSource : IVersionedEntity {
     return source.OrderByDescending(x => x.Major)
         .ThenByDescending(x => x.Minor)

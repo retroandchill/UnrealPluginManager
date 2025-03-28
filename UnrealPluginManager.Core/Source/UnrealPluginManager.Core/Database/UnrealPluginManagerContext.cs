@@ -90,10 +90,11 @@ public abstract class UnrealPluginManagerContext : DbContext {
 
   /// <inheritdoc/>
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
-    Plugin.DefineModelMetadata(modelBuilder);
-    PluginVersion.DefineModelMetadata(modelBuilder);
-    Dependency.DefineModelMetadata(modelBuilder);
-    UploadedBinaries.DefineModelMetadata(modelBuilder);
+    modelBuilder.Entity<Plugin>(Plugin.DefineModelMetadata);
+    modelBuilder.Entity<PluginVersion>(PluginVersion.DefineModelMetadata);
+    modelBuilder.Entity<Dependency>(Dependency.DefineModelMetadata);
+    modelBuilder.Entity<UploadedBinaries>(UploadedBinaries.DefineModelMetadata);
+    modelBuilder.Entity<Plugin>(Plugin.DefineModelMetadata);
     User.DefineModelMetadata(modelBuilder);
     ApiKey.DefineModelMetadata(modelBuilder);
     PluginOwner.DefineModelMetadata(modelBuilder);

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database.Entities.Storage;
@@ -113,10 +114,11 @@ public class Plugin {
   /// model metadata.
   /// </remarks>
   public ICollection<User> Owners { get; set; } = new List<User>();
-
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<Plugin>()
-        .HasIndex(x => new { x.Name })
+  
+  internal static void DefineModelMetadata(EntityTypeBuilder<Plugin> entity) {
+    entity.HasIndex(x => new {
+            x.Name
+        })
         .IsUnique();
   }
 }

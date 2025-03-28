@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
 
@@ -93,18 +93,15 @@ public class Dependency : IVersionedEntityChild {
   /// </remarks>
   public PluginType Type { get; set; } = PluginType.Provided;
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<Dependency>()
-        .HasOne(x => x.Parent)
+  internal static void DefineModelMetadata(EntityTypeBuilder<Dependency> entity) {
+    entity.HasOne(x => x.Parent)
         .WithMany(x => x.Dependencies)
         .HasForeignKey(x => x.ParentId)
         .OnDelete(DeleteBehavior.Cascade);
 
-    modelBuilder.Entity<Dependency>()
-        .HasIndex(x => x.ParentId);
+    entity.HasIndex(x => x.ParentId);
 
-    modelBuilder.Entity<Dependency>()
-        .Property(x => x.PluginVersion)
+    entity.Property(x => x.PluginVersion)
         .HasConversion(
             x => x.ToString(),
             x => SemVersionRange.Parse(x, 2048));

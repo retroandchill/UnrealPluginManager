@@ -16,14 +16,7 @@ namespace UnrealPluginManager.Core.Mappers;
 /// Utilizes Riok.Mapperly library for advanced mapping configurations.
 /// </summary>
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-[UseStaticMapper(typeof(ResourceMapper))]
 public static partial class PluginMapper {
-  /// <summary>
-  /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.
-  /// </summary>
-  /// <param name="plugins">The source <see cref="IQueryable{Plugin}"/> collection to be converted.</param>
-  /// <returns>An <see cref="IQueryable{PluginOverview}"/> collection representing the provided <see cref="IQueryable{Plugin}"/>.</returns>
-  public static partial IQueryable<PluginOverview> ToPluginOverview(this IQueryable<Plugin> plugins);
 
   /// <summary>
   /// Converts a <see cref="Plugin"/> instance to a <see cref="PluginDetails"/> representation.
@@ -79,13 +72,6 @@ public static partial class PluginMapper {
   public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
   /// <summary>
-  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionInfo}"/> representation.
-  /// </summary>
-  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
-  /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
-  public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfo(this IQueryable<PluginVersion> versions);
-
-  /// <summary>
   /// Maps a <see cref="PluginVersion"/> entity to a <see cref="PluginVersionDetails"/> model.
   /// </summary>
   /// <param name="version">The instance of <see cref="PluginVersion"/> to be mapped.</param>
@@ -100,14 +86,6 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
   public static partial PluginVersionDetails ToPluginVersionDetails(this PluginVersion version);
-
-  /// <summary>
-  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionDetails}"/> representation.
-  /// </summary>
-  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
-  /// <returns>An <see cref="IQueryable{PluginVersionDetails}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
-  public static partial IQueryable<PluginVersionDetails>
-      ToPluginVersionDetails(this IQueryable<PluginVersion> versions);
 
   /// <summary>
   /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
@@ -221,6 +199,28 @@ public static partial class PluginMapper {
   /// <returns>A <see cref="DependencyChainRoot"/> instance representing the dependency chain of the provided <see cref="IDependencyHolder"/>.</returns>
   [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
   public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
+
+  /// <summary>
+  /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.
+  /// </summary>
+  /// <param name="plugins">The source <see cref="IQueryable{Plugin}"/> collection to be converted.</param>
+  /// <returns>An <see cref="IQueryable{PluginOverview}"/> collection representing the provided <see cref="IQueryable{Plugin}"/>.</returns>
+  public static partial IQueryable<PluginOverview> ToPluginOverviewQuery(this IQueryable<Plugin> plugins);
+
+  /// <summary>
+  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionInfo}"/> representation.
+  /// </summary>
+  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
+  /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
+  public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfoQuery(this IQueryable<PluginVersion> versions);
+
+  /// <summary>
+  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionDetails}"/> representation.
+  /// </summary>
+  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
+  /// <returns>An <see cref="IQueryable{PluginVersionDetails}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
+  public static partial IQueryable<PluginVersionDetails> ToPluginVersionDetailsQuery(
+      this IQueryable<PluginVersion> versions);
 
   /// <summary>
   /// Returns a <see cref="SemVersion"/> object without any modifications.
