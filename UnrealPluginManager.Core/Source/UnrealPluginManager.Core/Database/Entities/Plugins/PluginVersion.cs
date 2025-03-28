@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Utils;
@@ -37,12 +37,12 @@ public class PluginVersion : IVersionedEntity {
   [NotMapped]
   public SemVersion Version {
     get => new(Major, Minor, Patch,
-               PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
-               Metadata?.Split('.'));
+        PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
+        Metadata?.Split('.'));
     set {
-      Major = (int)value.Major;
-      Minor = (int)value.Minor;
-      Patch = (int)value.Patch;
+      Major = (int) value.Major;
+      Minor = (int) value.Minor;
+      Patch = (int) value.Patch;
       PrereleaseNumber = value.IsPrerelease ? value.PrereleaseIdentifiers.GetPrereleaseNumber() : null;
       Prerelease = value.IsPrerelease ? value.PrereleaseIdentifiers[0].Value : null;
       Metadata = value.Metadata != "" ? value.Metadata : null;
@@ -148,35 +148,29 @@ public class PluginVersion : IVersionedEntity {
   /// </summary>
   public Guid? ReadmeId { get; set; }
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<PluginVersion>()
-        .HasOne(x => x.Parent)
+  internal static void DefineModelMetadata(EntityTypeBuilder<PluginVersion> entity) {
+    entity.HasOne(x => x.Parent)
         .WithMany(x => x.Versions)
         .HasForeignKey(x => x.ParentId)
         .IsRequired()
         .OnDelete(DeleteBehavior.Cascade);
 
-    modelBuilder.Entity<PluginVersion>()
-        .HasIndex(x => x.ParentId);
+    entity.HasIndex(x => x.ParentId);
 
-    modelBuilder.Entity<PluginVersion>()
-        .Ignore(x => x.Version);
-    
-    modelBuilder.Entity<PluginVersion>()
-        .HasOne(x => x.Source)
+    entity.Ignore(x => x.Version);
+
+    entity.HasOne(x => x.Source)
         .WithMany()
         .HasForeignKey(x => x.SourceId)
         .OnDelete(DeleteBehavior.NoAction)
         .IsRequired();
-    
-    modelBuilder.Entity<PluginVersion>()
-        .HasOne(x => x.Icon)
+
+    entity.HasOne(x => x.Icon)
         .WithMany()
         .HasForeignKey(x => x.IconId)
         .OnDelete(DeleteBehavior.NoAction);
-    
-    modelBuilder.Entity<PluginVersion>()
-        .HasOne(x => x.Readme)
+
+    entity.HasOne(x => x.Readme)
         .WithMany()
         .HasForeignKey(x => x.ReadmeId)
         .OnDelete(DeleteBehavior.NoAction);

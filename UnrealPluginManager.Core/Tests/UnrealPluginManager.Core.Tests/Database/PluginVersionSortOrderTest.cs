@@ -102,7 +102,7 @@ public class PluginVersionSortOrderTest {
     context.SaveChanges();
 
     var query = context.PluginVersions
-        .OrderByVersionDecending()
+        .OrderByVersionDescending()
         .Select(x => x.Version);
     var retrievedPlugins = query.ToList();
 
