@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Users;
@@ -35,19 +36,19 @@ public class AllowedPlugin {
   /// </summary>
   public Plugin Plugin { get; set; } = null!;
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<AllowedPlugin>()
-        .HasKey(x => new { x.ApiKeyId, x.PluginId });
-    
-    modelBuilder.Entity<AllowedPlugin>()
-        .HasOne(x => x.ApiKey)
+  internal static void DefineModelMetadata(EntityTypeBuilder<AllowedPlugin> entity) {
+    entity.HasKey(x => new {
+        x.ApiKeyId,
+        x.PluginId
+    });
+
+    entity.HasOne(x => x.ApiKey)
         .WithMany()
         .HasForeignKey(x => x.ApiKeyId)
         .IsRequired()
         .OnDelete(DeleteBehavior.Cascade);
-    
-    modelBuilder.Entity<AllowedPlugin>()
-        .HasOne(x => x.Plugin)
+
+    entity.HasOne(x => x.Plugin)
         .WithMany()
         .HasForeignKey(x => x.PluginId)
         .IsRequired()

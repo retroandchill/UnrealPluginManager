@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 
@@ -102,26 +103,21 @@ public class User {
   /// </remarks>
   public ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<User>()
-        .HasMany(x => x.Plugins)
+  internal static void DefineModelMetadata(EntityTypeBuilder<User> entity) {
+    entity.HasMany(x => x.Plugins)
         .WithMany(x => x.Owners)
         .UsingEntity<PluginOwner>();
 
-    modelBuilder.Entity<User>()
-        .Property(x => x.Username)
+    entity.Property(x => x.Username)
         .HasMaxLength(31);
-    
-    modelBuilder.Entity<User>()
-        .Property(x => x.PasswordHash)
+
+    entity.Property(x => x.PasswordHash)
         .HasMaxLength(255);
-    
-    modelBuilder.Entity<User>()
-        .Property(x => x.Email)
+
+    entity.Property(x => x.Email)
         .HasMaxLength(255);
-    
-    modelBuilder.Entity<User>()
-        .HasOne(x => x.ProfilePicture)
+
+    entity.HasOne(x => x.ProfilePicture)
         .WithMany()
         .HasForeignKey(x => x.ProfilePictureId)
         .OnDelete(DeleteBehavior.NoAction);

@@ -95,9 +95,9 @@ public abstract class UnrealPluginManagerContext : DbContext {
     modelBuilder.Entity<Dependency>(Dependency.DefineModelMetadata);
     modelBuilder.Entity<UploadedBinaries>(UploadedBinaries.DefineModelMetadata);
     modelBuilder.Entity<Plugin>(Plugin.DefineModelMetadata);
-    User.DefineModelMetadata(modelBuilder);
-    ApiKey.DefineModelMetadata(modelBuilder);
-    PluginOwner.DefineModelMetadata(modelBuilder);
-    AllowedPlugin.DefineModelMetadata(modelBuilder);
+    modelBuilder.Entity<User>(User.DefineModelMetadata);
+    modelBuilder.Entity<ApiKey>(ApiKey.DefineModelMetadata);
+    modelBuilder.Entity<PluginOwner>(PluginOwner.DefineModelMetadata);
+    modelBuilder.Entity<AllowedPlugin>(AllowedPlugin.DefineModelMetadata);
   }
 }

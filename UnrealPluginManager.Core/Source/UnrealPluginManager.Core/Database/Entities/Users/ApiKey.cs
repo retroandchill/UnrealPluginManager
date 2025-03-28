@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Users;
@@ -79,24 +80,20 @@ public class ApiKey {
   /// </remarks>
   public ICollection<Plugin> Plugins { get; set; } = new List<Plugin>();
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<ApiKey>()
-        .HasOne(x => x.User)
+  internal static void DefineModelMetadata(EntityTypeBuilder<ApiKey> entity) {
+    entity.HasOne(x => x.User)
         .WithMany(x => x.ApiKeys)
         .HasForeignKey(x => x.UserId)
         .OnDelete(DeleteBehavior.Cascade);
 
-    modelBuilder.Entity<ApiKey>()
-        .HasMany(x => x.Plugins)
+    entity.HasMany(x => x.Plugins)
         .WithMany()
         .UsingEntity<AllowedPlugin>();
-    
-    modelBuilder.Entity<ApiKey>()
-        .Property(x => x.Key)
+
+    entity.Property(x => x.Key)
         .HasMaxLength(255);
-    
-    modelBuilder.Entity<ApiKey>()
-        .Property(x => x.PluginGlob)
+
+    entity.Property(x => x.PluginGlob)
         .HasMaxLength(255);
   }
 }
