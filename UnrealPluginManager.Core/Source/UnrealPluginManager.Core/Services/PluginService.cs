@@ -41,7 +41,7 @@ public partial class PluginService : IPluginService {
         .Include(x => x.Versions)
         .ThenInclude(x => x.Icon)
         .OrderByDescending(x => x.Name)
-        .ToPluginOverview()
+        .ToPluginOverviewQuery()
         .ToPageAsync(pageable);
   }
 
@@ -72,7 +72,7 @@ public partial class PluginService : IPluginService {
         .Include(x => x.Parent)
         .Include(x => x.Binaries)
         .Include(x => x.Dependencies)
-        .ToPluginVersionDetails()
+        .ToPluginVersionDetailsQuery()
         .FirstOrDefaultAsync()
         .Map(x => x.ToOption());
   }
@@ -83,7 +83,7 @@ public partial class PluginService : IPluginService {
         .Where(x => x.ParentId == pluginId)
         .WhereVersionInRange(versionRange)
         .OrderByVersionDescending()
-        .ToPluginVersionInfo()
+        .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
 
@@ -93,7 +93,7 @@ public partial class PluginService : IPluginService {
         .Where(x => x.Parent.Name == pluginName)
         .WhereVersionInRange(versionRange)
         .OrderByVersionDescending()
-        .ToPluginVersionInfo()
+        .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
 
@@ -103,7 +103,7 @@ public partial class PluginService : IPluginService {
         .Where(x => x.Parent.Name == pluginName)
         .Where(x => x.VersionString == version.ToString())
         .OrderByVersionDescending()
-        .ToPluginVersionInfo()
+        .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
 
@@ -122,7 +122,7 @@ public partial class PluginService : IPluginService {
               .Include(p => p.Dependencies)
               .Where(p => unresolved.Contains(p.Parent.Name))
               .OrderByVersionDescending()
-              .ToPluginVersionInfo()
+              .ToPluginVersionInfoQuery()
               .ToListAsync())
           .GroupBy(x => x.Name);
 
@@ -158,7 +158,7 @@ public partial class PluginService : IPluginService {
         .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
         .OrderByVersionDescending()
-        .ToPluginVersionInfo()
+        .ToPluginVersionInfoQuery()
         .FirstAsync();
 
     var dependencyList = await GetPossibleVersions(plugin.Dependencies);
