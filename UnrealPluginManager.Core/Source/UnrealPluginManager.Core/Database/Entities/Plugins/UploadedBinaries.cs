@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -86,22 +86,22 @@ public class UploadedBinaries : IVersionedEntityChild {
   /// </summary>
   public Guid FileId { get; set; }
 
-  internal static void DefineModelMetadata(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<UploadedBinaries>()
-        .HasOne(x => x.Parent)
+  internal static void DefineModelMetadata(EntityTypeBuilder<UploadedBinaries> entity) {
+    entity.HasOne(x => x.Parent)
         .WithMany(x => x.Binaries)
         .HasForeignKey(x => x.ParentId)
         .OnDelete(DeleteBehavior.Cascade);
 
-    modelBuilder.Entity<UploadedBinaries>()
-        .HasIndex(x => x.ParentId);
+    entity.HasIndex(x => x.ParentId);
 
-    modelBuilder.Entity<UploadedBinaries>()
-        .HasIndex(x => new { x.ParentId, x.EngineVersion, x.Platform })
+    entity.HasIndex(x => new {
+            x.ParentId,
+            x.EngineVersion,
+            x.Platform
+        })
         .IsUnique();
-    
-    modelBuilder.Entity<UploadedBinaries>()
-        .HasOne(x => x.File)
+
+    entity.HasOne(x => x.File)
         .WithMany()
         .HasForeignKey(x => x.FileId)
         .OnDelete(DeleteBehavior.NoAction)

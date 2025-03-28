@@ -82,7 +82,7 @@ public partial class PluginService : IPluginService {
     return await _dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .WhereVersionInRange(versionRange)
-        .OrderByVersionDecending()
+        .OrderByVersionDescending()
         .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
@@ -92,7 +92,7 @@ public partial class PluginService : IPluginService {
     return await _dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
         .WhereVersionInRange(versionRange)
-        .OrderByVersionDecending()
+        .OrderByVersionDescending()
         .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
@@ -102,7 +102,7 @@ public partial class PluginService : IPluginService {
     return await _dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
         .Where(x => x.VersionString == version.ToString())
-        .OrderByVersionDecending()
+        .OrderByVersionDescending()
         .ToPluginVersionInfoQuery()
         .FirstOrDefaultAsync();
   }
@@ -121,7 +121,7 @@ public partial class PluginService : IPluginService {
               .Include(p => p.Parent)
               .Include(p => p.Dependencies)
               .Where(p => unresolved.Contains(p.Parent.Name))
-              .OrderByVersionDecending()
+              .OrderByVersionDescending()
               .ToPluginVersionInfoQuery()
               .ToListAsync())
           .GroupBy(x => x.Name);
@@ -157,7 +157,7 @@ public partial class PluginService : IPluginService {
     var plugin = await _dbContext.PluginVersions
         .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
-        .OrderByVersionDecending()
+        .OrderByVersionDescending()
         .ToPluginVersionInfoQuery()
         .FirstAsync();
 
