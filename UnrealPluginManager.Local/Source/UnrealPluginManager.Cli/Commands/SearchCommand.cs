@@ -1,15 +1,13 @@
 ﻿using System.CommandLine;
 using JetBrains.Annotations;
-using LanguageExt;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
 
-using StringOption = System.CommandLine.Option<string>;
+using StringOption = Option<string>;
 
 /// <summary>
 /// Represents the search command used for querying plugins either from a local cache or a specified remote location.
@@ -34,7 +32,7 @@ public class SearchCommand : Command<SearchCommandOptions, SearchCommandHandler>
       "search", "Searches either the local cache or a remote for plugins matching the search term.") {
     AddArgument(new Argument<string>("searchTerm", "The search term to use."));
     AddOption(new StringOption(["--remote", "-r"],
-                               "The remote to search. If not specified, the local cache will be searched. Using all will search all remotes.") {
+        "The remote to search. If not specified, the local cache will be searched. Using all will search all remotes.") {
         IsRequired = false
     });
   }
@@ -123,7 +121,7 @@ public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommand
       foreach (var (key, value) in plugins) {
         _console.WriteLine($"Remote: {key}");
         value.Match(x => ReportPlugins(x),
-                    e => _console.WriteLine($"Error: {e.Message}"));
+            e => _console.WriteLine($"Error: {e.Message}"));
         _console.WriteLine("");
       }
 

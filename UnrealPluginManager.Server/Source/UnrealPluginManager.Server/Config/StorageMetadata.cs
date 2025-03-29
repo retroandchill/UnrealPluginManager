@@ -38,5 +38,6 @@ public class StorageMetadata {
   /// The path can be set relative to the current working directory, and it will be converted
   /// to an absolute path during assignment.
   /// </remarks>
+  [UsedImplicitly]
   public string ResourceDirectory { get; set; } = "resources";
 }

@@ -1,8 +1,8 @@
 ﻿using LanguageExt;
+using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Exceptions;
@@ -34,7 +34,7 @@ public partial class PluginManagementService : IPluginManagementService {
           try {
             return await searchTerm.ToEnumerable()
                 .PageToEndAsync((y, p) => x.GetPluginsAsync(y, p.PageNumber, p.PageSize),
-                                DefaultPageSize)
+                    DefaultPageSize)
                 .ToListAsync();
           } catch (ApiException e) {
             return Fin<List<PluginOverview>>.Fail(e);
@@ -51,26 +51,31 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange, string? engineVersion) {
+  public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange,
+                                                        string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
         .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo(pluginName, v)));
 
     var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
-    return resolved.OrElseThrow(() => new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
+    return resolved.OrElseThrow(() =>
+        new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
     var cached = await _pluginService.GetPluginVersionInfo(pluginName, versionRange);
-    
+
     return await cached.OrElseAsync(() => LookupPluginVersionOnCloud(pluginName, versionRange));
   }
 
-  private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(string pluginName, SemVersionRange versionRange) {
+  private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(
+      string pluginName, SemVersionRange versionRange) {
     var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
         .Select(x => pluginName.ToEnumerable()
-                    .PageToEndAsync((y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize))
-                    .FirstOrDefaultAsync()
-                    .ToRef())
+            .PageToEndAsync(
+                (y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize),
+                DefaultPageSize)
+            .FirstOrDefaultAsync()
+            .ToRef())
         .ToList();
 
     return await SafeTasks.WhenEach(tasks)
@@ -84,7 +89,7 @@ public partial class PluginManagementService : IPluginManagementService {
   public async Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => x.Version);
-    
+
     var allDependencies = root.Dependencies
         .Concat(currentlyInstalled.Select(x => new PluginDependency {
             PluginName = x.Key,
@@ -93,14 +98,14 @@ public partial class PluginManagementService : IPluginManagementService {
         }))
         .DistinctBy(x => x.PluginName)
         .ToList();
-    
+
     var dependencyTasks = _pluginService.GetPossibleVersions(allDependencies)
         .Map(x => x.SetInstalledPlugins(currentlyInstalled)).ToEnumerable()
         .Concat(_remoteService.GetApiAccessors<IPluginsApi>()
-                    .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
-                                .Map(y => y.SetRemoteIndex(i))))
+            .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
+                .Map(y => y.SetRemoteIndex(i))))
         .ToList();
-    
+
     var dependencyManifest = await SafeTasks.WhenEach(dependencyTasks)
         .Where(x => x.IsCompletedSuccessfully)
         .Select(x => x.Result)
@@ -120,7 +125,7 @@ public partial class PluginManagementService : IPluginManagementService {
     if (remoteName is null) {
       throw new RemoteNotFoundException("No default remote configured.");
     }
-    
+
     await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
     return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData.FileData));
@@ -133,13 +138,15 @@ public partial class PluginManagementService : IPluginManagementService {
     var plugin = await _pluginService.GetPluginVersionDetails(pluginName, version);
     return await plugin.OrElseGetAsync(async () => {
       if (!remote.HasValue) {
-        throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version} in the local cache.");
+        throw new PluginNotFoundException(
+            $"Unable to find plugin {pluginName} with version {version} in the local cache.");
       }
-      
+
       var (remoteName, _) = _remoteService.GetAllRemotes().GetAt(remote.Value);
       var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
       var pluginToDownload = await pluginName.ToEnumerable()
-          .PageToEndAsync((y, p) => pluginsApi.GetLatestVersionsAsync(y, version.ToString(), p.PageNumber, p.PageSize))
+          .PageToEndAsync((y, p) => pluginsApi.GetLatestVersionsAsync(y, version.ToString(), p.PageNumber, p.PageSize),
+              DefaultPageSize)
           .FirstOrDefaultAsync();
       if (pluginToDownload is null) {
         throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");

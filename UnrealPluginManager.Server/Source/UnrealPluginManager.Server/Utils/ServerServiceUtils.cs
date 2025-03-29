@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Retro.SimplePage.Requests;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -66,12 +67,11 @@ public static class ServerServiceUtils {
   /// <returns>The updated <see cref="WebApplicationBuilder"/> with common configurations applied.</returns>
   public static WebApplicationBuilder SetUpCommonConfiguration(this WebApplicationBuilder builder) {
     builder.Services.AddControllers(options => {
-          options.ModelBinderProviders.Insert(0, new PaginationModelBinderProvider());
-          options.ModelBinderProviders.Insert(1, new SemVersionModelBinderProvider());
-
+          options.ModelBinderProviders.Insert(0, new SemVersionModelBinderProvider());
           options.InputFormatters.Insert(0, new TextMarkdownInputFormatter());
           options.OutputFormatters.Insert(0, new TextMarkdownOutputFormatter());
         })
+        .AddPagination()
         .AddJsonOptions(o => {
           o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
           o.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
