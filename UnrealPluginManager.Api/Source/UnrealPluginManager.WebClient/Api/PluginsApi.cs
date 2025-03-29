@@ -13,8 +13,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Retro.SimplePage;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.WebClient.Client;
 
 namespace UnrealPluginManager.WebClient.Api {

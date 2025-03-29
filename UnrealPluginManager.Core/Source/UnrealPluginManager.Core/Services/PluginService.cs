@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using Retro.SimplePage;
+using Retro.SimplePage.EntityFrameworkCore;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -15,7 +17,6 @@ using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Model.Storage;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Solver;
 using UnrealPluginManager.Core.Utils;
 
@@ -35,8 +36,8 @@ public partial class PluginService : IPluginService {
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
   /// <inheritdoc/>
-  public Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
-    return _dbContext.Plugins
+  public async Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default) {
+    return await _dbContext.Plugins
         .Where(x => EF.Functions.Like(x.Name, matcher.Replace("*", "%")))
         .Include(x => x.Versions)
         .ThenInclude(x => x.Icon)
@@ -117,14 +118,14 @@ public partial class PluginService : IPluginService {
 
     while (unresolved.Count > 0) {
       var currentlyExisting = unresolved.ToHashSet();
-      var plugins = (await _dbContext.PluginVersions
-              .Include(p => p.Parent)
-              .Include(p => p.Dependencies)
-              .Where(p => unresolved.Contains(p.Parent.Name))
-              .OrderByVersionDescending()
-              .ToPluginVersionInfoQuery()
-              .ToListAsync())
-          .GroupBy(x => x.Name);
+      var plugins = await _dbContext.PluginVersions
+          .Include(p => p.Parent)
+          .Include(p => p.Dependencies)
+          .Where(p => unresolved.Contains(p.Parent.Name))
+          .OrderByVersionDescending()
+          .ToPluginVersionInfoQuery()
+          .ToListAsync()
+          .Map(x => x.GroupBy(p => p.Name));
 
       foreach (var pluginList in plugins) {
         unresolved.Remove(pluginList.Key);

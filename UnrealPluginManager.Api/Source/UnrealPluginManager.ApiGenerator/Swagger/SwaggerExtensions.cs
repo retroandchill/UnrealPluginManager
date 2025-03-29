@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Retro.SimplePage.Swashbuckle;
 using Semver;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Model.Plugins;
@@ -37,16 +38,15 @@ public static class SwaggerExtensions {
     builder.Services.AddSingleton<ISwaggerService, SwaggerService>()
         .AddOpenApi()
         .AddEndpointsApiExplorer()
-        .AddSwaggerGen()
         .AddSwaggerGen(options => {
           // include API xml documentation
           options.CustomOperationIds(GetOperationIdName);
           var apiAssembly = typeof(PluginsController).Assembly;
           options.IncludeXmlComments(GetXmlDocumentationFileFor(apiAssembly));
-          
+
           options.SupportNonNullableReferenceTypes();
           options.UseAllOfForInheritance();
-          
+
           // include models xml documentation
           var modelsAssembly = typeof(PluginSummary).Assembly;
           options.IncludeXmlComments(GetXmlDocumentationFileFor(modelsAssembly));
@@ -60,8 +60,7 @@ public static class SwaggerExtensions {
               Example = new OpenApiString(">=1.0.0")
           });
           options.AddSchemaFilterInstance(new CollectionPropertyFilter());
-          options.AddOperationFilterInstance(new PageableParameterFilter());
-          options.AddSchemaFilterInstance(new PagePropertyFilter());
+          options.AddPagination();
           options.AddOperationFilterInstance(new SemVersionParameterFilter());
         });
 

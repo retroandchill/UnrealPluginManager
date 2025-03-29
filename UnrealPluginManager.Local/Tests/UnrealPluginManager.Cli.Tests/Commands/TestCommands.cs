@@ -6,6 +6,7 @@ using System.IO.Abstractions.TestingHelpers;
 using LanguageExt;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.DependencyInjection;
@@ -15,7 +16,6 @@ using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Resolution;
-using UnrealPluginManager.Core.Pagination;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
@@ -114,18 +114,18 @@ public class TestCommands {
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x =>
-                              x.BuildPlugin(
-                                  It.Is<IFileInfo>(y => y.FullName ==
-                                                        Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-                                  It.Is<string?>(y => y == "5.5")));
+        x.BuildPlugin(
+            It.Is<IFileInfo>(y => y.FullName ==
+                                  Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
+            It.Is<string?>(y => y == "5.5")));
 
     returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x =>
-                              x.BuildPlugin(
-                                  It.Is<IFileInfo>(y => y.FullName ==
-                                                        Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-                                  It.Is<string?>(y => y == null)));
+        x.BuildPlugin(
+            It.Is<IFileInfo>(y => y.FullName ==
+                                  Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
+            It.Is<string?>(y => y == null)));
   }
 
   [Test]
@@ -141,7 +141,7 @@ public class TestCommands {
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(-1));
   }
-  
+
   [Test]
   public async Task TestRequestBuildWithGenericError() {
     _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
@@ -154,40 +154,40 @@ public class TestCommands {
   [Test]
   public async Task TestInstallPlugin() {
     _installService.Setup(x => x.InstallPlugin(It.IsAny<string>(), It.IsAny<SemVersionRange>(), It.IsAny<string?>(),
-                                               It.IsAny<IReadOnlyCollection<string>>()))
+            It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync([new VersionChange("MyPlugin", null, new SemVersion(1, 0, 0))]);
     var returnCode = await _parser.InvokeAsync("install MyPlugin");
     Assert.That(returnCode, Is.EqualTo(0));
-     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
-                                               It.Is<string?>(y => y == null),
-                                               It.IsAny<IReadOnlyCollection<string>>()));
+    _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
+        It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
+        It.Is<string?>(y => y == null),
+        It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("install MyPlugin --version 1.0.0");
     Assert.That(returnCode, Is.EqualTo(0));
     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersionRange>(y => y ==
-                                                                           SemVersionRange.Parse("1.0.0", 2048)),
-                                               It.Is<string?>(y => y == null),
-                                               It.IsAny<IReadOnlyCollection<string>>()));
+        It.Is<SemVersionRange>(y => y ==
+                                    SemVersionRange.Parse("1.0.0", 2048)),
+        It.Is<string?>(y => y == null),
+        It.IsAny<IReadOnlyCollection<string>>()));
 
     _installService.Invocations.Clear();
     returnCode = await _parser.InvokeAsync("install MyPlugin --version >=1.0.0 --engine-version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                               It.Is<SemVersionRange>(y => y ==
-                                                                           SemVersionRange.AtLeast(new SemVersion(1, 0, 0), false)),
-                                               It.Is<string?>(y => y == "5.5"),
-                                               It.IsAny<IReadOnlyCollection<string>>()));
+        It.Is<SemVersionRange>(y => y ==
+                                    SemVersionRange.AtLeast(new SemVersion(1, 0, 0), false)),
+        It.Is<string?>(y => y == "5.5"),
+        It.IsAny<IReadOnlyCollection<string>>()));
   }
 
   [Test]
   public async Task TestSearch() {
     var versions = new SemVersion[] {
-        new(1, 0, 0), new(1, 0, 1), new(1, 0, 2), new(1, 0, 3), new(1, 1, 0), new(1, 1, 1), new(1, 2, 0),
-        new(2, 0, 0), new(2, 0, 1), new(3, 0, 0)
+        new(1, 0, 0), new(1, 0, 1), new(1, 0, 2), new(1, 0, 3), new(1, 1, 0), new(1, 1, 1), new(1, 2, 0), new(2, 0, 0),
+        new(2, 0, 1), new(3, 0, 0)
     };
-    
+
     var plugins = Enumerable.Range(0, 100)
         .Select(i => new PluginOverview {
             Id = Guid.NewGuid(),
@@ -221,8 +221,8 @@ public class TestCommands {
         })
         .GroupBy(x => x.Index / 10)
         .Select((x, i) => new KeyValuePair<string, Fin<List<PluginOverview>>>(
-                    $"group{i}",
-                    i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
+            $"group{i}",
+            i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
     _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(split));
@@ -232,8 +232,8 @@ public class TestCommands {
 
     var allErrors = Enumerable.Range(0, 100)
         .Select(i => new KeyValuePair<string, Fin<List<PluginOverview>>>(
-                    $"group{i}",
-                    Fin<List<PluginOverview>>.Fail("Error")))
+            $"group{i}",
+            Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
     _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(allErrors));
