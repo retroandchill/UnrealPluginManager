@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {PluginVersionInfo} from "@/api";
 import {apiResourcesPath, pluginsApi} from "@/config";
-import {Box, Grid2, Stack, Tab} from "@mui/material";
+import {Box, Grid, Stack, Tab} from "@mui/material";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import {useParams, useSearchParams} from 'react-router';
 import {PluginReadmeDisplay} from "@/components";
@@ -27,20 +27,20 @@ function PluginPage() {
   
   return (plugin === undefined ? <div>Loading...</div> :
       <Stack>
-        <Grid2 container spacing={3}>
-          <Grid2 size="auto">
+        <Grid container spacing={3}>
+          <Grid size="auto">
             <img src={plugin.icon ? `${apiResourcesPath}/${plugin.icon.storedFilename}` : "Icon128.png"}
                  alt="Plugin Icon"/>
-          </Grid2>
-          <Grid2 size="grow">
+          </Grid>
+          <Grid size="grow">
             <h2>{plugin.friendlyName ? plugin.friendlyName : plugin.name}</h2>
             <h4>{plugin.version}</h4>
-          </Grid2>
-          <Grid2 size="grow">
+          </Grid>
+          <Grid size="grow">
             <CopyBlock text={getInstallCommand(plugin)} language="none" theme={dracula} codeBlock={true}
                        showLineNumbers={false}/>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         <TabContext value={searchParams.get("currentTab") ?? "readme"}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <TabList onChange={(_, v) => setSearchParams({currentTab: v})} aria-label="lab API tabs example">
