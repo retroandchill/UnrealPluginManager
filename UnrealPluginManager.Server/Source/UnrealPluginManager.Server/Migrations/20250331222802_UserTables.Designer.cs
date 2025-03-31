@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UnrealPluginManager.Server.Database;
@@ -11,9 +12,11 @@ using UnrealPluginManager.Server.Database;
 namespace UnrealPluginManager.Server.Migrations
 {
     [DbContext(typeof(CloudUnrealPluginManagerContext))]
-    partial class CloudUnrealPluginManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20250331222802_UserTables")]
+    partial class UserTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

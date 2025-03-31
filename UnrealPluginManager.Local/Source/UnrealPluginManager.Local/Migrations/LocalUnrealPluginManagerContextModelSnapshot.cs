@@ -15,7 +15,7 @@ namespace UnrealPluginManager.Local.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
@@ -256,6 +256,116 @@ namespace UnrealPluginManager.Local.Migrations
                     b.ToTable("file_resources", (string)null);
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.AllowedPlugin", b =>
+                {
+                    b.Property<Guid>("ApiKeyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("api_key_id");
+
+                    b.Property<Guid>("PluginId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("plugin_id");
+
+                    b.HasKey("ApiKeyId", "PluginId")
+                        .HasName("pk_allowed_plugins");
+
+                    b.HasIndex("PluginId")
+                        .HasDatabaseName("ix_allowed_plugins_plugin_id");
+
+                    b.ToTable("allowed_plugins", (string)null);
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.ApiKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("key");
+
+                    b.Property<string>("PluginGlob")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("plugin_glob");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_api_keys");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_api_keys_user_id");
+
+                    b.ToTable("api_keys", (string)null);
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.PluginOwner", b =>
+                {
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("PluginId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("plugin_id");
+
+                    b.HasKey("OwnerId", "PluginId")
+                        .HasName("pk_plugin_owners");
+
+                    b.HasIndex("PluginId")
+                        .HasDatabaseName("ix_plugin_owners_plugin_id");
+
+                    b.ToTable("plugin_owners", (string)null);
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Password")
+                        .HasMaxLength(31)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("password");
+
+                    b.Property<Guid?>("ProfilePictureId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("profile_picture_id");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(31)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("username");
+
+                    b.HasKey("Id")
+                        .HasName("pk_users");
+
+                    b.HasIndex("ProfilePictureId")
+                        .HasDatabaseName("ix_users_profile_picture_id");
+
+                    b.ToTable("users", (string)null);
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "Parent")
@@ -326,6 +436,71 @@ namespace UnrealPluginManager.Local.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.AllowedPlugin", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Users.ApiKey", "ApiKey")
+                        .WithMany()
+                        .HasForeignKey("ApiKeyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_allowed_plugins_api_keys_api_key_id");
+
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Plugin")
+                        .WithMany()
+                        .HasForeignKey("PluginId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_allowed_plugins_plugins_plugin_id");
+
+                    b.Navigation("ApiKey");
+
+                    b.Navigation("Plugin");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.ApiKey", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Users.User", "User")
+                        .WithMany("ApiKeys")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_api_keys_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.PluginOwner", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Users.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_owners_users_owner_id");
+
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", "Plugin")
+                        .WithMany()
+                        .HasForeignKey("PluginId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_owners_plugins_plugin_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Plugin");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.User", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "ProfilePicture")
+                        .WithMany()
+                        .HasForeignKey("ProfilePictureId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_users_file_resources_profile_picture_id");
+
+                    b.Navigation("ProfilePicture");
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Plugin", b =>
                 {
                     b.Navigation("Versions");
@@ -336,6 +511,11 @@ namespace UnrealPluginManager.Local.Migrations
                     b.Navigation("Binaries");
 
                     b.Navigation("Dependencies");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Users.User", b =>
+                {
+                    b.Navigation("ApiKeys");
                 });
 #pragma warning restore 612, 618
         }
