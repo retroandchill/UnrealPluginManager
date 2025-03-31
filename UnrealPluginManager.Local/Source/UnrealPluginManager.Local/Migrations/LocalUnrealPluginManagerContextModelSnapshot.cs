@@ -342,10 +342,10 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("email");
 
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(255)
+                    b.Property<string>("Password")
+                        .HasMaxLength(31)
                         .HasColumnType("TEXT")
-                        .HasColumnName("password_hash");
+                        .HasColumnName("password");
 
                     b.Property<Guid?>("ProfilePictureId")
                         .HasColumnType("TEXT")

@@ -45,10 +45,10 @@ public class User {
   /// <remarks>
   /// This property stores the securely hashed and salted version of the user's password.
   /// It is used for authentication and is never stored in plaintext.
-  /// The maximum length is constrained to 255 characters, adhering to database design constraints.
+  /// The maximum length is constrained to 32 characters, adhering to database design constraints.
   /// </remarks>
-  [MaxLength(255)]
-  public string? PasswordHash { get; set; }
+  [MaxLength(31)]
+  public string? Password { get; set; }
 
   /// <summary>
   /// Gets or sets the email address associated with the user.
@@ -111,8 +111,8 @@ public class User {
     entity.Property(x => x.Username)
         .HasMaxLength(31);
 
-    entity.Property(x => x.PasswordHash)
-        .HasMaxLength(255);
+    entity.Property(x => x.Password)
+        .HasMaxLength(31);
 
     entity.Property(x => x.Email)
         .HasMaxLength(255);

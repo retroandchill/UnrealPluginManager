@@ -347,10 +347,10 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("password_hash");
+                    b.Property<string>("Password")
+                        .HasMaxLength(31)
+                        .HasColumnType("character varying(31)")
+                        .HasColumnName("password");
 
                     b.Property<Guid?>("ProfilePictureId")
                         .HasColumnType("uuid")

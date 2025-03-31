@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UnrealPluginManager.Local.Migrations
 {
     /// <inheritdoc />
-    public partial class AddBasicUserData : Migration
+    public partial class UserTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace UnrealPluginManager.Local.Migrations
                 {
                     id = table.Column<Guid>(type: "TEXT", nullable: false),
                     username = table.Column<string>(type: "TEXT", maxLength: 31, nullable: false),
-                    password_hash = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
+                    password = table.Column<string>(type: "TEXT", maxLength: 31, nullable: true),
                     email = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     profile_picture_id = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
