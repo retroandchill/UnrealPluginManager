@@ -2,10 +2,36 @@
 
 services:
   web-backend:
-    image: retroandchill/unreal-plugin-manager:latest
+    image: retroandchill/unreal-plugin-manager:main
     ports:
       - "8080:8080"
       - "8081:8081"
+    networks:
+      - uepm
+  
+  keycloak:
+    image: retroandchill/unreal-plugin-manager-keycloak:master
+    depends_on:
+      - postgresql
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: localhost
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgresql/keycloak
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: develop
+      KC_HTTP_RELATIVE_PATH: /kc
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      JAVA_OPTS_APPEND: "-Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/import -Dkeycloak.migration.strategy=IGNORE_EXISTING"
+    volumes:
+      - ./config/keycloak:/import
+    ports:
+      - "8080:8080"
+    command: [ "start", "--verbose" ]
+    networks:
+      - uepm
   
   postgresql:
     container_name: postgres
@@ -17,6 +43,7 @@ services:
       - "postgres.env"
     volumes:
       - db:/data/postgres
+      - ./config/postgres/init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -25,6 +52,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - uepm
 
 volumes:
   db:
+
+networks:
+  uepm:
+    name: uepm

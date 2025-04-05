@@ -68,8 +68,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$root", "$root", "{64D07B84
 		Dockerfile = Dockerfile
 		.dockerignore = .dockerignore
 		docker-compose.yml = docker-compose.yml
-		postgres.env = postgres.env
 		reverse_database_change.ps1 = reverse_database_change.ps1
+		postgres.env = postgres.env
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{998667FC-A7C7-40B7-ACA9-365267E8C86D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{6DCDC091-308A-4FB7-9304-9A322A8189A3}"
+	ProjectSection(SolutionItems) = preProject
+		config\keycloak\unreal-plugin-manager.json = config\keycloak\unreal-plugin-manager.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{C5A05F8C-66DC-444D-8F8A-87B6725F0D72}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "init-scripts", "init-scripts", "{D6B0A828-8072-4331-8F9D-C99A6DBB7173}"
+	ProjectSection(SolutionItems) = preProject
+		config\postgres\init-scripts\init.sql = config\postgres\init-scripts\init.sql
 	EndProjectSection
 EndProject
 Global
@@ -153,5 +167,8 @@ Global
 		{613D5350-AD38-45BA-B6B2-E12C9402E811} = {4792B0DC-7E08-42FA-A0E3-35BD18D25ADF}
 		{3F391E3C-489E-4733-9AF0-C5AA61EEF2B2} = {F07D3997-D624-4010-86D9-C196B3188F9A}
 		{E25AC043-6879-4D78-BD03-F56844C9C235} = {25ADB3D4-36C4-45F5-8D79-5D79E27BADEF}
+		{6DCDC091-308A-4FB7-9304-9A322A8189A3} = {998667FC-A7C7-40B7-ACA9-365267E8C86D}
+		{C5A05F8C-66DC-444D-8F8A-87B6725F0D72} = {998667FC-A7C7-40B7-ACA9-365267E8C86D}
+		{D6B0A828-8072-4331-8F9D-C99A6DBB7173} = {C5A05F8C-66DC-444D-8F8A-87B6725F0D72}
 	EndGlobalSection
 EndGlobal
