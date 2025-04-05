@@ -76,7 +76,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{998667
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{6DCDC091-308A-4FB7-9304-9A322A8189A3}"
 	ProjectSection(SolutionItems) = preProject
-		config\keycloak\unreal-plugin-manager.json = config\keycloak\unreal-plugin-manager.json
+		config\keycloak\unreal-plugin-manager-realm.json = config\keycloak\unreal-plugin-manager-realm.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{C5A05F8C-66DC-444D-8F8A-87B6725F0D72}"
@@ -170,5 +170,7 @@ Global
 		{6DCDC091-308A-4FB7-9304-9A322A8189A3} = {998667FC-A7C7-40B7-ACA9-365267E8C86D}
 		{C5A05F8C-66DC-444D-8F8A-87B6725F0D72} = {998667FC-A7C7-40B7-ACA9-365267E8C86D}
 		{D6B0A828-8072-4331-8F9D-C99A6DBB7173} = {C5A05F8C-66DC-444D-8F8A-87B6725F0D72}
+		{25ADB3D4-36C4-45F5-8D79-5D79E27BADEF} = {64D07B84-FEE4-426B-B1DB-EA2C31ED327F}
+		{998667FC-A7C7-40B7-ACA9-365267E8C86D} = {64D07B84-FEE4-426B-B1DB-EA2C31ED327F}
 	EndGlobalSection
 EndGlobal
