@@ -10,7 +10,7 @@ services:
       - uepm
   
   keycloak:
-    image: retroandchill/unreal-plugin-manager-keycloak:master
+    image: quay.io/keycloak/keycloak:26.1.3
     depends_on:
       - postgresql
     environment:
@@ -29,7 +29,7 @@ services:
       - ./config/keycloak:/import
     ports:
       - "8080:8080"
-    command: [ "start", "--verbose" ]
+    command: [ "start", "--features=token-exchange" ]
     networks:
       - uepm
   
