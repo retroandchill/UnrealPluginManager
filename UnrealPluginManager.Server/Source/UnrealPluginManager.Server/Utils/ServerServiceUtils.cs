@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -78,6 +80,11 @@ public static class ServerServiceUtils {
           o.JsonSerializerOptions.WriteIndented = true;
           o.JsonSerializerOptions.AllowTrailingCommas = true;
         });
+
+    builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
+    builder.Services.AddAuthorization();
+    builder.Services.AddKeycloakAdminHttpClient(builder.Configuration);
+
     builder.Services.AddCoreServices()
         .AddServerServices();
 
@@ -96,6 +103,7 @@ public static class ServerServiceUtils {
     app.UseDefaultFiles();
     app.MapStaticAssets();
     app.UseHttpsRedirection();
+    app.UseAuthentication();
     app.UseAuthorization();
     app.UseRouting();
     app.MapControllers();
