@@ -39,7 +39,9 @@ public static class ServerServiceUtils {
   }
 
   public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services.AddSingleton<HashAlgorithm>(_ => SHA512.Create())
+    return services.AddHttpContextAccessor()
+        .AddSingleton<HashAlgorithm>(_ => SHA512.Create())
+        .AddSingleton<IPasswordEncoder, PasswordEncoder>()
         .AddScoped<ApiKeyAuthorizationFilter>()
         .AddScoped<IApiKeyValidator, ApiKeyValidator>()
         .AddScoped<IPluginAuthValidator, PluginAuthValidator>()
