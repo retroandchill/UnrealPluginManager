@@ -24,6 +24,11 @@ public partial class ApiKeyAuthorizationFilter : IAsyncAuthorizationFilter {
 
   /// <inheritdoc />
   public async Task OnAuthorizationAsync(AuthorizationFilterContext context) {
+    // If we have a valid JWT allow us through
+    if (context.HttpContext.Request.Headers.Authorization.ToString().StartsWith("Bearer ")) {
+      return;
+    }
+
     string? apiKey = context.HttpContext.Request.Headers[ApiKeyHeaderName];
     if (!await _apiKeyValidator.IsValid(apiKey)) {
       context.Result = new UnauthorizedResult();

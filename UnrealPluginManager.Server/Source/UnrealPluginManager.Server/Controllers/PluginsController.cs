@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Mime;
 using LanguageExt;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Retro.SimplePage;
 using Semver;
@@ -9,6 +10,7 @@ using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Auth;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -26,7 +28,7 @@ namespace UnrealPluginManager.Server.Controllers;
 /// </example>
 /// <seealso cref="UnrealPluginManager.Core.Services.IPluginService"/>
 [ApiController]
-[Route("/api/plugins")]
+[Route("plugins")]
 [AutoConstructor]
 public partial class PluginsController : ControllerBase {
   private readonly IPluginService _pluginService;
@@ -54,6 +56,8 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
+  [Authorize("PluginContributors")]
+  [ApiKey]
   public async Task<PluginVersionDetails> SubmitPlugin(IFormFile submission) {
     await using var dataStream = submission.OpenReadStream();
     return await _pluginService.SubmitPlugin(dataStream);
@@ -85,6 +89,8 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
+  [Authorize("PluginContributors")]
+  [ApiKey]
   public async Task<PluginVersionDetails> AddPlugin(IFormFile pluginFile, [FromRoute] Version engineVersion) {
     await using var stream = pluginFile.OpenReadStream();
     return await _pluginService.SubmitPlugin(stream, engineVersion.ToString());
@@ -167,6 +173,8 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+  [Authorize("PluginContributors")]
+  [ApiKey]
   public Task<string>? AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                        [FromBody] string readme) {
     return _pluginService.AddPluginReadme(pluginId, versionId, readme);
@@ -183,6 +191,8 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+  [Authorize("PluginContributors")]
+  [ApiKey]
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                          [FromBody] string readme) {
     return _pluginService.UpdatePluginReadme(pluginId, versionId, readme);

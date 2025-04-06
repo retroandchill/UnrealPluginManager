@@ -117,6 +117,7 @@ public static class ServerServiceUtils {
     app.UseRouting();
     app.MapControllers();
     app.MapFallbackToFile("/index.html");
+    app.UsePathBase("/api");
 
     return app;
   }
