@@ -9,6 +9,7 @@ using Retro.SimplePage.Requests;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Binding;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Exceptions;
@@ -31,6 +32,12 @@ public static class ServerServiceUtils {
       options.ValueLengthLimit = int.MaxValue;
       options.MultipartBodyLengthLimit = long.MaxValue;
     });
+  }
+
+  public static IServiceCollection AddAuthServices(this IServiceCollection services) {
+    return services
+        .AddScoped<ApiKeyAuthorizationFilter>()
+        .AddScoped<IApiKeyValidator, ApiKeyValidator>();
   }
 
   /// <summary>
@@ -86,7 +93,8 @@ public static class ServerServiceUtils {
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration);
 
     builder.Services.AddCoreServices()
-        .AddServerServices();
+        .AddServerServices()
+        .AddAuthServices();
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
