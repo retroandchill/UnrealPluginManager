@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Model.Users;
 
@@ -41,6 +42,6 @@ public class ApiKeyDetails {
   /// <summary>
   /// Gets or sets the list of plugin identifiers explicitly allowed for this API key.
   /// </summary>
-  public List<Guid> AllowedPlugins { get; set; } = [];
+  public List<PluginIdentifiers> AllowedPlugins { get; set; } = [];
 
 }

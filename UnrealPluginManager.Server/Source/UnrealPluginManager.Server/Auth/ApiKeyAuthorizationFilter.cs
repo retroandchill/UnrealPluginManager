@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Server.Auth;
 
@@ -30,8 +32,16 @@ public partial class ApiKeyAuthorizationFilter : IAsyncAuthorizationFilter {
     }
 
     string? apiKey = context.HttpContext.Request.Headers[ApiKeyHeaderName];
-    if (!await _apiKeyValidator.IsValid(apiKey)) {
-      context.Result = new UnauthorizedResult();
-    }
+    var foundKeyData = await _apiKeyValidator.LookupApiKey(apiKey);
+
+    foundKeyData.Match(key => {
+          var claims = key.PluginGlob.ToOption()
+              .Select(g => new Claim(ApiKeyClaims.PluginGlob, g))
+              .Concat(key.AllowedPlugins
+                  .Select(x => x.Name)
+                  .Select(x => new Claim(ApiKeyClaims.AllowedPlugins, x)));
+          context.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, ApiKeyClaims.AuthenticationType));
+        },
+        () => context.Result = new UnauthorizedResult());
   }
 }

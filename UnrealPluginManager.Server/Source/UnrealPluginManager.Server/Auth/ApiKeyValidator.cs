@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LanguageExt;
+using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Mappers;
+using UnrealPluginManager.Core.Model.Users;
 
 namespace UnrealPluginManager.Server.Auth;
 
@@ -20,14 +22,14 @@ public partial class ApiKeyValidator : IApiKeyValidator {
   private readonly IPasswordEncoder _passwordEncoder;
 
   /// <inheritdoc />
-  public async ValueTask<bool> IsValid(string? apiKey) {
+  public async ValueTask<Option<ApiKeyOverview>> LookupApiKey(string? apiKey) {
     if (string.IsNullOrWhiteSpace(apiKey)) {
-      return false;
+      return Option<ApiKeyOverview>.None;
     }
 
     var splitKey = apiKey.Split('-');
     if (splitKey.Length != 2) {
-      return false;
+      return Option<ApiKeyOverview>.None;
     }
 
     try {
@@ -38,17 +40,17 @@ public partial class ApiKeyValidator : IApiKeyValidator {
           .ToApiKeyDetailsQuery()
           .FirstOrDefaultAsync();
       if (foundKey is null) {
-        return false;
+        return Option<ApiKeyOverview>.None;
       }
 
       if (DateTimeOffset.Now > foundKey.ExpiresAt) {
-        return false;
+        return Option<ApiKeyOverview>.None;
       }
 
       var encodedKey = _passwordEncoder.Encode(splitKey[1] + foundKey.Salt);
-      return encodedKey == foundKey.PrivateComponent;
+      return encodedKey == foundKey.PrivateComponent ? foundKey.ToApiKeyOverview() : Option<ApiKeyOverview>.None;
     } catch (ArgumentException) {
-      return false;
+      return Option<ApiKeyOverview>.None;
     }
   }
 }

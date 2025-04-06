@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,8 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
+using UnrealPluginManager.Server.Auth.Policies;
+using UnrealPluginManager.Server.Auth.Validators;
 using UnrealPluginManager.Server.Binding;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Exceptions;
@@ -38,7 +41,10 @@ public static class ServerServiceUtils {
   public static IServiceCollection AddAuthServices(this IServiceCollection services) {
     return services.AddSingleton<HashAlgorithm>(_ => SHA512.Create())
         .AddScoped<ApiKeyAuthorizationFilter>()
-        .AddScoped<IApiKeyValidator, ApiKeyValidator>();
+        .AddScoped<IApiKeyValidator, ApiKeyValidator>()
+        .AddScoped<IPluginAuthValidator, PluginAuthValidator>()
+        .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
+        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>();
   }
 
   /// <summary>
@@ -90,7 +96,11 @@ public static class ServerServiceUtils {
         });
 
     builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorizationBuilder()
+        .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
+            policy.Requirements.Add(new CanSubmitPluginRequirement()))
+        .AddPolicy(AuthorizationPolicies.CanEditPlugin, policy =>
+            policy.Requirements.Add(new CanEditPluginRequirement()));
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration);
 
     builder.Services.AddCoreServices()

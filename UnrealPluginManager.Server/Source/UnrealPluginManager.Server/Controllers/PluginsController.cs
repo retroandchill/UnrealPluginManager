@@ -56,7 +56,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.PluginContributors)]
+  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   [ApiKey]
   public async Task<PluginVersionDetails> SubmitPlugin(IFormFile submission) {
     await using var dataStream = submission.OpenReadStream();
@@ -89,7 +89,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.PluginContributors)]
+  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   [ApiKey]
   public async Task<PluginVersionDetails> AddPlugin(IFormFile pluginFile, [FromRoute] Version engineVersion) {
     await using var stream = pluginFile.OpenReadStream();
@@ -173,7 +173,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.PluginContributors)]
+  [Authorize(AuthorizationPolicies.CanEditPlugin)]
   [ApiKey]
   public Task<string>? AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                        [FromBody] string readme) {
@@ -191,7 +191,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.PluginContributors)]
+  [Authorize(AuthorizationPolicies.CanEditPlugin)]
   [ApiKey]
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                          [FromBody] string readme) {

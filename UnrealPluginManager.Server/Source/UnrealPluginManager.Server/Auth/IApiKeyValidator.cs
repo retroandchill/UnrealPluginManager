@@ -1,15 +1,20 @@
-﻿namespace UnrealPluginManager.Server.Auth;
+﻿using LanguageExt;
+using UnrealPluginManager.Core.Model.Users;
+
+namespace UnrealPluginManager.Server.Auth;
 
 /// <summary>
 /// Defines the interface for validating API keys.
 /// </summary>
 public interface IApiKeyValidator {
   /// <summary>
-  /// Validates whether the provided API key is valid.
+  /// Validates and retrieves the overview details of the specified API key, if it exists.
   /// </summary>
-  /// <param name="apiKey">The API key to be validated. Can be null.</param>
+  /// <param name="apiKey">The API key to lookup. Can be null or empty.</param>
   /// <returns>
-  /// Returns <c>true</c> if the API key is valid; otherwise, <c>false</c>.
+  /// A <see cref="ValueTask"/> encapsulating an optional <see cref="ApiKeyOverview"/> that contains
+  /// details about the API key, including its expiration and permissions. If the API key is invalid
+  /// or not found, the result will be an empty option.
   /// </returns>
-  ValueTask<bool> IsValid(string? apiKey);
+  ValueTask<Option<ApiKeyOverview>> LookupApiKey(string? apiKey);
 }
