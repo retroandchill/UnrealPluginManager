@@ -112,12 +112,12 @@
         "security": [
           {
             "oauth2": [
-              "PluginContributors"
+              "CanSubmitPlugin"
             ]
           },
           {
             "apiKey": [
-              "PluginContributors"
+              "CanSubmitPlugin"
             ]
           }
         ]
@@ -247,12 +247,12 @@
         "security": [
           {
             "oauth2": [
-              "PluginContributors"
+              "CanSubmitPlugin"
             ]
           },
           {
             "apiKey": [
-              "PluginContributors"
+              "CanSubmitPlugin"
             ]
           }
         ]
@@ -537,12 +537,12 @@
         "security": [
           {
             "oauth2": [
-              "PluginContributors"
+              "CanEditPlugin"
             ]
           },
           {
             "apiKey": [
-              "PluginContributors"
+              "CanEditPlugin"
             ]
           }
         ]
@@ -611,12 +611,12 @@
         "security": [
           {
             "oauth2": [
-              "PluginContributors"
+              "CanEditPlugin"
             ]
           },
           {
             "apiKey": [
-              "PluginContributors"
+              "CanEditPlugin"
             ]
           }
         ]
@@ -1358,7 +1358,8 @@
           "implicit": {
             "authorizationUrl": "/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
             "scopes": {
-              "PluginContributors": "User is a contributor on the given plugin"
+              "CanSubmitPlugin": "User is a contributor on the given plugin and has submit privileges",
+              "CanEditPlugin": "User is a contributor on the given plugin and has edit privileges"
             }
           }
         }

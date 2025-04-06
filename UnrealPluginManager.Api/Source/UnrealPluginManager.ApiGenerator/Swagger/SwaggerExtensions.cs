@@ -8,6 +8,7 @@ using Retro.SimplePage.Swashbuckle;
 using Semver;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Controllers;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
@@ -55,7 +56,8 @@ public static class SwaggerExtensions {
                       AuthorizationUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
                           UriKind.Relative),
                       Scopes = new Dictionary<string, string> {
-                          ["PluginContributors"] = "User is a contributor on the given plugin"
+                          [AuthorizationPolicies.CanSubmitPlugin] = "User is a contributor on the given plugin and has submit privileges",
+                          [AuthorizationPolicies.CanEditPlugin] = "User is a contributor on the given plugin and has edit privileges"
                       }
                   }
               }
