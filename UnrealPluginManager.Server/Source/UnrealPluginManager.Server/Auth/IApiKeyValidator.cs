@@ -11,5 +11,5 @@ public interface IApiKeyValidator {
   /// <returns>
   /// Returns <c>true</c> if the API key is valid; otherwise, <c>false</c>.
   /// </returns>
-  bool IsValid(string? apiKey);
+  ValueTask<bool> IsValid(string? apiKey);
 }

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk;
@@ -35,7 +36,7 @@ public static class ServerServiceUtils {
   }
 
   public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services
+    return services.AddSingleton<HashAlgorithm>(_ => SHA512.Create())
         .AddScoped<ApiKeyAuthorizationFilter>()
         .AddScoped<IApiKeyValidator, ApiKeyValidator>();
   }

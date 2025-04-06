@@ -8,12 +8,13 @@ namespace UnrealPluginManager.Core.Mappers;
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class UserMapper {
 
-  [MapProperty(nameof(ApiKey.Key), nameof(ApiKeyOverview.HashedKey))]
+  public static partial ApiKeyOverview ToApiKeyOverview(this ApiKeyDetails user);
+
   [MapProperty(nameof(ApiKey.Plugins), nameof(ApiKeyOverview.AllowedPlugins))]
-  public static partial ApiKeyOverview ToApiKeyOverview(this ApiKey apiKey);
+  public static partial ApiKeyDetails ToApiKeyDetails(this ApiKey apiKey);
 
   private static Guid GetPluginIds(Plugin plugin) => plugin.Id;
 
-  public static partial IQueryable<ApiKeyOverview> ToApiKeyOverviewQuery(this IQueryable<ApiKey> query);
+  public static partial IQueryable<ApiKeyDetails> ToApiKeyDetailsQuery(this IQueryable<ApiKey> query);
 
 }

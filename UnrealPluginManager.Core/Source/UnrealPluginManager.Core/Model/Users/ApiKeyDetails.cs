@@ -3,9 +3,11 @@
 namespace UnrealPluginManager.Core.Model.Users;
 
 /// <summary>
-/// Represents an overview of an API key, including its details, expiry, and associated permissions.
+/// Represents the details of an API key, including its unique identifier, expiration,
+/// and associated properties such as private component and allowed plugin information.
 /// </summary>
-public class ApiKeyOverview {
+public class ApiKeyDetails {
+
   /// <summary>
   /// Gets or sets the unique identifier for the API key.
   /// </summary>
@@ -15,6 +17,19 @@ public class ApiKeyOverview {
   /// Gets or sets the expiration date and time of the API key.
   /// </summary>
   public required DateTimeOffset ExpiresAt { get; set; }
+
+  /// <summary>
+  /// Gets or sets the private component of the API key, which is securely stored and can be used for verification purposes.
+  /// </summary>
+  [MaxLength(255)]
+  public required string PrivateComponent { get; set; }
+
+
+  /// <summary>
+  /// Gets or sets the cryptographic salt used for secure hashing of the private component.
+  /// </summary>
+  [MaxLength(255)]
+  public required string Salt { get; set; }
 
   /// <summary>
   /// Gets or sets the plugin glob pattern used for defining
@@ -27,4 +42,5 @@ public class ApiKeyOverview {
   /// Gets or sets the list of plugin identifiers explicitly allowed for this API key.
   /// </summary>
   public List<Guid> AllowedPlugins { get; set; } = [];
+
 }

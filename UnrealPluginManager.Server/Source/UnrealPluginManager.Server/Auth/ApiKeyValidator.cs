@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Model.Users;
+using UnrealPluginManager.Core.Mappers;
 
 namespace UnrealPluginManager.Server.Auth;
 
@@ -17,10 +17,38 @@ namespace UnrealPluginManager.Server.Auth;
 public partial class ApiKeyValidator : IApiKeyValidator {
 
   private readonly UnrealPluginManagerContext _dbContext;
-  private readonly IPasswordHasher<ApiKeyOverview> _passwordHasher;
+  private readonly IPasswordEncoder _passwordEncoder;
 
   /// <inheritdoc />
-  public bool IsValid(string? apiKey) {
-    throw new NotImplementedException();
+  public async ValueTask<bool> IsValid(string? apiKey) {
+    if (string.IsNullOrWhiteSpace(apiKey)) {
+      return false;
+    }
+
+    var splitKey = apiKey.Split('-');
+    if (splitKey.Length != 2) {
+      return false;
+    }
+
+    try {
+      var keyId = new Guid(Convert.FromBase64String(splitKey[0]));
+
+      var foundKey = await _dbContext.ApiKeys
+          .Where(x => x.Id == keyId)
+          .ToApiKeyDetailsQuery()
+          .FirstOrDefaultAsync();
+      if (foundKey is null) {
+        return false;
+      }
+
+      if (DateTimeOffset.Now > foundKey.ExpiresAt) {
+        return false;
+      }
+
+      var encodedKey = _passwordEncoder.Encode(splitKey[1] + foundKey.Salt);
+      return encodedKey == foundKey.PrivateComponent;
+    } catch (ArgumentException) {
+      return false;
+    }
   }
 }

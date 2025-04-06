@@ -16,16 +16,16 @@ namespace UnrealPluginManager.Server.Auth;
 /// to guard specific API endpoints against unauthorized access by checking for valid API keys.
 /// </example>
 [AutoConstructor]
-public partial class ApiKeyAuthorizationFilter : IAuthorizationFilter {
+public partial class ApiKeyAuthorizationFilter : IAsyncAuthorizationFilter {
 
   private const string ApiKeyHeaderName = "X-API-Key";
 
   private readonly IApiKeyValidator _apiKeyValidator;
 
   /// <inheritdoc />
-  public void OnAuthorization(AuthorizationFilterContext context) {
+  public async Task OnAuthorizationAsync(AuthorizationFilterContext context) {
     string? apiKey = context.HttpContext.Request.Headers[ApiKeyHeaderName];
-    if (!_apiKeyValidator.IsValid(apiKey)) {
+    if (!await _apiKeyValidator.IsValid(apiKey)) {
       context.Result = new UnauthorizedResult();
     }
   }
