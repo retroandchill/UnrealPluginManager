@@ -28,6 +28,7 @@ public partial class CanSubmitPluginHandler : AuthorizationHandler<CanSubmitPlug
   /// <inheritdoc />
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
                                                        CanSubmitPluginRequirement requirement) {
+    using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 
     if (httpContext == null || !httpContext.Request.HasFormContentType ||

@@ -38,6 +38,7 @@ public partial class ServerExceptionHandler : IExceptionHandler {
 
     const string contentType = "application/problem+json";
     httpContext.Response.ContentType = contentType;
+    httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
     await httpContext.Response.WriteAsync(json, cancellationToken);
 
     return true;

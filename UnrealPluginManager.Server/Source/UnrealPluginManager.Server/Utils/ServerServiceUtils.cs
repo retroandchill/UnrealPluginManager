@@ -12,6 +12,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
+using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Auth.Policies;
 using UnrealPluginManager.Server.Auth.Validators;
 using UnrealPluginManager.Server.Binding;
@@ -42,7 +43,6 @@ public static class ServerServiceUtils {
     return services.AddHttpContextAccessor()
         .AddSingleton<HashAlgorithm>(_ => SHA512.Create())
         .AddSingleton<IPasswordEncoder, PasswordEncoder>()
-        .AddScoped<ApiKeyAuthorizationFilter>()
         .AddScoped<IApiKeyValidator, ApiKeyValidator>()
         .AddScoped<IPluginAuthValidator, PluginAuthValidator>()
         .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
@@ -56,7 +56,6 @@ public static class ServerServiceUtils {
   /// <returns>The updated <see cref="IServiceCollection"/> containing the registered server services.</returns>
   public static IServiceCollection AddServerServices(this IServiceCollection services) {
     return services
-        .AddExceptionHandler<ServerExceptionHandler>()
         .AddSingleton<IStorageService, CloudStorageService>()
         .AddSingleton<IJsonService>(provider => {
           var options = provider.GetRequiredService<IOptions<JsonOptions>>();
@@ -72,6 +71,7 @@ public static class ServerServiceUtils {
   /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
   public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
     builder.SetUpCommonConfiguration();
+    builder.Services.AddProblemDetails();
     builder.Services.AddSystemAbstractions()
         .AddServiceConfigs()
         .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>();
@@ -97,7 +97,9 @@ public static class ServerServiceUtils {
           o.JsonSerializerOptions.AllowTrailingCommas = true;
         });
 
-    builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
+    builder.Services.AddAuthentication()
+        .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>("ApiKey", _ => { })
+        .AddKeycloakWebApi(builder.Configuration);
     builder.Services.AddAuthorizationBuilder()
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
             policy.Requirements.Add(new CanSubmitPluginRequirement()))
@@ -107,7 +109,8 @@ public static class ServerServiceUtils {
 
     builder.Services.AddCoreServices()
         .AddServerServices()
-        .AddAuthServices();
+        .AddAuthServices()
+        .AddExceptionHandler<ServerExceptionHandler>();
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
@@ -121,15 +124,19 @@ public static class ServerServiceUtils {
   /// <returns>The configured <see cref="WebApplication"/> instance.</returns>
   public static WebApplication Configure(this WebApplication app) {
     app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name ?? "MyApplication";
+    app.UseExceptionHandler();
+    
     app.UseDefaultFiles();
     app.MapStaticAssets();
     app.UseHttpsRedirection();
+    app.UsePathBase("/api");
+    app.UseRouting();
+    
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseRouting();
+    
     app.MapControllers();
     app.MapFallbackToFile("/index.html");
-    app.UsePathBase("/api");
 
     return app;
   }

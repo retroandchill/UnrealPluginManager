@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Auth.ApiKey;
 
 namespace UnrealPluginManager.Server.Auth.Validators;
 
@@ -38,9 +39,17 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
         return true;
       }
     } else {
-      if (await _dbContext.Users
-              .AnyAsync(x => x.Username == context.User.Identity.Name
-                             && x.Plugins.Any(p => p.Name == pluginName))) {
+      ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
+      var validPlugin = await _dbContext.Plugins
+          .Include(x => x.Owners
+                       .Where(y => y.Username == context.User.Identity.Name))
+          .Where(x => x.Name == pluginName)
+          .Select(x => new {
+              x.Name,
+              Owners = x.Owners.Select(y => y.Username).ToList()
+          })
+          .FirstOrDefaultAsync();
+      if (validPlugin is null || !validPlugin.Owners.Contains(context.User.Identity.Name)) {
         return true;
       }
     }

@@ -1,4 +1,4 @@
-﻿namespace UnrealPluginManager.Server.Auth;
+﻿namespace UnrealPluginManager.Server.Auth.ApiKey;
 
 /// <summary>
 /// Represents the claim types used for API key-based authentication.
@@ -8,7 +8,7 @@
 /// These claims are typically used in the authentication and authorization processes to
 /// verify and manage permissions for different API key holders.
 /// </remarks>
-public class ApiKeyClaims {
+public static class ApiKeyClaims {
 
   /// <summary>
   /// Specifies the authentication type used for API key-based authentication.

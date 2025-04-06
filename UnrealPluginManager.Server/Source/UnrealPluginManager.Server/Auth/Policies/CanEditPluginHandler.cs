@@ -23,6 +23,7 @@ public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRe
   /// <inheritdoc />
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
                                                        CanEditPluginRequirement requirement) {
+    using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 
     if (httpContext == null || !httpContext.Request.HasFormContentType ||
@@ -45,6 +46,5 @@ public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRe
     if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
       context.Fail();
     }
-
   }
 }

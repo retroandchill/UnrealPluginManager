@@ -4,7 +4,7 @@ using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Users;
 
-namespace UnrealPluginManager.Server.Auth;
+namespace UnrealPluginManager.Server.Auth.ApiKey;
 
 /// <summary>
 /// Provides functionality to validate API keys for authorization purposes.

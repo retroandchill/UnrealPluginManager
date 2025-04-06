@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UnrealPluginManager.Server.Auth;
+namespace UnrealPluginManager.Server.Auth.ApiKey;
 
 /// <summary>
 /// Represents an attribute that is used to enforce API key-based authorization
@@ -14,4 +14,5 @@ namespace UnrealPluginManager.Server.Auth;
 /// This filter ensures that requests without a valid API key do not proceed and are
 /// rejected with the appropriate response.
 /// </remarks>
-public class ApiKeyAttribute() : ServiceFilterAttribute(typeof(ApiKeyAuthorizationFilter));
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class ApiKeyAttribute : Attribute;

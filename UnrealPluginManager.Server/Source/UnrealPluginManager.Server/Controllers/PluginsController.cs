@@ -11,6 +11,7 @@ using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
+using UnrealPluginManager.Server.Auth.ApiKey;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -56,8 +57,8 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   [ApiKey]
+  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   public async Task<PluginVersionDetails> SubmitPlugin(IFormFile submission) {
     await using var dataStream = submission.OpenReadStream();
     return await _pluginService.SubmitPlugin(dataStream);
