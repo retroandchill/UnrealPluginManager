@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -31,12 +31,12 @@
         <PackageReference Include="Retro.SimplePage.EntityFrameworkCore" Version="1.0.0"/>
         <PackageReference Include="Riok.Mapperly" Version="4.2.0"/>
         <PackageReference Include="Semver" Version="3.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.0" />
         <PackageReference Include="System.CodeDom" Version="9.0.3"/>
         <PackageReference Include="System.Linq.Async" Version="6.0.1"/>
-        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.12"/>
+        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.13"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.3"/>
-        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.12"/>
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.13"/>
     </ItemGroup>
 
 </Project>
