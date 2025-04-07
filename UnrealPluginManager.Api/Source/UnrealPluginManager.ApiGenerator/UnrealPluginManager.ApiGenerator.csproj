@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Retro.SimplePage.Swashbuckle" Version="1.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.0"/>
     </ItemGroup>
 
 </Project>
