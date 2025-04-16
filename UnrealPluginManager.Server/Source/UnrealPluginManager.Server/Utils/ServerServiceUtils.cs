@@ -3,8 +3,11 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Retro.SimplePage.Requests;
@@ -60,7 +63,8 @@ public static class ServerServiceUtils {
         .AddSingleton<IJsonService>(provider => {
           var options = provider.GetRequiredService<IOptions<JsonOptions>>();
           return new JsonService(options.Value.JsonSerializerOptions);
-        });
+        })
+        .AddScoped<IUserService, UserService>();
   }
 
   /// <summary>
@@ -97,7 +101,7 @@ public static class ServerServiceUtils {
           o.JsonSerializerOptions.AllowTrailingCommas = true;
         });
 
-    builder.Services.AddAuthentication()
+    builder.Services.AddAuthentication(AuthenticationSchemes.ApiKey)
         .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>("ApiKey", _ => { })
         .AddKeycloakWebApi(builder.Configuration);
     builder.Services.AddAuthorizationBuilder()

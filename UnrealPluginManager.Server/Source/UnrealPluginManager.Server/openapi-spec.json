@@ -836,6 +836,36 @@
           }
         }
       }
+    },
+    "/users/active": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "getActiveUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOverview"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOverview"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOverview"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1292,6 +1322,30 @@
         },
         "additionalProperties": false,
         "description": "Represents metadata and file-related information for a resource."
+      },
+      "UserOverview": {
+        "required": [
+          "email",
+          "id",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "profilePicture": {
+            "$ref": "#/components/schemas/ResourceInfo"
+          }
+        },
+        "additionalProperties": false
       },
       "VersionDetails": {
         "allOf": [

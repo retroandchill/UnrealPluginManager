@@ -11,6 +11,8 @@ namespace UnrealPluginManager.Core.Mappers;
 /// </summary>
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class UserMapper {
+  
+  public static partial UserOverview ToUserOverview(this User user);
 
   /// <summary>
   /// Maps an <see cref="ApiKeyDetails"/> object to an <see cref="ApiKeyOverview"/> object.
@@ -30,6 +32,8 @@ public static partial class UserMapper {
   private static PluginIdentifiers GetPluginIdentifiers(Plugin plugin) {
     return new PluginIdentifiers(plugin.Id, plugin.Name);
   }
+  
+  public static partial IQueryable<UserOverview> ToUserOverviewQuery(this IQueryable<User> query);
 
   /// <summary>
   /// Maps an <see cref="IQueryable{ApiKey}"/> to an <see cref="IQueryable{ApiKeyDetails}"/> query, enabling the transformation of entities
