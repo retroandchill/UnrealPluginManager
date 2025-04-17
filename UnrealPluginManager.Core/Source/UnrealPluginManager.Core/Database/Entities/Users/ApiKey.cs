@@ -21,6 +21,8 @@ public class ApiKey {
   /// </remarks>
   [Key]
   public Guid Id { get; set; } = Guid.CreateVersion7();
+  
+  public required string DisplayName { get; set; }
 
   /// <summary>
   /// Gets or sets the user associated with the API key.
@@ -43,14 +45,27 @@ public class ApiKey {
   public Guid UserId { get; set; }
 
   /// <summary>
-  /// Gets or sets the value of the API key itself, used for authentication and authorization purposes.
+  /// Gets or sets the private component of the API key used for authentication.
   /// </summary>
   /// <remarks>
-  /// This property stores the actual API key string associated with the entity, which is utilized to validate access to system resources.
-  /// It must be provided during creation and is required for all API key operations.
+  /// The private component is a required string with a maximum length of 255 characters.
+  /// It is securely stored and handled, forming part of the mechanism to validate API keys.
+  /// This property works in conjunction with the public component and salt to ensure
+  /// the security and uniqueness of the API key.
   /// </remarks>
   [MaxLength(255)]
-  public required string Key { get; set; }
+  public required string PrivateComponent { get; set; }
+
+  /// <summary>
+  /// Gets or sets the cryptographic salt associated with the API key's private component.
+  /// </summary>
+  /// <remarks>
+  /// The salt is a unique string used to add an additional layer of security when hashing the private component of the API key.
+  /// It ensures that even if two API keys have identical private components, their hashed values will differ.
+  /// The length of the salt is limited to a maximum of 31 characters.
+  /// </remarks>
+  [MaxLength(31)]
+  public required string Salt { get; set; }
 
   /// <summary>
   /// Gets or sets the expiration date and time of the API key.
@@ -90,8 +105,11 @@ public class ApiKey {
         .WithMany()
         .UsingEntity<AllowedPlugin>();
 
-    entity.Property(x => x.Key)
+    entity.Property(x => x.PrivateComponent)
         .HasMaxLength(255);
+
+    entity.Property(x => x.Salt)
+        .HasMaxLength(31);
 
     entity.Property(x => x.PluginGlob)
         .HasMaxLength(255);

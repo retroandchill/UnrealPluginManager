@@ -8,6 +8,7 @@ using Retro.SimplePage.Swashbuckle;
 using Semver;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Controllers;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
@@ -39,6 +40,35 @@ public static class SwaggerExtensions {
         .AddOpenApi()
         .AddEndpointsApiExplorer()
         .AddSwaggerGen(options => {
+          options.SwaggerDoc("v1", new OpenApiInfo {
+              Title = "Unreal Plugin Manager API",
+              Version = "1.0.0"
+          });
+
+          options.AddServer(new OpenApiServer {
+              Url = "/api",
+          });
+
+          options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
+              Type = SecuritySchemeType.OAuth2,
+              Flows = new OpenApiOAuthFlows {
+                  Implicit = new OpenApiOAuthFlow {
+                      AuthorizationUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
+                          UriKind.Relative),
+                      Scopes = new Dictionary<string, string> {
+                          [AuthorizationPolicies.CanSubmitPlugin] = "User is a contributor on the given plugin and has submit privileges",
+                          [AuthorizationPolicies.CanEditPlugin] = "User is a contributor on the given plugin and has edit privileges"
+                      }
+                  }
+              }
+          });
+
+          options.AddSecurityDefinition("apiKey", new OpenApiSecurityScheme {
+              Type = SecuritySchemeType.ApiKey,
+              In = ParameterLocation.Header,
+              Name = "X-API-Key"
+          });
+
           // include API xml documentation
           options.CustomOperationIds(GetOperationIdName);
           var apiAssembly = typeof(PluginsController).Assembly;
@@ -62,6 +92,7 @@ public static class SwaggerExtensions {
           options.AddSchemaFilterInstance(new CollectionPropertyFilter());
           options.AddPagination();
           options.AddOperationFilterInstance(new SemVersionParameterFilter());
+          options.AddOperationFilterInstance(new SecurityRequirementsOperationFilter());
         });
 
     return builder;
