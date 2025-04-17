@@ -16,7 +16,8 @@ public static class GlobUtils {
   /// <param name="pattern">The glob-like pattern to test the string against.</param>
   /// <returns>A boolean value indicating whether the string matches the pattern.</returns>
   public static bool Like(this string str, string pattern) {
-    var regex = new Regex($"^{Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".")}$");
+    var regex = new Regex($"^{Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".")}$", 
+                          RegexOptions.None, TimeSpan.FromMilliseconds(100));
     return regex.IsMatch(str);
   }
 
