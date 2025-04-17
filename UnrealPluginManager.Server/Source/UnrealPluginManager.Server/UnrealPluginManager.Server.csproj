@@ -25,18 +25,29 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="JetBrains.Annotations" Version="2025.1.0-eap1"/>
+<<<<<<< HEAD
         <PackageReference Include="Keycloak.AuthServices.Authentication" Version="2.6.1"/>
         <PackageReference Include="Keycloak.AuthServices.Authorization" Version="2.6.1"/>
         <PackageReference Include="Keycloak.AuthServices.Sdk" Version="2.6.1"/>
         <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-49"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3"/>
+=======
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-50"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
+>>>>>>> main
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
             <Version>9.*-*</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="Retro.SimplePage.Requests" Version="1.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1"/>
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-50"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
+        <PackageReference Include="Keycloak.AuthServices.Authentication" Version="2.6.1"/>
+        <PackageReference Include="Keycloak.AuthServices.Authorization" Version="2.6.1"/>
+        <PackageReference Include="Keycloak.AuthServices.Sdk" Version="2.6.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1"/>
         <PackageReference Include="AutoExceptionHandler" Version="1.0.0"/>
     </ItemGroup>
 
