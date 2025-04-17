@@ -21,6 +21,8 @@ public class ApiKey {
   /// </remarks>
   [Key]
   public Guid Id { get; set; } = Guid.CreateVersion7();
+  
+  public required string DisplayName { get; set; }
 
   /// <summary>
   /// Gets or sets the user associated with the API key.

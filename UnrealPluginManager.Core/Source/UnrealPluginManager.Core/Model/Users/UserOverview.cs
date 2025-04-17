@@ -1,4 +1,5 @@
-﻿using UnrealPluginManager.Core.Model.Storage;
+﻿using System.Diagnostics.CodeAnalysis;
+using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Model.Users;
 
@@ -23,6 +24,7 @@ public class UserOverview {
   /// This property is required and typically used for communication
   /// and identification purposes.
   /// </summary>
+  [StringSyntax(StringSyntaxAttribute.Uri)]
   public required string Email { get; set; }
 
   /// <summary>

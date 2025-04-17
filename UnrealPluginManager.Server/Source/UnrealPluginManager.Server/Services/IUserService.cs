@@ -15,4 +15,12 @@ public interface IUserService {
   /// A <see cref="UserOverview"/> object that contains details of the active user.
   /// </returns>
   Task<UserOverview> GetActiveUser();
+  
+  /// <summary>
+  /// Creates a new API key for a specified user with the given API key details.
+  /// </summary>
+  /// <param name="userId">The unique identifier of the user for whom the API key is being created.</param>
+  /// <param name="apiKey">The details of the API key to be created.</param>
+  /// <returns>A string representation of the new API key, including both public and private components.</returns>
+  Task<string> CreateApiKey(Guid userId, ApiKeyOverview apiKey);
 }

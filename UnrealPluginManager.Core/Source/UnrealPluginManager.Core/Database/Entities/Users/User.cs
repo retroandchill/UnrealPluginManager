@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -59,6 +60,7 @@ public class User {
   /// for actions such as login, notifications, or account recovery.
   /// </remarks>
   [MaxLength(255)]
+  [StringSyntax(StringSyntaxAttribute.Uri)]
   public required string Email { get; set; }
 
   /// <summary>

@@ -13,6 +13,8 @@ public class ApiKeyDetails {
   /// Gets or sets the unique identifier for the API key.
   /// </summary>
   public required Guid Id { get; set; }
+  
+  public required string DisplayName { get; set; }
 
   /// <summary>
   /// Gets or sets the expiration date and time of the API key.

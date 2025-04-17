@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Swashbuckle.AspNetCore.Annotations;
 using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Model.Users;
@@ -10,7 +11,13 @@ public class ApiKeyOverview {
   /// <summary>
   /// Gets or sets the unique identifier for the API key.
   /// </summary>
-  public required Guid Id { get; set; }
+  [SwaggerSchema(ReadOnly = true)]
+  public Guid Id { get; set; } = Guid.CreateVersion7();
+
+  /// <summary>
+  /// Gets or sets the display name associated with the API key.
+  /// </summary>
+  public required string DisplayName { get; set; }
 
   /// <summary>
   /// Gets or sets the expiration date and time of the API key.

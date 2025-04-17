@@ -34,6 +34,18 @@ public static partial class UserMapper {
   public static partial ApiKeyDetails ToApiKeyDetails(this ApiKey apiKey);
 
   /// <summary>
+  /// Maps an <see cref="ApiKeyOverview"/> object to an <see cref="ApiKey"/> object while incorporating private components and a salt.
+  /// </summary>
+  /// <param name="apiKey">The <see cref="ApiKeyOverview"/> instance containing the high-level details of the API key to map from.</param>
+  /// <param name="privateComponent">The private component of the API key used for secure identification.</param>
+  /// <param name="salt">The salt value used for enhancing the security of the encoded API key.</param>
+  /// <returns>An <see cref="ApiKey"/> object containing detailed information, including mappings for private components and security-related fields.</returns>
+  [MapperIgnoreTarget(nameof(ApiKey.User))]
+  [MapperIgnoreTarget(nameof(ApiKey.UserId))]
+  [MapperIgnoreTarget(nameof(ApiKey.Plugins))]
+  public static partial ApiKey ToApiKey(this ApiKeyOverview apiKey, string privateComponent, string salt);
+
+  /// <summary>
   /// Converts a <see cref="Plugin"/> object to a <see cref="PluginIdentifiers"/> object, providing its unique identifier and name.
   /// </summary>
   /// <param name="plugin">The <see cref="Plugin"/> instance to extract identifiers from.</param>

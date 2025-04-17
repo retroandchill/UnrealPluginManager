@@ -5,4 +5,4 @@
 /// </summary>
 /// <param name="Id">The globally unique identifier (GUID) of the plugin.</param>
 /// <param name="Name">The name of the plugin.</param>
-public record struct PluginIdentifiers(Guid Id, string Name);
+public record struct PluginIdentifiers(Guid Id, string Name = "");
