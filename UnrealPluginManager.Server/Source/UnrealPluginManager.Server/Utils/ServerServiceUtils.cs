@@ -42,6 +42,11 @@ public static class ServerServiceUtils {
     });
   }
 
+  /// <summary>
+  /// Adds authentication and authorization services to the application's service collection.
+  /// </summary>
+  /// <param name="services">The <see cref="IServiceCollection"/> to which the authentication and authorization services are added.</param>
+  /// <returns>The updated <see cref="IServiceCollection"/> with the authentication and authorization services configured.</returns>
   public static IServiceCollection AddAuthServices(this IServiceCollection services) {
     return services.AddHttpContextAccessor()
         .AddSingleton<HashAlgorithm>(_ => SHA512.Create())

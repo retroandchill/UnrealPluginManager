@@ -22,7 +22,8 @@ public partial class UserService : IUserService {
     var principal = _httpContextAccessor.HttpContext?.User;
     principal.RequireNonNull();
     var claimsDict = principal.Claims.ToDictionary(x => x.Type, x => x.Value);
-    var username = principal.Identity?.Name;
+    var username = principal.Identity.RequireNonNull()
+        .Name.RequireNonNull();
     
     var existingUser = await _dataContext.Users
         .Where(x => x.Username == username)
