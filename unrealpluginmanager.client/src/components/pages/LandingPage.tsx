@@ -1,5 +1,11 @@
-﻿import {Button, Grid, Typography} from '@mui/material';
+﻿import {Grid, Typography} from '@mui/material';
+import {GradientButton} from "@/components";
 
+/**
+ * Renders the landing page showcasing the main features and options for the Unreal Plugin Manager application.
+ *
+ * @return A React component displaying the title, description, and action buttons for navigating to downloads and documentation pages.
+ */
 export function LandingPage() {
   return (
       <Grid container direction="column" spacing={2} justifyContent="center" alignItems="center">
@@ -13,16 +19,18 @@ export function LandingPage() {
         </Typography>
 
         <Grid container direction="row" spacing={2} size="grow">
-          <Button variant="contained" color="primary" component="div" style={{textTransform: 'none'}}>
+          <GradientButton variant="contained" color="primary" style={{textTransform: 'none'}} href="/downloads">
             <Typography variant="h5" component="div" sx={{marginX: '25px'}}>
               Downloads
             </Typography>
-          </Button>
-          <Button variant="contained" color="secondary" component="div" style={{textTransform: 'none'}}>
+          </GradientButton>
+          <GradientButton variant="contained" color="secondary" style={{textTransform: 'none'}}
+                          color1={{color: '#6b7ffe'}}
+                          color2={{color: '#6bc6fe'}} href="/docs">
             <Typography variant="h5" component="div" sx={{marginX: '25px'}}>
               Learn More
             </Typography>
-          </Button>
+          </GradientButton>
         </Grid>
       </Grid>
   );

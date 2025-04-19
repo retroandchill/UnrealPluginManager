@@ -1,8 +1,25 @@
-import {LandingPage} from "./components";
-import {AppBar, Button, TextField, Toolbar, Typography} from '@mui/material';
-import {createBrowserRouter} from "react-router-dom";
-import {RouterProvider} from "react-router";
-import PluginPage from "@/components/PluginPage.tsx";
+import {AppLayout, LandingPage, PluginPage, Search, SearchIconWrapper, StyledInputBase} from "./components";
+import {
+  AppBar,
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography
+} from '@mui/material';
+import {useState} from "react";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import SearchIcon from '@mui/icons-material/Search';
+import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
+import DownloadIcon from '@mui/icons-material/Download';
+import DocumentationIcon from '@mui/icons-material/Article';
+import ExtensionIcon from '@mui/icons-material/Extension';
 
 /**
  * Represents the properties required by an application.
@@ -31,36 +48,98 @@ interface AppProps {
  * integration between JavaScript and ASP.NET.
  */
 function App({routerFactory}: Readonly<AppProps>) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
   const router = routerFactory([
     {
       path: '/',
-      element: <LandingPage/>,
-    },
-    {
-      path: '/plugin/:id',
-      element: <PluginPage/>
+      element: <AppLayout/>,
+      children: [
+        {
+          path: '/',
+          element: <LandingPage/>,
+          errorElement: <LandingPage/>
+        },
+        {
+          path: '/plugin/:id',
+          element: <PluginPage/>
+        }
+      ]
     }
   ]);
 
-  return <>
-    <AppBar position="static">
-      <Toolbar style={{marginTop: '10px', marginBottom: '10px'}}>
-        <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
-          Unreal Plugin Manager
-        </Typography>
-        <TextField id="outlined-search" label="Seach plugins" type="search"
-                   style={{width: '20%', marginRight: '10px'}}/>
-        <Button variant="outlined" color="primary" style={{marginRight: '10px'}} onClick={() => {
-        }}>
-          Search
-        </Button>
-        <Button variant="contained" color="primary">Login</Button>
-      </Toolbar>
-    </AppBar>
-    <div style={{padding: '2%'}}>
-      <RouterProvider router={router}/>
-    </div>
-  </>;
+  return (
+      <>
+        <Box minHeight="100vh" display="flex" flexDirection="column">
+          <AppBar position="static" color="primary">
+            <Toolbar style={{marginTop: '10px', marginBottom: '10px'}}>
+              <Box display='flex' flexGrow={1} alignItems="center">
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{mr: 2}}
+                    onClick={() => setOpen(true)}
+                >
+                  <MenuIcon/>
+                </IconButton>
+                <Typography variant="h4" component="div" marginRight="10px">
+                  Unreal Plugin Manager
+                </Typography>
+                <Search sx={{marginX: '10px'}}>
+                  <SearchIconWrapper>
+                    <SearchIcon/>
+                  </SearchIconWrapper>
+                  <StyledInputBase
+                      placeholder="Search…"
+                      inputProps={{'aria-label': 'search'}}
+                      onChange={e => setSearch(e.target.value)}
+                      value={search}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          router.navigate(`/search?q=${search}`);
+                        }
+                      }}
+                  />
+                </Search>
+              </Box>
+              <Button variant="contained" color="primary">Login</Button>
+            </Toolbar>
+          </AppBar>
+          <RouterProvider router={router}/>
+        </Box>
+        <Drawer open={open} onClose={() => setOpen(false)}>
+          <List>
+            <ListItemButton href="/">
+              <ListItemIcon>
+                <HomeIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Home"/>
+            </ListItemButton>
+            <ListItemButton href="/downloads">
+              <ListItemIcon>
+                <DownloadIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Downloads"/>
+            </ListItemButton>
+            <ListItemButton href="/plugins">
+              <ListItemIcon>
+                <ExtensionIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Plugins"/>
+            </ListItemButton>
+            <ListItemButton href="/docs">
+              <ListItemIcon>
+                <DocumentationIcon/>
+              </ListItemIcon>
+              <ListItemText primary="Documentation"/>
+            </ListItemButton>
+          </List>
+        </Drawer>
+      </>
+  );
 }
 
 export default App;
