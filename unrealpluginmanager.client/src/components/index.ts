@@ -2,3 +2,4 @@
 export {default as PluginDisplayGrid} from "./PluginDisplayGrid.tsx";
 export {default as PluginPage} from "./PluginPage.tsx";
 export {default as PluginReadmeDisplay} from "./PluginReadmeDisplay.tsx";
+export * from './pages';

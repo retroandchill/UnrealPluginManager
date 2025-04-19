@@ -1,10 +1,5 @@
-import {PluginDisplayGrid} from "./components";
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import {LandingPage} from "./components";
+import {AppBar, Button, TextField, Toolbar, Typography} from '@mui/material';
 import {createBrowserRouter} from "react-router-dom";
 import {RouterProvider} from "react-router";
 import PluginPage from "@/components/PluginPage.tsx";
@@ -39,7 +34,7 @@ function App({routerFactory}: Readonly<AppProps>) {
   const router = routerFactory([
     {
       path: '/',
-        element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.pluginId}`)}/>
+      element: <LandingPage/>,
     },
     {
       path: '/plugin/:id',
@@ -47,28 +42,25 @@ function App({routerFactory}: Readonly<AppProps>) {
     }
   ]);
 
-  return <div>
+  return <>
     <AppBar position="static">
-      <Toolbar>
-        <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{mr: 2}}
-        >
-          <MenuIcon/>
-        </IconButton>
+      <Toolbar style={{marginTop: '10px', marginBottom: '10px'}}>
         <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
           Unreal Plugin Manager
         </Typography>
-        <Button color="inherit">Login</Button>
+        <TextField id="outlined-search" label="Seach plugins" type="search"
+                   style={{width: '20%', marginRight: '10px'}}/>
+        <Button variant="outlined" color="primary" style={{marginRight: '10px'}} onClick={() => {
+        }}>
+          Search
+        </Button>
+        <Button variant="contained" color="primary">Login</Button>
       </Toolbar>
     </AppBar>
     <div style={{padding: '2%'}}>
       <RouterProvider router={router}/>
     </div>
-  </div>;
+  </>;
 }
 
 export default App;
