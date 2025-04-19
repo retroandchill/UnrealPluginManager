@@ -1,19 +1,13 @@
-import {
-  PluginDisplayGrid
-} from "./components";
+import {PluginDisplayGrid} from "./components";
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
 import {createBrowserRouter} from "react-router-dom";
+import {RouterProvider} from "react-router";
 import PluginPage from "@/components/PluginPage.tsx";
-import AppTheme from "@/components/theme/AppTheme";
-import {CssBaseline, Divider} from '@mui/material';
-import AppAppBar from "@/components/AppAppBar.tsx";
-import Hero from "@/components/Hero.tsx";
-import LogoCollection from "@/components/LogoCollection.tsx";
-import Features from "@/components/Features.tsx";
-import Testimonials from "@/components/Testimonials.tsx";
-import Highlights from "@/components/Highlights.tsx";
-import Pricing from "@/components/Pricing.tsx";
-import FAQ from "@/components/FAQ.tsx";
-import Footer from "@/components/Footer.tsx";
 
 /**
  * Represents the properties required by an application.
@@ -33,8 +27,6 @@ interface AppProps {
    * the application using the React Router architecture.
    */
   routerFactory: typeof createBrowserRouter;
-
-  disableCustomTheme?: boolean;
 }
 
 /**
@@ -43,7 +35,7 @@ interface AppProps {
  * The component communicates with an ASP.NET backend and showcases an example
  * integration between JavaScript and ASP.NET.
  */
-function App({routerFactory, ...props}: Readonly<AppProps>) {
+function App({routerFactory}: Readonly<AppProps>) {
   const router = routerFactory([
     {
       path: '/',
@@ -55,28 +47,28 @@ function App({routerFactory, ...props}: Readonly<AppProps>) {
     }
   ]);
 
-  return (
-      <AppTheme {...props}>
-        <CssBaseline enableColorScheme/>
-
-        <AppAppBar/>
-        <Hero/>
-        <div>
-          <LogoCollection/>
-          <Features/>
-          <Divider/>
-          <Testimonials/>
-          <Divider/>
-          <Highlights/>
-          <Divider/>
-          <Pricing/>
-          <Divider/>
-          <FAQ/>
-          <Divider/>
-          <Footer/>
-        </div>
-      </AppTheme>
-  );
+  return <div>
+    <AppBar position="static">
+      <Toolbar>
+        <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{mr: 2}}
+        >
+          <MenuIcon/>
+        </IconButton>
+        <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
+          Unreal Plugin Manager
+        </Typography>
+        <Button color="inherit">Login</Button>
+      </Toolbar>
+    </AppBar>
+    <div style={{padding: '2%'}}>
+      <RouterProvider router={router}/>
+    </div>
+  </div>;
 }
 
 export default App;
