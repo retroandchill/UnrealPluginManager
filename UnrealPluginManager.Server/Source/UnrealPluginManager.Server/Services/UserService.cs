@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
-using LanguageExt;
+using Keycloak.AuthServices.Sdk;
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Users;
@@ -8,7 +7,7 @@ using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Server.Auth;
+using UnrealPluginManager.Server.Clients;
 
 namespace UnrealPluginManager.Server.Services;
 
@@ -18,9 +17,10 @@ namespace UnrealPluginManager.Server.Services;
 /// </summary>
 [AutoConstructor]
 public partial class UserService : IUserService {
+  private const string RealmName = "unreal-plugin-manager";
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly UnrealPluginManagerContext _dataContext;
-  private readonly IPasswordEncoder _passwordEncoder;
+  private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
 
   /// <inheritdoc />
   public async Task<UserOverview> GetActiveUser() {
@@ -72,18 +72,21 @@ public partial class UserService : IUserService {
       throw new BadArgumentException("Api key cannot specify duplicate allowed plugins.");
     }
     
-    if (!await _dataContext.Users.AnyAsync(x => x.Id == userId)) {
+    var username = await _dataContext.Users
+        .Where(x => x.Id == userId)
+        .Select(x => x.Username)
+        .SingleOrDefaultAsync();
+    if (username is null) {
       throw new ContentNotFoundException("User not found.");
     }
     
-    var rng = RandomNumberGenerator.Create();
-    var privateComponentBytes = new byte[16];
-    rng.GetBytes(privateComponentBytes);
-    var privateComponent = Convert.ToBase64String(privateComponentBytes);
-    
-    var (encodedPrivateComponent, salt) = _passwordEncoder.EncodeAndSalt(privateComponent);
-    var newApiKey = apiKey.ToApiKey(encodedPrivateComponent, salt);
-    newApiKey.UserId = userId;
+    CreatedApiKey createdKey;
+    try {
+      createdKey = await _keycloakApiKeyClient.CreateNewApiKey(RealmName, username, apiKey.ExpiresAt);
+    } catch (KeycloakHttpClientException ex) {
+      throw new ForeignApiException(ex.StatusCode, "Error creating Api Key", ex);
+    }
+    var newApiKey = apiKey.ToApiKey(createdKey.Id);
     _dataContext.ApiKeys.Add(newApiKey);
 
     if (apiKey.AllowedPlugins.Count > 0) {
@@ -104,7 +107,6 @@ public partial class UserService : IUserService {
 
     await _dataContext.SaveChangesAsync();
 
-    var publicComponent = Convert.ToBase64String(newApiKey.Id.ToByteArray());
-    return $"{publicComponent}-{privateComponent}";
+    return createdKey.ApiKey;
   }
 }

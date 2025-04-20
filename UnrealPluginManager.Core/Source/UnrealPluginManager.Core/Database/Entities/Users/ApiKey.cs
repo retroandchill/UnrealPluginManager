@@ -21,7 +21,25 @@ public class ApiKey {
   /// </remarks>
   [Key]
   public Guid Id { get; set; } = Guid.CreateVersion7();
-  
+
+  /// <summary>
+  /// Gets or sets the external identifier associated with the API key.
+  /// </summary>
+  /// <remarks>
+  /// This identifier is used to uniquely reference the API key for external integration or lookups.
+  /// It is intended for scenarios where a globally unique, client-facing identifier is required that is separate
+  /// from the internal database identifier.
+  /// </remarks>
+  public required Guid ExternalId { get; set; }
+
+  /// <summary>
+  /// Gets or sets the display name associated with the API key.
+  /// </summary>
+  /// <remarks>
+  /// The display name is a readable and descriptive label for the API key, typically used for identification
+  /// purposes in user interfaces or logs. It is required to be specified when the API key is created.
+  /// </remarks>
+  [MaxLength(255)]
   public required string DisplayName { get; set; }
 
   /// <summary>
@@ -43,29 +61,6 @@ public class ApiKey {
   /// It is used to establish a relationship between the API key and its owning user, ensuring that each key is tied to a valid user record.
   /// </remarks>
   public Guid UserId { get; set; }
-
-  /// <summary>
-  /// Gets or sets the private component of the API key used for authentication.
-  /// </summary>
-  /// <remarks>
-  /// The private component is a required string with a maximum length of 255 characters.
-  /// It is securely stored and handled, forming part of the mechanism to validate API keys.
-  /// This property works in conjunction with the public component and salt to ensure
-  /// the security and uniqueness of the API key.
-  /// </remarks>
-  [MaxLength(255)]
-  public required string PrivateComponent { get; set; }
-
-  /// <summary>
-  /// Gets or sets the cryptographic salt associated with the API key's private component.
-  /// </summary>
-  /// <remarks>
-  /// The salt is a unique string used to add an additional layer of security when hashing the private component of the API key.
-  /// It ensures that even if two API keys have identical private components, their hashed values will differ.
-  /// The length of the salt is limited to a maximum of 31 characters.
-  /// </remarks>
-  [MaxLength(31)]
-  public required string Salt { get; set; }
 
   /// <summary>
   /// Gets or sets the expiration date and time of the API key.
@@ -104,12 +99,12 @@ public class ApiKey {
     entity.HasMany(x => x.Plugins)
         .WithMany()
         .UsingEntity<AllowedPlugin>();
-
-    entity.Property(x => x.PrivateComponent)
+    
+    entity.Property(x => x.DisplayName)
         .HasMaxLength(255);
 
-    entity.Property(x => x.Salt)
-        .HasMaxLength(31);
+    entity.HasIndex(x => x.ExternalId)
+        .IsUnique();
 
     entity.Property(x => x.PluginGlob)
         .HasMaxLength(255);

@@ -36,8 +36,6 @@ public class UserServiceTest {
     services.AddSingleton(_httpContextAccessor.Object);
 
     services.AddSingleton<IUserService, UserService>()
-        .AddSingleton<HashAlgorithm>(_ => SHA512.Create())
-        .AddSingleton<IPasswordEncoder, PasswordEncoder>()
         .AddSingleton<IApiKeyValidator, ApiKeyValidator>();
 
     _serviceProvider = services.BuildServiceProvider();

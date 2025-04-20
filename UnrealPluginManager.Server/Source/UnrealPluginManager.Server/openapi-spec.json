@@ -866,6 +866,77 @@
           }
         }
       }
+    },
+    "/users/{userId}/apiKey": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "tryCreateKey",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "expireOn",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedApiKey"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedApiKey"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedApiKey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apiKey": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "validateApiKey",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -898,6 +969,23 @@
         },
         "additionalProperties": false,
         "description": "Represents an overview of binary files for a specific platform and engine version."
+      },
+      "CreatedApiKey": {
+        "required": [
+          "apiKey",
+          "expiresOn"
+        ],
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "DependencyManifest": {
         "type": "object",
@@ -1333,19 +1421,23 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "Gets or sets the unique identifier associated with the user.\r\nThis property is required and serves as the primary key for identifying a user.",
             "format": "uuid"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Gets or sets the username associated with the user.\r\nThis property is required and uniquely identifies the user by their chosen identifier."
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "Gets or sets the email address associated with the user.\r\nThis property is required and typically used for communication\r\nand identification purposes."
           },
           "profilePicture": {
             "$ref": "#/components/schemas/ResourceInfo"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents an overview of a User entity with essential details for identification and basic user information."
       },
       "VersionDetails": {
         "allOf": [

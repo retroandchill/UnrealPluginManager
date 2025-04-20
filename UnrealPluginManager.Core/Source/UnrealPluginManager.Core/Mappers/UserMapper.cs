@@ -19,31 +19,23 @@ public static partial class UserMapper {
   public static partial UserOverview ToUserOverview(this User user);
 
   /// <summary>
-  /// Maps an <see cref="ApiKeyDetails"/> object to an <see cref="ApiKeyOverview"/> object.
+  /// Maps an <see cref="ToApiKeyOverview"/> object to an <see cref="ApiKeyOverview"/> object.
   /// </summary>
-  /// <param name="user">The <see cref="ApiKeyDetails"/> instance containing the API key's detailed information to map from.</param>
+  /// <param name="user">The <see cref="ToApiKeyOverview"/> instance containing the API key's detailed information to map from.</param>
   /// <returns>An <see cref="ApiKeyOverview"/> object containing the mapped overview of the API key.</returns>
-  public static partial ApiKeyOverview ToApiKeyOverview(this ApiKeyDetails user);
-
-  /// <summary>
-  /// Maps an <see cref="ApiKey"/> object to an <see cref="ApiKeyDetails"/> object.
-  /// </summary>
-  /// <param name="apiKey">The <see cref="ApiKey"/> instance containing the API key's detailed information to map from.</param>
-  /// <returns>An <see cref="ApiKeyDetails"/> object containing the detailed representation of the API key.</returns>
   [MapProperty(nameof(ApiKey.Plugins), nameof(ApiKeyOverview.AllowedPlugins))]
-  public static partial ApiKeyDetails ToApiKeyDetails(this ApiKey apiKey);
+  public static partial ApiKeyOverview ToApiKeyOverview(this ApiKey user);
 
   /// <summary>
-  /// Maps an <see cref="ApiKeyOverview"/> object to an <see cref="ApiKey"/> object while incorporating private components and a salt.
+  /// Maps an <see cref="ApiKeyOverview"/> object to an <see cref="ApiKey"/> object.
   /// </summary>
-  /// <param name="apiKey">The <see cref="ApiKeyOverview"/> instance containing the high-level details of the API key to map from.</param>
-  /// <param name="privateComponent">The private component of the API key used for secure identification.</param>
-  /// <param name="salt">The salt value used for enhancing the security of the encoded API key.</param>
-  /// <returns>An <see cref="ApiKey"/> object containing detailed information, including mappings for private components and security-related fields.</returns>
+  /// <param name="apiKey">The <see cref="ApiKeyOverview"/> instance providing details about the API key to be mapped.</param>
+  /// <param name="externalId">A <see cref="Guid"/> representing the external unique identifier associated with the API key.</param>
+  /// <returns>An <see cref="ApiKey"/> object containing detailed information derived from the overview.</returns>
   [MapperIgnoreTarget(nameof(ApiKey.User))]
   [MapperIgnoreTarget(nameof(ApiKey.UserId))]
   [MapperIgnoreTarget(nameof(ApiKey.Plugins))]
-  public static partial ApiKey ToApiKey(this ApiKeyOverview apiKey, string privateComponent, string salt);
+  public static partial ApiKey ToApiKey(this ApiKeyOverview apiKey, Guid externalId);
 
   /// <summary>
   /// Converts a <see cref="Plugin"/> object to a <see cref="PluginIdentifiers"/> object, providing its unique identifier and name.
@@ -62,11 +54,10 @@ public static partial class UserMapper {
   public static partial IQueryable<UserOverview> ToUserOverviewQuery(this IQueryable<User> query);
 
   /// <summary>
-  /// Maps an <see cref="IQueryable{ApiKey}"/> to an <see cref="IQueryable{ApiKeyDetails}"/> query, enabling the transformation of entities
-  /// into a detailed model object representing API key information.
+  /// Projects a queryable collection of <see cref="ApiKey"/> entities to a queryable collection of <see cref="ApiKeyOverview"/> models.
   /// </summary>
-  /// <param name="query">The queryable collection of <see cref="ApiKey"/> instances to be mapped to <see cref="ApiKeyDetails"/>.</param>
-  /// <returns>An <see cref="IQueryable{ApiKeyDetails}"/> query representing the mapped data of API keys in detailed model form.</returns>
-  public static partial IQueryable<ApiKeyDetails> ToApiKeyDetailsQuery(this IQueryable<ApiKey> query);
+  /// <param name="query">The <see cref="IQueryable{T}"/> of <see cref="ApiKey"/> to project from.</param>
+  /// <returns>An <see cref="IQueryable{T}"/> of <see cref="ApiKeyOverview"/> objects representing the projected data.</returns>
+  public static partial IQueryable<ApiKeyOverview> ToApiKeyOverviewQuery(this IQueryable<ApiKey> query);
 
 }
