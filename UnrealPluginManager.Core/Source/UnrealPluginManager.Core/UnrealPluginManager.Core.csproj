@@ -34,9 +34,9 @@
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1" />
         <PackageReference Include="System.CodeDom" Version="9.0.4"/>
         <PackageReference Include="System.Linq.Async" Version="6.0.1"/>
-        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.13"/>
+        <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.14"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.3"/>
-        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.13"/>
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.14"/>
     </ItemGroup>
 
 </Project>
