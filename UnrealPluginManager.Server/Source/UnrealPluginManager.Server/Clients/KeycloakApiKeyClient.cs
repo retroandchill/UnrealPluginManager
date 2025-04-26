@@ -1,7 +1,10 @@
-﻿using System.Text.Encodings.Web;
-using UnrealPluginManager.Core.Model.Users;
+﻿using System.Net.Mime;
+using System.Text;
+using System.Text.Json;
 using Keycloak.AuthServices.Sdk;
-using static System.Web.HttpUtility;
+using UnrealPluginManager.Core.Model.Users;
+using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Server.Clients;
 
@@ -11,19 +14,32 @@ namespace UnrealPluginManager.Server.Clients;
 [AutoConstructor]
 public partial class KeycloakApiKeyClient : IKeycloakApiKeyClient {
   private readonly HttpClient _httpClient;
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public async Task<Guid> CheckApiKey(string realm, string apiKey) {
-    var path = $"realms/{realm}/api-keys?apiKey={UrlEncode(apiKey)}";
-    var response = await _httpClient.GetAsync(path);
+    var path = $"realms/{realm}/api-keys";
+    var request = new HttpRequestMessage(HttpMethod.Get, path);
+    request.Headers.Add("ApiKey", apiKey);
+
+    var response = await _httpClient.SendAsync(request);
     return await response.GetResponseAsync<Guid>();
   }
 
   /// <inheritdoc />
   public async Task<CreatedApiKey> CreateNewApiKey(string realm, string username, DateTimeOffset expireOn) {
     var expireTime = expireOn.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK");
-    var path = $"realms/{realm}/api-keys?userId={UrlEncode(username)}&expiresOn={UrlEncode(expireTime)}";
-    var response = await _httpClient.PostAsync(path, null);
-    return (await response.GetResponseAsync<CreatedApiKey>())!;
+    var payload = new {
+        UserId = username,
+        ExpiresOn = expireTime,
+    };
+
+    var content = new StringContent(_jsonService.Serialize(payload), Encoding.UTF8,
+        MediaTypeNames.Application.Json);
+
+    var path = $"realms/{realm}/api-keys";
+    var response = await _httpClient.PostAsync(path, content);
+    return (await response.GetResponseAsync<CreatedApiKey>())
+        .RequireNonNull(() => new JsonException("Returned null from Keycloak API."));
   }
 }
