@@ -31,3 +31,8 @@ export const theme: ThemeOptions = {
     borderRadius: 4,
   }
 };
+
+export const linkStyle = {
+  textDecoration: 'none',
+  '&:hover': {textDecoration: 'underline'},
+};

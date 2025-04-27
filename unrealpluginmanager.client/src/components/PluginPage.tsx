@@ -1,59 +1,117 @@
 ﻿import {useEffect, useState} from 'react';
 import {PluginVersionInfo} from "@/api";
-import {apiResourcesPath, pluginsApi} from "@/config";
-import {Box, Grid, Stack, Tab} from "@mui/material";
-import {TabContext, TabList, TabPanel} from "@mui/lab";
+import {pluginsApi} from "@/config";
+import {Box, CircularProgress, Container, Grid, Paper, Tab, Typography,} from '@mui/material';
+import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {useParams, useSearchParams} from 'react-router';
 import {PluginReadmeDisplay} from "@/components";
-import {CopyBlock, dracula} from 'react-code-blocks';
-import {getInstallCommand} from "@/util";
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import VersionsOutlinedIcon from '@mui/icons-material/StyleOutlined';
+import {PluginPageSidebar} from "@/components/PluginPageSidebar.tsx";
+import {PluginPageHeader} from "@/components/PluginPageHeader.tsx";
 
-/**
- * Renders the PluginPage component that displays plugin details including icon, name, version, and several tabs like Readme, Dependencies, and Download.
- * Fetches the latest version of a plugin based on the provided plugin ID.
- * 
- * @return The rendered PluginPage component with plugin details and tab functionality. Displays a loading indicator until the plugin data is fetched.
- */
+
 function PluginPage() {
   const [plugin, setPlugin] = useState<PluginVersionInfo>();
-
   const [searchParams, setSearchParams] = useSearchParams();
   const pluginId = useParams().id!;
-  
+
   useEffect(() => {
     pluginsApi.getLatestVersion({ pluginId: pluginId })
-        .then(p => setPlugin(p))
+        .then(p => setPlugin(p));
   }, []);
-  
-  return (plugin === undefined ? <div>Loading...</div> :
-      <Stack>
-        <Grid container spacing={3}>
-          <Grid size="auto">
-            <img src={plugin.icon ? `${apiResourcesPath}/${plugin.icon.storedFilename}` : "Icon128.png"}
-                 alt="Plugin Icon"/>
-          </Grid>
-          <Grid size="grow">
-            <h2>{plugin.friendlyName ? plugin.friendlyName : plugin.name}</h2>
-            <h4>{plugin.version}</h4>
-          </Grid>
-          <Grid size="grow">
-            <CopyBlock text={getInstallCommand(plugin)} language="none" theme={dracula} codeBlock={true}
-                       showLineNumbers={false}/>
-          </Grid>
-        </Grid>
-        <TabContext value={searchParams.get("currentTab") ?? "readme"}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <TabList onChange={(_, v) => setSearchParams({currentTab: v})} aria-label="lab API tabs example">
-              <Tab label="Readme" value="readme" />
-              <Tab label="Dependencies" value="dependencies" />
-              <Tab label="Download" value="download"/>
-            </TabList>
+
+  const tabStyle = {
+    minHeight: 64,
+    '& .MuiTab-iconWrapper': {
+      marginRight: 1
+    }
+  };
+
+  if (plugin === undefined) {
+    return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress/>
+        </Box>
+    );
+  }
+
+  return (
+      <Container maxWidth="lg">
+        <Box sx={{py: 4}}>
+          <PluginPageHeader plugin={plugin}/>
+
+          <Box sx={{mt: 4}}>
+            <TabContext value={searchParams.get("currentTab") ?? "readme"}>
+              <Paper sx={{mb: 3}}>
+                <TabList
+                    onChange={(_, v) => setSearchParams({currentTab: v})}
+                    aria-label="Plugin information tabs"
+                    sx={{
+                      borderBottom: 1,
+                      borderColor: 'divider',
+                      px: 2
+                    }}
+                >
+                  <Tab
+                      icon={<DescriptionOutlinedIcon/>}
+                      iconPosition="start"
+                      label="Readme"
+                      value="readme"
+                      sx={tabStyle}/>
+                  <Tab
+                      icon={<AccountTreeOutlinedIcon/>}
+                      iconPosition="start"
+                      label="Dependencies"
+                      value="dependencies"
+                      sx={tabStyle}/>
+                  <Tab
+                      icon={<DownloadOutlinedIcon/>}
+                      iconPosition="start"
+                      label="Download"
+                      value="download"
+                      sx={tabStyle}/>
+                  <Tab
+                      icon={<VersionsOutlinedIcon/>}
+                      iconPosition="start"
+                      label="Versions"
+                      value="versions"
+                      sx={tabStyle}/>
+                </TabList>
+              </Paper>
+
+              <Grid container spacing={3}>
+                <Grid size={{xs: 12, md: 8.5}}>
+                  <Paper elevation={2} sx={{p: 3}}>
+                    <TabPanel value="readme" sx={{p: 0}}>
+                      <PluginReadmeDisplay pluginId={pluginId} versionId={plugin.versionId}/>
+                    </TabPanel>
+                    <TabPanel value="dependencies" sx={{p: 0}}>
+                      <Typography variant="h6">Dependencies</Typography>
+                      <Typography color="text.secondary">Coming soon!</Typography>
+                    </TabPanel>
+                    <TabPanel value="download" sx={{p: 0}}>
+                      <Typography variant="h6">Download Options</Typography>
+                      <Typography color="text.secondary">Coming soon!</Typography>
+                    </TabPanel>
+                    <TabPanel value="versions" sx={{p: 0}}>
+                      <Typography variant="h6">Versions</Typography>
+                      <Typography color="text.secondary">Coming soon!</Typography>
+                    </TabPanel>
+                  </Paper>
+                </Grid>
+
+                {/* Sidebar */}
+                <Grid size={{xs: 12, md: 3.5}}>
+                  <PluginPageSidebar plugin={plugin}/>
+                </Grid>
+              </Grid>
+            </TabContext>
           </Box>
-          <TabPanel value="readme"><PluginReadmeDisplay pluginId={pluginId} versionId={plugin.versionId}/></TabPanel>
-          <TabPanel value="dependencies">Coming soon!</TabPanel>
-          <TabPanel value="download">Coming soon!</TabPanel>
-        </TabContext>
-      </Stack>
+        </Box>
+      </Container>
   );
 }
 

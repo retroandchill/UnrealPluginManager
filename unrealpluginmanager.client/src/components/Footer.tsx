@@ -1,5 +1,6 @@
 ﻿import {Box, Container, Divider, Grid, IconButton, Link, Stack, Typography,} from '@mui/material';
 import {GitHub} from '@mui/icons-material';
+import {linkStyle} from "@/Theme.ts";
 
 
 export function Footer() {
@@ -58,10 +59,7 @@ export function Footer() {
                         key={link.name}
                         href={link.href}
                         color="inherit"
-                        sx={{
-                          textDecoration: 'none',
-                          '&:hover': {textDecoration: 'underline'},
-                        }}
+                        sx={linkStyle}
                     >
                       {link.name}
                     </Link>
@@ -80,10 +78,7 @@ export function Footer() {
                         key={link.name}
                         href={link.href}
                         color="inherit"
-                        sx={{
-                          textDecoration: 'none',
-                          '&:hover': {textDecoration: 'underline'},
-                        }}
+                        sx={linkStyle}
                     >
                       {link.name}
                     </Link>
@@ -102,10 +97,7 @@ export function Footer() {
                         key={link.name}
                         href={link.href}
                         color="inherit"
-                        sx={{
-                          textDecoration: 'none',
-                          '&:hover': {textDecoration: 'underline'},
-                        }}
+                        sx={linkStyle}
                     >
                       {link.name}
                     </Link>
