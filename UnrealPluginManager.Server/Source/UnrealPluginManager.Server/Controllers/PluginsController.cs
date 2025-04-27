@@ -12,7 +12,6 @@ using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
-using AuthenticationSchemes = UnrealPluginManager.Server.Auth.AuthenticationSchemes;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -59,7 +58,7 @@ public partial class PluginsController : ControllerBase {
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
   [ApiKey]
-  [Authorize(AuthorizationPolicies.CanSubmitPlugin, AuthenticationSchemes = AuthenticationSchemes.BearerOrApiKey)]
+  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   public async Task<PluginVersionDetails> SubmitPlugin(IFormFile submission) {
     await using var dataStream = submission.OpenReadStream();
     return await _pluginService.SubmitPlugin(dataStream);
@@ -91,7 +90,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.CanSubmitPlugin, AuthenticationSchemes = AuthenticationSchemes.BearerOrApiKey)]
+  [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   [ApiKey]
   public async Task<PluginVersionDetails> AddPlugin(IFormFile pluginFile, [FromRoute] Version engineVersion) {
     await using var stream = pluginFile.OpenReadStream();
@@ -111,9 +110,8 @@ public partial class PluginsController : ControllerBase {
   public async Task<PluginVersionInfo> GetLatestVersion([FromRoute] Guid pluginId,
                                                         [FromQuery] SemVersionRange? version = null) {
     var latest = await _pluginService.GetPluginVersionInfo(pluginId, version ?? SemVersionRange.AllRelease);
-    return latest.OrElseThrow(
-        () => new PluginNotFoundException(
-            $"Could not find plugin {pluginId} that satisfies the specified version range."));
+    return latest.OrElseThrow(() => new PluginNotFoundException(
+        $"Could not find plugin {pluginId} that satisfies the specified version range."));
   }
 
   /// <summary>
@@ -175,7 +173,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.CanEditPlugin, AuthenticationSchemes = AuthenticationSchemes.BearerOrApiKey)]
+  [Authorize(AuthorizationPolicies.CanEditPlugin)]
   [ApiKey]
   public Task<string>? AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                        [FromBody] string readme) {
@@ -193,7 +191,7 @@ public partial class PluginsController : ControllerBase {
   [Consumes(MediaTypeNames.Text.Markdown, MediaTypeNames.Application.Json)]
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-  [Authorize(AuthorizationPolicies.CanEditPlugin, AuthenticationSchemes = AuthenticationSchemes.BearerOrApiKey)]
+  [Authorize(AuthorizationPolicies.CanEditPlugin)]
   [ApiKey]
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                          [FromBody] string readme) {

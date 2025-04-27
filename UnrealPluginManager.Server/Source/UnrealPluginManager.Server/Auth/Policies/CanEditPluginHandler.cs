@@ -14,26 +14,25 @@ public class CanEditPluginRequirement : IAuthorizationRequirement;
 /// Authorization handler that determines whether a user has permission to update a plugin.
 /// </summary>
 [AutoConstructor]
-public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRequirement> {
+public partial class CanEditPluginHandler : GeneralAuthorizationHandler<CanEditPluginRequirement> {
 
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly UnrealPluginManagerContext _dbContext;
   private readonly IPluginAuthValidator _pluginAuthValidator;
 
   /// <inheritdoc />
-  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-                                                       CanEditPluginRequirement requirement) {
+  protected override async Task HandleInternal(AuthorizationHandlerContext context,
+                                               CanEditPluginRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 
-    if (httpContext == null || !httpContext.Request.HasFormContentType ||
-        context.User.Identity?.IsAuthenticated != true) {
+    if (httpContext is null || !httpContext.Request.HasFormContentType ||
+        context.User.Identity?.IsAuthenticated != true ||
+        !httpContext.Request.RouteValues.TryGetValue("pluginId", out var id) || id is not string pluginIdString) {
+      context.Fail();
       return;
     }
-
-    if (!httpContext.Request.RouteValues.TryGetValue("pluginId", out var id) || id is not Guid pluginId) {
-      return;
-    }
+    var pluginId = Guid.Parse(pluginIdString);
 
     var pluginName = await _dbContext.Plugins
         .Where(x => x.Id == pluginId)

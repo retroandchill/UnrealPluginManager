@@ -17,7 +17,7 @@ namespace UnrealPluginManager.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -287,15 +287,19 @@ namespace UnrealPluginManager.Server.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("display_name");
+
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
 
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("key");
+                    b.Property<Guid>("ExternalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("external_id");
 
                     b.Property<string>("PluginGlob")
                         .HasMaxLength(255)
@@ -308,6 +312,10 @@ namespace UnrealPluginManager.Server.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_api_keys");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_api_keys_external_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_api_keys_user_id");

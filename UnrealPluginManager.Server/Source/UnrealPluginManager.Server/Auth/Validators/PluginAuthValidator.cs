@@ -36,20 +36,23 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
     if (context.User.Identity.AuthenticationType == ApiKeyClaims.AuthenticationType) {
       if (context.User.HasClaim(c => c.Type == ApiKeyClaims.PluginGlob && pluginName.Like(c.Value)
                                      || c.Type == ApiKeyClaims.AllowedPlugins && c.Value == pluginName)) {
-        return true;
+        return await _dbContext.Plugins
+            .Where(x => x.Name == pluginName)
+            .SelectMany(x => x.Owners)
+            .AnyAsync(x => x.Username == context.User.Identity.Name);
       }
     } else {
       ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
       var validPlugin = await _dbContext.Plugins
           .Include(x => x.Owners
-                       .Where(y => y.Username == context.User.Identity.Name))
+              .Where(y => y.Username == context.User.Identity.Name))
           .Where(x => x.Name == pluginName)
           .Select(x => new {
               x.Name,
               Owners = x.Owners.Select(y => y.Username).ToList()
           })
           .FirstOrDefaultAsync();
-      if (validPlugin is null || !validPlugin.Owners.Contains(context.User.Identity.Name)) {
+      if (validPlugin is null || validPlugin.Owners.Contains(context.User.Identity.Name)) {
         return true;
       }
     }

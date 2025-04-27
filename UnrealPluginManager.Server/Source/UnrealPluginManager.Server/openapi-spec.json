@@ -866,10 +866,126 @@
           }
         }
       }
+    },
+    "/users/{userId}/api-keys": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "createApiKey",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyOverview"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyOverview"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyOverview"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/markdown": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "CallingUser"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "ApiKeyOverview": {
+        "required": [
+          "displayName",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gets or sets the unique identifier for the API key.",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Gets or sets the display name associated with the API key."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Gets or sets the expiration date and time of the API key.",
+            "format": "date-time"
+          },
+          "pluginGlob": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Gets or sets the plugin glob pattern used for defining\r\nwildcard or specific plugin matching rules.",
+            "nullable": true
+          },
+          "allowedPlugins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PluginIdentifiers"
+            },
+            "description": "Gets or sets the list of plugin identifiers explicitly allowed for this API key."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents an overview of an API key, including its details, expiry, and associated permissions."
+      },
       "BinariesOverview": {
         "required": [
           "engineVersion",
@@ -1005,6 +1121,22 @@
           }
         ],
         "description": "Represents detailed information about a plugin, including its associated versions.\r\nInherits from UnrealPluginManager.Core.Model.Plugins.PluginOverviewBase to provide core metadata."
+      },
+      "PluginIdentifiers": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The globally unique identifier (GUID) of the plugin.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the plugin."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the identifiers for a plugin, including a globally unique identifier (GUID) and its corresponding name."
       },
       "PluginOverview": {
         "allOf": [
@@ -1333,19 +1465,23 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "Gets or sets the unique identifier associated with the user.\r\nThis property is required and serves as the primary key for identifying a user.",
             "format": "uuid"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Gets or sets the username associated with the user.\r\nThis property is required and uniquely identifies the user by their chosen identifier."
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "Gets or sets the email address associated with the user.\r\nThis property is required and typically used for communication\r\nand identification purposes."
           },
           "profilePicture": {
             "$ref": "#/components/schemas/ResourceInfo"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents an overview of a User entity with essential details for identification and basic user information."
       },
       "VersionDetails": {
         "allOf": [
@@ -1409,8 +1545,9 @@
       "oauth2": {
         "type": "oauth2",
         "flows": {
-          "implicit": {
+          "authorizationCode": {
             "authorizationUrl": "/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
+            "tokenUrl": "/kc/realms/unreal-plugin-manager/protocol/openid-connect/token",
             "scopes": {
               "CanSubmitPlugin": "User is a contributor on the given plugin and has submit privileges",
               "CanEditPlugin": "User is a contributor on the given plugin and has edit privileges"
