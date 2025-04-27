@@ -15,7 +15,7 @@ namespace UnrealPluginManager.Local.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
                 {
@@ -282,15 +282,19 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("id");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("display_name");
+
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("expires_at");
 
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(255)
+                    b.Property<Guid>("ExternalId")
                         .HasColumnType("TEXT")
-                        .HasColumnName("key");
+                        .HasColumnName("external_id");
 
                     b.Property<string>("PluginGlob")
                         .HasMaxLength(255)
@@ -303,6 +307,10 @@ namespace UnrealPluginManager.Local.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_api_keys");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_api_keys_external_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_api_keys_user_id");

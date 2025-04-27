@@ -52,12 +52,16 @@ public static class SwaggerExtensions {
           options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
               Type = SecuritySchemeType.OAuth2,
               Flows = new OpenApiOAuthFlows {
-                  Implicit = new OpenApiOAuthFlow {
+                  AuthorizationCode = new OpenApiOAuthFlow {
                       AuthorizationUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
                           UriKind.Relative),
+                      TokenUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/token",
+                                         UriKind.Relative),
                       Scopes = new Dictionary<string, string> {
-                          [AuthorizationPolicies.CanSubmitPlugin] = "User is a contributor on the given plugin and has submit privileges",
-                          [AuthorizationPolicies.CanEditPlugin] = "User is a contributor on the given plugin and has edit privileges"
+                          [AuthorizationPolicies.CanSubmitPlugin] =
+                              "User is a contributor on the given plugin and has submit privileges",
+                          [AuthorizationPolicies.CanEditPlugin] =
+                              "User is a contributor on the given plugin and has edit privileges"
                       }
                   }
               }

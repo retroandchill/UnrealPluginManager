@@ -7,7 +7,6 @@
 /// The policies defined in this class are utilized to categorize and enforce access control for various operations.
 /// </remarks>
 public static class AuthorizationPolicies {
-
   /// <summary>
   /// Represents an authorization policy permitting users to submit plugins for processing.
   /// </summary>
@@ -25,4 +24,13 @@ public static class AuthorizationPolicies {
   /// Endpoints related to plugin modification require this policy to ensure only authorized users can make changes to plugin data.
   /// </remarks>
   public const string CanEditPlugin = "CanEditPlugin";
+
+  /// <summary>
+  /// Represents an authorization policy that validates and identifies the currently authenticated user.
+  /// </summary>
+  /// <remarks>
+  /// This policy ensures that API endpoints requiring user-specific authorization can verify and operate with the context of the calling user.
+  /// It is commonly applied to secure actions such as creating API keys or performing user-specific operations.
+  /// </remarks>
+  public const string CallingUser = "CallingUser";
 }

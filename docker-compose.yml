@@ -10,7 +10,7 @@ services:
       - uepm
   
   keycloak:
-    image: quay.io/keycloak/keycloak:26.1.3
+    image: retroandchill/unreal-plugin-manager-keycloak:master
     depends_on:
       - postgresql
     environment:

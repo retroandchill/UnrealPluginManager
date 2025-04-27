@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using AutoExceptionHandler.Annotations;
+using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -64,18 +65,28 @@ public partial class ServerExceptionHandler : IExceptionHandler {
     return CreateProblemDetails(httpContext, StatusCodes.Status400BadRequest, exception);
   }
 
+  [HandlesException]
+  private ProblemDetails GetForeignApiPropProblemDetails(ForeignApiException exception, HttpContext httpContext) {
+    return CreateProblemDetails(httpContext, exception.StatusCode, exception);
+  }
+
 
   [FallbackExceptionHandler]
   private ProblemDetails GetDefaultProblemDetails(Exception exception, HttpContext httpContext) {
-    return CreateProblemDetails(httpContext, StatusCodes.Status500InternalServerError, exception);
+    return CreateProblemDetails(httpContext, StatusCodes.Status500InternalServerError, 
+                                "An unexpected server error occurred", exception);
   }
 
   private ProblemDetails CreateProblemDetails(HttpContext httpContext, int statusCode, Exception exception) {
+    return CreateProblemDetails(httpContext, statusCode, exception.Message, exception);
+  }
+  
+  private ProblemDetails CreateProblemDetails(HttpContext httpContext, int statusCode, string message, Exception exception) {
     var reasonPhrase = ReasonPhrases.GetReasonPhrase(statusCode);
     var details = new ProblemDetails {
         Title = reasonPhrase,
         Status = statusCode,
-        Detail = exception.Message,
+        Detail = message,
     };
 
     if (!_env.IsDevelopment()) {

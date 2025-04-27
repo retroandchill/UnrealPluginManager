@@ -1,8 +1,10 @@
-﻿using LanguageExt;
+﻿using Keycloak.AuthServices.Sdk;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Users;
+using UnrealPluginManager.Server.Clients;
 
 namespace UnrealPluginManager.Server.Auth.ApiKey;
 
@@ -19,7 +21,7 @@ namespace UnrealPluginManager.Server.Auth.ApiKey;
 public partial class ApiKeyValidator : IApiKeyValidator {
 
   private readonly UnrealPluginManagerContext _dbContext;
-  private readonly IPasswordEncoder _passwordEncoder;
+  private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
 
   /// <inheritdoc />
   public async ValueTask<Option<ApiKeyOverview>> LookupApiKey(string? apiKey) {
@@ -27,30 +29,16 @@ public partial class ApiKeyValidator : IApiKeyValidator {
       return Option<ApiKeyOverview>.None;
     }
 
-    var splitKey = apiKey.Split('-');
-    if (splitKey.Length != 2) {
-      return Option<ApiKeyOverview>.None;
-    }
-
+    Guid externalId;
     try {
-      var keyId = new Guid(Convert.FromBase64String(splitKey[0]));
-
-      var foundKey = await _dbContext.ApiKeys
-          .Where(x => x.Id == keyId)
-          .ToApiKeyDetailsQuery()
-          .FirstOrDefaultAsync();
-      if (foundKey is null) {
-        return Option<ApiKeyOverview>.None;
-      }
-
-      if (DateTimeOffset.Now > foundKey.ExpiresAt) {
-        return Option<ApiKeyOverview>.None;
-      }
-
-      var encodedKey = _passwordEncoder.Encode(splitKey[1] + foundKey.Salt);
-      return encodedKey == foundKey.PrivateComponent ? foundKey.ToApiKeyOverview() : Option<ApiKeyOverview>.None;
-    } catch (ArgumentException) {
+      externalId = await _keycloakApiKeyClient.CheckApiKey("unreal-plugin-manager", apiKey);
+    } catch (KeycloakHttpClientException) {
       return Option<ApiKeyOverview>.None;
     }
+
+    return await _dbContext.ApiKeys
+        .Where(x => x.ExternalId == externalId)
+        .ToApiKeyOverviewQuery()
+        .SingleOrDefaultAsync();
   }
 }
