@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Model.Users;
+using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Controllers;
@@ -24,6 +25,12 @@ public partial class UsersController : ControllerBase {
   [HttpGet("active")]
   public Task<UserOverview> GetActiveUser() {
     return _userService.GetActiveUser();
+  }
+
+  [Authorize(AuthorizationPolicies.CallingUser)]
+  [HttpPost("{userId:guid}/api-keys")]
+  public Task<string> CreateApiKey([FromRoute] Guid userId, [FromBody] ApiKeyOverview apiKey) {
+    return _userService.CreateApiKey(userId, apiKey);
   }
   
 }

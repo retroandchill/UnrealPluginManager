@@ -25,4 +25,6 @@ public static class AuthorizationPolicies {
   /// Endpoints related to plugin modification require this policy to ensure only authorized users can make changes to plugin data.
   /// </remarks>
   public const string CanEditPlugin = "CanEditPlugin";
+  
+  public const string CallingUser = "CallingUser";
 }
