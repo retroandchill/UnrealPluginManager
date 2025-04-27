@@ -1,6 +1,4 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using LanguageExt.UnsafeValueAccess;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +12,7 @@ using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
+using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Tests.Services;
@@ -21,6 +20,7 @@ namespace UnrealPluginManager.Server.Tests.Services;
 public class UserServiceTest {
   private UnrealPluginManagerContext _context;
   private Mock<IHttpContextAccessor> _httpContextAccessor;
+  private Mock<IKeycloakApiKeyClient> _keycloakApiKeyClient;
   private ServiceProvider _serviceProvider;
   private IUserService _userService;
   private IApiKeyValidator _apiKeyValidator;
@@ -34,6 +34,9 @@ public class UserServiceTest {
 
     _httpContextAccessor = new Mock<IHttpContextAccessor>();
     services.AddSingleton(_httpContextAccessor.Object);
+
+    _keycloakApiKeyClient = new Mock<IKeycloakApiKeyClient>();
+    services.AddSingleton(_keycloakApiKeyClient.Object);
 
     services.AddSingleton<IUserService, UserService>()
         .AddSingleton<IApiKeyValidator, ApiKeyValidator>();
@@ -99,6 +102,7 @@ public class UserServiceTest {
 
   [Test]
   public async Task TestCreateApiKey() {
+
     var user = new User {
         Username = "TestUser",
         Email = "email@gmail.com"
@@ -106,12 +110,25 @@ public class UserServiceTest {
     _context.Users.Add(user);
     await _context.SaveChangesAsync();
 
-    var newApiKey = await _userService.CreateApiKey(user.Id, new ApiKeyOverview {
+    var apiKeyPayload = new ApiKeyOverview {
         DisplayName = "TestKey",
         ExpiresAt = DateTimeOffset.Now.AddDays(1),
         PluginGlob = "*"
-    });
+    };
 
+    var externalId = Guid.CreateVersion7();
+    _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
+            "unreal-plugin-manager", "TestUser", apiKeyPayload.ExpiresAt))
+        .ReturnsAsync(new CreatedApiKey {
+            Id = externalId,
+            ApiKey = "DummyKey",
+            ExpiresOn = apiKeyPayload.ExpiresAt
+        });
+    var newApiKey = await _userService.CreateApiKey(user.Id, apiKeyPayload);
+
+
+    _keycloakApiKeyClient.Setup(x => x.CheckApiKey("unreal-plugin-manager", "DummyKey"))
+        .ReturnsAsync(externalId);
     var foundApiKey = await _apiKeyValidator.LookupApiKey(newApiKey);
     Assert.That(foundApiKey.IsSome, Is.True);
 
@@ -162,14 +179,26 @@ public class UserServiceTest {
     _context.Plugins.Add(plugin);
     await _context.SaveChangesAsync();
 
-    var newApiKey = await _userService.CreateApiKey(user.Id, new ApiKeyOverview {
+    var apiKey = new ApiKeyOverview {
         DisplayName = "TestKey",
         ExpiresAt = DateTimeOffset.Now.AddDays(1),
         AllowedPlugins = [
             new PluginIdentifiers(plugin.Id, plugin.Name)
         ]
-    });
+    };
 
+    var externalId = Guid.CreateVersion7();
+    _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
+            "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
+        .ReturnsAsync(new CreatedApiKey {
+            Id = externalId,
+            ApiKey = "DummyKey",
+            ExpiresOn = apiKey.ExpiresAt
+        });
+    var newApiKey = await _userService.CreateApiKey(user.Id, apiKey);
+
+    _keycloakApiKeyClient.Setup(x => x.CheckApiKey("unreal-plugin-manager", "DummyKey"))
+        .ReturnsAsync(externalId);
     var foundApiKey = await _apiKeyValidator.LookupApiKey(newApiKey);
     Assert.That(foundApiKey.IsSome, Is.True);
 
@@ -180,7 +209,7 @@ public class UserServiceTest {
       Assert.That(apiKeyValue.AllowedPlugins, Has.Count.EqualTo(1));
     }
   }
-  
+
   [Test]
   public async Task TestCreateApiKeyWithInvalidPlugins() {
     var user = new User {
@@ -203,8 +232,17 @@ public class UserServiceTest {
             new PluginIdentifiers(plugin.Id, plugin.Name)
         ]
     };
+
+    var externalId = Guid.CreateVersion7();
+    _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
+            "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
+        .ReturnsAsync(new CreatedApiKey {
+            Id = externalId,
+            ApiKey = "DummyKey",
+            ExpiresOn = apiKey.ExpiresAt
+        });
     Assert.ThrowsAsync<BadArgumentException>(() => _userService.CreateApiKey(user.Id, apiKey));
-    
+
     apiKey.AllowedPlugins = [
         new PluginIdentifiers(Guid.NewGuid(), "Plugin1"),
         new PluginIdentifiers(Guid.NewGuid(), "Plugin2")
