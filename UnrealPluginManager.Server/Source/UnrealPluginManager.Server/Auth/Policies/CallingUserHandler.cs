@@ -26,13 +26,13 @@ public class CallingUserRequirement : IAuthorizationRequirement;
 /// If the conditions are not met, the requirement fails authorization.
 /// </remarks>
 [AutoConstructor]
-public partial class CallingUserHandler : AuthorizationHandler<CallingUserRequirement> {
+public partial class CallingUserHandler : GeneralAuthorizationHandler<CallingUserRequirement> {
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly UnrealPluginManagerContext _dbContext;
 
   /// <inheritdoc />
-  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-                                                       CallingUserRequirement requirement) {
+  protected override async Task HandleInternal(AuthorizationHandlerContext context,
+                                               CallingUserRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 

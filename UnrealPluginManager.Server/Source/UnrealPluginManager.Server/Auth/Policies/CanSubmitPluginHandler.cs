@@ -19,15 +19,15 @@ public class CanSubmitPluginRequirement : IAuthorizationRequirement;
 /// the presence of a valid .uplugin file in an uploaded archive, authentication method, and user claims or database entries.
 /// </summary>
 [AutoConstructor]
-public partial class CanSubmitPluginHandler : AuthorizationHandler<CanSubmitPluginRequirement> {
+public partial class CanSubmitPluginHandler : GeneralAuthorizationHandler<CanSubmitPluginRequirement> {
 
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly IPluginAuthValidator _pluginAuthValidator;
 
 
   /// <inheritdoc />
-  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-                                                       CanSubmitPluginRequirement requirement) {
+  protected override async Task HandleInternal(AuthorizationHandlerContext context,
+                                               CanSubmitPluginRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 

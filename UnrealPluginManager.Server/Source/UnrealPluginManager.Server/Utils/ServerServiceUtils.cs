@@ -3,6 +3,8 @@ using System.Text.Json;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -116,16 +118,35 @@ public static class ServerServiceUtils {
               client.TokenEndpoint = options.KeycloakTokenEndpoint;
             }
         );
-    builder.Services.AddAuthentication(AuthenticationSchemes.ApiKey)
-        .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>("ApiKey", _ => { })
+
+    const string smartScheme = "Smart";
+
+    builder.Services.AddAuthentication(options => {
+          options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+          options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddPolicyScheme(smartScheme, "Authorize JWT or API Key", options => {
+          options.ForwardDefaultSelector = context => {
+            var authHeader = context.Request.Headers.Authorization;
+            if (authHeader.ToString().StartsWith("Bearer ")) {
+              return JwtBearerDefaults.AuthenticationScheme;
+            }
+
+            return context.Request.Headers.TryGetValue(ApiKeyAuth.HeaderName, out _)
+                ? AuthenticationSchemes.ApiKey
+                : OpenIdConnectDefaults.AuthenticationScheme;
+
+          };
+        })
+        .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(AuthenticationSchemes.ApiKey, _ => { })
         .AddKeycloakWebApi(builder.Configuration);
     builder.Services.AddAuthorizationBuilder()
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
             policy.Requirements.Add(new CanSubmitPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CanEditPlugin, policy =>
             policy.Requirements.Add(new CanEditPluginRequirement()))
-        .AddPolicy(AuthorizationPolicies.CallingUser, policy => 
-                       policy.Requirements.Add(new CallingUserRequirement()));
+        .AddPolicy(AuthorizationPolicies.CallingUser, policy =>
+            policy.Requirements.Add(new CallingUserRequirement()));
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
         .AddClientCredentialsTokenHandler("Keycloak")
         .AddTypedClient<IKeycloakApiKeyClient, KeycloakApiKeyClient>();
@@ -148,16 +169,16 @@ public static class ServerServiceUtils {
   public static WebApplication Configure(this WebApplication app) {
     app.Environment.ApplicationName = Assembly.GetExecutingAssembly().GetName().Name ?? "MyApplication";
     app.UseExceptionHandler();
-    
+
     app.UseDefaultFiles();
     app.MapStaticAssets();
     app.UseHttpsRedirection();
     app.UsePathBase("/api");
     app.UseRouting();
-    
+
     app.UseAuthentication();
     app.UseAuthorization();
-    
+
     app.MapControllers();
     app.MapFallbackToFile("/index.html");
 

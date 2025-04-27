@@ -14,15 +14,15 @@ public class CanEditPluginRequirement : IAuthorizationRequirement;
 /// Authorization handler that determines whether a user has permission to update a plugin.
 /// </summary>
 [AutoConstructor]
-public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRequirement> {
+public partial class CanEditPluginHandler : GeneralAuthorizationHandler<CanEditPluginRequirement> {
 
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly UnrealPluginManagerContext _dbContext;
   private readonly IPluginAuthValidator _pluginAuthValidator;
 
   /// <inheritdoc />
-  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-                                                       CanEditPluginRequirement requirement) {
+  protected override async Task HandleInternal(AuthorizationHandlerContext context,
+                                               CanEditPluginRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 

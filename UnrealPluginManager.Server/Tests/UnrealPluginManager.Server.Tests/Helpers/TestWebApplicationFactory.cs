@@ -1,6 +1,9 @@
 ﻿using System.IO.Abstractions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
@@ -19,12 +22,15 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
         typeof(IRegistry)
     ];
 
-    builder.ConfigureServices(services => {
+    builder.ConfigureTestServices(services => {
       foreach (var service in types.SelectValid(t => services.Single(s => s.ServiceType == t))) {
         services.Remove(service);
       }
 
       services.SetUpMockDataProviders();
+
+      services.AddAuthentication("Test")
+          .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", null);
     });
 
     builder.UseEnvironment("Development");
