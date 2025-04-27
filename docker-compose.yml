@@ -10,7 +10,7 @@ services:
       - uepm
   
   keycloak:
-    image: api-key-keycloak-test
+    image: retroandchill/unreal-plugin-manager-keycloak:master
     depends_on:
       - postgresql
     environment:
