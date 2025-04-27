@@ -36,7 +36,10 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
     if (context.User.Identity.AuthenticationType == ApiKeyClaims.AuthenticationType) {
       if (context.User.HasClaim(c => c.Type == ApiKeyClaims.PluginGlob && pluginName.Like(c.Value)
                                      || c.Type == ApiKeyClaims.AllowedPlugins && c.Value == pluginName)) {
-        return true;
+        return await _dbContext.Plugins
+            .Where(x => x.Name == pluginName)
+            .SelectMany(x => x.Owners)
+            .AnyAsync(x => x.Username == context.User.Identity.Name);
       }
     } else {
       ArgumentNullException.ThrowIfNull(context.User.Identity.Name);

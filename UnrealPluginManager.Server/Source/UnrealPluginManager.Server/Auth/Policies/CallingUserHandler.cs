@@ -1,5 +1,4 @@
-﻿using LanguageExt;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using UnrealPluginManager.Core.Database;
 
@@ -30,8 +29,10 @@ public class CallingUserRequirement : IAuthorizationRequirement;
 public partial class CallingUserHandler : AuthorizationHandler<CallingUserRequirement> {
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly UnrealPluginManagerContext _dbContext;
-  
-  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CallingUserRequirement requirement) {
+
+  /// <inheritdoc />
+  protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+                                                       CallingUserRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 
@@ -40,6 +41,7 @@ public partial class CallingUserHandler : AuthorizationHandler<CallingUserRequir
       context.Fail();
       return;
     }
+
     var userId = Guid.Parse(userIdString);
 
     var username = context.User.Identity.Name;
