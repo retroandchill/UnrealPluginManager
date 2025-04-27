@@ -30,7 +30,7 @@ public partial class KeycloakApiKeyClient : IKeycloakApiKeyClient {
   public async Task<CreatedApiKey> CreateNewApiKey(string realm, string username, DateTimeOffset expireOn) {
     var expireTime = expireOn.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK");
     var payload = new {
-        UserId = username,
+        Username = username,
         ExpiresOn = expireTime,
     };
 
