@@ -179,8 +179,11 @@ public class CallingUserHandlerTest {
   [Test]
   public async Task HandleRequirementAsync_WhenRouteValueIsMissing_ShouldFail() {
     // Arrange
-    var httpContext = new DefaultHttpContext();
-    httpContext.Request.RouteValues = new RouteValueDictionary(); // Empty route values
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            RouteValues = new RouteValueDictionary() // Empty route values
+        }
+    };
     _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
 
     var identity = new GenericIdentity("testuser", "TestAuth");

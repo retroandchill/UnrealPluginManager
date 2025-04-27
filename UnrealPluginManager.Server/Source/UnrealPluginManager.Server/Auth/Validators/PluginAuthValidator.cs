@@ -45,14 +45,14 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
       ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
       var validPlugin = await _dbContext.Plugins
           .Include(x => x.Owners
-                       .Where(y => y.Username == context.User.Identity.Name))
+              .Where(y => y.Username == context.User.Identity.Name))
           .Where(x => x.Name == pluginName)
           .Select(x => new {
               x.Name,
               Owners = x.Owners.Select(y => y.Username).ToList()
           })
           .FirstOrDefaultAsync();
-      if (validPlugin is null || !validPlugin.Owners.Contains(context.User.Identity.Name)) {
+      if (validPlugin is null || validPlugin.Owners.Contains(context.User.Identity.Name)) {
         return true;
       }
     }

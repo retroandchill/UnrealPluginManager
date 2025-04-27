@@ -27,8 +27,9 @@ public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRe
     var httpContext = _httpContextAccessor.HttpContext;
 
     if (httpContext is null || !httpContext.Request.HasFormContentType ||
-        context.User.Identity?.IsAuthenticated != true || 
+        context.User.Identity?.IsAuthenticated != true ||
         !httpContext.Request.RouteValues.TryGetValue("pluginId", out var id) || id is not string pluginIdString) {
+      context.Fail();
       return;
     }
     var pluginId = Guid.Parse(pluginIdString);

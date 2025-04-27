@@ -33,6 +33,7 @@ public partial class CanSubmitPluginHandler : AuthorizationHandler<CanSubmitPlug
 
     if (httpContext == null || !httpContext.Request.HasFormContentType ||
         context.User.Identity?.IsAuthenticated != true) {
+      context.Fail();
       return;
     }
 
