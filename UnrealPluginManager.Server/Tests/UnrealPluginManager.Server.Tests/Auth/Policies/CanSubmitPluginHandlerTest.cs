@@ -1,0 +1,265 @@
+﻿using System.IO.Compression;
+using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
+using Moq;
+using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Database.Entities.Users;
+using UnrealPluginManager.Core.Tests.Database;
+using UnrealPluginManager.Server.Auth.ApiKey;
+using UnrealPluginManager.Server.Auth.Policies;
+using UnrealPluginManager.Server.Auth.Validators;
+
+namespace UnrealPluginManager.Server.Tests.Auth.Policies;
+
+public class CanSubmitPluginHandlerTest {
+  private UnrealPluginManagerContext _dbContext;
+  private ServiceProvider _serviceProvider;
+  private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+  private IAuthorizationHandler _handler;
+
+  [SetUp]
+  public void Setup() {
+    var services = new ServiceCollection();
+
+    // Set up in-memory database
+    _dbContext = new TestUnrealPluginManagerContext();
+    _dbContext.Database.EnsureCreated();
+    services.AddSingleton(_dbContext);
+
+    // Set up mocks
+    _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+    services.AddSingleton(_httpContextAccessorMock.Object);
+
+    // Register the real PluginAuthValidator
+    services.AddScoped<IPluginAuthValidator, PluginAuthValidator>();
+
+    // Register the handler
+    services.AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>();
+
+    _serviceProvider = services.BuildServiceProvider();
+    _handler = _serviceProvider.GetRequiredService<IAuthorizationHandler>();
+  }
+
+  [TearDown]
+  public void TearDown() {
+    _dbContext.Database.EnsureDeleted();
+    _dbContext.Dispose();
+    _serviceProvider.Dispose();
+  }
+
+  private static IFormFile CreatePluginZipFile(string pluginName) {
+    var memoryStream = new MemoryStream();
+    using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)) {
+      var upluginEntry = archive.CreateEntry($"{pluginName}.uplugin");
+      using var writer = new StreamWriter(upluginEntry.Open());
+      writer.Write("{}"); // Minimal valid JSON
+    }
+    memoryStream.Position = 0;
+
+    var formFile = new Mock<IFormFile>();
+    formFile.Setup(f => f.OpenReadStream()).Returns(memoryStream);
+    formFile.Setup(f => f.Length).Returns(memoryStream.Length);
+    return formFile.Object;
+  }
+
+  [Test]
+  public async Task HandleRequirementAsync_WhenUserIsPluginOwner_ShouldSucceed() {
+    // Arrange
+    const string username = "testuser";
+    const string pluginName = "TestPlugin";
+
+    var user = new User {
+        Id = Guid.NewGuid(),
+        Username = username,
+        Email = "test@example.com"
+    };
+
+    var plugin = new Plugin {
+        Id = Guid.NewGuid(),
+        Name = pluginName,
+        Owners = new List<User> {
+            user
+        }
+    };
+
+    _dbContext.Users.Add(user);
+    _dbContext.Plugins.Add(plugin);
+    await _dbContext.SaveChangesAsync();
+
+    // Create form with plugin file
+    var formFile = CreatePluginZipFile(pluginName);
+    var formCollection = new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection {
+        formFile
+    });
+
+    // Set up HTTP context
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            Form = formCollection,
+            ContentType = "multipart/form-data"
+        }
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+    // Set up claims identity
+    var identity = new GenericIdentity(username, "TestAuth");
+    var claimsPrincipal = new ClaimsPrincipal(identity);
+
+    var authContext = new AuthorizationHandlerContext(
+        [new CanSubmitPluginRequirement()],
+        claimsPrincipal,
+        null);
+
+    // Act
+    await _handler.HandleAsync(authContext);
+
+    // Assert
+    Assert.That(authContext.HasSucceeded, Is.True);
+  }
+
+  [Test]
+  public async Task HandleRequirementAsync_WithApiKeyAuthentication_ValidGlobPattern_ShouldSucceed() {
+    // Arrange
+    const string username = "testuser";
+    const string pluginName = "TestPlugin";
+
+    var user = new User {
+        Id = Guid.NewGuid(),
+        Username = username,
+        Email = "test@example.com"
+    };
+
+    var plugin = new Plugin {
+        Id = Guid.NewGuid(),
+        Name = pluginName,
+        Owners = new List<User> {
+            user
+        }
+    };
+
+    _dbContext.Users.Add(user);
+    _dbContext.Plugins.Add(plugin);
+    await _dbContext.SaveChangesAsync();
+
+    // Create form with plugin file
+    var formFile = CreatePluginZipFile(pluginName);
+    var formCollection = new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection {
+        formFile
+    });
+
+    // Set up HTTP context
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            Form = formCollection,
+            ContentType = "multipart/form-data"
+        }
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+    // Set up claims identity with API key authentication
+    var identity = new ClaimsIdentity(ApiKeyClaims.AuthenticationType);
+    identity.AddClaim(new Claim(ApiKeyClaims.PluginGlob, "Test*"));
+    identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, username));
+    var claimsPrincipal = new ClaimsPrincipal(identity);
+
+    var authContext = new AuthorizationHandlerContext(
+        [new CanSubmitPluginRequirement()],
+        claimsPrincipal,
+        null);
+
+    // Act
+    await _handler.HandleAsync(authContext);
+
+    // Assert
+    Assert.That(authContext.HasSucceeded, Is.True);
+  }
+
+  [Test]
+  public async Task HandleRequirementAsync_WithNoFormFile_ShouldNotFail() {
+    // Arrange
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            ContentType = "multipart/form-data",
+            Form = new FormCollection(new Dictionary<string, StringValues>())
+        }
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+    var identity = new GenericIdentity("testuser", "TestAuth");
+    var claimsPrincipal = new ClaimsPrincipal(identity);
+
+    var authContext = new AuthorizationHandlerContext(
+        [new CanSubmitPluginRequirement()],
+        claimsPrincipal,
+        null);
+
+    // Act
+    await _handler.HandleAsync(authContext);
+
+    // Assert
+    Assert.That(authContext.HasFailed, Is.False);
+  }
+
+  [Test]
+  public void HandleRequirementAsync_WithInvalidZipFile_ShouldNotFail() {
+    // Arrange
+    var memoryStream = new MemoryStream([1, 2, 3]); // Invalid ZIP file
+    var formFile = new Mock<IFormFile>();
+    formFile.Setup(f => f.OpenReadStream()).Returns(memoryStream);
+    formFile.Setup(f => f.Length).Returns(memoryStream.Length);
+
+    var formCollection = new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection {
+        formFile.Object
+    });
+
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            ContentType = "multipart/form-data",
+            Form = formCollection
+        }
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+    var identity = new GenericIdentity("testuser", "TestAuth");
+    var claimsPrincipal = new ClaimsPrincipal(identity);
+
+    var authContext = new AuthorizationHandlerContext(
+        [new CanSubmitPluginRequirement()],
+        claimsPrincipal,
+        null);
+
+    // Act & Assert
+    Assert.DoesNotThrowAsync(async () => await _handler.HandleAsync(authContext));
+    Assert.That(authContext.HasFailed, Is.False);
+  }
+
+  [Test]
+  public async Task HandleRequirementAsync_WhenNotAuthenticated_ShouldFail() {
+    // Arrange
+    var httpContext = new DefaultHttpContext {
+        Request = {
+            ContentType = "multipart/form-data"
+        }
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+    var identity = new GenericIdentity(""); // No authentication type
+    var claimsPrincipal = new ClaimsPrincipal(identity);
+
+    var authContext = new AuthorizationHandlerContext(
+        [new CanSubmitPluginRequirement()],
+        claimsPrincipal,
+        null);
+
+    // Act
+    await _handler.HandleAsync(authContext);
+
+    // Assert
+    Assert.That(authContext.HasFailed, Is.True);
+  }
+}

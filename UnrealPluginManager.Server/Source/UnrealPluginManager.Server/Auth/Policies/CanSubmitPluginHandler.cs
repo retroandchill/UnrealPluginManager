@@ -44,16 +44,20 @@ public partial class CanSubmitPluginHandler : AuthorizationHandler<CanSubmitPlug
 
     var file = form.Files[0];
     await using var stream = file.OpenReadStream();
-    using var zipFile = new ZipArchive(stream);
-    var upluginFile = zipFile.Entries
-        .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
-    if (upluginFile is null) {
-      return;
-    }
+    try {
+      using var zipFile = new ZipArchive(stream);
+      var upluginFile = zipFile.Entries
+          .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
+      if (upluginFile is null) {
+        return;
+      }
 
-    var pluginName = Path.GetFileNameWithoutExtension(upluginFile.FullName);
-    if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
-      context.Fail();
+      var pluginName = Path.GetFileNameWithoutExtension(upluginFile.FullName);
+      if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
+        context.Fail();
+      }
+    } catch (InvalidDataException) {
+      // Pass it through
     }
   }
 }
