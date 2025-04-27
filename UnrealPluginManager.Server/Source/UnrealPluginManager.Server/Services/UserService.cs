@@ -87,6 +87,7 @@ public partial class UserService : IUserService {
       throw new ForeignApiException(ex.StatusCode, "Error creating Api Key", ex);
     }
     var newApiKey = apiKey.ToApiKey(createdKey.Id);
+    newApiKey.UserId = userId;
     _dataContext.ApiKeys.Add(newApiKey);
 
     if (apiKey.AllowedPlugins.Count > 0) {

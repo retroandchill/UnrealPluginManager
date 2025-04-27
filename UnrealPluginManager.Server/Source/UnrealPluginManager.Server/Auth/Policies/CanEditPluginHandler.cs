@@ -26,14 +26,12 @@ public partial class CanEditPluginHandler : AuthorizationHandler<CanEditPluginRe
     using var usingEvaluation = new ContextEvaluation(context, requirement);
     var httpContext = _httpContextAccessor.HttpContext;
 
-    if (httpContext == null || !httpContext.Request.HasFormContentType ||
-        context.User.Identity?.IsAuthenticated != true) {
+    if (httpContext is null || !httpContext.Request.HasFormContentType ||
+        context.User.Identity?.IsAuthenticated != true || 
+        !httpContext.Request.RouteValues.TryGetValue("pluginId", out var id) || id is not string pluginIdString) {
       return;
     }
-
-    if (!httpContext.Request.RouteValues.TryGetValue("pluginId", out var id) || id is not Guid pluginId) {
-      return;
-    }
+    var pluginId = Guid.Parse(pluginIdString);
 
     var pluginName = await _dbContext.Plugins
         .Where(x => x.Id == pluginId)

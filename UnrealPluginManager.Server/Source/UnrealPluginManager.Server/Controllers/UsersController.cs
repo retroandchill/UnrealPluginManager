@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Server.Auth;
@@ -27,7 +28,7 @@ public partial class UsersController : ControllerBase {
     return _userService.GetActiveUser();
   }
 
-  [Authorize(AuthorizationPolicies.CallingUser)]
+  [Authorize(AuthorizationPolicies.CallingUser, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   [HttpPost("{userId:guid}/api-keys")]
   public Task<string> CreateApiKey([FromRoute] Guid userId, [FromBody] ApiKeyOverview apiKey) {
     return _userService.CreateApiKey(userId, apiKey);

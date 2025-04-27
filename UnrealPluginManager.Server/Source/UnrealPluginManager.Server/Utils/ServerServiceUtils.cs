@@ -50,7 +50,8 @@ public static class ServerServiceUtils {
         .AddScoped<IApiKeyValidator, ApiKeyValidator>()
         .AddScoped<IPluginAuthValidator, PluginAuthValidator>()
         .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>();
+        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>()
+        .AddScoped<IAuthorizationHandler, CallingUserHandler>();
   }
 
   /// <summary>
@@ -122,7 +123,9 @@ public static class ServerServiceUtils {
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
             policy.Requirements.Add(new CanSubmitPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CanEditPlugin, policy =>
-            policy.Requirements.Add(new CanEditPluginRequirement()));
+            policy.Requirements.Add(new CanEditPluginRequirement()))
+        .AddPolicy(AuthorizationPolicies.CallingUser, policy => 
+                       policy.Requirements.Add(new CallingUserRequirement()));
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
         .AddClientCredentialsTokenHandler("Keycloak")
         .AddTypedClient<IKeycloakApiKeyClient, KeycloakApiKeyClient>();
