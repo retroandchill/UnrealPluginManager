@@ -3,6 +3,8 @@ import {AppBar, Box, Button, Container, Toolbar, Typography} from '@mui/material
 import {useState} from "react";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import SearchIcon from '@mui/icons-material/Search';
+import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
+import {SearchPage} from "@/components/pages/SearchPage.tsx";
 
 /**
  * Represents the properties required by an application.
@@ -24,6 +26,8 @@ interface AppProps {
   routerFactory: typeof createBrowserRouter;
 }
 
+const queryClient = new QueryClient();
+
 /**
  * The App class is a React component that manages and displays a list of plugins.
  * It fetches the plugin data from a backend server and renders the plugins in a table.
@@ -40,8 +44,11 @@ function App({routerFactory}: Readonly<AppProps>) {
       children: [
         {
           path: '/',
-          element: <LandingPage/>,
-          errorElement: <LandingPage/>
+          element: <LandingPage/>
+        },
+        {
+          path: '/search',
+          element: <SearchPage/>
         },
         {
           path: '/plugin/:id',
@@ -52,7 +59,7 @@ function App({routerFactory}: Readonly<AppProps>) {
   ]);
 
   return (
-      <>
+      <QueryClientProvider client={queryClient}>
         <Box minHeight="100vh" display="flex" flexDirection="column">
           <AppBar position="static">
             <Container>
@@ -84,7 +91,7 @@ function App({routerFactory}: Readonly<AppProps>) {
           </AppBar>
           <RouterProvider router={router}/>
         </Box>
-      </>
+      </QueryClientProvider>
   );
 }
 

@@ -1,5 +1,4 @@
 ﻿import {pluginsApi} from "@/config";
-import {useEffect, useState} from "react";
 import Markdown from "react-markdown";
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {dracula} from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -7,6 +6,8 @@ import Typography from "@mui/material/Typography";
 import remarkGfm from 'remark-gfm'
 import {remarkAlert} from 'remark-github-blockquote-alert'
 import 'remark-github-blockquote-alert/alert.css'
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {Box, CircularProgress} from "@mui/material";
 
 
 /**
@@ -43,21 +44,24 @@ interface PluginReadmeDisplayProps {
  * @return A React component rendering the plugin's README in Markdown format or a loading message if the content is not yet available.
  */
 export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadmeDisplayProps>) {
-  const [readme, setReadme] = useState<string>()
-  const [error, setError] = useState<string>();
+  const queryClient = useQueryClient();
 
+  const readme = useQuery({
+    queryKey: ['plugins', pluginId, versionId, 'readme'],
+    queryFn: () => pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId}),
+  }, queryClient);
 
-  useEffect(() => {
-    pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId})
-        .then(r => setReadme(r))
-        .catch(() => setError("Failed to fetch plugin README."));
-  }, [pluginId, versionId]);
-
-  if (error) {
-    return <Typography color="error">{error}</Typography>;
+  if (readme.isError) {
+    return <Typography color="error">Failed to fetch plugin README.</Typography>;
   }
 
-
+  if (readme.data === undefined) {
+    return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress/>
+        </Box>
+    );
+  }
 
   return (
       <div className="markdown-container" style={{all: "revert"}}>
@@ -89,7 +93,7 @@ export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadme
             );
           }
         }}>
-          {readme}
+          {readme.data}
         </Markdown>
       </div>
   );

@@ -1,6 +1,4 @@
-﻿import {useEffect, useState} from 'react';
-import {PluginVersionInfo} from "@/api";
-import {pluginsApi} from "@/config";
+﻿import {pluginsApi} from "@/config";
 import {Box, CircularProgress, Container, Grid, Paper, Tab, Typography,} from '@mui/material';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {useParams, useSearchParams} from 'react-router';
@@ -9,17 +7,18 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VersionsOutlinedIcon from '@mui/icons-material/StyleOutlined';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 
 export function PluginPage() {
-  const [plugin, setPlugin] = useState<PluginVersionInfo>();
   const [searchParams, setSearchParams] = useSearchParams();
   const pluginId = useParams().id!;
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    pluginsApi.getLatestVersion({ pluginId: pluginId })
-        .then(p => setPlugin(p));
-  }, []);
+  const plugin = useQuery({
+    queryKey: ['plugin', pluginId],
+    queryFn: () => pluginsApi.getLatestVersion({pluginId: pluginId})
+  }, queryClient);
 
   const tabStyle = {
     minHeight: 64,
@@ -28,7 +27,7 @@ export function PluginPage() {
     }
   };
 
-  if (plugin === undefined) {
+  if (plugin.data === undefined) {
     return (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
           <CircularProgress/>
@@ -39,7 +38,7 @@ export function PluginPage() {
   return (
       <Container maxWidth="lg">
         <Box sx={{py: 4}}>
-          <PluginPageHeader plugin={plugin}/>
+          <PluginPageHeader plugin={plugin.data}/>
 
           <Box sx={{mt: 4}}>
             <TabContext value={searchParams.get("currentTab") ?? "readme"}>
@@ -84,7 +83,7 @@ export function PluginPage() {
                 <Grid size={{xs: 12, md: 8.5}}>
                   <Paper elevation={2} sx={{p: 3}}>
                     <TabPanel value="readme" sx={{p: 0}}>
-                      <PluginReadmeDisplay pluginId={pluginId} versionId={plugin.versionId}/>
+                      <PluginReadmeDisplay pluginId={pluginId} versionId={plugin.data.versionId}/>
                     </TabPanel>
                     <TabPanel value="dependencies" sx={{p: 0}}>
                       <Typography variant="h6">Dependencies</Typography>
@@ -103,7 +102,7 @@ export function PluginPage() {
 
                 {/* Sidebar */}
                 <Grid size={{xs: 12, md: 3.5}}>
-                  <PluginPageSidebar plugin={plugin}/>
+                  <PluginPageSidebar plugin={plugin.data}/>
                 </Grid>
               </Grid>
             </TabContext>
