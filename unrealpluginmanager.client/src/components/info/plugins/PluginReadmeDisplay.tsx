@@ -42,7 +42,7 @@ interface PluginReadmeDisplayProps {
  * @param props.versionId - The specific version ID of the plugin for which the README is being fetched.
  * @return A React component rendering the plugin's README in Markdown format or a loading message if the content is not yet available.
  */
-function PluginReadmeDisplay({pluginId, versionId} : Readonly<PluginReadmeDisplayProps>) {
+export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadmeDisplayProps>) {
   const [readme, setReadme] = useState<string>()
   const [error, setError] = useState<string>();
 
@@ -94,5 +94,3 @@ function PluginReadmeDisplay({pluginId, versionId} : Readonly<PluginReadmeDispla
       </div>
   );
 }
-
-export default PluginReadmeDisplay;

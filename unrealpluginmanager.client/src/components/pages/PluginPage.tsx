@@ -4,16 +4,14 @@ import {pluginsApi} from "@/config";
 import {Box, CircularProgress, Container, Grid, Paper, Tab, Typography,} from '@mui/material';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {useParams, useSearchParams} from 'react-router';
-import {PluginReadmeDisplay} from "@/components";
+import {PluginPageHeader, PluginPageSidebar, PluginReadmeDisplay} from "@/components";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VersionsOutlinedIcon from '@mui/icons-material/StyleOutlined';
-import {PluginPageSidebar} from "@/components/PluginPageSidebar.tsx";
-import {PluginPageHeader} from "@/components/PluginPageHeader.tsx";
 
 
-function PluginPage() {
+export function PluginPage() {
   const [plugin, setPlugin] = useState<PluginVersionInfo>();
   const [searchParams, setSearchParams] = useSearchParams();
   const pluginId = useParams().id!;
@@ -114,5 +112,3 @@ function PluginPage() {
       </Container>
   );
 }
-
-export default PluginPage;

@@ -1,4 +1,4 @@
-import {AppLayout, LandingPage, PluginPage, Search, SearchIconWrapper, StyledInputBase} from "./components";
+import {AppLayout, LandingPage, PluginPage, Search, SearchIconWrapper, StyledInputBase} from "@/components";
 import {AppBar, Box, Button, Container, Toolbar, Typography} from '@mui/material';
 import {useState} from "react";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
