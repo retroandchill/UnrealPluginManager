@@ -1,11 +1,11 @@
 import React from 'react'
-import App from '@/App'
 import {mount} from 'cypress/react'
 import {Page} from "@/util";
 import {PluginVersionInfo} from "@/api";
 import {v7 as uuid7} from "uuid";
 import {pluginsApi} from "@/config/Globals";
-import {createMemoryRouter} from "react-router";
+import {createMemoryRouter, RouterProvider} from "react-router";
+import {SearchPage} from "../../src/components/pages/SearchPage";
 
 
 describe('<App />', () => {
@@ -42,12 +42,28 @@ describe('<App />', () => {
     ]
   };
 
+  const mountWithRouter = (initialPath: string) => {
+    const router = createMemoryRouter(
+        [
+          {
+            path: '/search',
+            element: <SearchPage/>,
+          },
+        ],
+        {
+          initialEntries: [initialPath],
+        }
+    );
+
+    return mount(<RouterProvider router={router}/>);
+  };
+
   beforeEach(() => {
     // Stub the API request
     cy.stub(pluginsApi, "getLatestVersions").returns(Promise.resolve(plugins));
 
-    mount(<App routerFactory={createMemoryRouter}/>);
-
+    // Mount the component with a route
+    mountWithRouter('/search?q=*plugin');
   });
 
   it('renders', () => {

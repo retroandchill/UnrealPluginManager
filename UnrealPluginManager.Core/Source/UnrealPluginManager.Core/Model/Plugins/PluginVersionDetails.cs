@@ -10,12 +10,6 @@
 /// </remarks>
 public class PluginVersionDetails : PluginVersionInfo {
   /// <summary>
-  /// Gets or sets a brief explanation or summary of the plugin version.
-  /// This provides additional context or details about the plugin functionality or purpose.
-  /// </summary>
-  public string? Description { get; set; }
-
-  /// <summary>
   /// Gets or sets the collection of binaries associated with the plugin version.
   /// This provides details about the compiled binaries, such as their configurations or associated metadata.
   /// </summary>

@@ -78,7 +78,7 @@ function App({routerFactory}: Readonly<AppProps>) {
                         onChange={e => setSearch(e.target.value)}
                         value={search}
                         onKeyDown={e => {
-                          if (e.key === 'Enter') {
+                          if (e.key === 'Enter' && search.length > 0) {
                             router.navigate(`/search?q=${search}`);
                           }
                         }}

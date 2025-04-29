@@ -46,6 +46,12 @@ public class PluginVersionInfo : IDependencyChainNode {
   public string? FriendlyName { get; set; }
 
   /// <summary>
+  /// Gets or sets a brief explanation or summary of the plugin version.
+  /// This provides additional context or details about the plugin functionality or purpose.
+  /// </summary>
+  public string? Description { get; set; }
+
+  /// <summary>
   /// Gets or sets the name of the author associated with the plugin.
   /// </summary>
   public string? AuthorName { get; set; }

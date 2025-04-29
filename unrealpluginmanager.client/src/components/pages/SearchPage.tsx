@@ -46,18 +46,20 @@ export function SearchPage({pageSize = 25}: Readonly<SearchPageProps>) {
 
   return (
       <Container maxWidth="lg">
-        {searchResult.data.items.map(plugin => <PluginSearchResultCard key={plugin.pluginId} plugin={plugin}/>)}
-        <Pagination
-            page={pageNumber}
-            count={searchResult.data.totalPages}
-            onChange={(_, v) => setSearchParams(prev => ({...prev, page: `${v}`}))}
-            renderItem={(item) => (
-                <PaginationItem
-                    component={Button}
-                    {...item}
-                />
-            )}
-        />
+        <Box marginY={2}>
+          {searchResult.data.items.map(plugin => <PluginSearchResultCard key={plugin.pluginId} plugin={plugin}/>)}
+          <Pagination
+              page={pageNumber}
+              count={searchResult.data.totalPages}
+              onChange={(_, v) => setSearchParams({q: searchTerm, page: `${v}`})}
+              renderItem={(item) => (
+                  <PaginationItem
+                      component={Button}
+                      {...item}
+                  />
+              )}
+          />
+        </Box>
       </Container>
   );
 }
