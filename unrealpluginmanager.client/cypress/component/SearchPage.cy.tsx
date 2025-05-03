@@ -8,7 +8,7 @@ import {createMemoryRouter, RouterProvider} from "react-router";
 import {SearchPage} from "@/components/pages/SearchPage";
 
 
-describe('<App />', () => {
+describe('<SearchPage />', () => {
   const plugins: Page<PluginVersionInfo> = {
     pageNumber: 1,
     pageSize: 10,

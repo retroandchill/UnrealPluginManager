@@ -1,6 +1,6 @@
 import {AppLayout, HeaderBar, LandingPage, PluginPage} from "@/components";
 import {Box} from '@mui/material';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router";
 import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {SearchPage} from "@/components/pages/SearchPage.tsx";
 
@@ -13,15 +13,7 @@ import {SearchPage} from "@/components/pages/SearchPage.tsx";
  * - `routerFactory`: The function responsible for creating the router instance. It should be of the type `createBrowserRouter` from the routing library. This function facilitates navigation and manages the application's routes.
  */
 interface AppProps {
-  /**
-   * A factory function for creating routers. This variable is assigned the `createBrowserRouter`
-   * function's type, which is used to configure and create a browser-based router for managing
-   * application routes.
-   *
-   * It provides the ability to define routes, navigation, and history handling within
-   * the application using the React Router architecture.
-   */
-  routerFactory: typeof createBrowserRouter;
+  routerType: typeof BrowserRouter;
 }
 
 const queryClient = new QueryClient();
@@ -32,34 +24,20 @@ const queryClient = new QueryClient();
  * The component communicates with an ASP.NET backend and showcases an example
  * integration between JavaScript and ASP.NET.
  */
-function App({routerFactory}: Readonly<AppProps>) {
-
-  const router = routerFactory([
-    {
-      path: '/',
-      element: <AppLayout/>,
-      children: [
-        {
-          path: '/',
-          element: <LandingPage/>
-        },
-        {
-          path: '/search',
-          element: <SearchPage/>
-        },
-        {
-          path: '/plugin/:id',
-          element: <PluginPage/>
-        }
-      ]
-    }
-  ]);
-
+function App({routerType: Router = BrowserRouter}: Readonly<AppProps>) {
   return (
       <QueryClientProvider client={queryClient}>
         <Box minHeight="100vh" display="flex" flexDirection="column">
-          <HeaderBar onSearch={search => router.navigate(`/search?q=${search}`)}/>
-          <RouterProvider router={router}/>
+          <Router>
+            <HeaderBar/>
+            <Routes>
+              <Route path="/" element={<AppLayout/>}>
+                <Route index element={<LandingPage/>}/>
+                <Route path="search" element={<SearchPage/>}/>
+                <Route path="plugin/:id" element={<PluginPage/>}/>
+              </Route>
+            </Routes>
+          </Router>
         </Box>
       </QueryClientProvider>
   );

@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import {mount} from 'cypress/react';
-import {createMemoryRouter, RouterProvider} from 'react-router-dom';
+import {createMemoryRouter, RouterProvider} from 'react-router';
 import {PluginPage} from "@/components";
 import {pluginsApi} from "@/config";
 
