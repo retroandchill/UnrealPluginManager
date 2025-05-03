@@ -1,8 +1,6 @@
-import {AppLayout, LandingPage, PluginPage, Search, SearchIconWrapper, StyledInputBase} from "@/components";
-import {AppBar, Box, Button, Container, Toolbar, Typography} from '@mui/material';
-import {useState} from "react";
+import {AppLayout, HeaderBar, LandingPage, PluginPage} from "@/components";
+import {Box} from '@mui/material';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import SearchIcon from '@mui/icons-material/Search';
 import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {SearchPage} from "@/components/pages/SearchPage.tsx";
 
@@ -35,7 +33,6 @@ const queryClient = new QueryClient();
  * integration between JavaScript and ASP.NET.
  */
 function App({routerFactory}: Readonly<AppProps>) {
-  const [search, setSearch] = useState('');
 
   const router = routerFactory([
     {
@@ -61,34 +58,7 @@ function App({routerFactory}: Readonly<AppProps>) {
   return (
       <QueryClientProvider client={queryClient}>
         <Box minHeight="100vh" display="flex" flexDirection="column">
-          <AppBar position="static">
-            <Container>
-              <Toolbar style={{marginTop: '10px', marginBottom: '10px'}}>
-                <Box display='flex' flexGrow={1} alignItems="center">
-                  <Typography variant="h4" component="div" marginRight="10px">
-                    Unreal Plugin Manager
-                  </Typography>
-                  <Search sx={{marginX: '10px'}}>
-                    <SearchIconWrapper>
-                      <SearchIcon/>
-                    </SearchIconWrapper>
-                    <StyledInputBase
-                        placeholder="Search…"
-                        inputProps={{'aria-label': 'search'}}
-                        onChange={e => setSearch(e.target.value)}
-                        value={search}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' && search.length > 0) {
-                            router.navigate(`/search?q=${search}`);
-                          }
-                        }}
-                    />
-                  </Search>
-                </Box>
-                <Button variant="contained" color="primary">Login</Button>
-              </Toolbar>
-            </Container>
-          </AppBar>
+          <HeaderBar onSearch={search => router.navigate(`/search?q=${search}`)}/>
           <RouterProvider router={router}/>
         </Box>
       </QueryClientProvider>

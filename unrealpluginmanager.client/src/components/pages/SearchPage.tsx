@@ -18,7 +18,7 @@ export function SearchPage({pageSize = 25}: Readonly<SearchPageProps>) {
   const searchResult = useQuery({
     queryKey: ['search', searchTerm, pageNumber],
     queryFn: () => pluginsApi.getLatestVersions({
-      match: `${searchTerm}*`,
+      match: `${searchTerm}`,
       page: pageNumber,
       size: pageSize
     })

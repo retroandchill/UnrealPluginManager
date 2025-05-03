@@ -5,7 +5,7 @@ import {PluginVersionInfo} from "@/api";
 import {v7 as uuid7} from "uuid";
 import {pluginsApi} from "@/config/Globals";
 import {createMemoryRouter, RouterProvider} from "react-router";
-import {SearchPage} from "../../src/components/pages/SearchPage";
+import {SearchPage} from "@/components/pages/SearchPage";
 
 
 describe('<App />', () => {

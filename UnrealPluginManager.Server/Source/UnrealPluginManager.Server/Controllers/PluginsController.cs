@@ -43,7 +43,7 @@ public partial class PluginsController : ControllerBase {
   [HttpGet]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(Page<PluginOverview>), (int) HttpStatusCode.OK)]
-  public Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "*",
+  public Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "",
                                                [FromQuery] Pageable pageable = default) {
     return _pluginService.ListPlugins(match, pageable);
   }
@@ -74,7 +74,7 @@ public partial class PluginsController : ControllerBase {
   [HttpGet("latest")]
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(Page<PluginVersionInfo>), (int) HttpStatusCode.OK)]
-  public Task<Page<PluginVersionInfo>> GetLatestVersions([FromQuery] string match = "*",
+  public Task<Page<PluginVersionInfo>> GetLatestVersions([FromQuery] string match = "",
                                                          [FromQuery] SemVersionRange? versionRange = null,
                                                          [FromQuery] Pageable pageable = default) {
     return _pluginService.ListLatestVersions(match, versionRange ?? SemVersionRange.AllRelease, pageable);

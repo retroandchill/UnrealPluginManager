@@ -5,6 +5,7 @@ import path from 'path';
 import child_process from 'child_process';
 import {env} from 'process';
 import istanbul from 'vite-plugin-istanbul';
+import svgr from "vite-plugin-svgr";
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -45,7 +46,8 @@ const isCypress = process.env.CYPRESS === 'true';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    plugin(), 
+    plugin(),
+    svgr(),
     istanbul({
       include: 'src/**/*.{ts,tsx}',
       exclude: ['node_modules', 'test/*', 'cypress/*'],
