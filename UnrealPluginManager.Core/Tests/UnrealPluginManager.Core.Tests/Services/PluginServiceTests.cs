@@ -86,13 +86,14 @@ public class PluginServiceTests {
     await context.SaveChangesAsync();
 
     var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
-    var summaries = await pluginService.ListPlugins("*", new Pageable(1, 10));
+    var summaries = await pluginService.ListPlugins("", new Pageable(1, 10));
     Assert.That(summaries, Has.Count.EqualTo(10));
 
 
     summaries = await pluginService.ListPlugins("Plugin1", new Pageable(1, 10));
-    Assert.That(summaries, Has.Count.EqualTo(1));
-    Assert.That(summaries[0].Name, Is.EqualTo("Plugin1"));
+    Assert.That(summaries, Has.Count.EqualTo(2));
+    Assert.That(summaries[0].Name, Is.EqualTo("Plugin10"));
+    Assert.That(summaries[1].Name, Is.EqualTo("Plugin1"));
 
     summaries = await pluginService.ListPlugins("Plugin2", new Pageable(1, 10));
     Assert.That(summaries, Has.Count.EqualTo(1));
@@ -412,8 +413,8 @@ public class PluginServiceTests {
     var (pluginId, _) = await SetupTestPluginEnvironment();
     _context.ChangeTracker.Clear();
 
-    Assert.DoesNotThrowAsync(
-        async () => await pluginService.GetPluginFileData(pluginId, SemVersionRange.All, "5.5", ["Win64"]));
+    Assert.DoesNotThrowAsync(async () =>
+        await pluginService.GetPluginFileData(pluginId, SemVersionRange.All, "5.5", ["Win64"]));
     _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(
@@ -430,8 +431,7 @@ public class PluginServiceTests {
     var (pluginId, versionId) = await SetupTestPluginEnvironment();
     _context.ChangeTracker.Clear();
 
-    Assert.DoesNotThrowAsync(
-        async () => await pluginService.GetPluginFileData(pluginId, versionId));
+    Assert.DoesNotThrowAsync(async () => await pluginService.GetPluginFileData(pluginId, versionId));
     _context.ChangeTracker.Clear();
     Assert.ThrowsAsync<PluginNotFoundException>(async () =>
         await pluginService.GetPluginFileData(

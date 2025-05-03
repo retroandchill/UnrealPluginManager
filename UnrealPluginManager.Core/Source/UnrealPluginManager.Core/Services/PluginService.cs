@@ -38,7 +38,8 @@ public partial class PluginService : IPluginService {
   /// <inheritdoc/>
   public async Task<Page<PluginOverview>> ListPlugins(string matcher = "", Pageable pageable = default) {
     return await _dbContext.Plugins
-        .Where(x => x.Name.ToUpper().Contains(matcher.ToUpper()))
+        .Where(x => x.Name.ToUpper().Contains(matcher.ToUpper()) ||
+                    x.FriendlyName.ToUpper().Contains(matcher.ToUpper()))
         .Include(x => x.Versions)
         .ThenInclude(x => x.Icon)
         .OrderByDescending(x => x.Name)
@@ -52,7 +53,8 @@ public partial class PluginService : IPluginService {
     return _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Icon)
-        .Where(x => x.Parent.Name.ToUpper().Contains(pluginName.ToUpper()))
+        .Where(x => x.Parent.Name.ToUpper().Contains(pluginName.ToUpper()) ||
+                    x.Parent.FriendlyName.ToUpper().Contains(pluginName.ToUpper()))
         .WhereVersionInRange(versionRange)
         .GroupBy(x => x.ParentId)
         .Select(x => x.OrderByDescending(y => y.Major)
@@ -61,6 +63,7 @@ public partial class PluginService : IPluginService {
             .ThenByDescending(y => y.PrereleaseNumber == null)
             .ThenByDescending(y => y.PrereleaseNumber)
             .First())
+        .OrderBy(x => x.Parent.Name)
         .ToPageAsync(pageable)
         .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
