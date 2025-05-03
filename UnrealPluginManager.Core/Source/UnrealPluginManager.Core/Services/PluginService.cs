@@ -63,7 +63,6 @@ public partial class PluginService : IPluginService {
             .ThenByDescending(y => y.PrereleaseNumber == null)
             .ThenByDescending(y => y.PrereleaseNumber)
             .First())
-        .OrderBy(x => x.Parent.Name)
         .ToPageAsync(pageable)
         .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
