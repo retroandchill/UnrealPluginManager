@@ -6,6 +6,7 @@ import {v7 as uuid7} from "uuid";
 import {pluginsApi} from "@/config/Globals";
 import {createMemoryRouter, RouterProvider} from "react-router";
 import {SearchPage} from "@/components/pages/SearchPage";
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 
 describe('<SearchPage />', () => {
@@ -42,6 +43,8 @@ describe('<SearchPage />', () => {
     ]
   };
 
+  const queryClient = new QueryClient();
+
   const mountWithRouter = (initialPath: string) => {
     const router = createMemoryRouter(
         [
@@ -55,7 +58,9 @@ describe('<SearchPage />', () => {
         }
     );
 
-    return mount(<RouterProvider router={router}/>);
+    return mount(<QueryClientProvider client={queryClient}>
+      <RouterProvider router={router}/>
+    </QueryClientProvider>);
   };
 
   beforeEach(() => {
@@ -63,7 +68,7 @@ describe('<SearchPage />', () => {
     cy.stub(pluginsApi, "getLatestVersions").returns(Promise.resolve(plugins));
 
     // Mount the component with a route
-    mountWithRouter('/search?q=*plugin');
+    mountWithRouter('/search?q=plugin');
   });
 
   it('renders', () => {

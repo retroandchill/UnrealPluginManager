@@ -51,11 +51,11 @@ export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadme
     queryFn: () => pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId}),
   }, queryClient);
 
-  if (readme.isError) {
-    return <Typography color="error">Failed to fetch plugin README.</Typography>;
-  }
-
   if (readme.data === undefined) {
+    if (readme.error !== undefined) {
+      return <Typography color="error">Failed to fetch plugin README.</Typography>;
+    }
+    
     return (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
           <CircularProgress/>

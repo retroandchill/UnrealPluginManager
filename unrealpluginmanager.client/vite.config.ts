@@ -62,7 +62,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     entries: ['cypress/**/*'],
-    include: ['react-router-dom']
+    include: ['react-router']
   },
   resolve: {
     alias: {

@@ -28,9 +28,8 @@ export function PluginSearchResultCard({plugin}: Readonly<PluginSearchResultCard
                 color: 'inherit'
               }}
           >
-            <Grid container spacing={2}>
-              <Grid size={2}>
-              
+            <Grid container size={12} spacing={2}>
+              <Grid size={{xs: 4, sm: 3, md: 2}}>
                 <Box
                     component="img"
                     src={plugin.icon ? `${apiResourcesPath}/${plugin.icon.storedFilename}` : "Icon128.png"}
@@ -42,9 +41,9 @@ export function PluginSearchResultCard({plugin}: Readonly<PluginSearchResultCard
                     }}
                 />
             </Grid>
-              <Grid size={4} sx={{alignSelf: 'flex-start'}}>
+              <Grid size={{xs: 8, sm: 9, md: 4}} sx={{alignSelf: 'flex-start'}}>
                 <Typography variant="h4" gutterBottom>
-                  {plugin.friendlyName}
+                  {plugin.friendlyName ?? plugin.name}
                 </Typography>
                 <Chip
                     label={`Version ${plugin.version}`}
@@ -55,7 +54,7 @@ export function PluginSearchResultCard({plugin}: Readonly<PluginSearchResultCard
                   <strong>Author:</strong> {plugin.authorName ?? 'Unknown'}
                 </Typography>
             </Grid>
-              <Grid size={6} sx={{alignSelf: 'flex-start'}}>
+              <Grid size={{xs: 12, md: 6}} sx={{alignSelf: 'flex-start'}}>
                 <Typography variant="body2" gutterBottom>
                   {plugin.description}
                 </Typography>
