@@ -3,9 +3,9 @@ import Typography from "@mui/material/Typography";
 import remarkGfm from 'remark-gfm'
 import {remarkAlert} from 'remark-github-blockquote-alert'
 import 'remark-github-blockquote-alert/alert.css'
-import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {Box, CircularProgress} from "@mui/material";
-import {CodeRender, MarkdownBody, MarkdownLink, useApi} from "@/components";
+import {CodeRender, MarkdownBody, MarkdownLink} from "@/components";
+import {usePluginReadmeQuery} from "@/queries";
 
 
 /**
@@ -42,13 +42,7 @@ interface PluginReadmeDisplayProps {
  * @return A React component rendering the plugin's README in Markdown format or a loading message if the content is not yet available.
  */
 export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadmeDisplayProps>) {
-  const queryClient = useQueryClient();
-  const {pluginsApi} = useApi();
-
-  const readme = useQuery({
-    queryKey: ['plugins', pluginId, versionId, 'readme'],
-    queryFn: () => pluginsApi.getPluginReadme({pluginId: pluginId, versionId: versionId}),
-  }, queryClient);
+  const readme = usePluginReadmeQuery(pluginId, versionId);
 
   if (readme.data === undefined) {
     if (readme.error !== undefined) {

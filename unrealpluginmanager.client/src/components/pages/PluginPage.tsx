@@ -1,24 +1,19 @@
 ﻿import {Box, CircularProgress, Container, Grid, Paper, Tab, Typography,} from '@mui/material';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {useParams, useSearchParams} from 'react-router';
-import {PluginPageHeader, PluginPageSidebar, PluginReadmeDisplay, useApi} from "@/components";
+import {PluginPageHeader, PluginPageSidebar, PluginReadmeDisplay} from "@/components";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VersionsOutlinedIcon from '@mui/icons-material/StyleOutlined';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useLatestPluginVersionQuery} from "@/queries";
 
 
 export function PluginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const pluginId = useParams().id ?? "";
-  const queryClient = useQueryClient();
-  const {pluginsApi} = useApi();
 
-  const plugin = useQuery({
-    queryKey: ['plugin', pluginId],
-    queryFn: () => pluginsApi.getLatestVersion({pluginId: pluginId})
-  }, queryClient);
+  const plugin = useLatestPluginVersionQuery(pluginId);
 
   const tabStyle = {
     minHeight: 64,
