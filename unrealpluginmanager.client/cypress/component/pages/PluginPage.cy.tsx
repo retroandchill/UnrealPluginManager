@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import {mount} from 'cypress/react';
-import {createMemoryRouter, RouterProvider} from 'react-router-dom';
+import {createMemoryRouter, RouterProvider} from 'react-router';
+import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {PluginPage} from "@/components";
 import {pluginsApi} from "@/config";
 
@@ -23,6 +24,8 @@ describe('<PluginPage />', () => {
     cy.stub(pluginsApi, 'getPluginReadme').resolves("Readme Content");
   });
 
+  const queryClient = new QueryClient();
+
   const mountWithRouter = (initialPath: string) => {
     const router = createMemoryRouter(
         [
@@ -36,7 +39,10 @@ describe('<PluginPage />', () => {
         }
     );
 
-    return mount(<RouterProvider router={router}/>);
+    return mount(
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router}/>
+        </QueryClientProvider>);
   };
 
   it('displays a loading indicator while fetching plugin data', () => {

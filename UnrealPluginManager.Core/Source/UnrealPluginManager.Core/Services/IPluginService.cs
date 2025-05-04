@@ -19,7 +19,7 @@ public interface IPluginService {
   /// <returns>
   /// An enumerable collection of <see cref="PluginSummary"/> representing the summaries of all plugins.
   /// </returns>
-  Task<Page<PluginOverview>> ListPlugins(string matcher = "*", Pageable pageable = default);
+  Task<Page<PluginOverview>> ListPlugins(string matcher = "", Pageable pageable = default);
 
   /// <summary>
   /// Retrieves the latest versions of a specific plugin filtered by a version range and paginated settings.

@@ -13,21 +13,10 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { ResourceInfo } from './ResourceInfo';
-import {
-    ResourceInfoFromJSON,
-    ResourceInfoFromJSONTyped,
-    ResourceInfoToJSON,
-    ResourceInfoToJSONTyped,
-} from './ResourceInfo';
-import type { PluginDependency } from './PluginDependency';
-import {
-    PluginDependencyFromJSON,
-    PluginDependencyFromJSONTyped,
-    PluginDependencyToJSON,
-    PluginDependencyToJSONTyped,
-} from './PluginDependency';
+import type {ResourceInfo} from './ResourceInfo';
+import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
+import type {PluginDependency} from './PluginDependency';
+import {PluginDependencyFromJSON, PluginDependencyToJSON,} from './PluginDependency';
 
 /**
  * Represents detailed information about a specific version of a plugin.
@@ -54,6 +43,13 @@ export interface PluginVersionInfo {
      */
     friendlyName?: string | null;
     /**
+     * Gets or sets a brief explanation or summary of the plugin version.
+     * This provides additional context or details about the plugin functionality or purpose.
+     * @type {string}
+     * @memberof PluginVersionInfo
+     */
+    description?: string | null;
+  /**
      * Gets or sets the name of the author associated with the plugin.
      * @type {string}
      * @memberof PluginVersionInfo
@@ -116,6 +112,7 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
         'pluginId': json['pluginId'],
         'name': json['name'],
         'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
+      'description': json['description'] == null ? undefined : json['description'],
         'authorName': json['authorName'] == null ? undefined : json['authorName'],
         'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
         'versionId': json['versionId'],
@@ -139,6 +136,7 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
         'pluginId': value['pluginId'],
         'name': value['name'],
         'friendlyName': value['friendlyName'],
+      'description': value['description'],
         'authorName': value['authorName'],
         'authorWebsite': value['authorWebsite'],
         'versionId': value['versionId'],

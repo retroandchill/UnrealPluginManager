@@ -1309,11 +1309,6 @@
           {
             "type": "object",
             "properties": {
-              "description": {
-                "type": "string",
-                "description": "Gets or sets a brief explanation or summary of the plugin version.\r\nThis provides additional context or details about the plugin functionality or purpose.",
-                "nullable": true
-              },
               "binaries": {
                 "type": "array",
                 "items": {
@@ -1349,6 +1344,11 @@
           "friendlyName": {
             "type": "string",
             "description": "Gets or sets the user-friendly name of the plugin associated with the current version.",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Gets or sets a brief explanation or summary of the plugin version.\r\nThis provides additional context or details about the plugin functionality or purpose.",
             "nullable": true
           },
           "authorName": {

@@ -1,13 +1,15 @@
-import {PluginDisplayGrid} from "./components";
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import {createBrowserRouter} from "react-router-dom";
-import {RouterProvider} from "react-router";
-import PluginPage from "@/components/PluginPage.tsx";
+import {AppLayout, HeaderBar, LandingPage, PluginPage} from "@/components";
+import {Box} from '@mui/material';
+import {BrowserRouter, Route, Routes} from "react-router";
+import {JSX, ReactNode} from "react";
+import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
+import {SearchPage} from "@/components/pages/SearchPage.tsx";
+
+interface BaseRouterProps {
+  basename?: string;
+  children?: ReactNode;
+  window?: Window;
+}
 
 /**
  * Represents the properties required by an application.
@@ -17,17 +19,12 @@ import PluginPage from "@/components/PluginPage.tsx";
  * Properties:
  * - `routerFactory`: The function responsible for creating the router instance. It should be of the type `createBrowserRouter` from the routing library. This function facilitates navigation and manages the application's routes.
  */
-interface AppProps {
-  /**
-   * A factory function for creating routers. This variable is assigned the `createBrowserRouter`
-   * function's type, which is used to configure and create a browser-based router for managing
-   * application routes.
-   *
-   * It provides the ability to define routes, navigation, and history handling within
-   * the application using the React Router architecture.
-   */
-  routerFactory: typeof createBrowserRouter;
+interface AppProps<P extends BaseRouterProps> {
+  routerType: (props: P) => JSX.Element;
+  routerProps: P;
 }
+
+const queryClient = new QueryClient();
 
 /**
  * The App class is a React component that manages and displays a list of plugins.
@@ -35,40 +32,23 @@ interface AppProps {
  * The component communicates with an ASP.NET backend and showcases an example
  * integration between JavaScript and ASP.NET.
  */
-function App({routerFactory}: Readonly<AppProps>) {
-  const router = routerFactory([
-    {
-      path: '/',
-        element: <PluginDisplayGrid onPluginClick={(plugin) => router.navigate(`/plugin/${plugin.pluginId}`)}/>
-    },
-    {
-      path: '/plugin/:id',
-      element: <PluginPage/>
-    }
-  ]);
-
-  return <div>
-    <AppBar position="static">
-      <Toolbar>
-        <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{mr: 2}}
-        >
-          <MenuIcon/>
-        </IconButton>
-        <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
-          Unreal Plugin Manager
-        </Typography>
-        <Button color="inherit">Login</Button>
-      </Toolbar>
-    </AppBar>
-    <div style={{padding: '2%'}}>
-      <RouterProvider router={router}/>
-    </div>
-  </div>;
+function App<P extends BaseRouterProps>({routerType: Router = BrowserRouter, routerProps}: Readonly<AppProps<P>>) {
+  return (
+      <QueryClientProvider client={queryClient}>
+        <Box minHeight="100vh" display="flex" flexDirection="column">
+          <Router {...routerProps}>
+            <HeaderBar/>
+            <Routes>
+              <Route path="/" element={<AppLayout/>}>
+                <Route index element={<LandingPage/>}/>
+                <Route path="search" element={<SearchPage/>}/>
+                <Route path="plugin/:id" element={<PluginPage/>}/>
+              </Route>
+            </Routes>
+          </Router>
+        </Box>
+      </QueryClientProvider>
+  );
 }
 
 export default App;

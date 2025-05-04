@@ -26,7 +26,10 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": ["src/*"] // Setup alias for Vite's `@` pointing to `src`
-    }
+    },
+    "types": [
+      "vite-plugin-svgr/client"
+    ]
   },
   "include": [
     "src"

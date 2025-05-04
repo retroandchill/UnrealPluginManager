@@ -63,6 +63,7 @@ public static partial class PluginMapper {
   /// <returns>A <see cref="PluginVersionInfo"/> representing the provided <see cref="PluginVersion"/>.</returns>
   [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionInfo.PluginId))]
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
+  [MapProperty(nameof(PluginVersion.Parent.Description), nameof(PluginVersionInfo.Description))]
   [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
   [MapProperty(nameof(PluginVersion.Parent.AuthorName), nameof(PluginVersionInfo.AuthorName))]
   [MapProperty(nameof(PluginVersion.Parent.AuthorWebsite), nameof(PluginVersionInfo.AuthorWebsite))]
