@@ -13,21 +13,25 @@ export function LandingPage() {
 
   const features = [
     {
+      key: "easy-downloads",
       icon: <CloudDownload sx={{fontSize: 40}}/>,
       title: 'Easy Downloads',
       description: 'Download Unreal Engine packages with a single click',
     },
     {
+      key: "plugin-management",
       icon: <Extension sx={{fontSize: 40}}/>,
       title: 'Plugin Management',
       description: 'Manage all your Unreal Engine plugins in one place',
     },
     {
+      key: "fast-installation",
       icon: <Speed sx={{fontSize: 40}}/>,
       title: 'Fast Installation',
       description: 'Lightning-fast package installation and updates',
     },
     {
+      key: "secure-downloads",
       icon: <Security sx={{fontSize: 40}}/>,
       title: 'Secure Downloads',
       description: 'Verified and secure package distribution',
@@ -79,8 +83,8 @@ export function LandingPage() {
             Features
           </Typography>
           <Grid container spacing={4} sx={{mt: 4}}>
-            {features.map((feature, index) => (
-                <Grid size={{xs: 12, sm: 6, md: 3}} key={index}>
+            {features.map(feature => (
+                <Grid size={{xs: 12, sm: 6, md: 3}} key={feature.key}>
                   <Card
                       sx={{
                         height: '100%',

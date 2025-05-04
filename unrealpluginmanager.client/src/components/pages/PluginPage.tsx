@@ -12,7 +12,7 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 export function PluginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const pluginId = useParams().id!;
+  const pluginId = useParams().id ?? "";
   const queryClient = useQueryClient();
 
   const plugin = useQuery({

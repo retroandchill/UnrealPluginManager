@@ -92,8 +92,10 @@ public class PluginServiceTests {
 
     summaries = await pluginService.ListPlugins("Plugin1", new Pageable(1, 10));
     Assert.That(summaries, Has.Count.EqualTo(2));
-    Assert.That(summaries[0].Name, Is.EqualTo("Plugin10"));
-    Assert.That(summaries[1].Name, Is.EqualTo("Plugin1"));
+    Assert.Multiple(() => {
+      Assert.That(summaries[0].Name, Is.EqualTo("Plugin10"));
+      Assert.That(summaries[1].Name, Is.EqualTo("Plugin1"));
+    });
 
     summaries = await pluginService.ListPlugins("Plugin2", new Pageable(1, 10));
     Assert.That(summaries, Has.Count.EqualTo(1));

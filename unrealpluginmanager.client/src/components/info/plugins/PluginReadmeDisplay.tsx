@@ -1,13 +1,12 @@
 ﻿import {pluginsApi} from "@/config";
 import Markdown from "react-markdown";
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import {dracula} from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Typography from "@mui/material/Typography";
 import remarkGfm from 'remark-gfm'
 import {remarkAlert} from 'remark-github-blockquote-alert'
 import 'remark-github-blockquote-alert/alert.css'
 import {useQuery, useQueryClient} from "@tanstack/react-query";
-import {Box, CircularProgress, Link} from "@mui/material";
+import {Box, CircularProgress} from "@mui/material";
+import {CodeRender, MarkdownBody, MarkdownLink} from "@/components";
 
 
 /**
@@ -67,43 +66,12 @@ export function PluginReadmeDisplay({pluginId, versionId}: Readonly<PluginReadme
       <Markdown remarkPlugins={[remarkGfm, remarkAlert]}
                 components={{
                   // Customize how code blocks are rendered
-                  code: ({node, className, children, style, ref, ...props}) => {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return match ? (
-                        <SyntaxHighlighter
-                            style={dracula}
-                            language={match[1]}
-                            PreTag="div"
-                            {...props}
-                        >
-                          {String(children).trim()}
-                        </SyntaxHighlighter>
-                    ) : (
-                        <code
-                            style={{
-                              backgroundColor: "#282a36",
-                              padding: "0.2em 0.4em",
-                              borderRadius: "4px",
-                              fontSize: "0.95rem",
-                            }}
-                            {...props}
-                        >
-                          {children}
-                        </code>
-                    );
-                  },
+                  code: CodeRender,
                   // Add styling for headers using MUI Typography
                   // Style paragraphs
-                  p: ({node, ...props}) => <Typography variant="body1" paragraph {...props} />,
+                  p: MarkdownBody,
                   // Style links using MUI Link component
-                  a: ({node, href, ...props}) => (
-                      <Link
-                          href={href}
-                          color="primary"
-                          underline="hover"
-                          {...props}
-                      />
-                  ),
+                  a: MarkdownLink,
                 }}>
         {readme.data}
       </Markdown>

@@ -12,7 +12,7 @@ interface PluginPageSidebarProps {
   plugin: PluginVersionInfo;
 }
 
-export function PluginPageSidebar({plugin}: PluginPageSidebarProps) {
+export function PluginPageSidebar({plugin}: Readonly<PluginPageSidebarProps>) {
   return (
       <Card elevation={3}>
         <CardContent>

@@ -8,7 +8,7 @@ interface PluginPageHeaderProps {
   plugin: PluginVersionInfo;
 }
 
-export function PluginPageHeader({plugin}: PluginPageHeaderProps) {
+export function PluginPageHeader({plugin}: Readonly<PluginPageHeaderProps>) {
   return (
       <Card elevation={3}>
         <CardContent>
