@@ -25,20 +25,13 @@ import type {
   PluginVersionInfoPage,
 } from '../models/index';
 import {
-    DependencyManifestFromJSON,
-    DependencyManifestToJSON,
-    PluginDependencyFromJSON,
-    PluginDependencyToJSON,
-    PluginOverviewPageFromJSON,
-    PluginOverviewPageToJSON,
-    PluginSummaryFromJSON,
-    PluginSummaryToJSON,
-    PluginVersionDetailsFromJSON,
-    PluginVersionDetailsToJSON,
-    PluginVersionInfoFromJSON,
-    PluginVersionInfoToJSON,
-    PluginVersionInfoPageFromJSON,
-    PluginVersionInfoPageToJSON,
+  DependencyManifestFromJSON,
+  PluginDependencyToJSON,
+  PluginOverviewPageFromJSON,
+  PluginSummaryFromJSON,
+  PluginVersionDetailsFromJSON,
+  PluginVersionInfoFromJSON,
+  PluginVersionInfoPageFromJSON,
 } from '../models/index';
 
 export interface AddPluginRequest {
@@ -280,6 +273,11 @@ export class PluginsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
+
         const response = await this.request({
             path: `/plugins/{pluginId}/latest/{engineVersion}/download`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))),
             method: 'GET',
@@ -334,6 +332,11 @@ export class PluginsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
+
         const response = await this.request({
             path: `/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))).replace(`{${"platform"}}`, encodeURIComponent(String(requestParameters['platform']))),
             method: 'GET',
@@ -373,6 +376,11 @@ export class PluginsApi extends runtime.BaseAPI {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins/{pluginId}/{versionId}/download/source`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
@@ -429,6 +437,11 @@ export class PluginsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
+
         const response = await this.request({
             path: `/plugins/{pluginId}/{versionId}/download/{engineVersion}`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))).replace(`{${"engineVersion"}}`, encodeURIComponent(String(requestParameters['engineVersion']))),
             method: 'GET',
@@ -463,6 +476,11 @@ export class PluginsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins/dependencies/candidates`,
@@ -499,6 +517,11 @@ export class PluginsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins/{pluginId}/latest/dependencies`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))),
@@ -537,6 +560,11 @@ export class PluginsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins/{pluginId}/latest`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))),
@@ -580,6 +608,11 @@ export class PluginsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
+
         const response = await this.request({
             path: `/plugins/latest`,
             method: 'GET',
@@ -619,6 +652,11 @@ export class PluginsApi extends runtime.BaseAPI {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins/{pluginId}/{versionId}/readme`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
@@ -661,6 +699,11 @@ export class PluginsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/plugins`,

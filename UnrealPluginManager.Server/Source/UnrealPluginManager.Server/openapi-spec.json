@@ -24,7 +24,7 @@
             "description": "A wildcard string used to filtered plugins by name. Defaults to \"*\".",
             "schema": {
               "type": "string",
-              "default": "*"
+              "default": ""
             }
           },
           {
@@ -61,8 +61,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -137,7 +148,7 @@
             "description": "A wildcard string used to filter plugins by name. Defaults to \"*\".",
             "schema": {
               "type": "string",
-              "default": "*"
+              "default": ""
             }
           },
           {
@@ -183,8 +194,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{engineVersion}/submit": {
@@ -296,8 +318,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{pluginId}/latest/dependencies": {
@@ -355,8 +388,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{pluginId}/latest/{engineVersion}/download": {
@@ -427,8 +471,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{pluginId}/{versionId}/readme": {
@@ -470,8 +525,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -691,8 +757,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{pluginId}/{versionId}/download/source": {
@@ -735,8 +812,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries": {
@@ -797,8 +885,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/plugins/dependencies/candidates": {
@@ -833,8 +932,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/users/active": {
@@ -863,8 +973,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
       }
     },
     "/users/{userId}/api-keys": {

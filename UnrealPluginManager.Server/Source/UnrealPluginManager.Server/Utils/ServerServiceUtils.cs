@@ -4,7 +4,6 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -122,8 +121,8 @@ public static class ServerServiceUtils {
     const string smartScheme = "Smart";
 
     builder.Services.AddAuthentication(options => {
-          options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-          options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+          options.DefaultScheme = smartScheme;
+          options.DefaultChallengeScheme = smartScheme;
         })
         .AddPolicyScheme(smartScheme, "Authorize JWT or API Key", options => {
           options.ForwardDefaultSelector = context => {
@@ -134,7 +133,7 @@ public static class ServerServiceUtils {
 
             return context.Request.Headers.TryGetValue(ApiKeyAuth.HeaderName, out _)
                 ? AuthenticationSchemes.ApiKey
-                : OpenIdConnectDefaults.AuthenticationScheme;
+                : JwtBearerDefaults.AuthenticationScheme;
 
           };
         })

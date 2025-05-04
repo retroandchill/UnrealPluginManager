@@ -1,1 +1,2 @@
-﻿export * from './PluginQueries'
+﻿export * from './PluginQueries';
+export * from './UserQueries';

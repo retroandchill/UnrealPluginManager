@@ -2,6 +2,10 @@
 import {useCallback} from "react";
 import type {DefaultError, QueryKey} from "@tanstack/query-core";
 
+export type QueryExtraOptions<TQueryFnData = unknown,
+    TError = DefaultError,
+    TData = TQueryFnData> = Omit<Omit<UseQueryOptions<TQueryFnData, TError, TData, unknown[]>, 'queryKey'>, 'queryFn'>;
+
 interface UseQueryWithMutationOptions<TQueryFnData = unknown,
     TError = DefaultError,
     TData = TQueryFnData,
@@ -11,6 +15,10 @@ interface UseQueryWithMutationOptions<TQueryFnData = unknown,
   onMutationSuccess?: (data: TData) => void;
   onMutationError?: (error: TError) => void;
 }
+
+export type UpdatableQueryExtraOptions<TQueryFnData = unknown,
+    TError = DefaultError,
+    TData = TQueryFnData> = Omit<Omit<Omit<UseQueryWithMutationOptions<TQueryFnData, TError, TData, unknown, unknown[]>, 'queryKey'>, 'queryFn'>, 'mutationFn'>;
 
 interface UseQueryWithMutationResult<TData, TVariables, TError extends Error> extends Omit<UseQueryResult<TData>, 'data'> {
   data: TData | undefined;

@@ -17,9 +17,10 @@ interface ApiProviderProps {
 export function ApiProvider({children}: ApiProviderProps) {
   const {user, isAuthenticated} = useAuth();
 
+  const accessToken = user?.access_token;
   const apiConfig = new Configuration({
     basePath: import.meta.env.VITE_API_BASE_URL,
-    accessToken: user?.access_token
+    accessToken: accessToken ? `Bearer ${accessToken}` : undefined,
   });
 
   const apiClients = {

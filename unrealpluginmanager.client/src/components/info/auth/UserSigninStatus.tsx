@@ -1,11 +1,16 @@
 ﻿import {Avatar, Box, Button, Chip, Menu, MenuItem} from "@mui/material";
 import {useAuth} from "react-oidc-context";
 import {MouseEvent, useState} from "react";
+import {useActiveUserQuery} from "@/queries";
 
 export function UserSigninStatus() {
   const auth = useAuth();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
+
+  const currentUser = useActiveUserQuery({
+    enabled: auth.isAuthenticated,
+  });
 
   function handleLogin() {
     auth.signinRedirect();
@@ -36,8 +41,8 @@ export function UserSigninStatus() {
   return (
       <Box display="flex" alignItems="center">
         <Chip
-            avatar={<Avatar>{auth.user?.profile.name?.[0] || "U"}</Avatar>}
-            label={auth.user?.profile.name || auth.user?.profile.email || "User"}
+            avatar={<Avatar>{currentUser.data?.username[0].toUpperCase() ?? "U"}</Avatar>}
+            label={currentUser.data?.username ?? "User"}
             color="primary"
             onClick={handleMenuOpen}
             sx={{cursor: "pointer"}}
