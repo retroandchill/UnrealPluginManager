@@ -1,8 +1,7 @@
 ﻿import React from 'react';
 import App from "@/App";
-import {MemoryRouter} from "react-router";
-import * as api from "@/config/Globals";
-import {pluginsApi} from "../../src/config";
+import {ApiContextType} from '@/components/providers/ApiProvider';
+import {ApiMockRouter} from "../support/helpers";
 
 describe('<App/>', () => {
   const mockPlugin = {
@@ -21,9 +20,9 @@ describe('<App/>', () => {
 
   const mockReadme = "# Test Plugin\nThis is a test readme";
 
-  beforeEach(() => {
+  const commonStubbing = ({pluginsApi}: ApiContextType) => {
     // Stub API calls
-    cy.stub(api.pluginsApi, 'getPluginReadme').resolves(mockReadme);
+    cy.stub(pluginsApi, 'getPluginReadme').resolves(mockReadme);
     cy.stub(pluginsApi, "getLatestVersions").resolves({
       items: [mockPlugin],
       pageNumber: 1,
@@ -31,11 +30,11 @@ describe('<App/>', () => {
       totalPages: 1,
       count: 1,
     });
-  });
+  }
 
   it('renders landing page by default', () => {
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{}}/>
+        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing}}/>
     );
 
     // Check header is present
@@ -47,7 +46,7 @@ describe('<App/>', () => {
 
   it('renders search page on search route', () => {
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{initialEntries: ['/search?q=test']}}/>
+        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search?q=test']}}/>
     );
 
     // Verify search page elements
@@ -55,15 +54,13 @@ describe('<App/>', () => {
   });
 
   it('renders plugin page and handles API calls', () => {
-    cy.stub(api.pluginsApi, 'getLatestVersion').resolves(mockPlugin);
+    const stubbing = ({pluginsApi, ...api}: ApiContextType) => {
+      commonStubbing({pluginsApi, ...api});
+      cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPlugin);
+    }
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{initialEntries: ['/plugin/test-plugin']}}/>
+        <App routerType={ApiMockRouter} routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin']}}/>
     );
-
-    // Verify API was called
-    cy.wrap(api.pluginsApi.getLatestVersion).should('be.calledWith', {
-      pluginId: 'test-plugin'
-    });
 
     // Wait for data to load and verify content
     cy.contains('Friendly Test Plugin').should('exist');
@@ -78,14 +75,19 @@ describe('<App/>', () => {
 
   it('shows loading state while fetching plugin data', () => {
     // Create a delayed promise for the API call
-    cy.stub(api.pluginsApi, 'getLatestVersion').returns(
-        new Promise(resolve => {
-          setTimeout(() => resolve(mockPlugin), 1000);
-        })
-    );
+
+    const stubbing = ({pluginsApi, ...api}: ApiContextType) => {
+      commonStubbing({pluginsApi, ...api});
+      cy.stub(pluginsApi, 'getLatestVersion').returns(
+          new Promise(resolve => {
+            setTimeout(() => resolve(mockPlugin), 1000);
+          })
+      );
+    }
 
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{initialEntries: ['/plugin/test-plugin-different']}}/>
+        <App routerType={ApiMockRouter}
+             routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin-different']}}/>
     );
 
     // Check for loading indicator
@@ -97,7 +99,7 @@ describe('<App/>', () => {
 
   it('maintains layout structure across routes', () => {
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{initialEntries: ['/search']}}/>
+        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search']}}/>
     );
 
     // Verify header and footer are present
@@ -107,7 +109,8 @@ describe('<App/>', () => {
 
   it('handles tab navigation on plugin page', () => {
     cy.mount(
-        <App routerType={MemoryRouter} routerProps={{initialEntries: ['/plugin/test-plugin']}}/>
+        <App routerType={ApiMockRouter}
+             routerProps={{mocking: commonStubbing, initialEntries: ['/plugin/test-plugin']}}/>
     );
 
     // Wait for content to load

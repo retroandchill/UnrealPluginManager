@@ -2,7 +2,7 @@
 import {createContext, ReactNode, useContext} from "react";
 import {useAuth} from "react-oidc-context";
 
-interface ApiContextType {
+export interface ApiContextType {
   isAuthenticated: boolean;
   pluginsApi: PluginsApi;
   usersApi: UsersApi;
@@ -11,7 +11,7 @@ interface ApiContextType {
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 interface ApiProviderProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export function ApiProvider({children}: ApiProviderProps) {

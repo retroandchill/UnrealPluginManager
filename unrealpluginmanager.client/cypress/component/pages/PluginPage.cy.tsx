@@ -1,9 +1,8 @@
 ﻿import React from 'react';
-import {mount} from 'cypress/react';
 import {createMemoryRouter, RouterProvider} from 'react-router';
 import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {PluginPage} from "@/components";
-import {pluginsApi} from "@/config";
+import {mountWithApiMock} from "../../support/helpers";
 
 describe('<PluginPage />', () => {
   // Mock API data
@@ -17,12 +16,6 @@ describe('<PluginPage />', () => {
     },
     versionId: '456',
   };
-
-  beforeEach(() => {
-    // Mock the API method `getLatestVersion`
-    cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPluginData);
-    cy.stub(pluginsApi, 'getPluginReadme').resolves("Readme Content");
-  });
 
   const queryClient = new QueryClient();
 
@@ -39,10 +32,12 @@ describe('<PluginPage />', () => {
         }
     );
 
-    return mount(
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router}/>
-        </QueryClientProvider>);
+    return mountWithApiMock(<QueryClientProvider client={queryClient}>
+      <RouterProvider router={router}/>
+    </QueryClientProvider>, ({pluginsApi}) => {
+      cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPluginData);
+      cy.stub(pluginsApi, 'getPluginReadme').resolves("Readme Content");
+    });
   };
 
   it('displays a loading indicator while fetching plugin data', () => {
