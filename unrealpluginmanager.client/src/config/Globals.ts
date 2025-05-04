@@ -1,4 +1,5 @@
 ﻿import {Configuration, PluginsApi} from "@/api";
+import {UserManager, WebStorageStateStore} from "oidc-client-ts";
 
 /**
  * The base URL of the API used for making HTTP requests.
@@ -20,6 +21,19 @@ const apiConfig = new Configuration({
  * and provides methods to manage or retrieve plugin-related information.
  */
 export const pluginsApi = new PluginsApi(apiConfig);
+
+export const userManager = new UserManager({
+  authority: import.meta.env.VITE_AUTHORITY,
+  client_id: import.meta.env.VITE_CLIENT_ID,
+  redirect_uri: `${window.location.origin}${window.location.pathname}`,
+  post_logout_redirect_uri: window.location.origin,
+  userStore: new WebStorageStateStore({store: window.sessionStorage}),
+  monitorSession: true
+});
+
+export function onSigninCallback() {
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
 
 /**
  * Represents the complete API path to access resources.

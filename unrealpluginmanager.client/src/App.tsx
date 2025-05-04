@@ -4,6 +4,8 @@ import {BrowserRouter, Route, Routes} from "react-router";
 import {JSX, ReactNode} from "react";
 import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {SearchPage} from "@/components/pages/SearchPage.tsx";
+import {AuthProvider} from "react-oidc-context";
+import {onSigninCallback, userManager} from "@/config";
 
 interface BaseRouterProps {
   basename?: string;
@@ -34,20 +36,22 @@ const queryClient = new QueryClient();
  */
 function App<P extends BaseRouterProps>({routerType: Router = BrowserRouter, routerProps}: Readonly<AppProps<P>>) {
   return (
-      <QueryClientProvider client={queryClient}>
-        <Box minHeight="100vh" display="flex" flexDirection="column">
-          <Router {...routerProps}>
-            <HeaderBar/>
-            <Routes>
-              <Route path="/" element={<AppLayout/>}>
-                <Route index element={<LandingPage/>}/>
-                <Route path="search" element={<SearchPage/>}/>
-                <Route path="plugin/:id" element={<PluginPage/>}/>
-              </Route>
-            </Routes>
-          </Router>
-        </Box>
-      </QueryClientProvider>
+      <AuthProvider userManager={userManager} onSigninCallback={onSigninCallback}>
+        <QueryClientProvider client={queryClient}>
+          <Box minHeight="100vh" display="flex" flexDirection="column">
+            <Router {...routerProps}>
+              <HeaderBar/>
+              <Routes>
+                <Route path="/" element={<AppLayout/>}>
+                  <Route index element={<LandingPage/>}/>
+                  <Route path="search" element={<SearchPage/>}/>
+                  <Route path="plugin/:id" element={<PluginPage/>}/>
+                </Route>
+              </Routes>
+            </Router>
+          </Box>
+        </QueryClientProvider>
+      </AuthProvider>
   );
 }
 
