@@ -9,6 +9,6 @@ const appTheme = createTheme(theme);
 createRoot(document.getElementById('root')!).render(
     <ThemeProvider theme={appTheme}>
       <CssBaseline/>
-      <App routerType={BrowserRouter}/>
+      <App routerType={BrowserRouter} routerProps={{}}/>
     </ThemeProvider>
 )

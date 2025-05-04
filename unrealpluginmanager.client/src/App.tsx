@@ -1,8 +1,15 @@
 import {AppLayout, HeaderBar, LandingPage, PluginPage} from "@/components";
 import {Box} from '@mui/material';
 import {BrowserRouter, Route, Routes} from "react-router";
+import {JSX, ReactNode} from "react";
 import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
 import {SearchPage} from "@/components/pages/SearchPage.tsx";
+
+interface BaseRouterProps {
+  basename?: string;
+  children?: ReactNode;
+  window?: Window;
+}
 
 /**
  * Represents the properties required by an application.
@@ -12,8 +19,9 @@ import {SearchPage} from "@/components/pages/SearchPage.tsx";
  * Properties:
  * - `routerFactory`: The function responsible for creating the router instance. It should be of the type `createBrowserRouter` from the routing library. This function facilitates navigation and manages the application's routes.
  */
-interface AppProps {
-  routerType: typeof BrowserRouter;
+interface AppProps<P extends BaseRouterProps> {
+  routerType: (props: P) => JSX.Element;
+  routerProps: P;
 }
 
 const queryClient = new QueryClient();
@@ -24,11 +32,11 @@ const queryClient = new QueryClient();
  * The component communicates with an ASP.NET backend and showcases an example
  * integration between JavaScript and ASP.NET.
  */
-function App({routerType: Router = BrowserRouter}: Readonly<AppProps>) {
+function App<P extends BaseRouterProps>({routerType: Router = BrowserRouter, routerProps}: Readonly<AppProps<P>>) {
   return (
       <QueryClientProvider client={queryClient}>
         <Box minHeight="100vh" display="flex" flexDirection="column">
-          <Router>
+          <Router {...routerProps}>
             <HeaderBar/>
             <Routes>
               <Route path="/" element={<AppLayout/>}>

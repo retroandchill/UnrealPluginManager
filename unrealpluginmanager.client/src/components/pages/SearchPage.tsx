@@ -1,4 +1,4 @@
-﻿import {Box, Button, CircularProgress, Container, Pagination, PaginationItem, Typography} from "@mui/material";
+﻿import {Box, Button, CircularProgress, Container, Divider, Pagination, PaginationItem, Typography} from "@mui/material";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {useSearchParams} from "react-router";
 import {pluginsApi} from "@/config";
@@ -47,6 +47,10 @@ export function SearchPage({pageSize = 25}: Readonly<SearchPageProps>) {
   return (
       <Container maxWidth="lg">
         <Box marginY={2}>
+          <Typography variant="h2" component="div">
+            Search Results
+          </Typography>
+          <Divider/>
           {searchResult.data.items.map(plugin => <PluginSearchResultCard key={plugin.pluginId} plugin={plugin}/>)}
           <Pagination
               page={pageNumber}
