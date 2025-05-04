@@ -2,6 +2,7 @@
 export * from './pages';
 export * from './icons';
 export * from './info';
+export * from './providers';
 export * from './AppLayout.tsx'
 export * from './Footer.tsx'
 export * from './HeaderBar.tsx'

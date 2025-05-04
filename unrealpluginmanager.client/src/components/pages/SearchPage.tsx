@@ -1,8 +1,8 @@
 ﻿import {Box, Button, CircularProgress, Container, Divider, Pagination, PaginationItem, Typography} from "@mui/material";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {useSearchParams} from "react-router";
-import {pluginsApi} from "@/config";
 import {PluginSearchResultCard} from "@/components/info";
+import {useApi} from "@/components";
 
 interface SearchPageProps {
   pageSize?: number;
@@ -11,6 +11,7 @@ interface SearchPageProps {
 export function SearchPage({pageSize = 25}: Readonly<SearchPageProps>) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const {pluginsApi} = useApi();
 
   const searchTerm = searchParams.get("q") ?? "";
   const pageNumber = parseInt(searchParams.get("page") ?? "1");
