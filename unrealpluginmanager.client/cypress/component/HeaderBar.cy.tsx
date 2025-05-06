@@ -9,12 +9,13 @@ describe('<HeaderBar/>', () => {
     const queryClient = new QueryClient();
     // Wrap component in BrowserRouter since it uses navigation
     mountWithApiMock(
-        <QueryClientProvider client={queryClient}>
+        {
+          component: <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <HeaderBar/>
           </BrowserRouter>
-        </QueryClientProvider>,
-        () => {
+          </QueryClientProvider>, mocking: () => {
+          }
         });
   });
 

@@ -57,10 +57,12 @@ describe('<SearchPage />', () => {
         }
     );
 
-    return mountWithApiMock(<QueryClientProvider client={queryClient}>
+    return mountWithApiMock({
+      component: <QueryClientProvider client={queryClient}>
       <RouterProvider router={router}/>
-    </QueryClientProvider>, ({pluginsApi}) => {
+      </QueryClientProvider>, mocking: ({pluginsApi}) => {
       cy.stub(pluginsApi, "getLatestVersions").returns(Promise.resolve(plugins))
+      }
     });
   };
 

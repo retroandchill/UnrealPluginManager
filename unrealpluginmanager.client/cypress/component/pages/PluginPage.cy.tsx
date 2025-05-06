@@ -32,11 +32,13 @@ describe('<PluginPage />', () => {
         }
     );
 
-    return mountWithApiMock(<QueryClientProvider client={queryClient}>
+    return mountWithApiMock({
+      component: <QueryClientProvider client={queryClient}>
       <RouterProvider router={router}/>
-    </QueryClientProvider>, ({pluginsApi}) => {
+      </QueryClientProvider>, mocking: ({pluginsApi}) => {
       cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPluginData);
       cy.stub(pluginsApi, 'getPluginReadme').resolves("Readme Content");
+      }
     });
   };
 

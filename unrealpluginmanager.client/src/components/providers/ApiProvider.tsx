@@ -1,5 +1,5 @@
 ﻿import {Configuration, PluginsApi, UsersApi} from "@/api";
-import {createContext, ReactNode, useContext} from "react";
+import {createContext, ReactNode, useContext, useMemo} from "react";
 import {useAuth} from "react-oidc-context";
 
 export interface ApiContextType {
@@ -14,20 +14,24 @@ interface ApiProviderProps {
   children?: ReactNode;
 }
 
-export function ApiProvider({children}: ApiProviderProps) {
+export function ApiProvider({children}: Readonly<ApiProviderProps>) {
   const {user, isAuthenticated} = useAuth();
 
   const accessToken = user?.access_token;
-  const apiConfig = new Configuration({
-    basePath: import.meta.env.VITE_API_BASE_URL,
-    accessToken: accessToken ? `Bearer ${accessToken}` : undefined,
-  });
+  const apiConfig = useMemo(() => {
+    return new Configuration({
+      basePath: import.meta.env.VITE_API_BASE_URL,
+      accessToken: accessToken ? `Bearer ${accessToken}` : undefined,
+    })
+  }, [accessToken]);
 
-  const apiClients = {
-    isAuthenticated: isAuthenticated,
-    pluginsApi: new PluginsApi(apiConfig),
-    usersApi: new UsersApi(apiConfig)
-  }
+  const apiClients = useMemo(() => {
+    return {
+      isAuthenticated: isAuthenticated,
+      pluginsApi: new PluginsApi(apiConfig),
+      usersApi: new UsersApi(apiConfig)
+    }
+  }, [isAuthenticated, apiConfig]);
 
   return (
       <ApiContext.Provider value={apiClients}>

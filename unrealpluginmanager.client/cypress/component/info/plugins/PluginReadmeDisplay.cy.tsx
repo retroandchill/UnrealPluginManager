@@ -13,11 +13,13 @@ describe('<PluginReadmeDisplay />', () => {
     const queryClient = new QueryClient();
 
     // Mount the component
-    mountWithApiMock(<QueryClientProvider client={queryClient}>
+    mountWithApiMock({
+      component: <QueryClientProvider client={queryClient}>
       <PluginReadmeDisplay pluginId={pluginId} versionId={versionId}/>
-    </QueryClientProvider>, ({pluginsApi}) => {
+      </QueryClientProvider>, mocking: ({pluginsApi}) => {
       cy.stub(pluginsApi, "getPluginReadme")
           .resolves('# Test Plugin README\n\nThis is a sample readme content for testing purposes.');
+      }
     });
 
     // Assert that the README content is rendered correctly
@@ -35,14 +37,16 @@ describe('<PluginReadmeDisplay />', () => {
     const queryClient = new QueryClient();
 
     // Mount the component
-    mountWithApiMock(<QueryClientProvider client={queryClient}>
+    mountWithApiMock({
+      component: <QueryClientProvider client={queryClient}>
       <PluginReadmeDisplay pluginId={pluginId} versionId={versionId}/>
-    </QueryClientProvider>, ({pluginsApi}) => {
+      </QueryClientProvider>, mocking: ({pluginsApi}) => {
       cy.stub(pluginsApi, "getPluginReadme").returns(Promise.reject({
         message: "Failed to load readme",
         status: 404,
         statusText: "Not Found"
       }));
+      }
     });
 
     // Assert that the error message is displayed
@@ -61,11 +65,13 @@ describe('<PluginReadmeDisplay />', () => {
     const queryClient = new QueryClient();
 
     // Mount the component
-    mountWithApiMock(<QueryClientProvider client={queryClient}>
+    mountWithApiMock({
+      component: <QueryClientProvider client={queryClient}>
       <PluginReadmeDisplay pluginId={pluginId} versionId={versionId}/>
-    </QueryClientProvider>, ({pluginsApi}) => {
+      </QueryClientProvider>, mocking: ({pluginsApi}) => {
       // Intercept the API call to return markdown with a code block
       cy.stub(pluginsApi, "getPluginReadme").returns(Promise.resolve(markdownWithCode));
+      }
     });
 
     // Assert Markdown renders properly with syntax-highlighted code
