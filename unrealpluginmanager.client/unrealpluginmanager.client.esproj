@@ -12,7 +12,4 @@
       <Script Include="cypress\tsconfig.json" />
         <Script Include="test\tsconfig.json"/>
     </ItemGroup>
-    <ItemGroup>
-        <Folder Include="cypress\component\info\auth\"/>
-    </ItemGroup>
 </Project>
