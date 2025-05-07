@@ -1,11 +1,15 @@
 import {defineConfig} from 'vite';
 import plugin from '@vitejs/plugin-react';
 import fs from 'fs';
-import path from 'path';
+import path, {dirname} from 'path';
 import child_process from 'child_process';
 import {env} from 'process';
 import istanbul from 'vite-plugin-istanbul';
 import svgr from "vite-plugin-svgr";
+import {fileURLToPath} from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''

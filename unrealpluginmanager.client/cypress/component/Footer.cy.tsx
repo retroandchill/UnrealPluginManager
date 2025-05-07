@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import {Footer} from "@/components";
 
-describe('Footer.cy.tsx', () => {
+describe('<Footer/>', () => {
   beforeEach(() => {
     cy.mount(<Footer/>);
   });

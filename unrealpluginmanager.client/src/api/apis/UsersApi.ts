@@ -15,16 +15,8 @@
 
 
 import * as runtime from '../runtime';
-import type {
-  ApiKeyOverview,
-  UserOverview,
-} from '../models/index';
-import {
-    ApiKeyOverviewFromJSON,
-    ApiKeyOverviewToJSON,
-    UserOverviewFromJSON,
-    UserOverviewToJSON,
-} from '../models/index';
+import type {ApiKeyOverview, UserOverview,} from '../models/index';
+import {ApiKeyOverviewToJSON, UserOverviewFromJSON,} from '../models/index';
 
 export interface CreateApiKeyRequest {
     userId: string;
@@ -85,6 +77,11 @@ export class UsersApi extends runtime.BaseAPI {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+      if (this.configuration && this.configuration.accessToken) {
+        // oauth required
+        headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+      }
 
         const response = await this.request({
             path: `/users/active`,

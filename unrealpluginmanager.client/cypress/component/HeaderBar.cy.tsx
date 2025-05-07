@@ -1,15 +1,22 @@
 ﻿import React from 'react';
 import {HeaderBar} from "@/components";
 import {BrowserRouter} from "react-router";
+import {mountWithApiMock} from "../support/helpers";
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 describe('<HeaderBar/>', () => {
   beforeEach(() => {
+    const queryClient = new QueryClient();
     // Wrap component in BrowserRouter since it uses navigation
-    cy.mount(
-        <BrowserRouter>
-          <HeaderBar/>
-        </BrowserRouter>
-    );
+    mountWithApiMock(
+        {
+          component: <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <HeaderBar/>
+          </BrowserRouter>
+          </QueryClientProvider>, mocking: () => {
+          }
+        });
   });
 
   it('renders header bar with all elements', () => {

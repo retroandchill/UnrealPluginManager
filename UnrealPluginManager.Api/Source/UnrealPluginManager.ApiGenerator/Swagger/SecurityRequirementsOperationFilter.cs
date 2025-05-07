@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
 
 namespace UnrealPluginManager.ApiGenerator.Swagger;
@@ -26,10 +25,6 @@ public class SecurityRequirementsOperationFilter : IOperationFilter {
         .Where(scope => !string.IsNullOrWhiteSpace(scope))
         .Distinct()
         .ToList();
-
-    if (requiredScopes.Count == 0) {
-      return;
-    }
 
     operation.Responses.Add("401", new OpenApiResponse {
         Description = "Unauthorized"

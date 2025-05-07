@@ -1,10 +1,12 @@
 ﻿import {Logo} from "./icons";
 import {SearchBar} from "./common";
-import {AppBar, Box, Button, Container, Link, Toolbar} from "@mui/material";
+import {AppBar, Box, Container, Link, Toolbar} from "@mui/material";
 import {useNavigate} from "react-router";
+import {UserSigninStatus} from "@/components/info";
 
 export function HeaderBar() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  
   
   return <AppBar position="static">
     <Container>
@@ -16,7 +18,7 @@ export function HeaderBar() {
           <SearchBar sx={{marginX: "10px"}}
                      onSearch={search => navigate(`/search?q=${search}`)}/>
         </Box>
-        <Button variant="contained" color="primary">Login</Button>
+        <UserSigninStatus/>
       </Toolbar>
     </Container>
   </AppBar>;
