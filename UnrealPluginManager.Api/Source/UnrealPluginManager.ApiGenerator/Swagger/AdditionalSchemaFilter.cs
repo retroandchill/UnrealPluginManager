@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using System.Numerics;
+using Microsoft.OpenApi.Models;
+using Semver;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 
@@ -9,5 +11,8 @@ public class AdditionalSchemaDocumentFilter : IDocumentFilter {
     context.SchemaGenerator.GenerateSchema(
         typeof(PluginManifest),
         context.SchemaRepository);
+    context.SchemaRepository.Schemas.Remove(nameof(BigInteger));
+    context.SchemaRepository.Schemas.Remove(nameof(MetadataIdentifier));
+    context.SchemaRepository.Schemas.Remove(nameof(PrereleaseIdentifier));
   }
 }

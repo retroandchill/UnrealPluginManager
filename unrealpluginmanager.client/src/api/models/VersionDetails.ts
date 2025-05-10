@@ -13,28 +13,12 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { ResourceInfo } from './ResourceInfo';
-import {
-    ResourceInfoFromJSON,
-    ResourceInfoFromJSONTyped,
-    ResourceInfoToJSON,
-    ResourceInfoToJSONTyped,
-} from './ResourceInfo';
-import type { BinariesOverview } from './BinariesOverview';
-import {
-    BinariesOverviewFromJSON,
-    BinariesOverviewFromJSONTyped,
-    BinariesOverviewToJSON,
-    BinariesOverviewToJSONTyped,
-} from './BinariesOverview';
-import type { DependencyOverview } from './DependencyOverview';
-import {
-    DependencyOverviewFromJSON,
-    DependencyOverviewFromJSONTyped,
-    DependencyOverviewToJSON,
-    DependencyOverviewToJSONTyped,
-} from './DependencyOverview';
+import type {SourceLocation} from './SourceLocation';
+import {SourceLocationFromJSON, SourceLocationToJSON,} from './SourceLocation';
+import type {ResourceInfo} from './ResourceInfo';
+import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
+import type {DependencyOverview} from './DependencyOverview';
+import {DependencyOverviewFromJSON, DependencyOverviewToJSON,} from './DependencyOverview';
 
 /**
  * Represents detailed information about a specific plugin version,
@@ -56,7 +40,13 @@ export interface VersionDetails {
      */
     version: string;
     /**
-     * 
+     *
+     * @type {SourceLocation}
+     * @memberof VersionDetails
+     */
+    source?: SourceLocation;
+  /**
+   * 
      * @type {ResourceInfo}
      * @memberof VersionDetails
      */
@@ -68,13 +58,6 @@ export interface VersionDetails {
      * @memberof VersionDetails
      */
     dependencies: Array<DependencyOverview>;
-    /**
-     * A collection of binary overviews associated with a specific version of a plugin.
-     * Each binary overview provides details about the platform and engine version it supports.
-     * @type {Array<BinariesOverview>}
-     * @memberof VersionDetails
-     */
-    binaries: Array<BinariesOverview>;
 }
 
 /**
@@ -84,7 +67,6 @@ export function instanceOfVersionDetails(value: object): value is VersionDetails
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('version' in value) || value['version'] === undefined) return false;
     if (!('dependencies' in value) || value['dependencies'] === undefined) return false;
-    if (!('binaries' in value) || value['binaries'] === undefined) return false;
     return true;
 }
 
@@ -100,9 +82,9 @@ export function VersionDetailsFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'id': json['id'],
         'version': json['version'],
+      'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(DependencyOverviewFromJSON)),
-        'binaries': ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
     };
 }
 
@@ -119,9 +101,9 @@ export function VersionDetailsToJSONTyped(value?: VersionDetails | null, ignoreD
         
         'id': value['id'],
         'version': value['version'],
+      'source': SourceLocationToJSON(value['source']),
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(DependencyOverviewToJSON)),
-        'binaries': ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),
     };
 }
 

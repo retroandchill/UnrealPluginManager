@@ -124,7 +124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginVersionDetails"
+                  "$ref": "#/components/schemas/PluginVersionInfo"
                 }
               }
             }
@@ -757,33 +757,6 @@
         "additionalProperties": false,
         "description": "Represents an overview of an API key, including its details, expiry, and associated permissions."
       },
-      "BigInteger": {
-        "type": "object",
-        "properties": {
-          "isPowerOfTwo": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isZero": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isOne": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isEven": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "sign": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
       "BinariesOverview": {
         "required": [
           "engineVersion",
@@ -859,26 +832,10 @@
             "type": "string",
             "description": "Gets or sets the version range associated with the plugin dependency.\r\nThis version range defines the compatible versions of the plugin required by the dependency.",
             "example": ">=1.0.0"
-          },
-          "optional": {
-            "type": "boolean",
-            "description": "Gets or sets a value indicating whether the dependency is optional.\r\nWhen set to true, the dependency is not mandatory, and the system\r\ncan function without it."
-          },
-          "type": {
-            "$ref": "#/components/schemas/PluginType"
           }
         },
         "additionalProperties": false,
         "description": "Represents an overview of a plugin dependency, including its metadata and type."
-      },
-      "MetadataIdentifier": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
       },
       "PluginDependency": {
         "required": [
@@ -921,31 +878,6 @@
         },
         "additionalProperties": false,
         "description": "Represents the dependency manifest of a plugin, detailing the required plugin dependencies.\r\nIt includes information about the dependency's name, version constraints, and optional repository source."
-      },
-      "PluginDetails": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PluginOverviewBase"
-          },
-          {
-            "required": [
-              "versions"
-            ],
-            "type": "object",
-            "properties": {
-              "versions": {
-                "minItems": 1,
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/VersionDetails"
-                },
-                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
-              }
-            },
-            "additionalProperties": false
-          }
-        ],
-        "description": "Represents detailed information about a plugin, including its associated versions.\r\nInherits from UnrealPluginManager.Core.Model.Plugins.PluginOverviewBase to provide core metadata."
       },
       "PluginIdentifiers": {
         "type": "object",
@@ -1018,34 +950,10 @@
         "description": "Represents a manifest for a plugin, containing metadata and configuration needed to identify\r\nand manage the plugin within the Unreal Plugin Manager."
       },
       "PluginOverview": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PluginOverviewBase"
-          },
-          {
-            "required": [
-              "versions"
-            ],
-            "type": "object",
-            "properties": {
-              "versions": {
-                "minItems": 1,
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/VersionOverview"
-                },
-                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
-              }
-            },
-            "additionalProperties": false
-          }
-        ],
-        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
-      },
-      "PluginOverviewBase": {
         "required": [
           "id",
-          "name"
+          "name",
+          "versions"
         ],
         "type": "object",
         "properties": {
@@ -1079,10 +987,18 @@
             "description": "Gets or sets the URL associated with the author of the plugin.",
             "format": "uri",
             "nullable": true
+          },
+          "versions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionOverview"
+            },
+            "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
           }
         },
         "additionalProperties": false,
-        "description": "Provides a base class for representing essential metadata of a plugin.\r\nThis includes core properties such as the plugin's unique identifier, name,\r\noptional friendly name, description, author's name, and website."
+        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
       },
       "PluginOverviewPage": {
         "required": [
@@ -1185,15 +1101,6 @@
         "additionalProperties": false,
         "description": "Represents a summary of a plugin, including its name, version, and optional description."
       },
-      "PluginType": {
-        "enum": [
-          "Engine",
-          "Provided",
-          "External"
-        ],
-        "type": "string",
-        "description": "Specifies the type of plugin in the Unreal Plugin Manager system."
-      },
       "PluginVersionDetails": {
         "allOf": [
           {
@@ -1265,6 +1172,9 @@
             "description": "Gets or sets the URL of the homepage associated with the plugin.",
             "nullable": true
           },
+          "source": {
+            "$ref": "#/components/schemas/SourceLocation"
+          },
           "icon": {
             "$ref": "#/components/schemas/ResourceInfo"
           },
@@ -1324,18 +1234,6 @@
           }
         },
         "description": "Represents the output of a paged query of PluginVersionInfo."
-      },
-      "PrereleaseIdentifier": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "numericValue": {
-            "$ref": "#/components/schemas/BigInteger"
-          }
-        },
-        "additionalProperties": false
       },
       "ResourceInfo": {
         "required": [
@@ -1415,7 +1313,6 @@
           },
           {
             "required": [
-              "binaries",
               "dependencies"
             ],
             "type": "object",
@@ -1426,13 +1323,6 @@
                   "$ref": "#/components/schemas/DependencyOverview"
                 },
                 "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality."
-              },
-              "binaries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/BinariesOverview"
-                },
-                "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports."
               }
             },
             "additionalProperties": false
@@ -1457,6 +1347,9 @@
             "type": "string",
             "description": "Gets or sets the semantic version of the plugin, representing its specific version details.",
             "example": "1.0.0"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceLocation"
           },
           "icon": {
             "$ref": "#/components/schemas/ResourceInfo"

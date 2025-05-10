@@ -21,7 +21,6 @@ import type {
   PluginManifest,
   PluginOverviewPage,
   PluginSummary,
-  PluginVersionDetails,
   PluginVersionInfo,
   PluginVersionInfoPage,
 } from '../models/index';
@@ -31,7 +30,6 @@ import {
   PluginManifestToJSON,
   PluginOverviewPageFromJSON,
   PluginSummaryFromJSON,
-  PluginVersionDetailsFromJSON,
   PluginVersionInfoFromJSON,
   PluginVersionInfoPageFromJSON,
 } from '../models/index';
@@ -413,7 +411,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Submits a new plugin version along with optional icon and README information.
      */
-    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionDetails>> {
+    async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionInfo>> {
       if (requestParameters['manifest'] == null) {
         throw new runtime.RequiredError(
             'manifest',
@@ -470,13 +468,13 @@ export class PluginsApi extends runtime.BaseAPI {
             body: formParams,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PluginVersionDetailsFromJSON(jsonValue));
+      return new runtime.JSONApiResponse(response, (jsonValue) => PluginVersionInfoFromJSON(jsonValue));
     }
 
     /**
      * Submits a new plugin version along with optional icon and README information.
      */
-    async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionDetails> {
+    async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfo> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }

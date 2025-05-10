@@ -13,6 +13,8 @@
  * Do not edit the class manually.
  */
 
+import type {SourceLocation} from './SourceLocation';
+import {SourceLocationFromJSON, SourceLocationToJSON,} from './SourceLocation';
 import type {ResourceInfo} from './ResourceInfo';
 import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
 import type {PluginDependency} from './PluginDependency';
@@ -74,7 +76,13 @@ export interface PluginVersionInfo {
      */
     homepage?: string | null;
     /**
-     * 
+     *
+     * @type {SourceLocation}
+     * @memberof PluginVersionInfo
+     */
+    source?: SourceLocation;
+  /**
+   * 
      * @type {ResourceInfo}
      * @memberof PluginVersionInfo
      */
@@ -117,6 +125,7 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
       'author': json['author'] == null ? undefined : json['author'],
       'license': json['license'] == null ? undefined : json['license'],
       'homepage': json['homepage'] == null ? undefined : json['homepage'],
+      'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
     };
@@ -141,6 +150,7 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
       'author': value['author'],
       'license': value['license'],
       'homepage': value['homepage'],
+      'source': SourceLocationToJSON(value['source']),
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
     };

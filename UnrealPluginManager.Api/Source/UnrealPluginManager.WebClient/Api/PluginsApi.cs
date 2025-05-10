@@ -196,9 +196,9 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="manifest"></param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
-    /// <returns>PluginVersionDetails</returns>
-    PluginVersionDetails SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
-                                      string? readme = default(string?));
+    /// <returns>PluginVersionInfo</returns>
+    PluginVersionInfo SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
+                                   string? readme = default(string?));
 
     /// <summary>
     /// Submits a new plugin version along with optional icon and README information.
@@ -210,10 +210,10 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="manifest"></param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
-    /// <returns>ApiResponse of PluginVersionDetails</returns>
-    ApiResponse<PluginVersionDetails> SubmitPluginWithHttpInfo(PluginManifest manifest,
-                                                               FileParameter? icon = default(FileParameter?),
-                                                               string? readme = default(string?));
+    /// <returns>ApiResponse of PluginVersionInfo</returns>
+    ApiResponse<PluginVersionInfo> SubmitPluginWithHttpInfo(PluginManifest manifest,
+                                                            FileParameter? icon = default(FileParameter?),
+                                                            string? readme = default(string?));
 
     /// <summary>
     /// Updates the README content for a specific plugin version.
@@ -476,10 +476,10 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-    /// <returns>Task of PluginVersionDetails</returns>
-    Task<PluginVersionDetails> SubmitPluginAsync(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
-                                                 string? readme = default(string?),
-                                                 CancellationToken cancellationToken = default(CancellationToken));
+    /// <returns>Task of PluginVersionInfo</returns>
+    Task<PluginVersionInfo> SubmitPluginAsync(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
+                                              string? readme = default(string?),
+                                              CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
     /// Submits a new plugin version along with optional icon and README information.
@@ -492,10 +492,12 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-    /// <returns>Task of ApiResponse (PluginVersionDetails)</returns>
-    Task<ApiResponse<PluginVersionDetails>> SubmitPluginWithHttpInfoAsync(
-        PluginManifest manifest, FileParameter? icon = default(FileParameter?), string? readme = default(string?),
-        CancellationToken cancellationToken = default(CancellationToken));
+    /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
+    Task<ApiResponse<PluginVersionInfo>> SubmitPluginWithHttpInfoAsync(PluginManifest manifest,
+                                                                       FileParameter? icon = default(FileParameter?),
+                                                                       string? readme = default(string?),
+                                                                       CancellationToken cancellationToken =
+                                                                           default(CancellationToken));
 
     /// <summary>
     /// Updates the README content for a specific plugin version.
@@ -1718,10 +1720,10 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="manifest"></param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
-    /// <returns>PluginVersionDetails</returns>
-    public PluginVersionDetails SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
-                                             string? readme = default(string?)) {
-      ApiResponse<PluginVersionDetails> localVarResponse = SubmitPluginWithHttpInfo(manifest, icon, readme);
+    /// <returns>PluginVersionInfo</returns>
+    public PluginVersionInfo SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
+                                          string? readme = default(string?)) {
+      ApiResponse<PluginVersionInfo> localVarResponse = SubmitPluginWithHttpInfo(manifest, icon, readme);
       return localVarResponse.Data;
     }
 
@@ -1732,10 +1734,10 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="manifest"></param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
-    /// <returns>ApiResponse of PluginVersionDetails</returns>
-    public ApiResponse<PluginVersionDetails> SubmitPluginWithHttpInfo(PluginManifest manifest,
-                                                                      FileParameter? icon = default(FileParameter?),
-                                                                      string? readme = default(string?)) {
+    /// <returns>ApiResponse of PluginVersionInfo</returns>
+    public ApiResponse<PluginVersionInfo> SubmitPluginWithHttpInfo(PluginManifest manifest,
+                                                                   FileParameter? icon = default(FileParameter?),
+                                                                   string? readme = default(string?)) {
       // verify the required parameter 'manifest' is set
       if (manifest == null)
         throw new ApiException(400, "Missing required parameter 'manifest' when calling PluginsApi->SubmitPlugin");
@@ -1778,7 +1780,7 @@ namespace UnrealPluginManager.WebClient.Api {
 
       // make the HTTP request
       var localVarResponse =
-          this.Client.Post<PluginVersionDetails>("/plugins", localVarRequestOptions, this.Configuration);
+          this.Client.Post<PluginVersionInfo>("/plugins", localVarRequestOptions, this.Configuration);
 
       if (this.ExceptionFactory != null) {
         Exception _exception = this.ExceptionFactory("SubmitPlugin", localVarResponse);
@@ -1796,13 +1798,13 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-    /// <returns>Task of PluginVersionDetails</returns>
-    public async Task<PluginVersionDetails> SubmitPluginAsync(PluginManifest manifest,
-                                                              FileParameter? icon = default(FileParameter?),
-                                                              string? readme = default(string?),
-                                                              CancellationToken cancellationToken =
-                                                                  default(CancellationToken)) {
-      ApiResponse<PluginVersionDetails> localVarResponse =
+    /// <returns>Task of PluginVersionInfo</returns>
+    public async Task<PluginVersionInfo> SubmitPluginAsync(PluginManifest manifest,
+                                                           FileParameter? icon = default(FileParameter?),
+                                                           string? readme = default(string?),
+                                                           CancellationToken cancellationToken =
+                                                               default(CancellationToken)) {
+      ApiResponse<PluginVersionInfo> localVarResponse =
           await SubmitPluginWithHttpInfoAsync(manifest, icon, readme, cancellationToken).ConfigureAwait(false);
       return localVarResponse.Data;
     }
@@ -1815,8 +1817,8 @@ namespace UnrealPluginManager.WebClient.Api {
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-    /// <returns>Task of ApiResponse (PluginVersionDetails)</returns>
-    public async Task<ApiResponse<PluginVersionDetails>> SubmitPluginWithHttpInfoAsync(
+    /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
+    public async Task<ApiResponse<PluginVersionInfo>> SubmitPluginWithHttpInfoAsync(
         PluginManifest manifest, FileParameter? icon = default(FileParameter?), string? readme = default(string?),
         CancellationToken cancellationToken = default(CancellationToken)) {
       // verify the required parameter 'manifest' is set
@@ -1864,7 +1866,7 @@ namespace UnrealPluginManager.WebClient.Api {
       // make the HTTP request
 
       var localVarResponse = await this.AsynchronousClient
-          .PostAsync<PluginVersionDetails>("/plugins", localVarRequestOptions, this.Configuration, cancellationToken)
+          .PostAsync<PluginVersionInfo>("/plugins", localVarRequestOptions, this.Configuration, cancellationToken)
           .ConfigureAwait(false);
 
       if (this.ExceptionFactory != null) {
