@@ -1,11 +1,9 @@
 ﻿using Riok.Mapperly.Abstractions;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
-using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
-using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Mappers;
 
@@ -18,30 +16,6 @@ namespace UnrealPluginManager.Core.Mappers;
 /// </summary>
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class PluginMapper {
-
-  /// <summary>
-  /// Converts a <see cref="Plugin"/> instance to a <see cref="PluginDetails"/> representation.
-  /// </summary>
-  /// <param name="plugin">The <see cref="Plugin"/> instance to be converted.</param>
-  /// <returns>A <see cref="PluginDetails"/> object representing the provided <see cref="Plugin"/>.</returns>
-  public static partial PluginDetails ToPluginDetails(this Plugin plugin);
-
-  /// <summary>
-  /// Converts a <see cref="Plugin"/> entity and its associated <see cref="PluginVersion"/> to a <see cref="PluginDetails"/> representation.
-  /// </summary>
-  /// <param name="plugin">The <see cref="Plugin"/> entity to be converted.</param>
-  /// <param name="versions">The associated <see cref="PluginVersion"/> data to be included in the conversion.</param>
-  /// <returns>A <see cref="PluginDetails"/> instance representing the provided <see cref="Plugin"/> entity along with its version details.</returns>
-  public static partial PluginDetails ToPluginDetails(this Plugin plugin, PluginVersion versions);
-
-  /// <summary>
-  /// Maps a <see cref="PluginVersion"/> to a list of <see cref="VersionDetails"/> instances.
-  /// </summary>
-  /// <param name="version">The <see cref="PluginVersion"/> instance containing version information.</param>
-  /// <returns>A <see cref="List{T}"/> of <see cref="VersionDetails"/> objects based on the provided <see cref="PluginVersion"/>.</returns>
-  public static List<VersionDetails> MapVersionDetails(PluginVersion version) {
-    return version.ToEnumerable().Select(ToVersionDetails).ToList();
-  }
 
   /// <summary>
   /// Maps a <see cref="PluginVersion"/> entity to its <see cref="PluginSummary"/> representation.
@@ -70,25 +44,29 @@ public static partial class PluginMapper {
   public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
   /// <summary>
-  /// Maps a <see cref="PluginVersion"/> entity to a <see cref="PluginVersionDetails"/> model.
+  /// Converts a <see cref="PluginManifest"/> instance to a <see cref="PluginVersion"/> representation.
   /// </summary>
-  /// <param name="version">The instance of <see cref="PluginVersion"/> to be mapped.</param>
-  /// <returns>An instance of <see cref="PluginVersionDetails"/> that represents the provided <see cref="PluginVersion"/>.</returns>
-  [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionDetails.PluginId))]
-  [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionDetails.Name))]
-  [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionDetails.VersionId))]
-  [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
-  [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
-  public static partial PluginVersionDetails ToPluginVersionDetails(this PluginVersion version);
-
+  /// <param name="manifest">The <see cref="PluginManifest"/> instance to be converted.</param>
+  /// <returns>A <see cref="PluginVersion"/> object representing the provided <see cref="PluginManifest"/>.</returns>
   public static partial PluginVersion ToPluginVersion(this PluginManifest manifest);
 
+  public static partial PluginManifest ToPluginManifest(this PluginVersionInfo version);
+
+  /// <summary>
+  /// Converts a <see cref="PluginDependencyManifest"/> instance to a <see cref="Dependency"/> representation.
+  /// </summary>
+  /// <param name="manifest">The <see cref="PluginDependencyManifest"/> instance to be converted.</param>
+  /// <returns>A <see cref="Dependency"/> object representing the provided <see cref="PluginDependencyManifest"/>.</returns>
   [MapProperty(nameof(PluginDependencyManifest.Name), nameof(Dependency.PluginName))]
   [MapProperty(nameof(PluginDependencyManifest.Version), nameof(Dependency.PluginVersion))]
   [MapperIgnoreTarget(nameof(Dependency.Id))]
   [MapperIgnoreTarget(nameof(Dependency.Parent))]
   [MapperIgnoreTarget(nameof(Dependency.ParentId))]
   public static partial Dependency ToDependency(this PluginDependencyManifest manifest);
+
+  [MapProperty(nameof(PluginDependency.PluginName), nameof(PluginDependencyManifest.Name))]
+  [MapProperty(nameof(PluginDependency.PluginVersion), nameof(PluginDependencyManifest.Version))]
+  public static partial PluginDependencyManifest ToPluginDependencyManifest(this PluginDependency dependency);
 
   /// <summary>
   /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
@@ -127,19 +105,6 @@ public static partial class PluginMapper {
   public static partial PluginDependency ToPluginDependency(this Dependency dependency);
 
   /// <summary>
-  /// Maps a <see cref="PluginBinaryType"/> to an <see cref="UploadedBinaries"/> representation.
-  /// </summary>
-  /// <param name="descriptor">The <see cref="PluginBinaryType"/> instance to be converted.</param>
-  /// <returns>An <see cref="UploadedBinaries"/> object created based on the provided <see cref="PluginBinaryType"/>.</returns>
-  [MapperIgnoreTarget(nameof(UploadedBinaries.Id))]
-  [MapperIgnoreTarget(nameof(UploadedBinaries.ParentId))]
-  [MapperIgnoreTarget(nameof(UploadedBinaries.Parent))]
-  [MapperIgnoreTarget(nameof(UploadedBinaries.FileId))]
-  [MapperIgnoreTarget(nameof(UploadedBinaries.File))]
-  [MapperIgnoreTarget(nameof(UploadedBinaries.CreatedAt))]
-  public static partial UploadedBinaries ToUploadedBinaries(this PluginBinaryType descriptor);
-
-  /// <summary>
   /// Converts an <see cref="IDependencyHolder"/> instance to a <see cref="DependencyChainRoot"/> representation.
   /// </summary>
   /// <param name="descriptor">The source <see cref="IDependencyHolder"/> containing plugin dependency information.</param>
@@ -164,14 +129,6 @@ public static partial class PluginMapper {
   /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
   /// <returns>An <see cref="IQueryable{PluginVersionInfo}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
   public static partial IQueryable<PluginVersionInfo> ToPluginVersionInfoQuery(this IQueryable<PluginVersion> versions);
-
-  /// <summary>
-  /// Converts an <see cref="IQueryable{PluginVersion}"/> to an <see cref="IQueryable{PluginVersionDetails}"/> representation.
-  /// </summary>
-  /// <param name="versions">The source <see cref="IQueryable{PluginVersion}"/> collection to be converted.</param>
-  /// <returns>An <see cref="IQueryable{PluginVersionDetails}"/> collection representing the provided <see cref="IQueryable{PluginVersion}"/>.</returns>
-  public static partial IQueryable<PluginVersionDetails> ToPluginVersionDetailsQuery(
-      this IQueryable<PluginVersion> versions);
 
   /// <summary>
   /// Returns a <see cref="SemVersion"/> object without any modifications.

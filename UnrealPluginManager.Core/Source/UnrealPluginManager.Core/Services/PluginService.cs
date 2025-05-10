@@ -59,17 +59,11 @@ public partial class PluginService : IPluginService {
         .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
 
-  /// <inheritdoc />
-  public Task<Option<PluginVersionDetails>> GetPluginVersionDetails(string pluginName, SemVersion version) {
-    return _dbContext.PluginVersions
-        .Where(x => x.Parent.Name == pluginName)
-        .Where(x => x.VersionString == version.ToString())
-        .Include(x => x.Parent)
-        .Include(x => x.Binaries)
-        .Include(x => x.Dependencies)
-        .ToPluginVersionDetailsQuery()
-        .FirstOrDefaultAsync()
-        .Map(x => x.ToOption());
+  public async Task<PluginVersionInfo> GetPluginVersionInfo(Guid pluginId, Guid versionId) {
+    return await _dbContext.PluginVersions
+        .Where(x => x.ParentId == pluginId && x.Id == versionId)
+        .ToPluginVersionInfoQuery()
+        .SingleAsync();
   }
 
   /// <inheritdoc />
@@ -257,8 +251,8 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginVersionDetails> SubmitPlugin(PluginManifest manifest, Stream? icon = null,
-                                                       string? readme = null) {
+  public async Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest, Stream? icon = null,
+                                                    string? readme = null) {
     var mainPlugin = await _dbContext.Plugins
         .SingleOrDefaultAsync(x => x.Name == manifest.Name);
     if (mainPlugin is null) {
@@ -289,6 +283,6 @@ public partial class PluginService : IPluginService {
     mainPlugin.Versions.Add(version);
     await _dbContext.SaveChangesAsync();
 
-    return version.ToPluginVersionDetails();
+    return version.ToPluginVersionInfo();
   }
 }

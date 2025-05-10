@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Text.Json;
 using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Mappers;
@@ -40,7 +39,8 @@ public partial class InstallService : IInstallService {
                                                              IReadOnlyCollection<string> platforms) {
     IDependencyHolder? descriptor;
     await using (var stream = _fileSystem.File.OpenRead(descriptorFile)) {
-      descriptor = descriptorFile.EndsWith(".uplugin") ? await _jsonService.DeserializeAsync<PluginDescriptor>(stream) 
+      descriptor = descriptorFile.EndsWith(".uplugin")
+          ? await _jsonService.DeserializeAsync<PluginDescriptor>(stream)
           : await _jsonService.DeserializeAsync<ProjectDescriptor>(stream);
       ArgumentNullException.ThrowIfNull(descriptor);
     }
@@ -56,39 +56,31 @@ public partial class InstallService : IInstallService {
     var dependencyTree = await _pluginManagementService.GetPluginsToInstall(targetPlugin, engineVersion);
     return await InstallToEngine(dependencyTree, engineVersion, platforms);
   }
-  
-  private async Task<List<VersionChange>> InstallToEngine(List<PluginSummary> resolvedDependencies, string? engineVersion,
+
+  private async Task<List<VersionChange>> InstallToEngine(List<PluginSummary> resolvedDependencies,
+                                                          string? engineVersion,
                                                           IReadOnlyCollection<string> platforms) {
     var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => (x.Version, x.Platforms));
 
     var installChanges = new List<VersionChange>();
     foreach (var dep in resolvedDependencies) {
-      if (currentlyInstalled.TryGetValue(dep.Name, out var current) && current.Version == dep.Version 
-                                                                    && platforms.All(x => current.Platforms.Contains(x))) {
+      if (currentlyInstalled.TryGetValue(dep.Name, out var current) && current.Version == dep.Version
+                                                                    && platforms.All(x =>
+                                                                        current.Platforms.Contains(x))) {
         continue;
       }
-      
+
       var currentVersion = _engineService.GetInstalledEngine(engineVersion);
       ArgumentNullException.ThrowIfNull(currentVersion);
-      var cachedPlugin = await _pluginManagementService.FindLocalPlugin(dep.Name, dep.Version);
-      if (cachedPlugin.IsNone) {
-        var foundPlugin = await _pluginManagementService.DownloadPlugin(dep.Name, dep.Version, dep.RemoteIndex,
-            currentVersion.Name, platforms.ToList());
+      var cachedPlugin =
+          await _pluginManagementService.FindLocalPlugin(dep.Name, dep.Version, currentVersion.Name, platforms);
+      var plugin = await cachedPlugin.OrElseGetAsync(async () =>
+          await _pluginManagementService.DownloadPlugin(dep.Name, dep.Version, dep.RemoteIndex,
+              currentVersion.Name, platforms.ToList()));
 
-        var missingPlatforms = foundPlugin.Binaries
-            .Where(x => x.EngineVersion == currentVersion.Name)
-            .Select(x => x.Platform)
-            .Except(platforms)
-            .ToList();
-        if (missingPlatforms.Count > 0) {
-          // TODO: Build for missing platforms
-          throw new PlatformNotSupportedException(
-              $"Unable to install plugin {dep.Name} with version {dep.Version} on platforms {string.Join(", ", missingPlatforms)}.");
-        }
-      }
-
-      await _engineService.InstallPlugin(dep.Name, dep.Version, engineVersion, platforms);
+      _engineService.InstallPlugin(plugin.PluginName, _fileSystem.DirectoryInfo.New(plugin.DirectoryName),
+          engineVersion);
       installChanges.Add(new VersionChange(dep.Name, current.Version, dep.Version));
     }
 

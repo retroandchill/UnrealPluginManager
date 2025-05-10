@@ -7,11 +7,11 @@ using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
+using UnrealPluginManager.Server.Model;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -58,13 +58,12 @@ public partial class PluginsController : ControllerBase {
   [HttpPost]
   [Consumes(MediaTypeNames.Multipart.FormData)]
   [Produces(MediaTypeNames.Application.Json)]
-  [ProducesResponseType(typeof(PluginVersionDetails), (int) HttpStatusCode.OK)]
+  [ProducesResponseType(typeof(PluginVersionInfo), (int) HttpStatusCode.OK)]
   [ApiKey]
   [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
-  public async Task<PluginVersionDetails> SubmitPlugin([FromForm] PluginManifest manifest, IFormFile? icon,
-                                                       [FromForm] string? readme) {
-    await using var iconStream = icon?.OpenReadStream();
-    return await _pluginService.SubmitPlugin(manifest, iconStream, readme);
+  public async Task<PluginVersionInfo> SubmitPlugin(PluginSubmissionMultipartRequest requestBody) {
+    await using var iconStream = requestBody.Icon?.OpenReadStream();
+    return await _pluginService.SubmitPlugin(requestBody.Manifest, iconStream, requestBody.Readme);
   }
 
   /// <summary>

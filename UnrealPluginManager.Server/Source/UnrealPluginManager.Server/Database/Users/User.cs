@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 
-namespace UnrealPluginManager.Core.Database.Entities.Users;
+namespace UnrealPluginManager.Server.Database.Users;
 
 /// <summary>
 /// Represents a user entity within the database.
@@ -107,7 +107,7 @@ public class User {
 
   internal static void DefineModelMetadata(EntityTypeBuilder<User> entity) {
     entity.HasMany(x => x.Plugins)
-        .WithMany(x => x.Owners)
+        .WithMany()
         .UsingEntity<PluginOwner>();
 
     entity.Property(x => x.Username)

@@ -40,11 +40,17 @@ export interface PluginVersionDetails {
      */
     name: string;
     /**
-     * Gets or sets the user-friendly name of the plugin associated with the current version.
+     * Gets or sets the unique identifier for the plugin version.
      * @type {string}
      * @memberof PluginVersionDetails
      */
-    friendlyName?: string | null;
+    versionId: string;
+  /**
+   * Gets the semantic version of the plugin.
+     * @type {string}
+     * @memberof PluginVersionDetails
+     */
+  version: string;
     /**
      * Gets or sets a brief explanation or summary of the plugin version.
      * This provides additional context or details about the plugin functionality or purpose.
@@ -57,25 +63,19 @@ export interface PluginVersionDetails {
      * @type {string}
      * @memberof PluginVersionDetails
      */
-    authorName?: string | null;
+  author?: string | null;
     /**
-     * Gets or sets the URL associated with the author of the plugin.
+     * Gets or sets the license information associated with the plugin.
      * @type {string}
      * @memberof PluginVersionDetails
      */
-    authorWebsite?: string | null;
+    license?: string | null;
     /**
-     * Gets or sets the unique identifier for the plugin version.
+     * Gets or sets the URL of the homepage associated with the plugin.
      * @type {string}
      * @memberof PluginVersionDetails
      */
-    versionId: string;
-    /**
-     * Gets the semantic version of the plugin.
-     * @type {string}
-     * @memberof PluginVersionDetails
-     */
-    version: string;
+    homepage?: string | null;
     /**
      * 
      * @type {ResourceInfo}
@@ -121,12 +121,12 @@ export function PluginVersionDetailsFromJSONTyped(json: any, ignoreDiscriminator
         
         'pluginId': json['pluginId'],
         'name': json['name'],
-        'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
-      'description': json['description'] == null ? undefined : json['description'],
-        'authorName': json['authorName'] == null ? undefined : json['authorName'],
-        'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
         'versionId': json['versionId'],
         'version': json['version'],
+      'description': json['description'] == null ? undefined : json['description'],
+      'author': json['author'] == null ? undefined : json['author'],
+      'license': json['license'] == null ? undefined : json['license'],
+      'homepage': json['homepage'] == null ? undefined : json['homepage'],
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
         'binaries': json['binaries'] == null ? undefined : ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
@@ -146,12 +146,12 @@ export function PluginVersionDetailsToJSONTyped(value?: PluginVersionDetails | n
         
         'pluginId': value['pluginId'],
         'name': value['name'],
-        'friendlyName': value['friendlyName'],
-      'description': value['description'],
-        'authorName': value['authorName'],
-        'authorWebsite': value['authorWebsite'],
         'versionId': value['versionId'],
         'version': value['version'],
+      'description': value['description'],
+      'author': value['author'],
+      'license': value['license'],
+      'homepage': value['homepage'],
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
         'binaries': value['binaries'] == null ? undefined : ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),

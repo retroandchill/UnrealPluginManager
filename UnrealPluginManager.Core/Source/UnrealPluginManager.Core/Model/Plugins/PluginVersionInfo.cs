@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
@@ -85,6 +86,8 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// is optional and may not be provided for all plugins.
   /// </remarks>
   public string? Homepage { get; set; }
+
+  public SourceLocation Source { get; set; }
 
   /// <summary>
   /// Gets or sets the resource information for the plugin icon.

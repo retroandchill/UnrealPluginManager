@@ -32,15 +32,7 @@ public interface IPluginService {
   Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange,
                                                    Pageable pageable = default);
 
-  /// <summary>
-  /// Retrieves detailed information about a specific plugin, including its versions and metadata.
-  /// </summary>
-  /// <param name="pluginName">The name of the plugin for which details are to be retrieved.</param>
-  /// <param name="version">The specific version of the plugin to retrieve details for.</param>
-  /// <returns>
-  /// An <see cref="Option{PluginDetails}"/> containing the plugin details if found; otherwise, an empty option.
-  /// </returns>
-  Task<Option<PluginVersionDetails>> GetPluginVersionDetails(string pluginName, SemVersion version);
+  Task<PluginVersionInfo> GetPluginVersionInfo(Guid pluginId, Guid versionId);
 
   /// <summary>
   /// Retrieves detailed version information associated with a specific plugin name and version range.
@@ -145,7 +137,7 @@ public interface IPluginService {
   /// <returns>
   /// The details of the submitted plugin version as a <see cref="PluginVersionDetails"/> object.
   /// </returns>
-  Task<PluginVersionDetails> SubmitPlugin(PluginManifest manifest, Stream? icon = null, string? readme = null);
+  Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest, Stream? icon = null, string? readme = null);
 
 
 }

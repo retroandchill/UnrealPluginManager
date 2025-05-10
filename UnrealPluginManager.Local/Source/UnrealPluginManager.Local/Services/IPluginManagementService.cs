@@ -2,7 +2,7 @@
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Local.Model.Cache;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -23,8 +23,9 @@ public interface IPluginManagementService {
   /// A task representing the asynchronous operation. Upon completion, returns an <see cref="Option{T}"/>
   /// containing a <see cref="PluginVersionInfo"/> if a matching plugin is found, or <see cref="Option{T}.None"/> if no match exists.
   /// </returns>
-  Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange);
-  
+  Task<Option<PluginBuildInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange, string engineVersion,
+                                                IReadOnlyCollection<string> platforms);
+
   /// <summary>
   /// Retrieves a list of plugin overviews that optionally match a given search term.
   /// The method aggregates and groups plugins by name, merging relevant details
@@ -142,7 +143,7 @@ public interface IPluginManagementService {
   /// returns a <see cref="PluginDetails"/> object containing detailed
   /// information about the downloaded plugin, including its versions.
   /// </returns>
-  Task<PluginVersionDetails> DownloadPlugin(string pluginName, SemVersion version, int? remote,
-                                            string engineVersion,
-                                            List<string> platforms);
+  Task<PluginBuildInfo> DownloadPlugin(string pluginName, SemVersion version, int? remote,
+                                       string engineVersion,
+                                       List<string> platforms);
 }

@@ -114,18 +114,16 @@ public class TestCommands {
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x =>
-        x.BuildPlugin(
-            It.Is<IFileInfo>(y => y.FullName ==
-                                  Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-            It.Is<string?>(y => y == "5.5")));
+        x.BuildPlugin(It.Is<IFileInfo>(y => y.FullName ==
+                                            Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
+            It.IsAny<IDirectoryInfo>(), It.Is<string?>(y => y == "5.5"), It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin");
     Assert.That(returnCode, Is.EqualTo(0));
     _engineService.Verify(x =>
-        x.BuildPlugin(
-            It.Is<IFileInfo>(y => y.FullName ==
-                                  Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-            It.Is<string?>(y => y == null)));
+        x.BuildPlugin(It.Is<IFileInfo>(y => y.FullName ==
+                                            Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
+            It.IsAny<IDirectoryInfo>(), It.Is<string?>(y => y == null), It.IsAny<IReadOnlyCollection<string>>()));
   }
 
   [Test]

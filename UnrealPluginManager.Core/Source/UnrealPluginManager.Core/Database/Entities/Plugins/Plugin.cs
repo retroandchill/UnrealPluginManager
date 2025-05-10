@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UnrealPluginManager.Core.Database.Entities.Users;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -53,17 +52,6 @@ public class Plugin {
   /// Each version is linked to a specific plugin and managed within the context of the database.
   /// </remarks>
   public ICollection<PluginVersion> Versions { get; set; } = new List<PluginVersion>();
-
-  /// <summary>
-  /// Gets or sets the collection of users who are owners of this plugin.
-  /// </summary>
-  /// <remarks>
-  /// This property represents a many-to-many relationship between the Plugin
-  /// and User entities. Each plugin can have multiple owners, and each user
-  /// can own multiple plugins. This relationship is configured in the database
-  /// model metadata.
-  /// </remarks>
-  public ICollection<User> Owners { get; set; } = new List<User>();
 
   internal static void DefineModelMetadata(EntityTypeBuilder<Plugin> entity) {
     entity.HasIndex(x => new {

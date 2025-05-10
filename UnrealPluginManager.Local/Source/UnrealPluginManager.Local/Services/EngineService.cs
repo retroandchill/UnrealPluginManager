@@ -1,14 +1,9 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Plugins;
 
@@ -20,11 +15,10 @@ namespace UnrealPluginManager.Local.Services;
 [AutoConstructor]
 public partial class EngineService : IEngineService {
   private readonly IFileSystem _fileSystem;
-  private readonly IPluginService _pluginService;
-  private readonly IPluginStructureService _pluginStructureService;
-  private readonly IEnginePlatformService _enginePlatformService;
   private readonly IProcessRunner _processRunner;
   private readonly IJsonService _jsonService;
+  private readonly IEnginePlatformService _enginePlatformService;
+  private readonly IPluginStructureService _pluginStructureService;
 
   /// <inheritdoc />
   public InstalledEngine GetInstalledEngine(string? engineVersion) {
@@ -36,45 +30,63 @@ public partial class EngineService : IEngineService {
             .First();
     return installedEngine;
   }
-  
+
   /// <inheritdoc />
   public List<InstalledEngine> GetInstalledEngines() {
     return _enginePlatformService.GetInstalledEngines();
   }
 
   /// <inheritdoc />
-  public async Task<int> BuildPlugin(IFileInfo pluginFile, string? engineVersion) {
+  public async Task<int> BuildPlugin(IFileInfo pluginFile,
+                                     IDirectoryInfo destination,
+                                     string? engineVersion,
+                                     IReadOnlyCollection<string> platforms) {
     var installedEngine = GetInstalledEngine(engineVersion);
-    var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
-                               $"RunUAT.{_enginePlatformService.ScriptFileExtension}");
-    using var intermediate = _fileSystem.CreateDisposableDirectory(out var intermediateFolder);
 
-    var exitCode = await _processRunner.RunProcess(scriptPath, [
+    /*
+    PluginManifest pluginManifest;
+    await using (var pluginFileStream = pluginFile.OpenRead()) {
+      pluginManifest = await _jsonService.DeserializeAsync<PluginManifest>(pluginFileStream);
+    }
+
+    using var intermediate = _fileSystem.CreateDisposableDirectory(out var intermediateFolder);
+    var zipFileName = Path.Join(intermediateFolder.FullName, "Source.zip");
+    await using (var downloadStream = await _httpClient.GetStreamAsync(pluginManifest.Source.Url)) {
+      await using var fileStream = _fileSystem.FileStream.New(zipFileName, FileMode.Create);
+      await downloadStream.CopyToAsync(fileStream);
+    }
+
+    using var zipArchive = new ZipArchive(File.OpenRead(zipFileName), ZipArchiveMode.Read);
+    var pluginDirectoryName = Path.Join(_storageService.BaseDirectory, "Plugins", pluginManifest.Name,
+        pluginManifest.Version.ToString());
+    var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
+    pluginDirectory.Create();
+    var destinationFolder = Path.Join(intermediateFolder.FullName, "Source");
+    await _fileSystem.ExtractZipFile(zipArchive, destinationFolder);
+
+    var sourceDirectory = _fileSystem.DirectoryInfo.New(destinationFolder);
+    var upluginFile = sourceDirectory
+        .EnumerateFiles("*.uplugin", SearchOption.TopDirectoryOnly)
+        .FirstOrDefault();
+
+
+    if (upluginFile is null) {
+      throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
+    }
+
+    var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
+    var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
+    buildDirectory.Create();
+    */
+
+    var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
+        $"RunUAT.{_enginePlatformService.ScriptFileExtension}");
+
+    return await _processRunner.RunProcess(scriptPath, [
         "BuildPlugin",
         $"-Plugin=\"{pluginFile.FullName}\"",
-        $"-package=\"{intermediateFolder.FullName}\""
+        $"-package=\"{destination.FullName}\""
     ]);
-    if (exitCode != 0) {
-      return exitCode;
-    }
-
-    var upluginInfo = _fileSystem.FileInfo.New(pluginFile.FullName);
-    JsonNode pluginDescriptor;
-    await using (var reader = upluginInfo.OpenRead()) {
-      pluginDescriptor = (await JsonNode.ParseAsync(reader))!;
-    }
-
-    pluginDescriptor["bInstalled"] = true;
-
-    var destPath = Path.Join(intermediateFolder.FullName, upluginInfo.Name);
-    await using (var destination = _fileSystem.File.Open(destPath, FileMode.OpenOrCreate)) {
-      destination.SetLength(0);
-      await using var jsonWriter = new Utf8JsonWriter(destination, new JsonWriterOptions { Indented = true });
-      pluginDescriptor.WriteTo(jsonWriter);
-    }
-
-    await _pluginService.SubmitPlugin(intermediateFolder, installedEngine.Version.ToString());
-    return 0;
   }
 
   /// <inheritdoc />
@@ -103,13 +115,12 @@ public partial class EngineService : IEngineService {
       ArgumentNullException.ThrowIfNull(pluginDescriptor);
       ArgumentNullException.ThrowIfNull(file.Directory);
       yield return new InstalledPlugin(Path.GetFileNameWithoutExtension(file.Name), pluginDescriptor.VersionName,
-                                       _pluginStructureService.GetInstalledBinaries(file.Directory));
+          _pluginStructureService.GetInstalledBinaries(file.Directory));
     }
   }
 
   /// <inheritdoc />
-  public async Task<int> InstallPlugin(string pluginName, SemVersion pluginVersion, string? engineVersion,
-                                       IReadOnlyCollection<string> targetPlatforms) {
+  public void InstallPlugin(string pluginName, IDirectoryInfo sourceDirectory, string? engineVersion) {
     var installedEngine = GetInstalledEngine(engineVersion);
     var installDirectory = Path.Join(installedEngine.PackageDirectory, pluginName);
     if (_fileSystem.Directory.Exists(installDirectory)) {
@@ -118,13 +129,18 @@ public partial class EngineService : IEngineService {
 
     var destinationDirectory = _fileSystem.Directory.CreateDirectory(installDirectory);
 
-    await foreach (var zipFile in _pluginService.GetAllPluginData(pluginName, pluginVersion, installedEngine.Name,
-                                                                  targetPlatforms)) {
-      await using var fileStream = zipFile.OpenRead();
-      using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-      await _fileSystem.ExtractZipFile(zipArchive, destinationDirectory.FullName);
-    }
 
-    return 0;
+    foreach (var file in sourceDirectory.GetFiles("*", SearchOption.AllDirectories)) {
+      var relativePath = Path.GetRelativePath(sourceDirectory.FullName, file.FullName);
+      var targetPath = Path.Join(destinationDirectory.FullName, relativePath);
+
+      // Ensure target directory exists
+      var targetDir = Path.GetDirectoryName(targetPath);
+      if (!string.IsNullOrEmpty(targetDir)) {
+        _fileSystem.Directory.CreateDirectory(targetDir);
+      }
+
+      file.CopyTo(targetPath, true);
+    }
   }
 }

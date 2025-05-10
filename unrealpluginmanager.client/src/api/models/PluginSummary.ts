@@ -13,7 +13,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
 /**
  * Represents a summary of a plugin, including its name, version, and optional description.
  * @export
@@ -34,14 +33,6 @@ export interface PluginSummary {
      * @memberof PluginSummary
      */
     name: string;
-    /**
-     * Gets or sets an optional user-friendly name for the plugin.
-     * This property provides a more descriptive or colloquial name that can be displayed in user interfaces
-     * and used as an alternative to the plugin's primary name when needed.
-     * @type {string}
-     * @memberof PluginSummary
-     */
-    friendlyName: string | null;
     /**
      * Gets the unique identifier of the plugin version.
      * This property ensures that each version of a plugin is distinctly identifiable within the system.
@@ -64,7 +55,6 @@ export interface PluginSummary {
 export function instanceOfPluginSummary(value: object): value is PluginSummary {
     if (!('pluginId' in value) || value['pluginId'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
-    if (!('friendlyName' in value) || value['friendlyName'] === undefined) return false;
     if (!('versionId' in value) || value['versionId'] === undefined) return false;
     if (!('version' in value) || value['version'] === undefined) return false;
     return true;
@@ -82,7 +72,6 @@ export function PluginSummaryFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'pluginId': json['pluginId'],
         'name': json['name'],
-        'friendlyName': json['friendlyName'],
         'versionId': json['versionId'],
         'version': json['version'],
     };
@@ -101,7 +90,6 @@ export function PluginSummaryToJSONTyped(value?: PluginSummary | null, ignoreDis
         
         'pluginId': value['pluginId'],
         'name': value['name'],
-        'friendlyName': value['friendlyName'],
         'versionId': value['versionId'],
         'version': value['version'],
     };

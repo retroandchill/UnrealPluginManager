@@ -37,6 +37,7 @@ public static class ServiceUtils {
   /// <returns>The updated IServiceCollection.</returns>
   public static IServiceCollection AddCoreServices(this IServiceCollection services) {
     return services
-        .AddScoped<IPluginService, PluginService>();
+        .AddScoped<IPluginService, PluginService>()
+        .AddScoped<IPluginStructureService, PluginStructureService>();
   }
 }

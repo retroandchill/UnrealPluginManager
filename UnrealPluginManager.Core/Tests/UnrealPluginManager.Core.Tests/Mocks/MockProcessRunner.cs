@@ -32,6 +32,10 @@ public class MockProcessRunner : IProcessRunner {
     return _mock.Setup(expression);
   }
 
+  public void Verify(Expression<Action<IProcessRunner>> expression, Times times) {
+    _mock.Verify(expression, times);
+  }
+
   /// <inheritdoc />
   public Task<int> RunProcess(string command, string[] arguments) {
     return _mock.Object.RunProcess(command, arguments);

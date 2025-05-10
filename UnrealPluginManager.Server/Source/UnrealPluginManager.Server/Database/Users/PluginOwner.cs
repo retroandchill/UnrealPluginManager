@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
-namespace UnrealPluginManager.Core.Database.Entities.Users;
+namespace UnrealPluginManager.Server.Database.Users;
 
 /// <summary>
 /// Represents the ownership relationship between a user and a plugin.

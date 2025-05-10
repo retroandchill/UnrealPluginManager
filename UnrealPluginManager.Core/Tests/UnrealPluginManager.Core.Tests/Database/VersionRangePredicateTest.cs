@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
-using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Tests.Database;
@@ -50,11 +49,7 @@ public class VersionRangePredicateTest {
         Name = "Test Plugin",
         Versions = versions
             .Select(x => new PluginVersion {
-                Version = x,
-                Source = new FileResource {
-                    OriginalFilename = "Source.zip",
-                    StoredFilename = "Dummy"
-                }
+                Version = x
             })
             .ToList()
     };

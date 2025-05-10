@@ -12,6 +12,7 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// indicating the compatible versions of the plugin.
 /// </remarks>
 public class PluginDependency {
+
   /// <summary>
   /// Gets the name of the plugin.
   /// </summary>

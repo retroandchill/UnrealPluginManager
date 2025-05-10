@@ -3,22 +3,22 @@ using LanguageExt.UnsafeValueAccess;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
-using UnrealPluginManager.Core.Database.Entities.Users;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Users;
-using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Clients;
+using UnrealPluginManager.Server.Database;
+using UnrealPluginManager.Server.Database.Users;
 using UnrealPluginManager.Server.Services;
+using UnrealPluginManager.Server.Tests.Helpers;
 
 namespace UnrealPluginManager.Server.Tests.Services;
 
 public class UserServiceTest {
-  private UnrealPluginManagerContext _context;
+  private CloudUnrealPluginManagerContext _context;
   private Mock<IHttpContextAccessor> _httpContextAccessor;
   private Mock<IKeycloakApiKeyClient> _keycloakApiKeyClient;
   private ServiceProvider _serviceProvider;
@@ -28,7 +28,7 @@ public class UserServiceTest {
   [SetUp]
   public void Setup() {
     var services = new ServiceCollection();
-    _context = new TestUnrealPluginManagerContext();
+    _context = new TestCloudUnrealPluginManagerContext();
     _context.Database.EnsureCreated();
     services.AddSingleton(_context);
 

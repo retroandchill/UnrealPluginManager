@@ -1,5 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using UnrealPluginManager.Cli.Helpers;
@@ -86,9 +85,11 @@ public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCo
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-    var installResult = await _installService.InstallRequirements(options.Input, options.Version, 
-                                                            ["Win64"]);
+    var installResult = await _installService.InstallRequirements(options.Input, options.Version,
+        ["Win64"]);
     _console.WriteVersionChanges(installResult);
-    return await _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
+    var inputFile = _fileSystem.FileInfo.New(options.Input);
+    var dest = _fileSystem.Directory.CreateDirectory(Path.Combine(inputFile.Name, "Build"));
+    return await _engineService.BuildPlugin(inputFile, dest, options.Version, []);
   }
 }

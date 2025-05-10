@@ -6,6 +6,7 @@ using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
@@ -70,8 +71,7 @@ public class PluginManagementServiceTest {
 
     _serviceProvider = services.BuildServiceProvider();
 
-    var jsonService = _serviceProvider.GetRequiredService<IJsonService>();
-    var realPluginService = new PluginService(null, null, null, null, jsonService);
+    var realPluginService = new PluginService(null, null, null);
     _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
         .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
             realPluginService.GetDependencyList(root, manifest));
@@ -144,22 +144,18 @@ public class PluginManagementServiceTest {
         Dependencies = [
             new PluginDependency {
                 PluginName = "Sql",
-                Type = PluginType.Provided,
                 PluginVersion = SemVersionRange.Parse("=2.0.0")
             },
             new PluginDependency {
                 PluginName = "Threads",
-                Type = PluginType.Provided,
                 PluginVersion = SemVersionRange.Parse("=2.0.0")
             },
             new PluginDependency {
                 PluginName = "Http",
-                Type = PluginType.Provided,
                 PluginVersion = SemVersionRange.Parse(">=3.0.0 <=4.0.0")
             },
             new PluginDependency {
                 PluginName = "StdLib",
-                Type = PluginType.Provided,
                 PluginVersion = SemVersionRange.Parse("=4.0.0")
             }
         ]
@@ -238,7 +234,6 @@ public class PluginManagementServiceTest {
             new PluginVersionInfo {
                 PluginId = Guid.NewGuid(),
                 Name = "TestPlugin",
-                FriendlyName = "Test Plugin",
                 VersionId = Guid.NewGuid(),
                 Version = new SemVersion(1, 1, 0),
                 Dependencies = []
@@ -249,7 +244,6 @@ public class PluginManagementServiceTest {
     Assert.That(targetPlugin, Is.Not.Null);
     Assert.Multiple(() => {
       Assert.That(targetPlugin.Name, Is.EqualTo("TestPlugin"));
-      Assert.That(targetPlugin.FriendlyName, Is.EqualTo("Test Plugin"));
       Assert.That(targetPlugin.Version, Is.EqualTo(new SemVersion(1, 1, 0)));
       Assert.That(targetPlugin.Dependencies, Is.Empty);
     });
@@ -272,9 +266,8 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
 
     var memoryStream = new MemoryStream();
-    _pluginService.Setup(x => x.GetPluginFileData(pluginVersion.PluginId, pluginVersion.VersionId))
-        .ReturnsAsync(new PluginDownload("TestPlugin", memoryStream));
-    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<PluginManifest>(), It.IsAny<Stream>(), It.IsAny<string>(),
+            It.IsAny<CancellationToken>()))
         .ReturnsAsync(pluginVersion);
 
     var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
@@ -302,12 +295,12 @@ public class PluginManagementServiceTest {
         Version = new SemVersion(1, 0, 0),
         Dependencies = []
     };
-    _pluginService.Setup(x => x.GetPluginVersionDetails("TestPlugin", new SemVersion(1, 0, 0)))
+    _pluginService.Setup(x => x.GetPluginVersionInfo("TestPlugin", new SemVersion(1, 0, 0)))
         .ReturnsAsync(pluginDetails);
     var result =
         await _pluginManagementService.DownloadPlugin("TestPlugin", new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]);
 
-    Assert.That(result, Is.EqualTo(pluginDetails));
+    Assert.That(result.PluginName, Is.EqualTo(pluginDetails.Name));
   }
 
   [Test]
@@ -337,19 +330,9 @@ public class PluginManagementServiceTest {
     _pluginsApi.Setup(x => x.GetLatestVersionsAsync("TestPlugin", "1.0.0", 1, 100, CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([pluginDetails]));
 
-    var dummyStream = new MemoryStream();
-    _pluginsApi.Setup(x => x.DownloadPluginVersionAsync(pluginDetails.PluginId, pluginDetails.VersionId, "5.5",
-            new List<string> {
-                "Win64"
-            }, true, CancellationToken.None))
-        .ReturnsAsync(dummyStream);
-
-    _pluginService.Setup(x => x.SubmitPlugin(dummyStream))
-        .ReturnsAsync(pluginDetails);
-
     var result = await _pluginManagementService.DownloadPlugin("TestPlugin",
         new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);
-    Assert.That(result, Is.EqualTo(pluginDetails));
+    Assert.That(result.PluginName, Is.EqualTo(pluginDetails.Name));
   }
 
 }

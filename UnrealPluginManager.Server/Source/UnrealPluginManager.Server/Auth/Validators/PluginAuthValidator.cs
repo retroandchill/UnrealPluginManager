@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LinqKit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth.ApiKey;
+using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Auth.Validators;
 
@@ -16,7 +17,7 @@ namespace UnrealPluginManager.Server.Auth.Validators;
 /// </remarks>
 [AutoConstructor]
 public partial class PluginAuthValidator : IPluginAuthValidator {
-  private readonly UnrealPluginManagerContext _dbContext;
+  private readonly CloudUnrealPluginManagerContext _dbContext;
 
   /// <summary>
   /// Determines whether the current user has the necessary permissions to edit the specified plugin.
@@ -34,22 +35,29 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
   public async Task<bool> CanEditPlugin(AuthorizationHandlerContext context, string pluginName) {
     ArgumentNullException.ThrowIfNull(context.User.Identity);
     if (context.User.Identity.AuthenticationType == ApiKeyClaims.AuthenticationType) {
-      if (context.User.HasClaim(c => c.Type == ApiKeyClaims.PluginGlob && pluginName.Like(c.Value)
-                                     || c.Type == ApiKeyClaims.AllowedPlugins && c.Value == pluginName)) {
-        return await _dbContext.Plugins
-            .Where(x => x.Name == pluginName)
-            .SelectMany(x => x.Owners)
-            .AnyAsync(x => x.Username == context.User.Identity.Name);
+      if (!context.User.HasClaim(c => c.Type == ApiKeyClaims.PluginGlob && pluginName.Like(c.Value)
+                                      || c.Type == ApiKeyClaims.AllowedPlugins && c.Value == pluginName)) {
+        return false;
       }
+
+      return await _dbContext.Users
+          .Where(x => x.Username == context.User.Identity.Name)
+          .SelectMany(x => x.Plugins)
+          .AnyAsync(x => x.Name == pluginName);
+      ;
     } else {
       ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
       var validPlugin = await _dbContext.Plugins
-          .Include(x => x.Owners
-              .Where(y => y.Username == context.User.Identity.Name))
-          .Where(x => x.Name == pluginName)
+          .LeftJoin(_dbContext.PluginOwners, x => x.Id, x => x.PluginId,
+              (plugin, owner) => new {
+                  Plugin = plugin,
+                  owner.Owner
+              })
+          .Where(x => x.Plugin.Name == pluginName)
+          .GroupBy(x => x.Plugin.Name)
           .Select(x => new {
-              x.Name,
-              Owners = x.Owners.Select(y => y.Username).ToList()
+              x.Key,
+              Owners = x.Select(y => y.Owner.Username).ToList()
           })
           .FirstOrDefaultAsync();
       if (validPlugin is null || validPlugin.Owners.Contains(context.User.Identity.Name)) {

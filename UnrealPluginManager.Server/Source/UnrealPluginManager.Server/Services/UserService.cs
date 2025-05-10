@@ -1,13 +1,14 @@
 ﻿using System.Security.Claims;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Users;
 using UnrealPluginManager.Core.Exceptions;
-using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Clients;
+using UnrealPluginManager.Server.Database;
+using UnrealPluginManager.Server.Database.Users;
+using UnrealPluginManager.Server.Mappers;
+using UserMapper = UnrealPluginManager.Server.Mappers.UserMapper;
 
 namespace UnrealPluginManager.Server.Services;
 
@@ -19,7 +20,7 @@ namespace UnrealPluginManager.Server.Services;
 public partial class UserService : IUserService {
   private const string RealmName = "unreal-plugin-manager";
   private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly UnrealPluginManagerContext _dataContext;
+  private readonly CloudUnrealPluginManagerContext _dataContext;
   private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
 
   /// <inheritdoc />
@@ -29,7 +30,7 @@ public partial class UserService : IUserService {
     var claimsDict = principal.Claims.ToDictionary(x => x.Type, x => x.Value);
     var username = principal.Identity.RequireNonNull()
         .Name.RequireNonNull();
-    
+
     var existingUser = await _dataContext.Users
         .Where(x => x.Username == username)
         .ToUserOverviewQuery()
@@ -41,13 +42,13 @@ public partial class UserService : IUserService {
     var newUser = new User {
         Username = username,
         Email = claimsDict[ClaimTypes.Email]
-    }; 
+    };
     _dataContext.Users.Add(newUser);
     await _dataContext.SaveChangesAsync();
-    
-    return newUser.ToUserOverview();
+
+    return UserMapper.ToUserOverview(newUser);
   }
-  
+
   /// <inheritdoc />
   public async Task<string> CreateApiKey(Guid userId, ApiKeyOverview apiKey) {
     var now = DateTimeOffset.Now;
@@ -71,7 +72,7 @@ public partial class UserService : IUserService {
         apiKey.AllowedPlugins.Count > apiKey.AllowedPlugins.DistinctBy(x => x.Id).Count()) {
       throw new BadArgumentException("Api key cannot specify duplicate allowed plugins.");
     }
-    
+
     var username = await _dataContext.Users
         .Where(x => x.Id == userId)
         .Select(x => x.Username)
@@ -79,14 +80,14 @@ public partial class UserService : IUserService {
     if (username is null) {
       throw new ContentNotFoundException("User not found.");
     }
-    
+
     CreatedApiKey createdKey;
     try {
       createdKey = await _keycloakApiKeyClient.CreateNewApiKey(RealmName, username, apiKey.ExpiresAt);
     } catch (KeycloakHttpClientException ex) {
       throw new ForeignApiException(ex.StatusCode, "Error creating Api Key", ex);
     }
-    var newApiKey = apiKey.ToApiKey(createdKey.Id);
+    var newApiKey = UserMapper.ToApiKey(apiKey, createdKey.Id);
     newApiKey.UserId = userId;
     _dataContext.ApiKeys.Add(newApiKey);
 
@@ -98,12 +99,12 @@ public partial class UserService : IUserService {
       if (existingPluginsCount != pluginIds.Count) {
         throw new ContentNotFoundException("One or more allowed plugins not found.");
       }
-      
+
       _dataContext.AllowedPlugins.AddRange(apiKey.AllowedPlugins
-                                               .Select(x => new AllowedPlugin {
-                                                   ApiKeyId = newApiKey.Id,
-                                                   PluginId = x.Id
-                                               }));
+          .Select(x => new AllowedPlugin {
+              ApiKeyId = newApiKey.Id,
+              PluginId = x.Id
+          }));
     }
 
     await _dataContext.SaveChangesAsync();

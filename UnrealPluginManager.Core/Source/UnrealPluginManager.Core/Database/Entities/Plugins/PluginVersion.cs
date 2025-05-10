@@ -144,11 +144,6 @@ public class PluginVersion : IVersionedEntity {
   public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
 
   /// <summary>
-  /// Gets or sets the collection of binaries associated with the plugin version.
-  /// </summary>
-  public ICollection<UploadedBinaries> Binaries { get; set; } = new List<UploadedBinaries>();
-
-  /// <summary>
   /// Gets or sets the timestamp indicating when the plugin version was created.
   /// </summary>
   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

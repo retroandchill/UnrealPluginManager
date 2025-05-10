@@ -1,11 +1,14 @@
-﻿using LanguageExt;
+﻿using System.IO.Abstractions;
+using LanguageExt;
 using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Exceptions;
+using UnrealPluginManager.Local.Model.Cache;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
 
@@ -16,15 +19,23 @@ namespace UnrealPluginManager.Local.Services;
 /// </summary>
 [AutoConstructor]
 public partial class PluginManagementService : IPluginManagementService {
+  private readonly IFileSystem _fileSystem;
   private readonly IRemoteService _remoteService;
   private readonly IEngineService _engineService;
   private readonly IPluginService _pluginService;
+  private readonly IStorageService _storageService;
+  private readonly ISourceDownloadService _sourceDownloadService;
+  private readonly IBinaryCacheService _binaryCacheService;
 
   private const int DefaultPageSize = 100;
 
+  private const string PluginCacheDirectory = "Plugins";
+
   /// <inheritdoc />
-  public Task<Option<PluginVersionInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange) {
-    return _pluginService.GetPluginVersionInfo(pluginName, versionRange);
+  public async Task<Option<PluginBuildInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange,
+                                                             string engineVersion,
+                                                             IReadOnlyCollection<string> platforms) {
+    return await _binaryCacheService.GetCachedPluginBuild(pluginName, versionRange, engineVersion, platforms);
   }
 
   /// <inheritdoc />
@@ -125,16 +136,25 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new RemoteNotFoundException("No default remote configured.");
     }
 
-    await using var fileData = await _pluginService.GetPluginFileData(plugin.PluginId, plugin.VersionId);
+    var manifest = plugin.ToPluginManifest();
+
+    await using var iconFile = plugin.Icon is not null
+        ? _storageService.GetResourceStream(plugin.Icon.StoredFilename)
+        : null;
+
+    var readme = await _pluginService.GetPluginReadme(plugin.PluginId, plugin.VersionId)
+        .ContinueWith(x => x.IsFaulted ? null : x.Result);
+
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(new FileParameter("submission", fileData.FileData));
+    return await pluginsApi.SubmitPluginAsync(manifest, iconFile is not null ? new FileParameter(iconFile) : null,
+        readme);
   }
 
   /// <inheritdoc />
-  public async Task<PluginVersionDetails> DownloadPlugin(string pluginName, SemVersion version,
-                                                         int? remote, string engineVersion,
-                                                         List<string> platforms) {
-    var plugin = await _pluginService.GetPluginVersionDetails(pluginName, version);
+  public async Task<PluginBuildInfo> DownloadPlugin(string pluginName, SemVersion version,
+                                                    int? remote, string engineVersion,
+                                                    List<string> platforms) {
+    var plugin = await _binaryCacheService.GetCachedPluginBuild(pluginName, version, engineVersion, platforms);
     return await plugin.OrElseGetAsync(async () => {
       if (!remote.HasValue) {
         throw new PluginNotFoundException(
@@ -151,10 +171,33 @@ public partial class PluginManagementService : IPluginManagementService {
         throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
       }
 
-      await using var pluginDownload = await pluginsApi.DownloadPluginVersionAsync(pluginToDownload.PluginId,
-              pluginToDownload.VersionId, engineVersion, platforms, true)
-          .Map(x => x.Content);
-      return await _pluginService.SubmitPlugin(pluginDownload);
+      var manifest = pluginToDownload.ToPluginManifest();
+
+      var pluginDirectoryName =
+          Path.Join(_storageService.BaseDirectory, PluginCacheDirectory, pluginName, version.ToString());
+      var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
+      pluginDirectory.Create();
+
+      var sourceDirectoryName = Path.Join(pluginDirectoryName, "Source");
+      var sourceDirectory = _fileSystem.DirectoryInfo.New(sourceDirectoryName);
+      await _sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
+
+      var upluginFile = sourceDirectory
+          .EnumerateFiles("*.uplugin", SearchOption.TopDirectoryOnly)
+          .FirstOrDefault();
+
+      if (upluginFile is null) {
+        throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
+      }
+
+      var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
+      var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
+      buildDirectory.Create();
+      if (await _engineService.BuildPlugin(upluginFile, buildDirectory, engineVersion, platforms) != 0) {
+        throw new InvalidOperationException();
+      }
+
+      return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, engineVersion, platforms);
     });
   }
 }
