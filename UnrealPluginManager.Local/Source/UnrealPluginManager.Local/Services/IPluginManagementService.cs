@@ -106,20 +106,20 @@ public interface IPluginManagementService {
   /// and submits it to the specified or default remote.
   /// </summary>
   /// <param name="pluginName">
-  /// The name of the plugin to upload.
+  ///   The name of the plugin to upload.
   /// </param>
   /// <param name="version">
-  /// The version of the plugin to upload, represented as a <see cref="SemVersion"/>.
+  ///   The version of the plugin to upload, represented as a <see cref="SemVersion"/>.
   /// </param>
   /// <param name="remote">
-  /// An optional string specifying the name of the remote to which the plugin will be uploaded.
-  /// If null, the default remote is used.
+  ///   An optional string specifying the name of the remote to which the plugin will be uploaded.
+  ///   If null, the default remote is used.
   /// </param>
   /// <returns>
   /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginDetails"/>
   /// object containing detailed information about the uploaded plugin.
   /// </returns>
-  Task<PluginVersionDetails> UploadPlugin(string pluginName, SemVersion version, string? remote);
+  Task<PluginVersionInfo> UploadPlugin(string pluginName, SemVersion version, string? remote);
 
   /// <summary>
   /// Downloads the specified version of a plugin from a remote source.

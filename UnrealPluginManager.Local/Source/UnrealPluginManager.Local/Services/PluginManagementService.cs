@@ -124,7 +124,7 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginVersionDetails> UploadPlugin(string pluginName, SemVersion version, string? remote) {
+  public async Task<PluginVersionInfo> UploadPlugin(string pluginName, SemVersion version, string? remote) {
     var plugin = await _pluginService.ListLatestVersions(pluginName, SemVersionRange.Equals(version))
         .Map(x => x.Count > 0 ? x[0] : null);
     if (plugin is null) {
