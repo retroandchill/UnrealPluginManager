@@ -24,17 +24,6 @@ public class PluginDependency {
   public required string PluginName { get; set; }
 
   /// <summary>
-  /// Gets the type of the plugin.
-  /// </summary>
-  /// <remarks>
-  /// The type determines the classification of the plugin, which may include
-  /// categories such as Engine, Provided, or External. This property is utilized
-  /// to differentiate plugins based on their origin or functionality and
-  /// typically influences dependency evaluation or management within the system.
-  /// </remarks>
-  public required PluginType Type { get; set; }
-
-  /// <summary>
   /// Gets the version range of the dependent plugin.
   /// </summary>
   /// <remarks>

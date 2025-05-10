@@ -1,9 +1,8 @@
-﻿using System.IO.Abstractions;
-using LanguageExt;
+﻿using LanguageExt;
 using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -106,22 +105,6 @@ public interface IPluginService {
   List<PluginSummary> GetDependencyList(IDependencyChainNode root, DependencyManifest manifest);
 
   /// <summary>
-  /// Adds a new plugin to the system using the provided plugin name and descriptor information.
-  /// </summary>
-  /// <param name="pluginName">
-  ///   The unique name of the plugin to be added.
-  /// </param>
-  /// <param name="descriptor">
-  ///   A <see cref="PluginDescriptor"/> object containing detailed metadata about the plugin, such as version, description, and other attributes.
-  /// </param>
-  /// <param name="fileData"></param>
-  /// <returns>
-  /// A <see cref="PluginSummary"/> representing the added plugin, including its name and optional description.
-  /// </returns>
-  Task<PluginVersionDetails> AddPlugin(string pluginName, PluginDescriptor descriptor,
-                                       PartitionedPlugin fileData);
-
-  /// <summary>
   /// Retrieves the README file content for a specific plugin version.
   /// </summary>
   /// <param name="pluginId">The unique identifier of the plugin.</param>
@@ -154,113 +137,15 @@ public interface IPluginService {
   Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme);
 
   /// <summary>
-  /// Submits a plugin file for processing and storage, associating it with a specific engine version.
+  /// Submits a plugin to the system by providing its manifest, optional icon, and optional readme file.
   /// </summary>
-  /// <param name="fileData">
-  ///     The stream containing the plugin file data to be submitted.
-  /// </param>
-  /// <param name="engineVersion">
-  ///     The version of the Unreal Engine that the plugin is associated with.
-  /// </param>
+  /// <param name="manifest">The manifest containing the core details and metadata of the plugin.</param>
+  /// <param name="icon">An optional stream containing the plugin's representation icon.</param>
+  /// <param name="readme">An optional readme text containing additional information about the plugin.</param>
   /// <returns>
-  /// A <see cref="PluginSummary"/> representing the processed and stored plugin, including its metadata.
+  /// The details of the submitted plugin version as a <see cref="PluginVersionDetails"/> object.
   /// </returns>
-  Task<PluginVersionDetails> SubmitPlugin(Stream fileData, string engineVersion);
-
-  /// <summary>
-  /// Submits a plugin along with its platform-specific binaries.
-  /// </summary>
-  /// <param name="submission"></param>
-  /// <returns>
-  /// A <see cref="PluginDetails"/> object containing detailed information about the submitted plugin.
-  /// </returns>
-  Task<PluginVersionDetails> SubmitPlugin(Stream submission);
-
-  /// <summary>
-  /// Submits a plugin from the specified directory for inclusion in the system, including processing metadata and versioning information.
-  /// </summary>
-  /// <param name="pluginDirectory">The directory containing the plugin's files, including its descriptor.</param>
-  /// <param name="engineVersion">The version of the engine that the plugin supports.</param>
-  /// <returns>
-  /// A <see cref="PluginDetails"/> object containing detailed information about the submitted plugin.
-  /// </returns>
-  Task<PluginVersionDetails> SubmitPlugin(IDirectoryInfo pluginDirectory, string engineVersion);
-
-  /// <summary>
-  /// Retrieves the source code file for a specific plugin version.
-  /// </summary>
-  /// <param name="pluginId">The unique identifier of the plugin.</param>
-  /// <param name="versionId">The unique identifier of the plugin version.</param>
-  /// <returns>
-  /// An <see cref="IFileInfo"/> representing the source code file of the specified plugin version.
-  /// </returns>
-  Task<IFileInfo> GetPluginSource(Guid pluginId, Guid versionId);
-
-  /// <summary>
-  /// Retrieves the binary data of a specified plugin for a specific version, engine version, and platform.
-  /// </summary>
-  /// <param name="pluginId">The unique identifier of the plugin.</param>
-  /// <param name="versionId">The unique identifier of the specific version of the plugin.</param>
-  /// <param name="engineVersion">The engine version the plugin is associated with.</param>
-  /// <param name="platform">The target platform for which the plugin binary is requested.</param>
-  /// <returns>
-  /// A <see cref="IFileInfo"/> representing the binary data file of the requested plugin.
-  /// </returns>
-  Task<IFileInfo> GetPluginBinaries(Guid pluginId, Guid versionId, string engineVersion,
-                                    string platform);
-
-
-  /// <summary>
-  /// Retrieves the stored plugin version data, including the source file, optional icon, and list of binaries for the specified plugin and version.
-  /// </summary>
-  /// <param name="pluginId">The unique identifier of the plugin.</param>
-  /// <param name="versionId">The unique identifier of the plugin version.</param>
-  /// <returns>
-  /// A <see cref="StoredPluginVersion"/> containing the source file, optional icon, and binaries for the specified plugin version.
-  /// </returns>
-  Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId);
-
-
-  /// <summary>
-  /// Retrieves the raw file data for a specified plugin, based on the provided plugin identifier, version range, engine version, and target platforms.
-  /// </summary>
-  /// <param name="pluginId">The unique identifier of the plugin to retrieve.</param>
-  /// <param name="targetVersion">The range of plugin versions to consider when fetching the file data.</param>
-  /// <param name="engineVersion">The specific engine version that the plugin file should be compatible with.</param>
-  /// <param name="targetPlatforms">The collection of target platform identifiers for which the plugin file is relevant.</param>
-  /// <param name="separated"></param>
-  /// <returns>
-  /// A <see cref="Stream"/> containing the requested plugin file data.
-  /// </returns>
-  Task<PluginDownload> GetPluginFileData(Guid pluginId, SemVersionRange targetVersion, string engineVersion,
-                                         IReadOnlyCollection<string> targetPlatforms, bool separated = false);
-
-  /// <summary>
-  /// Retrieves the file data of a plugin version for a specified engine version and target platforms.
-  /// </summary>
-  /// <param name="pluginId">The unique identifier of the plugin.</param>
-  /// <param name="versionId">The unique identifier of the specific version of the plugin.</param>
-  /// <param name="engineVersion">The engine version for which the plugin file data is requested.</param>
-  /// <param name="targetPlatforms">The collection of target platforms for which the plugin file is intended.</param>
-  /// <param name="separated"></param>
-  /// <returns>
-  /// A stream containing the binary content of the plugin file.
-  /// </returns>
-  Task<PluginDownload> GetPluginFileData(Guid pluginId, Guid versionId, string engineVersion,
-                                         IReadOnlyCollection<string> targetPlatforms, bool separated = false);
-
-  /// <summary>
-  /// Retrieves a collection of plugin data files that match the specified criteria including plugin name, version, engine version, and target platforms.
-  /// </summary>
-  /// <param name="pluginName">The name of the plugin to retrieve data for.</param>
-  /// <param name="pluginVersion">The version of the plugin to retrieve data for.</param>
-  /// <param name="engineVersion">The version of the engine for which the plugin is targeted.</param>
-  /// <param name="targetPlatforms">A collection of target platforms for the plugin.</param>
-  /// <returns>
-  /// An asynchronous enumerable collection of <see cref="IFileInfo"/> representing plugin data files.
-  /// </returns>
-  IAsyncEnumerable<IFileInfo> GetAllPluginData(string pluginName, SemVersion pluginVersion, string engineVersion,
-                                               IReadOnlyCollection<string> targetPlatforms);
+  Task<PluginVersionDetails> SubmitPlugin(PluginManifest manifest, Stream? icon = null, string? readme = null);
 
 
 }

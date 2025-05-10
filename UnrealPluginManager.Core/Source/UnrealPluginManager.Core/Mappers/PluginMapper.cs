@@ -4,6 +4,7 @@ using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Model.Engine;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Mappers;
@@ -63,10 +64,6 @@ public static partial class PluginMapper {
   /// <returns>A <see cref="PluginVersionInfo"/> representing the provided <see cref="PluginVersion"/>.</returns>
   [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionInfo.PluginId))]
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionInfo.Name))]
-  [MapProperty(nameof(PluginVersion.Parent.Description), nameof(PluginVersionInfo.Description))]
-  [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionInfo.FriendlyName))]
-  [MapProperty(nameof(PluginVersion.Parent.AuthorName), nameof(PluginVersionInfo.AuthorName))]
-  [MapProperty(nameof(PluginVersion.Parent.AuthorWebsite), nameof(PluginVersionInfo.AuthorWebsite))]
   [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionInfo.VersionId))]
   [MapperIgnoreTarget(nameof(PluginVersionInfo.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteIndex))]
@@ -79,14 +76,19 @@ public static partial class PluginMapper {
   /// <returns>An instance of <see cref="PluginVersionDetails"/> that represents the provided <see cref="PluginVersion"/>.</returns>
   [MapProperty(nameof(PluginVersion.ParentId), nameof(PluginVersionDetails.PluginId))]
   [MapProperty(nameof(PluginVersion.Parent.Name), nameof(PluginVersionDetails.Name))]
-  [MapProperty(nameof(PluginVersion.Parent.FriendlyName), nameof(PluginVersionDetails.FriendlyName))]
   [MapProperty(nameof(PluginVersion.Id), nameof(PluginVersionDetails.VersionId))]
-  [MapProperty(nameof(PluginVersion.Parent.AuthorName), nameof(PluginVersionDetails.AuthorName))]
-  [MapProperty(nameof(PluginVersion.Parent.AuthorWebsite), nameof(PluginVersionDetails.AuthorWebsite))]
-  [MapProperty(nameof(PluginVersion.Parent.Description), nameof(PluginVersionDetails.Description))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.Installed))]
   [MapperIgnoreTarget(nameof(PluginVersionDetails.RemoteIndex))]
   public static partial PluginVersionDetails ToPluginVersionDetails(this PluginVersion version);
+
+  public static partial PluginVersion ToPluginVersion(this PluginManifest manifest);
+
+  [MapProperty(nameof(PluginDependencyManifest.Name), nameof(Dependency.PluginName))]
+  [MapProperty(nameof(PluginDependencyManifest.Version), nameof(Dependency.PluginVersion))]
+  [MapperIgnoreTarget(nameof(Dependency.Id))]
+  [MapperIgnoreTarget(nameof(Dependency.Parent))]
+  [MapperIgnoreTarget(nameof(Dependency.ParentId))]
+  public static partial Dependency ToDependency(this PluginDependencyManifest manifest);
 
   /// <summary>
   /// Converts a given <see cref="PluginVersion"/> to a <see cref="VersionOverview"/> representation.
@@ -118,67 +120,11 @@ public static partial class PluginMapper {
   public static partial VersionDetails ToVersionDetails(this PluginVersion version);
 
   /// <summary>
-  /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="Plugin"/> object using the specified plugin name and optional icon.
-  /// </summary>
-  /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data.</param>
-  /// <param name="name">The name of the plugin to assign in the created <see cref="Plugin"/> instance.</param>
-  /// <returns>A new <see cref="Plugin"/> object mapped from the provided <see cref="PluginDescriptor"/>, name, and optional icon.</returns>
-  [MapperIgnoreTarget(nameof(Plugin.Id))]
-  [MapperIgnoreTarget(nameof(Plugin.Versions))]
-  [MapProperty(nameof(PluginDescriptor.CreatedBy), nameof(Plugin.AuthorName))]
-  [MapProperty(nameof(PluginDescriptor.CreatedByUrl), nameof(Plugin.AuthorWebsite))]
-  [MapperIgnoreTarget(nameof(PluginVersion.CreatedAt))]
-  public static partial Plugin ToPlugin(this PluginDescriptor descriptor, string name);
-
-  /// <summary>
-  /// Maps a <see cref="PluginDescriptor"/> object to a <see cref="PluginVersion"/> object.
-  /// </summary>
-  /// <param name="descriptor">The <see cref="PluginDescriptor"/> object containing source data to be mapped.</param>
-  /// <returns>A new <see cref="PluginVersion"/> object populated with data from the provided <see cref="PluginDescriptor"/> object.</returns>
-  [MapperIgnoreTarget(nameof(PluginVersion.Id))]
-  [MapperIgnoreTarget(nameof(PluginVersion.Parent))]
-  [MapperIgnoreTarget(nameof(PluginVersion.ParentId))]
-  [MapperIgnoreTarget(nameof(PluginVersion.Binaries))]
-  [MapProperty(nameof(PluginDescriptor.VersionName), nameof(PluginVersion.Version))]
-  [MapProperty(nameof(PluginDescriptor.Plugins), nameof(PluginVersion.Dependencies))]
-  [MapperIgnoreTarget(nameof(PluginVersion.CreatedAt))]
-  [MapperIgnoreTarget(nameof(PluginVersion.Source))]
-  [MapperIgnoreTarget(nameof(PluginVersion.SourceId))]
-  [MapperIgnoreTarget(nameof(PluginVersion.Icon))]
-  [MapperIgnoreTarget(nameof(PluginVersion.IconId))]
-  [MapperIgnoreTarget(nameof(PluginVersion.Readme))]
-  [MapperIgnoreTarget(nameof(PluginVersion.ReadmeId))]
-  public static partial PluginVersion ToPluginVersion(this PluginDescriptor descriptor);
-
-  /// <summary>
-  /// Maps a <see cref="PluginReferenceDescriptor"/> object to a <see cref="Dependency"/> object with the specified properties transformed accordingly.
-  /// </summary>
-  /// <param name="descriptor">The <see cref="PluginReferenceDescriptor"/> object containing source data for mapping.</param>
-  /// <returns>A new <see cref="Dependency"/> object mapped from the provided <see cref="PluginReferenceDescriptor"/> instance.</returns>
-  [MapperIgnoreTarget(nameof(Dependency.Id))]
-  [MapperIgnoreTarget(nameof(Dependency.Parent))]
-  [MapperIgnoreTarget(nameof(Dependency.ParentId))]
-  [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(Dependency.PluginName))]
-  [MapProperty(nameof(PluginReferenceDescriptor.PluginType), nameof(Dependency.Type))]
-  [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(Dependency.PluginVersion))]
-  public static partial Dependency ToDependency(this PluginReferenceDescriptor descriptor);
-
-  /// <summary>
   /// Maps a <see cref="Dependency"/> entity to a <see cref="PluginDependency"/> representation.
   /// </summary>
   /// <param name="dependency">The source <see cref="Dependency"/> entity to be mapped.</param>
   /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="Dependency"/> entity.</returns>
   public static partial PluginDependency ToPluginDependency(this Dependency dependency);
-
-  /// <summary>
-  /// Maps a <see cref="PluginReferenceDescriptor"/> to a <see cref="PluginDependency"/> representation.
-  /// </summary>
-  /// <param name="descriptor">The source <see cref="PluginReferenceDescriptor"/> to be mapped.</param>
-  /// <returns>A <see cref="PluginDependency"/> instance representing the provided <see cref="PluginReferenceDescriptor"/>.</returns>
-  [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(Dependency.PluginName))]
-  [MapProperty(nameof(PluginReferenceDescriptor.PluginType), nameof(Dependency.Type))]
-  [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(Dependency.PluginVersion))]
-  public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor descriptor);
 
   /// <summary>
   /// Maps a <see cref="PluginBinaryType"/> to an <see cref="UploadedBinaries"/> representation.
@@ -200,6 +146,10 @@ public static partial class PluginMapper {
   /// <returns>A <see cref="DependencyChainRoot"/> instance representing the dependency chain of the provided <see cref="IDependencyHolder"/>.</returns>
   [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
   public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
+
+  [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(PluginDependency.PluginName))]
+  [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(PluginDependency.PluginVersion))]
+  public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor manifest);
 
   /// <summary>
   /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.

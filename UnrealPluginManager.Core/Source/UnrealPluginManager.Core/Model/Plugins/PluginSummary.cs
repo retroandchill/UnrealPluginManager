@@ -26,13 +26,6 @@ public record PluginSummary {
   [Required]
   public required string Name { get; init; }
 
-  /// <summary>
-  /// Gets or sets an optional user-friendly name for the plugin.
-  /// This property provides a more descriptive or colloquial name that can be displayed in user interfaces
-  /// and used as an alternative to the plugin's primary name when needed.
-  /// </summary>
-  public required string? FriendlyName { get; init; }
-
 
   /// <summary>
   /// Gets the unique identifier of the plugin version.
@@ -49,7 +42,7 @@ public record PluginSummary {
   [Required]
   [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; init; }
-  
+
   /// <summary>
   /// Indicates whether the plugin version is currently installed.
   /// </summary>

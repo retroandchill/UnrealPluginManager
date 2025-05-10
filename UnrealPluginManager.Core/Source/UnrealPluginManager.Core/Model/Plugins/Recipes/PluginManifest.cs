@@ -35,6 +35,12 @@ public record PluginManifest {
   public string? Description { get; init; }
 
   /// <summary>
+  /// Gets or sets the license associated with the plugin. This property provides information
+  /// about the licensing terms under which the plugin is distributed.
+  /// </summary>
+  public string? License { get; init; }
+
+  /// <summary>
   /// Gets the homepage URL of the plugin. This property provides a link to the plugin's
   /// main page or website containing additional information, updates, or documentation.
   /// </summary>
@@ -45,20 +51,6 @@ public record PluginManifest {
   /// URL and commit SHA that uniquely identifies the plugin's source in a repository.
   /// </summary>
   public required SourceLocation Source { get; init; }
-
-  /// <summary>
-  /// Gets the location of the plugin's icon file. This property specifies the
-  /// source information for the icon, including its URL and associated hash,
-  /// used to visually represent the plugin in the Unreal Plugin Manager interface.
-  /// </summary>
-  public SourceLocation? Icon { get; init; }
-
-  /// <summary>
-  /// Gets the location of the plugin's readme file. This property provides information about the
-  /// source and checksum of the readme, allowing the Unreal Plugin Manager to access or verify
-  /// the documentation associated with the plugin.
-  /// </summary>
-  public SourceLocation? Readme { get; init; }
 
   /// <summary>
   /// Gets the list of dependencies required by the plugin. Each dependency is described

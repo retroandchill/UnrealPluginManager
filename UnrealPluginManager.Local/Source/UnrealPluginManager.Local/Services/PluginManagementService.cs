@@ -93,8 +93,7 @@ public partial class PluginManagementService : IPluginManagementService {
     var allDependencies = root.Dependencies
         .Concat(currentlyInstalled.Select(x => new PluginDependency {
             PluginName = x.Key,
-            PluginVersion = SemVersionRange.AtLeast(x.Value),
-            Type = PluginType.Provided
+            PluginVersion = SemVersionRange.AtLeast(x.Value)
         }))
         .DistinctBy(x => x.PluginName)
         .ToList();

@@ -1,10 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database.Entities.Storage;
 using UnrealPluginManager.Core.Database.Entities.Users;
-using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -41,52 +37,6 @@ public class Plugin {
   public required string Name { get; set; }
 
   /// <summary>
-  /// Gets or sets the user-friendly, display name of the plugin.
-  /// </summary>
-  /// <remarks>
-  /// This property represents an optional, human-readable identifier
-  /// that can be used to display or describe the plugin in a more
-  /// descriptive and accessible manner compared to its technical name.
-  /// It supports up to 255 characters and adheres to defined length constraints.
-  /// </remarks>
-  [MinLength(1)]
-  [MaxLength(255)]
-  public string? FriendlyName { get; set; }
-
-  /// <summary>
-  /// Gets or sets the description of the plugin.
-  /// </summary>
-  /// <remarks>
-  /// This property contains a textual representation that describes the plugin's purpose, functionality, or other relevant details.
-  /// It is constrained to a string length between 1 and 2000 characters.
-  /// </remarks>
-  [MinLength(1)]
-  [MaxLength(2000)]
-  public string? Description { get; set; }
-
-  /// <summary>
-  /// Gets or sets the name of the author of the plugin.
-  /// </summary>
-  /// <remarks>
-  /// This property contains the name of the individual or entity responsible for creating the plugin.
-  /// It is optional but must adhere to the specified length and format restrictions if provided.
-  /// </remarks>
-  [MinLength(1)]
-  [MaxLength(255)]
-  public string? AuthorName { get; set; }
-
-  /// <summary>
-  /// Gets or sets the website of the plugin's author.
-  /// </summary>
-  /// <remarks>
-  /// The website provides additional information about the author, such as their portfolio,
-  /// project details, or other plugins they have developed. It may be null if the author
-  /// has not provided a website.
-  /// </remarks>
-  [MaxLength(255)]
-  public Uri? AuthorWebsite { get; set; }
-
-  /// <summary>
   /// Gets or sets the timestamp at which the plugin entity was created.
   /// </summary>
   /// <remarks>
@@ -114,7 +64,7 @@ public class Plugin {
   /// model metadata.
   /// </remarks>
   public ICollection<User> Owners { get; set; } = new List<User>();
-  
+
   internal static void DefineModelMetadata(EntityTypeBuilder<Plugin> entity) {
     entity.HasIndex(x => new {
             x.Name
