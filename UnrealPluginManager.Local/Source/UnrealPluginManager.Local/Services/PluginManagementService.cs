@@ -226,7 +226,12 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new InvalidOperationException();
     }
 
-    return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches, installedEngine.Name,
+    var cachedPlugin = await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches,
+        installedEngine.Name,
         platforms);
+    var buildInfoJson = _jsonService.Serialize(cachedPlugin);
+    var buildInfoFile = _fileSystem.FileInfo.New(Path.Join(buildDirectory.FullName, "build-info.json"));
+    await buildInfoFile.WriteAllTextAsync(buildInfoJson);
+    return cachedPlugin;
   }
 }

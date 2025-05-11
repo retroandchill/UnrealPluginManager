@@ -73,19 +73,26 @@ public partial class BinaryCacheService : IBinaryCacheService {
     return build.ToPluginBuildInfo();
   }
 
+  /// <inheritdoc />
   public async Task<Option<PluginBuildInfo>> GetCachedPluginBuild(string pluginName, SemVersion pluginVersion,
                                                                   string engineVersion,
                                                                   IReadOnlyCollection<string> targetPlatforms) {
     return await _dbContext.CachedBuilds
+        .Include(x => x.PluginVersion)
+        .ThenInclude(x => x.Dependencies)
+        .Include(x => x.PluginVersion)
+        .ThenInclude(x => x.Parent)
         .Where(x => x.PluginVersion.Parent.Name == pluginName
                     && x.PluginVersion.VersionString == pluginVersion.ToString()
                     && x.EngineVersion == engineVersion
                     && targetPlatforms.All(y => x.Platforms.Any(z => z.Platform == y)))
+        .AsAsyncEnumerable()
         .OrderByDescending(x => x.BuiltOn)
-        .ToPluginBuildInfoQuery()
+        .Select(x => x.ToPluginBuildInfo())
         .FirstAsync();
   }
 
+  /// <inheritdoc />
   public async Task<Option<IDirectoryInfo>> GetCachedBuildDirectory(string pluginName, SemVersion pluginVersion,
                                                                     string engineVersion,
                                                                     IReadOnlyCollection<string> targetPlatforms) {
