@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UnrealPluginManager.Local.Database;
 
@@ -11,9 +12,11 @@ using UnrealPluginManager.Local.Database;
 namespace UnrealPluginManager.Local.Migrations
 {
     [DbContext(typeof(LocalUnrealPluginManagerContext))]
-    partial class LocalUnrealPluginManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20250511141308_ChangeToBinaryCache")]
+    partial class ChangeToBinaryCache
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");

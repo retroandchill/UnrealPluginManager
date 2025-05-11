@@ -19,6 +19,7 @@ using UnrealPluginManager.Core.Model.Resolution;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local;
 using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Installation;
 using UnrealPluginManager.Local.Services;

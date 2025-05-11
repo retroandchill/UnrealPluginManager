@@ -2,6 +2,8 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using UnrealPluginManager.Cli.Helpers;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -80,16 +82,20 @@ public class BuildCommandOptions : ICommandOptions {
 public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
   private readonly IConsole _console;
   private readonly IFileSystem _fileSystem;
-  private readonly IEngineService _engineService;
+  private readonly IPluginManagementService _pluginManagementService;
   private readonly IInstallService _installService;
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-    var installResult = await _installService.InstallRequirements(options.Input, options.Version,
+    var manifestFile = _fileSystem.FileInfo.New(options.Input);
+    await using var manifestStream = manifestFile.OpenRead();
+    var manifest = await _jsonService.DeserializeAsync<PluginManifest>(manifestStream);
+
+    var installResult = await _installService.InstallRequirements(manifest, options.Version,
         ["Win64"]);
     _console.WriteVersionChanges(installResult);
-    var inputFile = _fileSystem.FileInfo.New(options.Input);
-    var dest = _fileSystem.Directory.CreateDirectory(Path.Combine(inputFile.Name, "Build"));
-    return await _engineService.BuildPlugin(inputFile, dest, options.Version, []);
+    await _pluginManagementService.BuildFromManifest(manifest, options.Version, ["Win64"]);
+    return 0;
   }
 }

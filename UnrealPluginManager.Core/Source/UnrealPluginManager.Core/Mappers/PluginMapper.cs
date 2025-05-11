@@ -112,9 +112,15 @@ public static partial class PluginMapper {
   [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
   public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
 
+  public static partial DependencyChainRoot ToDependencyChainRoot(this PluginManifest manifest);
+
   [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(PluginDependency.PluginName))]
   [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(PluginDependency.PluginVersion))]
   public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor manifest);
+
+  [MapProperty(nameof(PluginDependencyManifest.Name), nameof(PluginDependency.PluginName))]
+  [MapProperty(nameof(PluginDependencyManifest.Version), nameof(PluginDependency.PluginVersion))]
+  public static partial PluginDependency ToPluginDependency(this PluginDependencyManifest manifest);
 
   /// <summary>
   /// Converts an <see cref="IQueryable{Plugin}"/> to an <see cref="IQueryable{PluginOverview}"/> representation.

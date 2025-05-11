@@ -4,6 +4,7 @@ using Semver;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.EngineFile;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Model.Project;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -46,6 +47,13 @@ public partial class InstallService : IInstallService {
     }
 
     var chainRoot = descriptor.ToDependencyChainRoot();
+    var dependencyTree = await _pluginManagementService.GetPluginsToInstall(chainRoot, engineVersion);
+    return await InstallToEngine(dependencyTree, engineVersion, platforms);
+  }
+
+  public async Task<List<VersionChange>> InstallRequirements(PluginManifest manifest, string? engineVersion,
+                                                             IReadOnlyCollection<string> platforms) {
+    var chainRoot = manifest.ToDependencyChainRoot();
     var dependencyTree = await _pluginManagementService.GetPluginsToInstall(chainRoot, engineVersion);
     return await InstallToEngine(dependencyTree, engineVersion, platforms);
   }

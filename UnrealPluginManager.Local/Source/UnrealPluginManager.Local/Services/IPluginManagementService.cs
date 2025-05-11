@@ -1,7 +1,9 @@
-﻿using LanguageExt;
+﻿using System.IO.Abstractions;
+using LanguageExt;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Local.Model.Cache;
 
 namespace UnrealPluginManager.Local.Services;
@@ -146,4 +148,42 @@ public interface IPluginManagementService {
   Task<PluginBuildInfo> DownloadPlugin(string pluginName, SemVersion version, int? remote,
                                        string engineVersion,
                                        List<string> platforms);
+
+  /// <summary>
+  /// Builds a plugin from the specified manifest file, engine version, and target platforms.
+  /// </summary>
+  /// <param name="manifestFile">
+  /// The manifest file containing the plugin's metadata. This file is used to construct the build details.
+  /// </param>
+  /// <param name="engineVersion">
+  /// The version of the engine the plugin is being built for.
+  /// </param>
+  /// <param name="platforms">
+  /// A collection of target platforms the plugin should support.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginBuildInfo"/> object
+  /// containing details about the built plugin.
+  /// </returns>
+  Task<PluginBuildInfo> BuildFromManifest(IFileInfo manifestFile, string engineVersion,
+                                          IReadOnlyCollection<string> platforms);
+
+  /// <summary>
+  /// Builds plugin binaries and metadata using the specified manifest, engine version, and supported platforms.
+  /// </summary>
+  /// <param name="manifest">
+  ///   The manifest containing metadata and configuration for the plugin to be built.
+  /// </param>
+  /// <param name="engineVersion">
+  ///   The version of the Unreal Engine to target for the plugin build.
+  /// </param>
+  /// <param name="platforms">
+  ///   The collection of platforms to include in the build process.
+  /// </param>
+  /// <returns>
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginBuildInfo"/>
+  /// containing details about the successfully built plugin.
+  /// </returns>
+  Task<PluginBuildInfo> BuildFromManifest(PluginManifest manifest, string? engineVersion,
+                                          IReadOnlyCollection<string> platforms);
 }

@@ -1,4 +1,5 @@
 ﻿using Semver;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Local.Model.Installation;
 
 namespace UnrealPluginManager.Local.Services;
@@ -26,5 +27,8 @@ public interface IInstallService {
   /// <param name="platforms">The collection of platforms for which the requirements should be installed.</param>
   /// <returns>A task that represents the asynchronous installation operation. The task result contains the installation result.</returns>
   public Task<List<VersionChange>> InstallRequirements(string descriptorFile, string? engineVersion,
+                                                       IReadOnlyCollection<string> platforms);
+
+  public Task<List<VersionChange>> InstallRequirements(PluginManifest manifest, string? engineVersion,
                                                        IReadOnlyCollection<string> platforms);
 }

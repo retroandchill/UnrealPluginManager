@@ -1,4 +1,6 @@
-﻿using Semver;
+﻿using System.Text.Json.Serialization;
+using Semver;
+using UnrealPluginManager.Core.Converters;
 
 namespace UnrealPluginManager.Core.Model.Plugins.Recipes;
 
@@ -18,6 +20,7 @@ public record PluginManifest {
   /// Gets the semantic version of the plugin as defined in its manifest.
   /// This property specifies the version of the plugin for identification, compatibility, and dependency resolution purposes.
   /// </summary>
+  [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; init; }
 
   /// <summary>

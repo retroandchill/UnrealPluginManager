@@ -1,4 +1,6 @@
-﻿using Semver;
+﻿using System.Text.Json.Serialization;
+using Semver;
+using UnrealPluginManager.Core.Converters;
 
 namespace UnrealPluginManager.Core.Model.Plugins.Recipes;
 
@@ -17,6 +19,7 @@ public record PluginDependencyManifest {
   /// Gets or sets the version constraint of the plugin dependency.
   /// Defines the acceptable range of versions required for the dependency.
   /// </summary>
+  [JsonConverter(typeof(SemVersionRangeJsonConverter))]
   public SemVersionRange Version { get; init; } = SemVersionRange.AllRelease;
 
   /// <summary>

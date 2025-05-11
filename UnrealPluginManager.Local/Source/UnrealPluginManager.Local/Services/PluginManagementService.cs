@@ -5,6 +5,7 @@ using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Exceptions;
@@ -26,6 +27,7 @@ public partial class PluginManagementService : IPluginManagementService {
   private readonly IStorageService _storageService;
   private readonly ISourceDownloadService _sourceDownloadService;
   private readonly IBinaryCacheService _binaryCacheService;
+  private readonly IJsonService _jsonService;
 
   private const int DefaultPageSize = 100;
 
@@ -172,32 +174,53 @@ public partial class PluginManagementService : IPluginManagementService {
       }
 
       var manifest = pluginToDownload.ToPluginManifest();
-
-      var pluginDirectoryName =
-          Path.Join(_storageService.BaseDirectory, PluginCacheDirectory, pluginName, version.ToString());
-      var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
-      pluginDirectory.Create();
-
-      var sourceDirectoryName = Path.Join(pluginDirectoryName, "Source");
-      var sourceDirectory = _fileSystem.DirectoryInfo.New(sourceDirectoryName);
-      await _sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
-
-      var upluginFile = sourceDirectory
-          .EnumerateFiles("*.uplugin", SearchOption.TopDirectoryOnly)
-          .FirstOrDefault();
-
-      if (upluginFile is null) {
-        throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
-      }
-
-      var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
-      var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
-      buildDirectory.Create();
-      if (await _engineService.BuildPlugin(upluginFile, buildDirectory, engineVersion, platforms) != 0) {
-        throw new InvalidOperationException();
-      }
-
-      return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, engineVersion, platforms);
+      return await BuildFromManifest(manifest, engineVersion, platforms);
     });
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginBuildInfo> BuildFromManifest(IFileInfo manifestFile, string engineVersion,
+                                                       IReadOnlyCollection<string> platforms) {
+    await using var manifestStream = manifestFile.OpenRead();
+    var manifest = await _jsonService.DeserializeAsync<PluginManifest>(manifestStream);
+    return await BuildFromManifest(manifest, engineVersion, platforms);
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginBuildInfo> BuildFromManifest(PluginManifest manifest, string? engineVersion,
+                                                       IReadOnlyCollection<string> platforms) {
+    var installedEngine = _engineService.GetInstalledEngine(engineVersion);
+
+    var pluginDirectoryName = Path.Join(_storageService.BaseDirectory,
+        PluginCacheDirectory, manifest.Name, manifest.Version.ToString());
+    var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
+    pluginDirectory.Create();
+
+    var sourceDirectoryName = Path.Join(pluginDirectoryName, "Source");
+    var sourceDirectory = _fileSystem.DirectoryInfo.New(sourceDirectoryName);
+    sourceDirectory.Create();
+
+    var upluginFile = sourceDirectory
+        .EnumerateFiles("*.uplugin", SearchOption.AllDirectories)
+        .FirstOrDefault();
+    if (upluginFile is null) {
+      await _sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
+      upluginFile = sourceDirectory
+          .EnumerateFiles("*.uplugin", SearchOption.AllDirectories)
+          .FirstOrDefault();
+    }
+
+    if (upluginFile is null) {
+      throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
+    }
+
+    var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
+    var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
+    buildDirectory.Create();
+    if (await _engineService.BuildPlugin(upluginFile, buildDirectory, engineVersion, platforms) != 0) {
+      throw new InvalidOperationException();
+    }
+
+    return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, installedEngine.Name, platforms);
   }
 }
