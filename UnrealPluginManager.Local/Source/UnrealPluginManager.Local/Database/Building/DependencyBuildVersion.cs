@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -25,11 +26,13 @@ public class DependencyBuildVersion {
     builder.HasOne(x => x.Build)
         .WithMany(x => x.BuiltWith)
         .HasForeignKey(x => x.BuildId)
+        .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
 
     builder.HasOne(x => x.Dependency)
         .WithMany()
         .HasForeignKey(x => x.DependencyId)
+        .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
 
     builder.Property(x => x.Version)

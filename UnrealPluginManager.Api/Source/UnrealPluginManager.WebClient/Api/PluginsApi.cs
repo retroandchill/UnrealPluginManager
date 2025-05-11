@@ -144,6 +144,27 @@ namespace UnrealPluginManager.WebClient.Api {
                                                                      int? size = default(int?));
 
     /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version.
+    /// </summary>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <returns>List&lt;SourcePatchInfo&gt;</returns>
+    List<SourcePatchInfo> GetPluginPatches(Guid pluginId, Guid versionId);
+
+    /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version.
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <returns>ApiResponse of List&lt;SourcePatchInfo&gt;</returns>
+    ApiResponse<List<SourcePatchInfo>> GetPluginPatchesWithHttpInfo(Guid pluginId, Guid versionId);
+
+    /// <summary>
     /// Retrieves the readme content for a specific version of a plugin.
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
@@ -194,11 +215,12 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <returns>PluginVersionInfo</returns>
-    PluginVersionInfo SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
-                                   string? readme = default(string?));
+    PluginVersionInfo SubmitPlugin(PluginManifest manifest, List<string>? patches = default(List<string>?),
+                                   FileParameter? icon = default(FileParameter?), string? readme = default(string?));
 
     /// <summary>
     /// Submits a new plugin version along with optional icon and README information.
@@ -208,10 +230,12 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </remarks>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <returns>ApiResponse of PluginVersionInfo</returns>
     ApiResponse<PluginVersionInfo> SubmitPluginWithHttpInfo(PluginManifest manifest,
+                                                            List<string>? patches = default(List<string>?),
                                                             FileParameter? icon = default(FileParameter?),
                                                             string? readme = default(string?));
 
@@ -403,6 +427,34 @@ namespace UnrealPluginManager.WebClient.Api {
         int? size = default(int?), CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version.
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+    /// <returns>Task of List&lt;SourcePatchInfo&gt;</returns>
+    Task<List<SourcePatchInfo>> GetPluginPatchesAsync(Guid pluginId, Guid versionId,
+                                                      CancellationToken cancellationToken = default(CancellationToken));
+
+    /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version.
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+    /// <returns>Task of ApiResponse (List&lt;SourcePatchInfo&gt;)</returns>
+    Task<ApiResponse<List<SourcePatchInfo>>> GetPluginPatchesWithHttpInfoAsync(
+        Guid pluginId, Guid versionId, CancellationToken cancellationToken = default(CancellationToken));
+
+    /// <summary>
     /// Retrieves the readme content for a specific version of a plugin.
     /// </summary>
     /// <remarks>
@@ -473,11 +525,13 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </remarks>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
     /// <returns>Task of PluginVersionInfo</returns>
-    Task<PluginVersionInfo> SubmitPluginAsync(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
+    Task<PluginVersionInfo> SubmitPluginAsync(PluginManifest manifest, List<string>? patches = default(List<string>?),
+                                              FileParameter? icon = default(FileParameter?),
                                               string? readme = default(string?),
                                               CancellationToken cancellationToken = default(CancellationToken));
 
@@ -489,11 +543,13 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </remarks>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
     /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
     Task<ApiResponse<PluginVersionInfo>> SubmitPluginWithHttpInfoAsync(PluginManifest manifest,
+                                                                       List<string>? patches = default(List<string>?),
                                                                        FileParameter? icon = default(FileParameter?),
                                                                        string? readme = default(string?),
                                                                        CancellationToken cancellationToken =
@@ -1439,6 +1495,134 @@ namespace UnrealPluginManager.WebClient.Api {
     }
 
     /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version. 
+    /// </summary>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <returns>List&lt;SourcePatchInfo&gt;</returns>
+    public List<SourcePatchInfo> GetPluginPatches(Guid pluginId, Guid versionId) {
+      ApiResponse<List<SourcePatchInfo>> localVarResponse = GetPluginPatchesWithHttpInfo(pluginId, versionId);
+      return localVarResponse.Data;
+    }
+
+    /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version. 
+    /// </summary>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <returns>ApiResponse of List&lt;SourcePatchInfo&gt;</returns>
+    public ApiResponse<List<SourcePatchInfo>> GetPluginPatchesWithHttpInfo(Guid pluginId, Guid versionId) {
+      RequestOptions localVarRequestOptions = new RequestOptions();
+
+      string[] _contentTypes = new string[] {
+      };
+
+      // to determine the Accept header
+      string[] _accepts = new string[] {
+          "application/json"
+      };
+
+      var localVarContentType = ClientUtils.SelectHeaderContentType(_contentTypes);
+      if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+      var localVarAccept = ClientUtils.SelectHeaderAccept(_accepts);
+      if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+      localVarRequestOptions.PathParameters.Add("pluginId", ClientUtils.ParameterToString(pluginId)); // path parameter
+      localVarRequestOptions.PathParameters.Add("versionId",
+          ClientUtils.ParameterToString(versionId)); // path parameter
+
+      // authentication (oauth2) required
+      // oauth required
+      if (!string.IsNullOrEmpty(this.Configuration.AccessToken) &&
+          !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization")) {
+        localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+      }
+
+      // make the HTTP request
+      var localVarResponse = this.Client.Get<List<SourcePatchInfo>>("/plugins/{pluginId}/{versionId}/patches",
+          localVarRequestOptions, this.Configuration);
+
+      if (this.ExceptionFactory != null) {
+        Exception _exception = this.ExceptionFactory("GetPluginPatches", localVarResponse);
+        if (_exception != null) throw _exception;
+      }
+
+      return localVarResponse;
+    }
+
+    /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version. 
+    /// </summary>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+    /// <returns>Task of List&lt;SourcePatchInfo&gt;</returns>
+    public async Task<List<SourcePatchInfo>> GetPluginPatchesAsync(Guid pluginId, Guid versionId,
+                                                                   CancellationToken cancellationToken =
+                                                                       default(CancellationToken)) {
+      ApiResponse<List<SourcePatchInfo>> localVarResponse =
+          await GetPluginPatchesWithHttpInfoAsync(pluginId, versionId, cancellationToken).ConfigureAwait(false);
+      return localVarResponse.Data;
+    }
+
+    /// <summary>
+    /// Retrieves a list of source patch information for the specified plugin version. 
+    /// </summary>
+    /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
+    /// <param name="pluginId">The unique identifier of the plugin.</param>
+    /// <param name="versionId">The unique identifier of the plugin version.</param>
+    /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+    /// <returns>Task of ApiResponse (List&lt;SourcePatchInfo&gt;)</returns>
+    public async Task<ApiResponse<List<SourcePatchInfo>>> GetPluginPatchesWithHttpInfoAsync(
+        Guid pluginId, Guid versionId, CancellationToken cancellationToken = default(CancellationToken)) {
+
+      RequestOptions localVarRequestOptions = new RequestOptions();
+
+      string[] _contentTypes = new string[] {
+      };
+
+      // to determine the Accept header
+      string[] _accepts = new string[] {
+          "application/json"
+      };
+
+
+      var localVarContentType = ClientUtils.SelectHeaderContentType(_contentTypes);
+      if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+      var localVarAccept = ClientUtils.SelectHeaderAccept(_accepts);
+      if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+      localVarRequestOptions.PathParameters.Add("pluginId", ClientUtils.ParameterToString(pluginId)); // path parameter
+      localVarRequestOptions.PathParameters.Add("versionId",
+          ClientUtils.ParameterToString(versionId)); // path parameter
+
+      // authentication (oauth2) required
+      // oauth required
+      if (!string.IsNullOrEmpty(this.Configuration.AccessToken) &&
+          !localVarRequestOptions.HeaderParameters.ContainsKey("Authorization")) {
+        localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+      }
+
+      // make the HTTP request
+
+      var localVarResponse = await this.AsynchronousClient
+          .GetAsync<List<SourcePatchInfo>>("/plugins/{pluginId}/{versionId}/patches", localVarRequestOptions,
+              this.Configuration, cancellationToken).ConfigureAwait(false);
+
+      if (this.ExceptionFactory != null) {
+        Exception _exception = this.ExceptionFactory("GetPluginPatches", localVarResponse);
+        if (_exception != null) throw _exception;
+      }
+
+      return localVarResponse;
+    }
+
+    /// <summary>
     /// Retrieves the readme content for a specific version of a plugin. 
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
@@ -1718,12 +1902,14 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <returns>PluginVersionInfo</returns>
-    public PluginVersionInfo SubmitPlugin(PluginManifest manifest, FileParameter? icon = default(FileParameter?),
+    public PluginVersionInfo SubmitPlugin(PluginManifest manifest, List<string>? patches = default(List<string>?),
+                                          FileParameter? icon = default(FileParameter?),
                                           string? readme = default(string?)) {
-      ApiResponse<PluginVersionInfo> localVarResponse = SubmitPluginWithHttpInfo(manifest, icon, readme);
+      ApiResponse<PluginVersionInfo> localVarResponse = SubmitPluginWithHttpInfo(manifest, patches, icon, readme);
       return localVarResponse.Data;
     }
 
@@ -1732,10 +1918,12 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <returns>ApiResponse of PluginVersionInfo</returns>
     public ApiResponse<PluginVersionInfo> SubmitPluginWithHttpInfo(PluginManifest manifest,
+                                                                   List<string>? patches = default(List<string>?),
                                                                    FileParameter? icon = default(FileParameter?),
                                                                    string? readme = default(string?)) {
       // verify the required parameter 'manifest' is set
@@ -1760,6 +1948,9 @@ namespace UnrealPluginManager.WebClient.Api {
       if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
       localVarRequestOptions.FormParameters.Add("manifest", ClientUtils.ParameterToString(manifest)); // form parameter
+      if (patches != null) {
+        localVarRequestOptions.FormParameters.Add("patches", ClientUtils.ParameterToString(patches)); // form parameter
+      }
       if (icon != null) {
         localVarRequestOptions.FileParameters.Add("icon", icon);
       }
@@ -1795,17 +1986,19 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
     /// <returns>Task of PluginVersionInfo</returns>
     public async Task<PluginVersionInfo> SubmitPluginAsync(PluginManifest manifest,
+                                                           List<string>? patches = default(List<string>?),
                                                            FileParameter? icon = default(FileParameter?),
                                                            string? readme = default(string?),
                                                            CancellationToken cancellationToken =
                                                                default(CancellationToken)) {
       ApiResponse<PluginVersionInfo> localVarResponse =
-          await SubmitPluginWithHttpInfoAsync(manifest, icon, readme, cancellationToken).ConfigureAwait(false);
+          await SubmitPluginWithHttpInfoAsync(manifest, patches, icon, readme, cancellationToken).ConfigureAwait(false);
       return localVarResponse.Data;
     }
 
@@ -1814,12 +2007,14 @@ namespace UnrealPluginManager.WebClient.Api {
     /// </summary>
     /// <exception cref="UnrealPluginManager.WebClient.Client.ApiException">Thrown when fails to make API call</exception>
     /// <param name="manifest"></param>
+    /// <param name="patches"> (optional)</param>
     /// <param name="icon"> (optional)</param>
     /// <param name="readme"> (optional)</param>
     /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
     /// <returns>Task of ApiResponse (PluginVersionInfo)</returns>
     public async Task<ApiResponse<PluginVersionInfo>> SubmitPluginWithHttpInfoAsync(
-        PluginManifest manifest, FileParameter? icon = default(FileParameter?), string? readme = default(string?),
+        PluginManifest manifest, List<string>? patches = default(List<string>?),
+        FileParameter? icon = default(FileParameter?), string? readme = default(string?),
         CancellationToken cancellationToken = default(CancellationToken)) {
       // verify the required parameter 'manifest' is set
       if (manifest == null)
@@ -1845,6 +2040,9 @@ namespace UnrealPluginManager.WebClient.Api {
       if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
       localVarRequestOptions.FormParameters.Add("manifest", ClientUtils.ParameterToString(manifest)); // form parameter
+      if (patches != null) {
+        localVarRequestOptions.FormParameters.Add("patches", ClientUtils.ParameterToString(patches)); // form parameter
+      }
       if (icon != null) {
         localVarRequestOptions.FileParameters.Add("icon", icon);
       }

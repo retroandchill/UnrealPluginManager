@@ -76,11 +76,17 @@ export interface PluginVersionInfo {
      */
     homepage?: string | null;
     /**
-     *
+     * 
      * @type {SourceLocation}
      * @memberof PluginVersionInfo
      */
     source?: SourceLocation;
+  /**
+   * Gets or sets the collection of patch versions associated with the plugin.
+   * @type {Array<string>}
+   * @memberof PluginVersionInfo
+   */
+  patches?: Array<string>;
   /**
    * 
      * @type {ResourceInfo}
@@ -126,6 +132,7 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
       'license': json['license'] == null ? undefined : json['license'],
       'homepage': json['homepage'] == null ? undefined : json['homepage'],
       'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
+      'patches': json['patches'] == null ? undefined : json['patches'],
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
     };
@@ -151,6 +158,7 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
       'license': value['license'],
       'homepage': value['homepage'],
       'source': SourceLocationToJSON(value['source']),
+      'patches': value['patches'],
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
     };

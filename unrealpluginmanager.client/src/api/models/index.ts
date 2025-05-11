@@ -18,6 +18,7 @@ export * from './PluginVersionInfo';
 export * from './PluginVersionInfoPage';
 export * from './ResourceInfo';
 export * from './SourceLocation';
+export * from './SourcePatchInfo';
 export * from './UserOverview';
 export * from './VersionDetails';
 export * from './VersionOverview';

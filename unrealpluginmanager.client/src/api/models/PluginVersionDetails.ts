@@ -79,11 +79,17 @@ export interface PluginVersionDetails {
      */
     homepage?: string | null;
     /**
-     *
+     * 
      * @type {SourceLocation}
      * @memberof PluginVersionDetails
      */
     source?: SourceLocation;
+  /**
+   * Gets or sets the collection of patch versions associated with the plugin.
+   * @type {Array<string>}
+   * @memberof PluginVersionDetails
+   */
+  patches?: Array<string>;
   /**
    * 
      * @type {ResourceInfo}
@@ -136,6 +142,7 @@ export function PluginVersionDetailsFromJSONTyped(json: any, ignoreDiscriminator
       'license': json['license'] == null ? undefined : json['license'],
       'homepage': json['homepage'] == null ? undefined : json['homepage'],
       'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
+      'patches': json['patches'] == null ? undefined : json['patches'],
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
         'binaries': json['binaries'] == null ? undefined : ((json['binaries'] as Array<any>).map(BinariesOverviewFromJSON)),
@@ -162,6 +169,7 @@ export function PluginVersionDetailsToJSONTyped(value?: PluginVersionDetails | n
       'license': value['license'],
       'homepage': value['homepage'],
       'source': SourceLocationToJSON(value['source']),
+      'patches': value['patches'],
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
         'binaries': value['binaries'] == null ? undefined : ((value['binaries'] as Array<any>).map(BinariesOverviewToJSON)),

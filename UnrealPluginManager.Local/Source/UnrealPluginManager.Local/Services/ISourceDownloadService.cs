@@ -9,4 +9,6 @@ public interface ISourceDownloadService {
 
   Task VerifySourceHash(IFileInfo file, string expectedHash);
 
+  Task PatchSources(IDirectoryInfo directory, IReadOnlyList<string> patches);
+
 }

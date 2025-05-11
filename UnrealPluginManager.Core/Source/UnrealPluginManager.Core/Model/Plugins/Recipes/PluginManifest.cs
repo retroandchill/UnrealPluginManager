@@ -56,6 +56,13 @@ public record PluginManifest {
   public required SourceLocation Source { get; init; }
 
   /// <summary>
+  /// Gets a list of patch file names associated with the plugin.
+  /// These patches represent modifications or updates that can be applied to the plugin files.
+  /// Each entry in this list corresponds to a patch expected to be uploaded and managed.
+  /// </summary>
+  public List<string> Patches { get; init; } = [];
+
+  /// <summary>
   /// Gets the list of dependencies required by the plugin. Each dependency is described
   /// by its name, version range, and optional repository source from which it can be retrieved.
   /// This property ensures that all necessary plugins or components are available and aligned

@@ -43,11 +43,26 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(PluginVersionInfo.RemoteIndex))]
   public static partial PluginVersionInfo ToPluginVersionInfo(this PluginVersion version);
 
+  private static List<string> ToPatchFileNames(this ICollection<PluginSourcePatch> patches) {
+    return patches.OrderBy(x => x.PatchNumber)
+        .Select(x => x.FileResource.OriginalFilename)
+        .ToList();
+  }
+
   /// <summary>
   /// Converts a <see cref="PluginManifest"/> instance to a <see cref="PluginVersion"/> representation.
   /// </summary>
   /// <param name="manifest">The <see cref="PluginManifest"/> instance to be converted.</param>
   /// <returns>A <see cref="PluginVersion"/> object representing the provided <see cref="PluginManifest"/>.</returns>
+  [MapperIgnoreTarget(nameof(PluginVersion.Id))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Parent))]
+  [MapperIgnoreTarget(nameof(PluginVersion.ParentId))]
+  [MapperIgnoreTarget(nameof(PluginVersion.CreatedAt))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Icon))]
+  [MapperIgnoreTarget(nameof(PluginVersion.IconId))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Readme))]
+  [MapperIgnoreTarget(nameof(PluginVersion.ReadmeId))]
+  [MapperIgnoreTarget(nameof(PluginVersion.Patches))]
   public static partial PluginVersion ToPluginVersion(this PluginManifest manifest);
 
   public static partial PluginManifest ToPluginManifest(this PluginVersionInfo version);

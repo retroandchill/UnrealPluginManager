@@ -77,6 +77,29 @@ namespace UnrealPluginManager.Local.Migrations
                     b.ToTable("plugins", (string)null);
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginSourcePatch", b =>
+                {
+                    b.Property<Guid>("PluginVersionId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("plugin_version_id");
+
+                    b.Property<uint>("PatchNumber")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("patch_number");
+
+                    b.Property<Guid>("FileResourceId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("file_resource_id");
+
+                    b.HasKey("PluginVersionId", "PatchNumber")
+                        .HasName("pk_plugin_source_patches");
+
+                    b.HasIndex("FileResourceId")
+                        .HasDatabaseName("ix_plugin_source_patches_file_resource_id");
+
+                    b.ToTable("plugin_source_patches", (string)null);
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -225,12 +248,12 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnName("version");
 
                     b.HasKey("BuildId", "DependencyId")
-                        .HasName("pk_dependency_build_version");
+                        .HasName("pk_dependency_build_versions");
 
                     b.HasIndex("DependencyId")
-                        .HasDatabaseName("ix_dependency_build_version_dependency_id");
+                        .HasDatabaseName("ix_dependency_build_versions_dependency_id");
 
-                    b.ToTable("dependency_build_version", (string)null);
+                    b.ToTable("dependency_build_versions", (string)null);
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Server.Database.Building.PluginBuild", b =>
@@ -260,12 +283,12 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnName("plugin_version_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_plugin_build");
+                        .HasName("pk_cached_builds");
 
                     b.HasIndex("PluginVersionId")
-                        .HasDatabaseName("ix_plugin_build_plugin_version_id");
+                        .HasDatabaseName("ix_cached_builds_plugin_version_id");
 
-                    b.ToTable("plugin_build", (string)null);
+                    b.ToTable("cached_builds", (string)null);
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Server.Database.Building.PluginBuildPlatform", b =>
@@ -279,9 +302,9 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasColumnName("platform");
 
                     b.HasKey("BuildId", "Platform")
-                        .HasName("pk_plugin_build_platform");
+                        .HasName("pk_plugin_build_platforms");
 
-                    b.ToTable("plugin_build_platform", (string)null);
+                    b.ToTable("plugin_build_platforms", (string)null);
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", b =>
@@ -294,6 +317,27 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasConstraintName("fk_dependency_plugin_versions_parent_id");
 
                     b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginSourcePatch", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "FileResource")
+                        .WithMany()
+                        .HasForeignKey("FileResourceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_source_patches_file_resources_file_resource_id");
+
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "PluginVersion")
+                        .WithMany("Patches")
+                        .HasForeignKey("PluginVersionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_source_patches_plugin_versions_plugin_version_id");
+
+                    b.Navigation("FileResource");
+
+                    b.Navigation("PluginVersion");
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
@@ -331,14 +375,14 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasForeignKey("BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_dependency_build_version_plugin_build_build_id");
+                        .HasConstraintName("fk_dependency_build_versions_cached_builds_build_id");
 
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.Dependency", "Dependency")
                         .WithMany()
                         .HasForeignKey("DependencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_dependency_build_version_dependency_dependency_id");
+                        .HasConstraintName("fk_dependency_build_versions_dependency_dependency_id");
 
                     b.Navigation("Build");
 
@@ -352,7 +396,7 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasForeignKey("PluginVersionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_plugin_build_plugin_versions_plugin_version_id");
+                        .HasConstraintName("fk_cached_builds_plugin_versions_plugin_version_id");
 
                     b.Navigation("PluginVersion");
                 });
@@ -364,7 +408,7 @@ namespace UnrealPluginManager.Local.Migrations
                         .HasForeignKey("BuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_plugin_build_platform_plugin_build_build_id");
+                        .HasConstraintName("fk_plugin_build_platforms_cached_builds_build_id");
 
                     b.Navigation("Build");
                 });
@@ -377,6 +421,8 @@ namespace UnrealPluginManager.Local.Migrations
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.Navigation("Dependencies");
+
+                    b.Navigation("Patches");
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Server.Database.Building.PluginBuild", b =>

@@ -7,6 +7,7 @@ using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
@@ -63,7 +64,7 @@ public partial class PluginsController : ControllerBase {
   [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   public async Task<PluginVersionInfo> SubmitPlugin(PluginSubmissionMultipartRequest requestBody) {
     await using var iconStream = requestBody.Icon?.OpenReadStream();
-    return await _pluginService.SubmitPlugin(requestBody.Manifest, iconStream, requestBody.Readme);
+    return await _pluginService.SubmitPlugin(requestBody.Manifest, requestBody.Patches, iconStream, requestBody.Readme);
   }
 
   /// <summary>
@@ -159,6 +160,19 @@ public partial class PluginsController : ControllerBase {
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                          [FromBody] string readme) {
     return _pluginService.UpdatePluginReadme(pluginId, versionId, readme);
+  }
+
+  /// <summary>
+  /// Retrieves a list of source patch information for the specified plugin version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the plugin version.</param>
+  /// <return>Returns a list of source patch information, each containing the filename and content of a patch.</return>
+  [HttpGet("{pluginId:guid}/{versionId:guid}/patches")]
+  [Produces(MediaTypeNames.Application.Json)]
+  [ProducesResponseType(typeof(List<SourcePatchInfo>), (int) HttpStatusCode.OK)]
+  public Task<List<SourcePatchInfo>> GetPluginPatches([FromRoute] Guid pluginId, [FromRoute] Guid versionId) {
+    return _pluginService.GetSourcePatches(pluginId, versionId);
   }
 
   /// <summary>

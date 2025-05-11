@@ -104,7 +104,6 @@ public class PluginManagementServiceTest {
         .Select(i => new PluginOverview {
             Id = Guid.NewGuid(),
             Name = $"Plugin{i + 1}",
-            FriendlyName = $"Plugin {i + 1}",
             Versions = []
         })
         .AsPages(100)
@@ -265,8 +264,8 @@ public class PluginManagementServiceTest {
     _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
 
-    var memoryStream = new MemoryStream();
-    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<PluginManifest>(), It.IsAny<Stream>(), It.IsAny<string>(),
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<PluginManifest>(), It.IsAny<List<string>>(), It.IsAny<Stream>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
         .ReturnsAsync(pluginVersion);
 

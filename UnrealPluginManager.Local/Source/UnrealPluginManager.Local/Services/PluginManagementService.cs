@@ -139,6 +139,9 @@ public partial class PluginManagementService : IPluginManagementService {
     }
 
     var manifest = plugin.ToPluginManifest();
+    var patches = await _pluginService.GetSourcePatches(plugin.PluginId, plugin.VersionId)
+        .Map(x => x.Select(y => y.Content)
+            .ToList());
 
     await using var iconFile = plugin.Icon is not null
         ? _storageService.GetResourceStream(plugin.Icon.StoredFilename)
@@ -148,8 +151,8 @@ public partial class PluginManagementService : IPluginManagementService {
         .ContinueWith(x => x.IsFaulted ? null : x.Result);
 
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(manifest, iconFile is not null ? new FileParameter(iconFile) : null,
-        readme);
+    return await pluginsApi.SubmitPluginAsync(manifest, patches,
+        iconFile is not null ? new FileParameter(iconFile) : null, readme);
   }
 
   /// <inheritdoc />
@@ -174,20 +177,18 @@ public partial class PluginManagementService : IPluginManagementService {
       }
 
       var manifest = pluginToDownload.ToPluginManifest();
-      return await BuildFromManifest(manifest, engineVersion, platforms);
+
+      var patches = await pluginsApi.GetPluginPatchesAsync(pluginToDownload.PluginId, pluginToDownload.VersionId)
+          .Map(x => x.Select(y => y.Content)
+              .ToList());
+
+      return await BuildFromManifest(manifest, patches, engineVersion, platforms);
     });
   }
 
   /// <inheritdoc />
-  public async Task<PluginBuildInfo> BuildFromManifest(IFileInfo manifestFile, string engineVersion,
-                                                       IReadOnlyCollection<string> platforms) {
-    await using var manifestStream = manifestFile.OpenRead();
-    var manifest = await _jsonService.DeserializeAsync<PluginManifest>(manifestStream);
-    return await BuildFromManifest(manifest, engineVersion, platforms);
-  }
-
-  /// <inheritdoc />
-  public async Task<PluginBuildInfo> BuildFromManifest(PluginManifest manifest, string? engineVersion,
+  public async Task<PluginBuildInfo> BuildFromManifest(PluginManifest manifest, IReadOnlyList<string> patches,
+                                                       string? engineVersion,
                                                        IReadOnlyCollection<string> platforms) {
     var installedEngine = _engineService.GetInstalledEngine(engineVersion);
 
@@ -205,14 +206,18 @@ public partial class PluginManagementService : IPluginManagementService {
         .FirstOrDefault();
     if (upluginFile is null) {
       await _sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
+
       upluginFile = sourceDirectory
           .EnumerateFiles("*.uplugin", SearchOption.AllDirectories)
           .FirstOrDefault();
+      if (upluginFile is null) {
+        throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
+      }
+
+      var rootDir = upluginFile.Directory.RequireNonNull();
+      await _sourceDownloadService.PatchSources(rootDir, patches);
     }
 
-    if (upluginFile is null) {
-      throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
-    }
 
     var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
     var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
@@ -221,6 +226,7 @@ public partial class PluginManagementService : IPluginManagementService {
       throw new InvalidOperationException();
     }
 
-    return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, installedEngine.Name, platforms);
+    return await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches, installedEngine.Name,
+        platforms);
   }
 }

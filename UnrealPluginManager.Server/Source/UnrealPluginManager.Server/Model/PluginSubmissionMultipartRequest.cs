@@ -9,6 +9,9 @@ public record PluginSubmissionMultipartRequest {
   public required PluginManifest Manifest { get; init; }
 
   [FromForm]
+  public List<string> Patches { get; init; } = [];
+
+  [FromForm]
   public IFormFile? Icon { get; init; }
 
   [FromForm]

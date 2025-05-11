@@ -76,6 +76,14 @@ export interface PluginManifest {
    */
   source: SourceLocation;
   /**
+   * Gets a list of patch file names associated with the plugin.
+   * These patches represent modifications or updates that can be applied to the plugin files.
+   * Each entry in this list corresponds to a patch expected to be uploaded and managed.
+   * @type {Array<string>}
+   * @memberof PluginManifest
+   */
+  patches?: Array<string>;
+  /**
    * Gets the list of dependencies required by the plugin. Each dependency is described
    * by its name, version range, and optional repository source from which it can be retrieved.
    * This property ensures that all necessary plugins or components are available and aligned
@@ -114,6 +122,7 @@ export function PluginManifestFromJSONTyped(json: any, ignoreDiscriminator: bool
     'license': json['license'] == null ? undefined : json['license'],
     'homepage': json['homepage'] == null ? undefined : json['homepage'],
     'source': SourceLocationFromJSON(json['source']),
+    'patches': json['patches'] == null ? undefined : json['patches'],
     'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyManifestFromJSON)),
   };
 }
@@ -136,6 +145,7 @@ export function PluginManifestToJSONTyped(value?: PluginManifest | null, ignoreD
     'license': value['license'],
     'homepage': value['homepage'],
     'source': SourceLocationToJSON(value['source']),
+    'patches': value['patches'],
     'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyManifestToJSON)),
   };
 }

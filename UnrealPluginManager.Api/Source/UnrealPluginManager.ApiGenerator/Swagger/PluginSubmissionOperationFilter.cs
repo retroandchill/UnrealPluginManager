@@ -20,6 +20,13 @@ public class PluginSubmissionOperationFilter : IOperationFilter {
                                   Id = nameof(PluginManifest)
                               }
                           },
+                          ["patches"] = new() {
+                              Type = "array",
+                              Items = new OpenApiSchema {
+                                  Type = "string"
+                              },
+                              Nullable = true
+                          },
                           ["icon"] = new() {
                               Type = "string",
                               Format = "binary",
@@ -38,8 +45,11 @@ public class PluginSubmissionOperationFilter : IOperationFilter {
                       ["manifest"] = new() {
                           ContentType = "application/json"
                       },
+                      ["patches"] = new() {
+                          ContentType = "application/json"
+                      },
                       ["icon"] = new() {
-                          ContentType = "image/*"
+                          ContentType = "image/png"
                       },
                       ["readme"] = new() {
                           ContentType = "text/markdown"

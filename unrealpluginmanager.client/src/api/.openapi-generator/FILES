@@ -20,6 +20,7 @@ models/PluginVersionInfo.ts
 models/PluginVersionInfoPage.ts
 models/ResourceInfo.ts
 models/SourceLocation.ts
+models/SourcePatchInfo.ts
 models/UserOverview.ts
 models/VersionDetails.ts
 models/VersionOverview.ts

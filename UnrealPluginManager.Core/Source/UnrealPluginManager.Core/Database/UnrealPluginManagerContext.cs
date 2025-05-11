@@ -32,6 +32,15 @@ public abstract class UnrealPluginManagerContext : DbContext {
   public DbSet<PluginVersion> PluginVersions { get; init; }
 
   /// <summary>
+  /// Represents the database set for storing and managing patches associated with specific plugin versions within the UnrealPluginManager context.
+  /// </summary>
+  /// <remarks>
+  /// This property provides access to the collection of `PluginSourcePatch` entities persisted in the database.
+  /// It is used for performing CRUD operations and querying the patch data related to plugin versions.
+  /// </remarks>
+  public DbSet<PluginSourcePatch> PluginSourcePatches { get; init; }
+
+  /// <summary>
   /// Represents the database set for storing and managing file resources within the Unreal Plugin Manager context.
   /// </summary>
   /// <remarks>
@@ -46,6 +55,6 @@ public abstract class UnrealPluginManagerContext : DbContext {
     modelBuilder.Entity<Plugin>(Plugin.DefineModelMetadata);
     modelBuilder.Entity<PluginVersion>(PluginVersion.DefineModelMetadata);
     modelBuilder.Entity<Dependency>(Dependency.DefineModelMetadata);
-    modelBuilder.Entity<Plugin>(Plugin.DefineModelMetadata);
+    modelBuilder.Entity<PluginSourcePatch>(PluginSourcePatch.DefineModelMetadata);
   }
 }

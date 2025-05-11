@@ -99,7 +99,7 @@ namespace UnrealPluginManager.Local.Migrations
                 defaultValue: "");
 
             migrationBuilder.CreateTable(
-                name: "plugin_build",
+                name: "cached_builds",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -110,9 +110,9 @@ namespace UnrealPluginManager.Local.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_plugin_build", x => x.id);
+                    table.PrimaryKey("pk_cached_builds", x => x.id);
                     table.ForeignKey(
-                        name: "fk_plugin_build_plugin_versions_plugin_version_id",
+                        name: "fk_cached_builds_plugin_versions_plugin_version_id",
                         column: x => x.plugin_version_id,
                         principalTable: "plugin_versions",
                         principalColumn: "id",
@@ -120,7 +120,31 @@ namespace UnrealPluginManager.Local.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "dependency_build_version",
+                name: "plugin_source_patches",
+                columns: table => new
+                {
+                    plugin_version_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    patch_number = table.Column<uint>(type: "INTEGER", nullable: false),
+                    file_resource_id = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_plugin_source_patches", x => new { x.plugin_version_id, x.patch_number });
+                    table.ForeignKey(
+                        name: "fk_plugin_source_patches_file_resources_file_resource_id",
+                        column: x => x.file_resource_id,
+                        principalTable: "file_resources",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_plugin_source_patches_plugin_versions_plugin_version_id",
+                        column: x => x.plugin_version_id,
+                        principalTable: "plugin_versions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "dependency_build_versions",
                 columns: table => new
                 {
                     build_id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -129,23 +153,23 @@ namespace UnrealPluginManager.Local.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_dependency_build_version", x => new { x.build_id, x.dependency_id });
+                    table.PrimaryKey("pk_dependency_build_versions", x => new { x.build_id, x.dependency_id });
                     table.ForeignKey(
-                        name: "fk_dependency_build_version_dependency_dependency_id",
-                        column: x => x.dependency_id,
-                        principalTable: "dependency",
+                        name: "fk_dependency_build_versions_cached_builds_build_id",
+                        column: x => x.build_id,
+                        principalTable: "cached_builds",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_dependency_build_version_plugin_build_build_id",
-                        column: x => x.build_id,
-                        principalTable: "plugin_build",
+                        name: "fk_dependency_build_versions_dependency_dependency_id",
+                        column: x => x.dependency_id,
+                        principalTable: "dependency",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "plugin_build_platform",
+                name: "plugin_build_platforms",
                 columns: table => new
                 {
                     build_id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -153,37 +177,45 @@ namespace UnrealPluginManager.Local.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_plugin_build_platform", x => new { x.build_id, x.platform });
+                    table.PrimaryKey("pk_plugin_build_platforms", x => new { x.build_id, x.platform });
                     table.ForeignKey(
-                        name: "fk_plugin_build_platform_plugin_build_build_id",
+                        name: "fk_plugin_build_platforms_cached_builds_build_id",
                         column: x => x.build_id,
-                        principalTable: "plugin_build",
+                        principalTable: "cached_builds",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_dependency_build_version_dependency_id",
-                table: "dependency_build_version",
+                name: "ix_cached_builds_plugin_version_id",
+                table: "cached_builds",
+                column: "plugin_version_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_dependency_build_versions_dependency_id",
+                table: "dependency_build_versions",
                 column: "dependency_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_plugin_build_plugin_version_id",
-                table: "plugin_build",
-                column: "plugin_version_id");
+                name: "ix_plugin_source_patches_file_resource_id",
+                table: "plugin_source_patches",
+                column: "file_resource_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "dependency_build_version");
+                name: "dependency_build_versions");
 
             migrationBuilder.DropTable(
-                name: "plugin_build_platform");
+                name: "plugin_build_platforms");
 
             migrationBuilder.DropTable(
-                name: "plugin_build");
+                name: "plugin_source_patches");
+
+            migrationBuilder.DropTable(
+                name: "cached_builds");
 
             migrationBuilder.DropColumn(
                 name: "author",

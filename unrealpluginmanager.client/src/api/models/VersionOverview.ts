@@ -37,7 +37,7 @@ export interface VersionOverview {
      */
     version: string;
     /**
-     *
+     * 
      * @type {SourceLocation}
      * @memberof VersionOverview
      */

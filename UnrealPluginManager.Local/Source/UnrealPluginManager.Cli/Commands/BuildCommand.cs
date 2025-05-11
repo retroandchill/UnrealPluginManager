@@ -95,7 +95,25 @@ public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCo
     var installResult = await _installService.InstallRequirements(manifest, options.Version,
         ["Win64"]);
     _console.WriteVersionChanges(installResult);
-    await _pluginManagementService.BuildFromManifest(manifest, options.Version, ["Win64"]);
+
+    var patchesFolder = manifestFile.Directory?
+        .GetDirectories("patches", SearchOption.TopDirectoryOnly)
+        .FirstOrDefault();
+
+    var patchFiles = patchesFolder?.EnumerateFiles("*.patch", SearchOption.AllDirectories)
+        .ToDictionary(x => x.Name) ?? [];
+
+    var patchContents = await manifest.Patches
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => {
+          await using var patchStream = patchFiles[x].OpenRead();
+          using var patchReader = new StreamReader(patchStream);
+          return await patchReader.ReadToEndAsync(cancellationToken);
+        })
+        .ToListAsync(cancellationToken);
+
+
+    await _pluginManagementService.BuildFromManifest(manifest, patchContents, options.Version, ["Win64"]);
     return 0;
   }
 }

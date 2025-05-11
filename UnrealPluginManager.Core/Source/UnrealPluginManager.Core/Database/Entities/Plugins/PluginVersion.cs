@@ -153,6 +153,8 @@ public class PluginVersion : IVersionedEntity {
   /// </summary>
   public SourceLocation Source { get; set; }
 
+  public ICollection<PluginSourcePatch> Patches { get; set; } = new List<PluginSourcePatch>();
+
   /// <summary>
   /// Gets or sets the associated icon for the plugin version.
   /// This property references a file resource that represents the icon.

@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Utils;
 
@@ -11,6 +12,7 @@ public partial class SourceDownloadService : ISourceDownloadService {
 
   private readonly HttpClient _httpClient;
   private readonly IFileSystem _fileSystem;
+  private readonly IProcessRunner _processRunner;
 
   public async Task DownloadAndExtractSources(SourceLocation sourceLocation, IDirectoryInfo directory) {
     using var intermediate = _fileSystem.CreateDisposableDirectory(out var intermediateFolder);
@@ -38,5 +40,18 @@ public partial class SourceDownloadService : ISourceDownloadService {
       throw new InvalidOperationException(
           $"SHA256 hash mismatch for downloaded file. Expected: {expectedHash}, Got: {computedHashString}");
     }
+  }
+
+  public async Task PatchSources(IDirectoryInfo directory, IReadOnlyList<string> patches) {
+    foreach (var patch in patches) {
+      using var disposableFile = _fileSystem.CreateDisposableFile(out var tempFileInfo);
+      await _fileSystem.File.WriteAllTextAsync(tempFileInfo.FullName, patch);
+
+      var result = await _processRunner.RunProcess("git", ["apply", tempFileInfo.FullName], directory.FullName);
+      if (result != 0) {
+        throw new InvalidOperationException("Failed to apply patches.");
+      }
+    }
+
   }
 }

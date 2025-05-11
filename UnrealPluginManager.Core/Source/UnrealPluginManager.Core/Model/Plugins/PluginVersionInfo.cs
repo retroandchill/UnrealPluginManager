@@ -87,7 +87,26 @@ public class PluginVersionInfo : IDependencyChainNode {
   /// </remarks>
   public string? Homepage { get; set; }
 
+  /// <summary>
+  /// Gets or sets the source location information associated with a plugin.
+  /// </summary>
+  /// <remarks>
+  /// This property represents the location or origin data for a specific plugin,
+  /// which may include the path, repository, or another identifier indicating
+  /// where the plugin was obtained or is maintained. It provides context about
+  /// the plugin's provenance within the plugin management system.
+  /// </remarks>
   public SourceLocation Source { get; set; }
+
+  /// <summary>
+  /// Gets or sets the collection of patch versions associated with the plugin.
+  /// </summary>
+  /// <remarks>
+  /// The patches represent incremental updates or fixes applied to the plugin.
+  /// Each entry in the collection identifies a specific patch version, aiding in tracking
+  /// and managing updates to the plugin over its lifecycle.
+  /// </remarks>
+  public List<string> Patches { get; set; } = [];
 
   /// <summary>
   /// Gets or sets the resource information for the plugin icon.

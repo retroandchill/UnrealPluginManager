@@ -9,6 +9,7 @@ public interface IProcessRunner {
   /// </summary>
   /// <param name="command">The command or executable file name to run.</param>
   /// <param name="arguments">An array of arguments to pass to the command.</param>
+  /// <param name="workingDirectory"></param>
   /// <returns>A task that represents the asynchronous operation and wraps the exit code of the process.</returns>
-  Task<int> RunProcess(string command, string[] arguments);
+  Task<int> RunProcess(string command, string[] arguments, string? workingDirectory = null);
 }

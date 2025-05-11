@@ -14,9 +14,11 @@ namespace UnrealPluginManager.Local.Database;
 public partial class LocalUnrealPluginManagerContext : UnrealPluginManagerContext {
   private readonly IStorageService _storageService;
 
-  public DbSet<PluginBuild> CachedBuilds;
+  public DbSet<PluginBuild> CachedBuilds { get; set; }
 
-  public DbSet<DependencyBuildVersion> DependencyBuildVersions;
+  public DbSet<DependencyBuildVersion> DependencyBuildVersions { get; set; }
+
+  public DbSet<PluginBuildPlatform> PluginBuildPlatforms { get; set; }
 
   /// <inheritdoc />
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {

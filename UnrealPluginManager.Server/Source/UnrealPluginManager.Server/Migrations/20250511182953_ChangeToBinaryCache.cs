@@ -91,11 +91,43 @@ namespace UnrealPluginManager.Server.Migrations
                 type: "text",
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.CreateTable(
+                name: "plugin_source_patches",
+                columns: table => new
+                {
+                    plugin_version_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    patch_number = table.Column<long>(type: "bigint", nullable: false),
+                    file_resource_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_plugin_source_patches", x => new { x.plugin_version_id, x.patch_number });
+                    table.ForeignKey(
+                        name: "fk_plugin_source_patches_file_resources_file_resource_id",
+                        column: x => x.file_resource_id,
+                        principalTable: "file_resources",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_plugin_source_patches_plugin_versions_plugin_version_id",
+                        column: x => x.plugin_version_id,
+                        principalTable: "plugin_versions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_plugin_source_patches_file_resource_id",
+                table: "plugin_source_patches",
+                column: "file_resource_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "plugin_source_patches");
+
             migrationBuilder.DropColumn(
                 name: "author",
                 table: "plugin_versions");

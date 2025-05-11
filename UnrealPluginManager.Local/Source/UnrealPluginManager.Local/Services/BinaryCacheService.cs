@@ -21,18 +21,22 @@ public partial class BinaryCacheService : IBinaryCacheService {
   private readonly IEngineService _engineService;
 
   public async Task<PluginBuildInfo> CacheBuiltPlugin(PluginManifest manifest, IDirectoryInfo directory,
+                                                      IReadOnlyList<string> patches,
                                                       string engineVersion,
                                                       IReadOnlyCollection<string> platforms) {
-    var iconFile = directory.File(Path.Join("Resources", "Icon128.png"));
-    await using (var iconFileStream = iconFile.Exists ? iconFile.OpenRead() : null) {
-      var readmeFile = directory.File("README.md");
-      string? readmeContent = null;
-      if (readmeFile.Exists) {
-        using var readmeStream = readmeFile.OpenText();
-        readmeContent = await readmeStream.ReadToEndAsync();
-      }
+    var versionInfo = await _pluginService.GetPluginVersionInfo(manifest.Name, manifest.Version);
+    if (versionInfo.IsNone) {
+      var iconFile = directory.File(Path.Join("Resources", "Icon128.png"));
+      await using (var iconFileStream = iconFile.Exists ? iconFile.OpenRead() : null) {
+        var readmeFile = directory.File("README.md");
+        string? readmeContent = null;
+        if (readmeFile.Exists) {
+          using var readmeStream = readmeFile.OpenText();
+          readmeContent = await readmeStream.ReadToEndAsync();
+        }
 
-      await _pluginService.SubmitPlugin(manifest, iconFileStream, readmeContent);
+        await _pluginService.SubmitPlugin(manifest, patches, iconFileStream, readmeContent);
+      }
     }
 
     var pluginVersion = await _dbContext.PluginVersions

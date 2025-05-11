@@ -102,7 +102,7 @@ public class PluginServiceTests {
             Sha = "Plugin1TestSha"
         },
         Dependencies = []
-    });
+    }, []);
 
     var plugin2 = await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Plugin2",
@@ -121,7 +121,7 @@ public class PluginServiceTests {
                 Version = SemVersionRange.Parse(">=1.0.0")
             }
         ]
-    });
+    }, []);
 
     var plugin3 = await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Plugin3",
@@ -136,7 +136,7 @@ public class PluginServiceTests {
                 Version = SemVersionRange.AtLeast(new SemVersion(1, 0, 0))
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Plugin3",
@@ -151,7 +151,7 @@ public class PluginServiceTests {
                 Version = SemVersionRange.AtLeast(new SemVersion(1, 0, 0))
             }
         ]
-    });
+    }, []);
 
     var plugin1List = await pluginService.GetDependencyList(plugin1.PluginId);
     Assert.That(plugin1List, Has.Count.EqualTo(1));

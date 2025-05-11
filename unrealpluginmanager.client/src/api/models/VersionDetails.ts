@@ -40,7 +40,7 @@ export interface VersionDetails {
      */
     version: string;
     /**
-     *
+     * 
      * @type {SourceLocation}
      * @memberof VersionDetails
      */

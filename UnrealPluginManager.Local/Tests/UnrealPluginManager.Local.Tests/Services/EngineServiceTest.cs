@@ -87,7 +87,7 @@ public partial class EngineServiceTest {
             It.Is<string[]>(y => y.Length == 3 &&
                                  y[0] == "BuildPlugin" &&
                                  y[1] == $"-Plugin=\"{pluginFile}\"" &&
-                                 y[2].StartsWith("-package=\""))))
+                                 y[2].StartsWith("-package=\"")), It.IsAny<string>()))
         .ReturnsAsync(0);
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
@@ -112,7 +112,7 @@ public partial class EngineServiceTest {
             It.Is<string[]>(y =>
                 y[0] == "BuildPlugin" &&
                 y[1] == $"-Plugin=\"{pluginFile}\"" &&
-                y[2] == $"-package=\"{destination.FullName}\"")),
+                y[2] == $"-package=\"{destination.FullName}\""), It.IsAny<string>()),
         Times.Once());
 
   }

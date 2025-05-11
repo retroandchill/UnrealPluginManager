@@ -93,6 +93,13 @@
                   "manifest": {
                     "$ref": "#/components/schemas/PluginManifest"
                   },
+                  "patches": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "nullable": true
+                  },
                   "icon": {
                     "type": "string",
                     "format": "binary",
@@ -108,8 +115,11 @@
                 "manifest": {
                   "contentType": "application/json"
                 },
+                "patches": {
+                  "contentType": "application/json"
+                },
                 "icon": {
-                  "contentType": "image/*"
+                  "contentType": "image/png"
                 },
                 "readme": {
                   "contentType": "text/markdown"
@@ -550,6 +560,63 @@
         ]
       }
     },
+    "/plugins/{pluginId}/{versionId}/patches": {
+      "get": {
+        "tags": [
+          "Plugins"
+        ],
+        "summary": "Retrieves a list of source patch information for the specified plugin version.",
+        "operationId": "getPluginPatches",
+        "parameters": [
+          {
+            "name": "pluginId",
+            "in": "path",
+            "description": "The unique identifier of the plugin.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "description": "The unique identifier of the plugin version.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SourcePatchInfo"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
     "/plugins/dependencies/candidates": {
       "get": {
         "tags": [
@@ -938,6 +1005,13 @@
           "source": {
             "$ref": "#/components/schemas/SourceLocation"
           },
+          "patches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Gets a list of patch file names associated with the plugin.\r\nThese patches represent modifications or updates that can be applied to the plugin files.\r\nEach entry in this list corresponds to a patch expected to be uploaded and managed."
+          },
           "dependencies": {
             "type": "array",
             "items": {
@@ -966,27 +1040,6 @@
             "minLength": 1,
             "type": "string",
             "description": "Gets or sets the name of the plugin."
-          },
-          "friendlyName": {
-            "type": "string",
-            "description": "Gets or sets the user-friendly name of the plugin, which may be used for display purposes.",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "description": "Gets or sets the description of the plugin, providing detailed information about its purpose or functionality.",
-            "nullable": true
-          },
-          "authorName": {
-            "type": "string",
-            "description": "Gets or sets the name of the author associated with the plugin.",
-            "nullable": true
-          },
-          "authorWebsite": {
-            "type": "string",
-            "description": "Gets or sets the URL associated with the author of the plugin.",
-            "format": "uri",
-            "nullable": true
           },
           "versions": {
             "minItems": 1,
@@ -1175,6 +1228,13 @@
           "source": {
             "$ref": "#/components/schemas/SourceLocation"
           },
+          "patches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Gets or sets the collection of patch versions associated with the plugin."
+          },
           "icon": {
             "$ref": "#/components/schemas/ResourceInfo"
           },
@@ -1277,6 +1337,19 @@
         },
         "additionalProperties": false,
         "description": "Represents the location of a source, containing information about its URL and associated SHA hash."
+      },
+      "SourcePatchInfo": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents information about a source patch file, including its filename\r\nand content."
       },
       "UserOverview": {
         "required": [

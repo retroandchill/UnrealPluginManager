@@ -31,7 +31,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse("=4.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Sql",
@@ -41,7 +41,7 @@ public static class PluginSetupHelpers {
             Sha = "SqlTestSha0"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Sql",
         Version = new SemVersion(1, 0, 0),
@@ -59,7 +59,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse("1.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Sql",
         Version = new SemVersion(2, 0, 0),
@@ -77,7 +77,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=1.0.0 <=2.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Threads",
@@ -92,7 +92,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Threads",
         Version = new SemVersion(1, 0, 0),
@@ -106,7 +106,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Threads",
         Version = new SemVersion(2, 0, 0),
@@ -120,7 +120,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=3.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Http",
@@ -135,7 +135,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=0.1.0 <=3.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Http",
         Version = new SemVersion(1, 0, 0),
@@ -149,7 +149,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=0.1.0 <=3.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Http",
         Version = new SemVersion(2, 0, 0),
@@ -163,7 +163,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=1.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Http",
@@ -178,7 +178,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Http",
         Version = new SemVersion(4, 0, 0),
@@ -192,7 +192,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse(">=2.0.0 <=4.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "StdLib",
@@ -202,7 +202,7 @@ public static class PluginSetupHelpers {
             Sha = "StdLibTestSha0"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "StdLib",
         Version = new SemVersion(1, 0, 0),
@@ -211,7 +211,7 @@ public static class PluginSetupHelpers {
             Sha = "StdLibTestSha1"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "StdLib",
         Version = new SemVersion(2, 0, 0),
@@ -220,7 +220,7 @@ public static class PluginSetupHelpers {
             Sha = "StdLibTestSha2"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "StdLib",
         Version = new SemVersion(3, 0, 0),
@@ -229,7 +229,7 @@ public static class PluginSetupHelpers {
             Sha = "StdLibTestSha3"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "StdLib",
         Version = new SemVersion(4, 0, 0),
@@ -238,7 +238,7 @@ public static class PluginSetupHelpers {
             Sha = "StdLibTestSha4"
         },
         Dependencies = []
-    });
+    }, []);
 
     return app.PluginId;
   }
@@ -261,7 +261,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse("=1.0.0")
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "Sql",
@@ -276,7 +276,7 @@ public static class PluginSetupHelpers {
                 Version = SemVersionRange.Parse("=2.0.0") // Conflict: "App" requires 1.0.0, but "Sql" requires 2.0.0
             }
         ]
-    });
+    }, []);
 
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "ConflictingDependency",
@@ -286,7 +286,7 @@ public static class PluginSetupHelpers {
             Sha = "ConflictDepSha1"
         },
         Dependencies = []
-    });
+    }, []);
     await pluginService.SubmitPlugin(new PluginManifest {
         Name = "ConflictingDependency",
         Version = new SemVersion(2, 0, 0),
@@ -295,7 +295,7 @@ public static class PluginSetupHelpers {
             Sha = "ConflictDepSha2"
         },
         Dependencies = []
-    });
+    }, []);
 
     return app.PluginId;
   }

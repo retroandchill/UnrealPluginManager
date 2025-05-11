@@ -132,12 +132,24 @@ public interface IPluginService {
   /// Submits a plugin to the system by providing its manifest, optional icon, and optional readme file.
   /// </summary>
   /// <param name="manifest">The manifest containing the core details and metadata of the plugin.</param>
+  /// <param name="patches"></param>
   /// <param name="icon">An optional stream containing the plugin's representation icon.</param>
   /// <param name="readme">An optional readme text containing additional information about the plugin.</param>
   /// <returns>
   /// The details of the submitted plugin version as a <see cref="PluginVersionDetails"/> object.
   /// </returns>
-  Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest, Stream? icon = null, string? readme = null);
+  Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest, IReadOnlyList<string> patches,
+                                       Stream? icon = null, string? readme = null);
+
+  /// <summary>
+  /// Retrieves a list of source patches associated with a specific plugin version.
+  /// </summary>
+  /// <param name="pluginId">The unique identifier of the plugin.</param>
+  /// <param name="versionId">The unique identifier of the plugin version.</param>
+  /// <returns>
+  /// A task that represents the asynchronous operation. The task result contains a list of <see cref="SourcePatchInfo"/> representing the source patches for the specified plugin version.
+  /// </returns>
+  Task<List<SourcePatchInfo>> GetSourcePatches(Guid pluginId, Guid versionId);
 
 
 }

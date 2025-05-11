@@ -251,7 +251,9 @@ public partial class PluginService : IPluginService {
   }
 
   /// <inheritdoc />
-  public async Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest, Stream? icon = null,
+  public async Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest,
+                                                    IReadOnlyList<string> patches,
+                                                    Stream? icon = null,
                                                     string? readme = null) {
     var mainPlugin = await _dbContext.Plugins
         .SingleOrDefaultAsync(x => x.Name == manifest.Name);
@@ -263,6 +265,24 @@ public partial class PluginService : IPluginService {
     }
 
     var version = manifest.ToPluginVersion();
+
+    if (patches.Count != manifest.Patches.Count) {
+      throw new BadSubmissionException("Number of patches does not match the number of patches in the manifest!");
+    }
+
+    for (var i = 0; i < manifest.Patches.Count; i++) {
+      await using var patchStream = patches[i].ToStream();
+      var fileSource = new StreamFileSource(_fileSystem, patchStream);
+      var (storedName, _) = await _storageService.AddResource(fileSource);
+      version.Patches.Add(new PluginSourcePatch {
+          FileResource = new FileResource {
+              OriginalFilename = manifest.Patches[i],
+              StoredFilename = storedName
+          },
+          PatchNumber = (uint) i
+      });
+    }
+
     if (icon is not null) {
       var iconFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, icon));
       version.Icon = new FileResource {
@@ -284,5 +304,33 @@ public partial class PluginService : IPluginService {
     await _dbContext.SaveChangesAsync();
 
     return version.ToPluginVersionInfo();
+  }
+
+  /// <inheritdoc />
+  public async Task<List<SourcePatchInfo>> GetSourcePatches(Guid pluginId, Guid versionId) {
+    var pluginPatches = await _dbContext.PluginVersions
+        .Where(x => x.ParentId == pluginId && x.Id == versionId)
+        .Select(x => new {
+            PatchFiles = x.Patches
+                .OrderBy(y => y.PatchNumber)
+                .Select(y => new {
+                    y.FileResource.StoredFilename,
+                    y.FileResource.OriginalFilename
+                })
+                .ToList()
+        })
+        .SingleOrDefaultAsync();
+    if (pluginPatches is null) {
+      throw new PluginNotFoundException($"Plugin {pluginId} version {versionId} was not found!");
+    }
+
+    return await pluginPatches.PatchFiles
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => {
+          await using var stream = _storageService.GetResourceStream(x.StoredFilename);
+          using var reader = new StreamReader(stream);
+          return new SourcePatchInfo(x.OriginalFilename, await reader.ReadToEndAsync());
+        })
+        .ToListAsync();
   }
 }

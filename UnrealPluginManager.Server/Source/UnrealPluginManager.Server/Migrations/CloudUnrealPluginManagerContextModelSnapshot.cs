@@ -82,6 +82,29 @@ namespace UnrealPluginManager.Server.Migrations
                     b.ToTable("plugins", (string)null);
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginSourcePatch", b =>
+                {
+                    b.Property<Guid>("PluginVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plugin_version_id");
+
+                    b.Property<long>("PatchNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("patch_number");
+
+                    b.Property<Guid>("FileResourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("file_resource_id");
+
+                    b.HasKey("PluginVersionId", "PatchNumber")
+                        .HasName("pk_plugin_source_patches");
+
+                    b.HasIndex("FileResourceId")
+                        .HasDatabaseName("ix_plugin_source_patches_file_resource_id");
+
+                    b.ToTable("plugin_source_patches", (string)null);
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -343,6 +366,27 @@ namespace UnrealPluginManager.Server.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginSourcePatch", b =>
+                {
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "FileResource")
+                        .WithMany()
+                        .HasForeignKey("FileResourceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_source_patches_file_resources_file_resource_id");
+
+                    b.HasOne("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", "PluginVersion")
+                        .WithMany("Patches")
+                        .HasForeignKey("PluginVersionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_plugin_source_patches_plugin_versions_plugin_version_id");
+
+                    b.Navigation("FileResource");
+
+                    b.Navigation("PluginVersion");
+                });
+
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.HasOne("UnrealPluginManager.Core.Database.Entities.Storage.FileResource", "Icon")
@@ -444,6 +488,8 @@ namespace UnrealPluginManager.Server.Migrations
             modelBuilder.Entity("UnrealPluginManager.Core.Database.Entities.Plugins.PluginVersion", b =>
                 {
                     b.Navigation("Dependencies");
+
+                    b.Navigation("Patches");
                 });
 
             modelBuilder.Entity("UnrealPluginManager.Server.Database.Users.User", b =>

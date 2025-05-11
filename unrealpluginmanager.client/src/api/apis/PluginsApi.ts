@@ -23,6 +23,7 @@ import type {
   PluginSummary,
   PluginVersionInfo,
   PluginVersionInfoPage,
+  SourcePatchInfo,
 } from '../models/index';
 import {
   DependencyManifestFromJSON,
@@ -32,6 +33,7 @@ import {
   PluginSummaryFromJSON,
   PluginVersionInfoFromJSON,
   PluginVersionInfoPageFromJSON,
+  SourcePatchInfoFromJSON,
 } from '../models/index';
 
 export interface AddPluginReadmeRequest {
@@ -61,6 +63,11 @@ export interface GetLatestVersionsRequest {
     size?: number;
 }
 
+export interface GetPluginPatchesRequest {
+  pluginId: string;
+  versionId: string;
+}
+
 export interface GetPluginReadmeRequest {
     pluginId: string;
     versionId: string;
@@ -74,6 +81,7 @@ export interface GetPluginsRequest {
 
 export interface SubmitPluginRequest {
   manifest: PluginManifest;
+  patches?: Array<string> | null;
   icon?: Blob | null;
   readme?: string | null;
 }
@@ -316,6 +324,51 @@ export class PluginsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+  /**
+   * Retrieves a list of source patch information for the specified plugin version.
+   */
+  async getPluginPatchesRaw(requestParameters: GetPluginPatchesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<SourcePatchInfo>>> {
+    if (requestParameters['pluginId'] == null) {
+      throw new runtime.RequiredError(
+          'pluginId',
+          'Required parameter "pluginId" was null or undefined when calling getPluginPatches().'
+      );
+    }
+
+    if (requestParameters['versionId'] == null) {
+      throw new runtime.RequiredError(
+          'versionId',
+          'Required parameter "versionId" was null or undefined when calling getPluginPatches().'
+      );
+    }
+
+    const queryParameters: any = {};
+
+    const headerParameters: runtime.HTTPHeaders = {};
+
+    if (this.configuration && this.configuration.accessToken) {
+      // oauth required
+      headerParameters["Authorization"] = await this.configuration.accessToken("oauth2", []);
+    }
+
+    const response = await this.request({
+      path: `/plugins/{pluginId}/{versionId}/patches`.replace(`{${"pluginId"}}`, encodeURIComponent(String(requestParameters['pluginId']))).replace(`{${"versionId"}}`, encodeURIComponent(String(requestParameters['versionId']))),
+      method: 'GET',
+      headers: headerParameters,
+      query: queryParameters,
+    }, initOverrides);
+
+    return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(SourcePatchInfoFromJSON));
+  }
+
+  /**
+   * Retrieves a list of source patch information for the specified plugin version.
+   */
+  async getPluginPatches(requestParameters: GetPluginPatchesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<SourcePatchInfo>> {
+    const response = await this.getPluginPatchesRaw(requestParameters, initOverrides);
+    return await response.value();
+  }
+
     /**
      * Retrieves the readme content for a specific version of a plugin.
      */
@@ -450,6 +503,12 @@ export class PluginsApi extends runtime.BaseAPI {
 
       if (requestParameters['manifest'] != null) {
         formParams.append('manifest', new Blob([JSON.stringify(PluginManifestToJSON(requestParameters['manifest']))], {type: "application/json",}));
+      }
+
+      if (requestParameters['patches'] != null) {
+        requestParameters['patches'].forEach((element) => {
+          formParams.append('patches', element as any);
+        })
       }
 
       if (requestParameters['icon'] != null) {
