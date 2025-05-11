@@ -108,7 +108,7 @@ public class InstallServiceTest {
     var pluginBuildInfo = new PluginBuildInfo {
         PluginName = pluginName,
         PluginVersion = new SemVersion(2, 0, 0),
-        DirectoryName = "cache/path/TestPlugin",
+        DirectoryName = Path.GetFullPath("cache/path/TestPlugin"),
         EngineVersion = engineVersion,
         BuiltOn = DateTimeOffset.Now
     };
@@ -127,9 +127,9 @@ public class InstallServiceTest {
     });
 
     _engineService.Verify(x => x.InstallPlugin(
-            pluginName,
+            It.Is<string>(y => y == pluginName),
             It.Is<IDirectoryInfo>(d => d.FullName == pluginBuildInfo.DirectoryName),
-            engineVersion),
+            It.Is<string>(y => y == engineVersion)),
         Times.Once);
   }
 
@@ -206,7 +206,7 @@ public class InstallServiceTest {
     var downloadedPlugin = new PluginBuildInfo {
         PluginName = pluginName,
         PluginVersion = new SemVersion(2, 0, 0),
-        DirectoryName = "downloaded/path/TestPlugin",
+        DirectoryName = Path.GetFullPath("downloaded/path/TestPlugin"),
         EngineVersion = engineVersion,
         BuiltOn = DateTimeOffset.Now
     };

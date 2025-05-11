@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.IO.Compression;
 using LanguageExt;
 using Retro.SimplePage;
 using Semver;
@@ -142,6 +143,9 @@ public partial class PluginManagementService : IPluginManagementService {
     var patches = await _pluginService.GetSourcePatches(plugin.PluginId, plugin.VersionId)
         .Map(x => x.Select(y => y.Content)
             .ToList());
+    if (manifest.Patches.Count != patches.Count) {
+      throw new BadSubmissionException("Patches are not the same length as the source files.");
+    }
 
     await using var iconFile = plugin.Icon is not null
         ? _storageService.GetResourceStream(plugin.Icon.StoredFilename)
@@ -151,8 +155,42 @@ public partial class PluginManagementService : IPluginManagementService {
         .ContinueWith(x => x.IsFaulted ? null : x.Result);
 
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    return await pluginsApi.SubmitPluginAsync(manifest, patches,
-        iconFile is not null ? new FileParameter(iconFile) : null, readme);
+    var manifestJson = _jsonService.Serialize(manifest);
+
+    using var memoryStream = new MemoryStream();
+    using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)) {
+      var pluginEntry = zipArchive.CreateEntry("plugin.json");
+      await using (var entryStream = pluginEntry.Open()) {
+        await using var jsonStream = manifestJson.ToStream();
+        await jsonStream.CopyToAsync(entryStream);
+      }
+
+      if (manifest.Patches.Count > 0) {
+        zipArchive.CreateEntry("patches/");
+        for (var i = 0; i < manifest.Patches.Count; i++) {
+          var patchEntry = zipArchive.CreateEntry($"patches/{manifest.Patches[i]}");
+          await using var entryStream = patchEntry.Open();
+          await using var patchStream = patches[i].ToStream();
+          await patchStream.CopyToAsync(entryStream);
+        }
+      }
+
+      if (iconFile is not null) {
+        var iconEntry = zipArchive.CreateEntry("icon.png");
+        await using var entryStream = iconEntry.Open();
+        await iconFile.CopyToAsync(entryStream);
+      }
+
+      if (readme is not null) {
+        var readmeEntry = zipArchive.CreateEntry("readme.md");
+        await using var entryStream = readmeEntry.Open();
+        await using var readmeStream = readme.ToStream();
+        await readmeStream.CopyToAsync(entryStream);
+      }
+    }
+    memoryStream.Position = 0;
+
+    return await pluginsApi.SubmitPluginAsync(new FileParameter(memoryStream));
   }
 
   /// <inheritdoc />

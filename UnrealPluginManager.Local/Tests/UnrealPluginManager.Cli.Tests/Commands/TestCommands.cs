@@ -3,6 +3,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using System.Text.Json;
 using LanguageExt;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -13,9 +14,8 @@ using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Exceptions;
 using UnrealPluginManager.Cli.Tests.Mocks;
 using UnrealPluginManager.Core.Abstractions;
-using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
-using UnrealPluginManager.Core.Model.Resolution;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Mocks;
 using UnrealPluginManager.Core.Utils;
@@ -34,6 +34,7 @@ public class TestCommands {
   private Mock<IPluginManagementService> _pluginManagementService;
   private Mock<IEngineService> _engineService;
   private Mock<IInstallService> _installService;
+  private IJsonService _jsonService;
 
   [SetUp]
   public void Setup() {
@@ -46,6 +47,7 @@ public class TestCommands {
         new UploadCommand()
     };
 
+    _jsonService = new JsonService(JsonSerializerOptions.Default);
     _pluginService = new Mock<IPluginService>();
     _engineService = new Mock<IEngineService>();
     _pluginManagementService = new Mock<IPluginManagementService>();
@@ -61,6 +63,7 @@ public class TestCommands {
           services.AddSingleton(_pluginService.Object);
           services.AddSingleton(_pluginManagementService.Object);
           services.AddSingleton(_installService.Object);
+          services.AddSingleton(_jsonService);
         });
 
     _parser = builder.Build();
@@ -109,36 +112,34 @@ public class TestCommands {
 
   [Test]
   public async Task TestRequestBuild() {
-    _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
+    var pluginManifest = new PluginManifest {
+        Name = "MyPlugin",
+        Version = new SemVersion(1, 0, 0),
+        Source = new SourceLocation {
+            Url = new Uri("https://github.com/api/plugins"),
+            Sha = "ThisIsNotARealShaHash"
+        },
+        Dependencies = []
+    };
+    _jsonService.Serialize(pluginManifest);
+    _filesystem.Directory.CreateDirectory("C:/dev/MyPlugin");
+    await _filesystem.File.WriteAllTextAsync("C:/dev/MyPlugin/MyPlugin.uplugin",
+        _jsonService.Serialize(pluginManifest));
+
+    _installService.Setup(x => x.InstallRequirements(It.IsAny<PluginManifest>(), It.IsAny<string?>(),
             It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync([]);
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x =>
-        x.BuildPlugin(It.Is<IFileInfo>(y => y.FullName ==
-                                            Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-            It.IsAny<IDirectoryInfo>(), It.Is<string?>(y => y == "5.5"), It.IsAny<IReadOnlyCollection<string>>()));
+    _pluginManagementService.Verify(x =>
+        x.BuildFromManifest(It.IsAny<PluginManifest>(), It.IsAny<IReadOnlyList<string>>(),
+            It.Is<string?>(y => y == "5.5"), It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin");
     Assert.That(returnCode, Is.EqualTo(0));
-    _engineService.Verify(x =>
-        x.BuildPlugin(It.Is<IFileInfo>(y => y.FullName ==
-                                            Path.GetFullPath("C:/dev/MyPlugin/MyPlugin.uplugin")),
-            It.IsAny<IDirectoryInfo>(), It.Is<string?>(y => y == null), It.IsAny<IReadOnlyCollection<string>>()));
-  }
-
-  [Test]
-  public async Task TestRequestBuildWithError() {
-    _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
-            It.IsAny<IReadOnlyCollection<string>>()))
-        .ThrowsAsync(new DependencyConflictException([
-            new Conflict("TestPlugin", [
-                new PluginRequirement("OtherPlugin", SemVersionRange.Parse("1.0.0")),
-                new PluginRequirement("ThirdPlugin", SemVersionRange.Parse("2.0.0"))
-            ])
-        ]));
-    var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
-    Assert.That(returnCode, Is.EqualTo(-1));
+    _pluginManagementService.Verify(x =>
+        x.BuildFromManifest(It.IsAny<PluginManifest>(), It.IsAny<IReadOnlyList<string>>(),
+            It.Is<string?>(y => y == null), It.IsAny<IReadOnlyCollection<string>>()));
   }
 
   [Test]

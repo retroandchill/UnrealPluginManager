@@ -18,7 +18,6 @@ import * as runtime from '../runtime';
 import type {
   DependencyManifest,
   PluginDependency,
-  PluginManifest,
   PluginOverviewPage,
   PluginSummary,
   PluginVersionInfo,
@@ -28,7 +27,6 @@ import type {
 import {
   DependencyManifestFromJSON,
   PluginDependencyToJSON,
-  PluginManifestToJSON,
   PluginOverviewPageFromJSON,
   PluginSummaryFromJSON,
   PluginVersionInfoFromJSON,
@@ -80,10 +78,7 @@ export interface GetPluginsRequest {
 }
 
 export interface SubmitPluginRequest {
-  manifest: PluginManifest;
-  patches?: Array<string> | null;
-  icon?: Blob | null;
-  readme?: string | null;
+  archive?: Blob;
 }
 
 export interface UpdatePluginReadmeRequest {
@@ -465,13 +460,6 @@ export class PluginsApi extends runtime.BaseAPI {
      * Submits a new plugin version along with optional icon and README information.
      */
     async submitPluginRaw(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PluginVersionInfo>> {
-      if (requestParameters['manifest'] == null) {
-        throw new runtime.RequiredError(
-            'manifest',
-            'Required parameter "manifest" was null or undefined when calling submitPlugin().'
-        );
-      }
-
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -501,22 +489,8 @@ export class PluginsApi extends runtime.BaseAPI {
             formParams = new URLSearchParams();
         }
 
-      if (requestParameters['manifest'] != null) {
-        formParams.append('manifest', new Blob([JSON.stringify(PluginManifestToJSON(requestParameters['manifest']))], {type: "application/json",}));
-      }
-
-      if (requestParameters['patches'] != null) {
-        requestParameters['patches'].forEach((element) => {
-          formParams.append('patches', element as any);
-        })
-      }
-
-      if (requestParameters['icon'] != null) {
-        formParams.append('icon', requestParameters['icon'] as any);
-      }
-
-      if (requestParameters['readme'] != null) {
-        formParams.append('readme', requestParameters['readme'] as any);
+      if (requestParameters['archive'] != null) {
+        formParams.append('archive', requestParameters['archive'] as any);
         }
 
         const response = await this.request({
@@ -533,7 +507,7 @@ export class PluginsApi extends runtime.BaseAPI {
     /**
      * Submits a new plugin version along with optional icon and README information.
      */
-    async submitPlugin(requestParameters: SubmitPluginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfo> {
+    async submitPlugin(requestParameters: SubmitPluginRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PluginVersionInfo> {
         const response = await this.submitPluginRaw(requestParameters, initOverrides);
         return await response.value();
     }

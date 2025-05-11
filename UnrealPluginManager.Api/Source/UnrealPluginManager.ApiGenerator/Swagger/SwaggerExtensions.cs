@@ -93,12 +93,10 @@ public static class SwaggerExtensions {
               Type = "string",
               Example = new OpenApiString(">=1.0.0")
           });
-          options.AddDocumentFilterInstance(new AdditionalSchemaDocumentFilter());
           options.AddSchemaFilterInstance(new CollectionPropertyFilter());
           options.AddPagination();
           options.AddOperationFilterInstance(new SemVersionParameterFilter());
           options.AddOperationFilterInstance(new SecurityRequirementsOperationFilter());
-          options.AddOperationFilterInstance(new PluginSubmissionOperationFilter());
         });
 
     return builder;

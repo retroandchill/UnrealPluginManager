@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.IO.Compression;
+using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
+using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Tests.Helpers;
 using UnrealPluginManager.WebClient.Api;
 using UnrealPluginManager.WebClient.Client;
@@ -13,6 +15,7 @@ public class PluginControllerTest {
   private TestWebApplicationFactory<Program> _factory;
   private HttpClient _client;
   private PluginsApi _pluginsApi;
+  private IJsonService _jsonService;
   private IServiceProvider _serviceProvider;
 
 
@@ -24,6 +27,7 @@ public class PluginControllerTest {
     _serviceProvider = _factory.Services;
     _serviceProvider.GetRequiredService<UnrealPluginManagerContext>()
         .Database.EnsureCreated();
+    _jsonService = _serviceProvider.GetRequiredService<IJsonService>();
   }
 
   [TearDown]
@@ -141,7 +145,7 @@ public class PluginControllerTest {
 
   [Test]
   public async Task TestAddReadme() {
-    var result = await _pluginsApi.SubmitPluginAsync(new PluginManifest {
+    var manifestJson = _jsonService.Serialize(new PluginManifest {
         Name = "TestPlugin",
         Version = new SemVersion(1, 0, 0),
         Source = new SourceLocation {
@@ -150,6 +154,16 @@ public class PluginControllerTest {
         },
         Dependencies = []
     });
+    using var memoryStream = new MemoryStream();
+    using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)) {
+      var entry = zipArchive.CreateEntry("plugin.json");
+      await using var writer = entry.Open();
+      await using var jsonStream = manifestJson.ToStream();
+      await jsonStream.CopyToAsync(writer);
+    }
+    memoryStream.Position = 0;
+
+    var result = await _pluginsApi.SubmitPluginAsync(new FileParameter(memoryStream));
     Assert.That(result.Name, Is.EqualTo("TestPlugin"));
 
     var pluginId = result.PluginId;

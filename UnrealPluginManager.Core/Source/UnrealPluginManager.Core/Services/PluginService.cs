@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.IO.Compression;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Retro.SimplePage;
@@ -26,6 +27,7 @@ public partial class PluginService : IPluginService {
   private readonly UnrealPluginManagerContext _dbContext;
   private readonly IStorageService _storageService;
   private readonly IFileSystem _fileSystem;
+  private readonly IJsonService _jsonService;
 
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
@@ -252,6 +254,43 @@ public partial class PluginService : IPluginService {
     return readme;
   }
 
+  public async Task<PluginVersionInfo> SubmitPlugin(Stream archiveStream) {
+    using var directoryHandle = _fileSystem.CreateDisposableDirectory(out var tempDirectory);
+    using (var zipArchive = new ZipArchive(archiveStream)) {
+      await _fileSystem.ExtractZipFile(zipArchive, tempDirectory.FullName);
+    }
+
+    var manifestFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "plugin.json"));
+    if (!manifestFile.Exists) {
+      throw new BadSubmissionException("Plugin manifest file was not found!");
+    }
+
+    PluginManifest manifest;
+    await using (var stream = manifestFile.OpenRead()) {
+      manifest = await _jsonService.DeserializeAsync<PluginManifest>(stream);
+    }
+
+    var patches = await manifest.Patches
+        .Select(x => _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "patches", x)))
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => {
+          if (!x.Exists) {
+            throw new BadSubmissionException($"Missing patch file: {x.Name}");
+          }
+
+          return await x.ReadAllTextAsync();
+        })
+        .ToListAsync();
+
+    var iconFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "icon.png"));
+    await using var iconStream = iconFile.Exists ? iconFile.OpenRead() : null;
+
+    var readmeFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "README.md"));
+    var readme = readmeFile.Exists ? readmeFile.ReadAllText() : null;
+
+    return await SubmitPlugin(manifest, patches, iconStream, readme);
+  }
+
   /// <inheritdoc />
   public async Task<PluginVersionInfo> SubmitPlugin(PluginManifest manifest,
                                                     IReadOnlyList<string> patches,
@@ -303,6 +342,7 @@ public partial class PluginService : IPluginService {
     }
 
     mainPlugin.Versions.Add(version);
+    _dbContext.PluginVersions.Add(version);
     await _dbContext.SaveChangesAsync();
 
     return version.ToPluginVersionInfo();

@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using UnrealPluginManager.Server.Config;
 using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Tests.Helpers;
@@ -15,8 +14,8 @@ public class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginManagerCon
     var config = new Mock<IConfiguration>();
     var mockSection = new Mock<IConfigurationSection>();
     config.Setup(x => x.GetSection("Postgresql")).Returns(mockSection.Object);
-    mockSection.Setup(x => x.Get<PostgresConfig>())
-        .Returns((PostgresConfig?) null);
+    mockSection.Setup(x => x.Value)
+        .Returns((string?) null);
 
     return config.Object;
   }

@@ -43,42 +43,6 @@ public partial class EngineService : IEngineService {
                                      IReadOnlyCollection<string> platforms) {
     var installedEngine = GetInstalledEngine(engineVersion);
 
-    /*
-    PluginManifest pluginManifest;
-    await using (var pluginFileStream = pluginFile.OpenRead()) {
-      pluginManifest = await _jsonService.DeserializeAsync<PluginManifest>(pluginFileStream);
-    }
-
-    using var intermediate = _fileSystem.CreateDisposableDirectory(out var intermediateFolder);
-    var zipFileName = Path.Join(intermediateFolder.FullName, "Source.zip");
-    await using (var downloadStream = await _httpClient.GetStreamAsync(pluginManifest.Source.Url)) {
-      await using var fileStream = _fileSystem.FileStream.New(zipFileName, FileMode.Create);
-      await downloadStream.CopyToAsync(fileStream);
-    }
-
-    using var zipArchive = new ZipArchive(File.OpenRead(zipFileName), ZipArchiveMode.Read);
-    var pluginDirectoryName = Path.Join(_storageService.BaseDirectory, "Plugins", pluginManifest.Name,
-        pluginManifest.Version.ToString());
-    var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
-    pluginDirectory.Create();
-    var destinationFolder = Path.Join(intermediateFolder.FullName, "Source");
-    await _fileSystem.ExtractZipFile(zipArchive, destinationFolder);
-
-    var sourceDirectory = _fileSystem.DirectoryInfo.New(destinationFolder);
-    var upluginFile = sourceDirectory
-        .EnumerateFiles("*.uplugin", SearchOption.TopDirectoryOnly)
-        .FirstOrDefault();
-
-
-    if (upluginFile is null) {
-      throw new ContentNotFoundException("Missing a .uplugin file in the plugin's source directory.");
-    }
-
-    var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
-    var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
-    buildDirectory.Create();
-    */
-
     var scriptPath = Path.Join(installedEngine.BatchFilesDirectory,
         $"RunUAT.{_enginePlatformService.ScriptFileExtension}");
 

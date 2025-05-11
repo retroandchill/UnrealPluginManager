@@ -151,7 +151,7 @@ public class PluginVersion : IVersionedEntity {
   /// <summary>
   /// Gets or sets the source location associated with the plugin version.
   /// </summary>
-  public SourceLocation Source { get; set; }
+  public required SourceLocation Source { get; set; }
 
   public ICollection<PluginSourcePatch> Patches { get; set; } = new List<PluginSourcePatch>();
 

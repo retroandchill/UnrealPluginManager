@@ -128,6 +128,8 @@ public interface IPluginService {
   /// </returns>
   Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme);
 
+  Task<PluginVersionInfo> SubmitPlugin(Stream archiveStream);
+
   /// <summary>
   /// Submits a plugin to the system by providing its manifest, optional icon, and optional readme file.
   /// </summary>

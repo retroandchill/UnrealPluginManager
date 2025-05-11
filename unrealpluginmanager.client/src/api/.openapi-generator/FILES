@@ -8,12 +8,9 @@ models/BinariesOverview.ts
 models/DependencyManifest.ts
 models/DependencyOverview.ts
 models/PluginDependency.ts
-models/PluginDependencyManifest.ts
 models/PluginIdentifiers.ts
-models/PluginManifest.ts
 models/PluginOverview.ts
 models/PluginOverviewPage.ts
-models/PluginRepositorySource.ts
 models/PluginSummary.ts
 models/PluginVersionDetails.ts
 models/PluginVersionInfo.ts

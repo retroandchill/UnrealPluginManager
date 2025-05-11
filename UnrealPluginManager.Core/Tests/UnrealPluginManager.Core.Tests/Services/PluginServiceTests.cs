@@ -63,10 +63,18 @@ public class PluginServiceTests {
                 Name = "Plugin" + i,
                 Versions = [
                     new PluginVersion {
-                        Version = new SemVersion(1, 0, 0)
+                        Version = new SemVersion(1, 0, 0),
+                        Source = new SourceLocation {
+                            Url = new Uri("https://github.com/ue4plugins/TestPlugin"),
+                            Sha = "Dummy"
+                        }
                     },
                     new PluginVersion {
-                        Version = new SemVersion(1, 2, 2)
+                        Version = new SemVersion(1, 2, 2),
+                        Source = new SourceLocation {
+                            Url = new Uri("https://github.com/ue4plugins/TestPlugin"),
+                            Sha = "Dummy"
+                        }
                     }
                 ]
             }
@@ -114,10 +122,6 @@ public class PluginServiceTests {
         Dependencies = [
             new PluginDependencyManifest {
                 Name = "Plugin1",
-                Version = SemVersionRange.Parse(">=1.0.0")
-            },
-            new PluginDependencyManifest {
-                Name = "Paper2D",
                 Version = SemVersionRange.Parse(">=1.0.0")
             }
         ]
@@ -322,6 +326,10 @@ public class PluginServiceTests {
         Versions = [
             new PluginVersion {
                 Version = new SemVersion(1, 0, 0),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/ue4plugins/TestPlugin"),
+                    Sha = "Dummy"
+                }
             }
         ]
     };

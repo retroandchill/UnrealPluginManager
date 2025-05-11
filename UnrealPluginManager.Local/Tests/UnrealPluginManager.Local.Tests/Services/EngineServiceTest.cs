@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using System.IO.Compression;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,16 +68,7 @@ public partial class EngineServiceTest {
     // Setup source plugin
     const string pluginPath = "C:/dev/Plugins/MyPlugin";
     _filesystem.Directory.CreateDirectory(pluginPath);
-    var pluginFile = Path.Join(pluginPath, "MyPlugin.uplugin");
-    var descriptor = new PluginDescriptor {
-        Version = 1,
-        FriendlyName = "My Plugin",
-        VersionName = new SemVersion(1, 0, 0),
-        Installed = false
-    };
-    await using (var writer = _filesystem.File.Create(pluginFile)) {
-      await JsonSerializer.SerializeAsync(writer, descriptor);
-    }
+    var pluginFile = Path.GetFullPath(Path.Join(pluginPath, "MyPlugin.uplugin"));
 
     // Setup process runner mock for UAT
     var batchFilePath = Path.GetFullPath("C:/dev/UnrealEngine/5.5/Engine/Build/BatchFiles/RunUAT.bat");
@@ -108,11 +98,12 @@ public partial class EngineServiceTest {
 
     // Verify process runner was called correctly
     _processRunner.Verify(x => x.RunProcess(
-            batchFilePath,
+            It.Is<string>(y => y == batchFilePath),
             It.Is<string[]>(y =>
                 y[0] == "BuildPlugin" &&
                 y[1] == $"-Plugin=\"{pluginFile}\"" &&
-                y[2] == $"-package=\"{destination.FullName}\""), It.IsAny<string>()),
+                y[2] == $"-package=\"{destination.FullName}\""),
+            It.Is<string?>(y => y == null)),
         Times.Once());
 
   }
@@ -126,40 +117,25 @@ public partial class EngineServiceTest {
     };
     _enginePlatformService.Setup(x => x.GetInstalledEngines()).Returns(installedEngines);
 
-    const string pluginPath = "C:/dev/Plugins/MyPlugin.zip";
-    var dirName = Path.GetDirectoryName(pluginPath);
+    const string pluginPath = "C:/dev/Plugins/MyPlugin";
+    var dirName = Path.GetFullPath(pluginPath);
     Assert.That(dirName, Is.Not.Null);
     _filesystem.Directory.CreateDirectory(dirName);
-    await using (var zipFile = _filesystem.File.Create(pluginPath)) {
-      using var archive = new ZipArchive(zipFile, ZipArchiveMode.Create);
-      var descriptor = new PluginDescriptor {
-          Version = 1,
-          FriendlyName = "My Plugin",
-          VersionName = new SemVersion(1, 0, 0),
-          Installed = false
-      };
-      var pluginEntry = archive.CreateEntry("MyPlugin.uplugin");
-      await using (var writer = pluginEntry.Open()) {
-        await JsonSerializer.SerializeAsync(writer, descriptor);
-      }
 
-      archive.CreateEntry("Example/");
-      var textFileName = Path.Join("Example", "TextFile.txt");
-      var textFileEntry = archive.CreateEntry(textFileName);
-      await using var textFileStream = textFileEntry.Open();
-      await using var textWriter = new StreamWriter(textFileStream);
-      await textWriter.WriteAsync("Hello World!");
-    }
-
-    List<string> targetPlatforms = ["Win64"];
+    var descriptor = new PluginDescriptor {
+        Version = 1,
+        FriendlyName = "My Plugin",
+        VersionName = new SemVersion(1, 0, 0),
+        Installed = false
+    };
+    var descriptorJson = JsonSerializer.Serialize(descriptor);
+    await _filesystem.File.WriteAllTextAsync(Path.Join(dirName, "MyPlugin.uplugin"), descriptorJson);
 
     var engineService = _serviceProvider.GetRequiredService<IEngineService>();
     var installedPluginVersion = await engineService.GetInstalledPluginVersion("MyPlugin", "5.4");
     Assert.That(installedPluginVersion.IsNone, Is.True);
-    var destination =
-        _filesystem.DirectoryInfo.New(
-            "C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin");
-    engineService.InstallPlugin("MyPlugin", destination, "5.4");
+    var source = _filesystem.DirectoryInfo.New(pluginPath);
+    engineService.InstallPlugin("MyPlugin", source, "5.4");
     Assert.That(_filesystem.Directory.Exists(
             Path.Join("C:/dev/UnrealEngine/5.4/Engine/Plugins/Marketplace/.UnrealPluginManager/MyPlugin")),
         Is.True);

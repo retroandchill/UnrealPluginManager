@@ -5,16 +5,16 @@ namespace UnrealPluginManager.Server.Model;
 
 public record PluginSubmissionMultipartRequest {
 
-  [FromForm]
+  [FromForm(Name = "manifest")]
   public required PluginManifest Manifest { get; init; }
 
-  [FromForm]
+  [FromForm(Name = "patches")]
   public List<string> Patches { get; init; } = [];
 
-  [FromForm]
+  [FromForm(Name = "icon")]
   public IFormFile? Icon { get; init; }
 
-  [FromForm]
+  [FromForm(Name = "readme")]
   public string? Readme { get; init; }
 
 }

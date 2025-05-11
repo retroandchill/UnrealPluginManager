@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Auth.Policies;
@@ -29,6 +30,7 @@ public class CanEditPluginHandlerTest {
     _dbContext = new TestCloudUnrealPluginManagerContext();
     _dbContext.Database.EnsureCreated();
     services.AddSingleton(_dbContext);
+    services.AddSingleton<UnrealPluginManagerContext>(_dbContext);
 
     // Set up mocks
     _httpContextAccessorMock = new Mock<IHttpContextAccessor>();

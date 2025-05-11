@@ -12,7 +12,6 @@ using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
-using UnrealPluginManager.Server.Model;
 
 namespace UnrealPluginManager.Server.Controllers;
 
@@ -62,9 +61,9 @@ public partial class PluginsController : ControllerBase {
   [ProducesResponseType(typeof(PluginVersionInfo), (int) HttpStatusCode.OK)]
   [ApiKey]
   [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
-  public async Task<PluginVersionInfo> SubmitPlugin(PluginSubmissionMultipartRequest requestBody) {
-    await using var iconStream = requestBody.Icon?.OpenReadStream();
-    return await _pluginService.SubmitPlugin(requestBody.Manifest, requestBody.Patches, iconStream, requestBody.Readme);
+  public async Task<PluginVersionInfo> SubmitPlugin(IFormFile archive) {
+    await using var archiveStream = archive.OpenReadStream();
+    return await _pluginService.SubmitPlugin(archiveStream);
   }
 
   /// <summary>

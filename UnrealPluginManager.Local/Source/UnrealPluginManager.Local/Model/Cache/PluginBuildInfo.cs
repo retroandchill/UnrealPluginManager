@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
-using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Local.Model.Cache;
 
@@ -59,6 +58,6 @@ public record PluginBuildInfo {
   /// Provides detailed versioning information about the tools and environments used to build the plugin.
   /// Useful for ensuring compatibility and tracking build dependencies.
   /// </summary>
-  [JsonConverter(typeof(StringKeyDictionaryConverter<List<PluginVersionInfo>>))]
+  [JsonConverter(typeof(StringKeyDictionaryConverter<SemVersion>))]
   public Dictionary<string, SemVersion> BuiltWith { get; init; } = [];
 }

@@ -85,44 +85,17 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "required": [
-                  "manifest"
-                ],
                 "type": "object",
                 "properties": {
-                  "manifest": {
-                    "$ref": "#/components/schemas/PluginManifest"
-                  },
-                  "patches": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "nullable": true
-                  },
-                  "icon": {
+                  "archive": {
                     "type": "string",
-                    "format": "binary",
-                    "nullable": true
-                  },
-                  "readme": {
-                    "type": "string",
-                    "nullable": true
+                    "format": "binary"
                   }
                 }
               },
               "encoding": {
-                "manifest": {
-                  "contentType": "application/json"
-                },
-                "patches": {
-                  "contentType": "application/json"
-                },
-                "icon": {
-                  "contentType": "image/png"
-                },
-                "readme": {
-                  "contentType": "text/markdown"
+                "archive": {
+                  "style": "form"
                 }
               }
             }
@@ -924,28 +897,6 @@
         "additionalProperties": false,
         "description": "Represents a dependency of a plugin within the Unreal Plugin Manager framework."
       },
-      "PluginDependencyManifest": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Gets or sets the name of the plugin dependency."
-          },
-          "version": {
-            "type": "string",
-            "description": "Gets or sets the version constraint of the plugin dependency.\r\nDefines the acceptable range of versions required for the dependency.",
-            "example": ">=1.0.0"
-          },
-          "repositorySource": {
-            "$ref": "#/components/schemas/PluginRepositorySource"
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents the dependency manifest of a plugin, detailing the required plugin dependencies.\r\nIt includes information about the dependency's name, version constraints, and optional repository source."
-      },
       "PluginIdentifiers": {
         "type": "object",
         "properties": {
@@ -961,67 +912,6 @@
         },
         "additionalProperties": false,
         "description": "Represents the identifiers for a plugin, including a globally unique identifier (GUID) and its corresponding name."
-      },
-      "PluginManifest": {
-        "required": [
-          "dependencies",
-          "name",
-          "source",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Gets the name of the plugin as defined in its manifest. This property is\r\nrequired and serves as a unique identifier for the plugin within the Unreal Plugin Manager."
-          },
-          "version": {
-            "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-(?:(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?:[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-            "type": "string",
-            "description": "Gets the semantic version of the plugin as defined in its manifest.\r\nThis property specifies the version of the plugin for identification, compatibility, and dependency resolution purposes.",
-            "example": "1.0.0"
-          },
-          "author": {
-            "type": "string",
-            "description": "Gets or sets the author of the plugin. This property is optional and provides\r\ninformation about the individual or organization responsible for creating\r\nor maintaining the plugin.",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "description": "Provides a detailed description of the plugin. This property is optional and may include\r\nany relevant information about the plugin, such as its purpose, features, or any additional\r\ncontext needed for users or developers.",
-            "nullable": true
-          },
-          "license": {
-            "type": "string",
-            "description": "Gets or sets the license associated with the plugin. This property provides information\r\nabout the licensing terms under which the plugin is distributed.",
-            "nullable": true
-          },
-          "homepage": {
-            "type": "string",
-            "description": "Gets the homepage URL of the plugin. This property provides a link to the plugin's\r\nmain page or website containing additional information, updates, or documentation.",
-            "format": "uri",
-            "nullable": true
-          },
-          "source": {
-            "$ref": "#/components/schemas/SourceLocation"
-          },
-          "patches": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Gets a list of patch file names associated with the plugin.\r\nThese patches represent modifications or updates that can be applied to the plugin files.\r\nEach entry in this list corresponds to a patch expected to be uploaded and managed."
-          },
-          "dependencies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PluginDependencyManifest"
-            },
-            "description": "Gets the list of dependencies required by the plugin. Each dependency is described\r\nby its name, version range, and optional repository source from which it can be retrieved.\r\nThis property ensures that all necessary plugins or components are available and aligned\r\nwith the plugin's requirements, allowing proper functionality within the Unreal Plugin Manager."
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents a manifest for a plugin, containing metadata and configuration needed to identify\r\nand manage the plugin within the Unreal Plugin Manager."
       },
       "PluginOverview": {
         "required": [
@@ -1098,26 +988,6 @@
           }
         },
         "description": "Represents the output of a paged query of PluginOverview."
-      },
-      "PluginRepositorySource": {
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "description": "Gets or sets the URL associated with the plugin repository.",
-            "format": "uri"
-          },
-          "ref": {
-            "type": "string",
-            "description": "Gets or sets the reference identifier or name associated with the plugin repository source.",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents the source for a plugin repository."
       },
       "PluginSummary": {
         "required": [

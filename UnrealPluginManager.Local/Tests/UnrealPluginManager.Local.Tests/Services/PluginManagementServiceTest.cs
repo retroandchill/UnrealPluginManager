@@ -1,4 +1,6 @@
 ﻿using System.CommandLine;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -11,6 +13,8 @@ using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
 using UnrealPluginManager.Local.Factories;
+using UnrealPluginManager.Local.Model.Cache;
+using UnrealPluginManager.Local.Model.Engine;
 using UnrealPluginManager.Local.Model.Plugins;
 using UnrealPluginManager.Local.Services;
 using UnrealPluginManager.WebClient.Api;
@@ -20,10 +24,13 @@ namespace UnrealPluginManager.Local.Tests.Services;
 
 public class PluginManagementServiceTest {
   private ServiceProvider _serviceProvider;
+  private MockFileSystem _filesystem;
   private Mock<IStorageService> _storageService;
   private Mock<IPluginsApi> _pluginsApi;
   private Mock<IPluginService> _pluginService;
   private Mock<IEngineService> _engineService;
+  private Mock<ISourceDownloadService> _sourceDownloadService;
+  private Mock<IBinaryCacheService> _binaryCacheService;
   private IPluginManagementService _pluginManagementService;
 
   [SetUp]
@@ -55,6 +62,15 @@ public class PluginManagementServiceTest {
     services.AddSingleton(_pluginsApi.Object);
     services.AddSingleton<IApiAccessor>(_pluginsApi.Object);
 
+    _filesystem = new MockFileSystem(new Dictionary<string, MockFileData>());
+    services.AddSingleton<IFileSystem>(_filesystem);
+
+    _sourceDownloadService = new Mock<ISourceDownloadService>();
+    services.AddSingleton(_sourceDownloadService.Object);
+
+    _binaryCacheService = new Mock<IBinaryCacheService>();
+    services.AddSingleton(_binaryCacheService.Object);
+
     var mockClientFactory = new Mock<IApiClientFactory>();
     mockClientFactory.SetupGet(x => x.InterfaceType).Returns(typeof(IPluginsApi));
     mockClientFactory.Setup(x => x.Create(It.IsAny<RemoteConfig>()))
@@ -67,11 +83,12 @@ public class PluginManagementServiceTest {
     services.AddSingleton(_pluginsApi.Object);
     services.AddScoped<IRemoteService, RemoteService>();
     services.AddScoped<IPluginManagementService, PluginManagementService>();
-    services.AddSingleton<IJsonService>(new JsonService(JsonSerializerOptions.Default));
+    var jsonService = new JsonService(JsonSerializerOptions.Default);
+    services.AddSingleton<IJsonService>(jsonService);
 
     _serviceProvider = services.BuildServiceProvider();
 
-    var realPluginService = new PluginService(null, null, null);
+    var realPluginService = new PluginService(null, null, null, jsonService);
     _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
         .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
             realPluginService.GetDependencyList(root, manifest));
@@ -263,10 +280,10 @@ public class PluginManagementServiceTest {
 
     _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", versionMatcher, default))
         .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+    _pluginService.Setup(x => x.GetSourcePatches(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync([]);
 
-    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<PluginManifest>(), It.IsAny<List<string>>(), It.IsAny<Stream>(),
-            It.IsAny<string>(),
-            It.IsAny<CancellationToken>()))
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
         .ReturnsAsync(pluginVersion);
 
     var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
@@ -287,19 +304,20 @@ public class PluginManagementServiceTest {
 
   [Test]
   public async Task TestDownloadPlugin_AlreadyDownloaded() {
-    var pluginDetails = new PluginVersionDetails {
-        PluginId = Guid.NewGuid(),
-        Name = "TestPlugin",
-        VersionId = Guid.NewGuid(),
-        Version = new SemVersion(1, 0, 0),
-        Dependencies = []
-    };
-    _pluginService.Setup(x => x.GetPluginVersionInfo("TestPlugin", new SemVersion(1, 0, 0)))
-        .ReturnsAsync(pluginDetails);
+    _binaryCacheService.Setup(x => x.GetCachedPluginBuild("TestPlugin", new SemVersion(1, 0, 0), "5.5", new[] {
+            "Win64"
+        }))
+        .ReturnsAsync(new PluginBuildInfo {
+            PluginName = "TestPlugin",
+            PluginVersion = new SemVersion(1, 0, 0),
+            BuiltOn = DateTimeOffset.Now,
+            DirectoryName = "",
+            EngineVersion = "5.5"
+        });
     var result =
-        await _pluginManagementService.DownloadPlugin("TestPlugin", new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]);
+        await _pluginManagementService.DownloadPlugin("TestPlugin", new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);
 
-    Assert.That(result.PluginName, Is.EqualTo(pluginDetails.Name));
+    Assert.That(result.PluginName, Is.EqualTo("TestPlugin"));
   }
 
   [Test]
@@ -326,8 +344,29 @@ public class PluginManagementServiceTest {
         Dependencies = []
     };
 
+    _engineService.Setup(x => x.GetInstalledEngine("5.5"))
+        .Returns(new InstalledEngine("5.5", new Version(5, 5), null!));
     _pluginsApi.Setup(x => x.GetLatestVersionsAsync("TestPlugin", "1.0.0", 1, 100, CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([pluginDetails]));
+    _pluginsApi.Setup(x => x.GetPluginPatchesAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync([]);
+
+    _sourceDownloadService
+        .Setup(x => x.DownloadAndExtractSources(It.IsAny<SourceLocation>(), It.IsAny<IDirectoryInfo>()))
+        .Returns((SourceLocation _, IDirectoryInfo directory) => {
+          directory.File("TestPlugin.uplugin").Create();
+          return Task.CompletedTask;
+        });
+
+    _binaryCacheService.Setup(x => x.CacheBuiltPlugin(It.IsAny<PluginManifest>(), It.IsAny<IDirectoryInfo>(),
+            It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>()))
+        .ReturnsAsync(new PluginBuildInfo {
+            PluginName = pluginDetails.Name,
+            PluginVersion = pluginDetails.Version,
+            BuiltOn = DateTimeOffset.Now,
+            DirectoryName = "",
+            EngineVersion = "5.5"
+        });
 
     var result = await _pluginManagementService.DownloadPlugin("TestPlugin",
         new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);

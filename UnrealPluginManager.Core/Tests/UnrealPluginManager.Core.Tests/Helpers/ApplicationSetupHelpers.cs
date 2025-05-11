@@ -1,12 +1,5 @@
-﻿using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using UnrealPluginManager.Core.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Tests.Database;
-using UnrealPluginManager.Core.Tests.Mocks;
-using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Tests.Helpers;
 
@@ -23,8 +16,10 @@ public static class ApplicationSetupHelpers {
   /// </summary>
   /// <param name="services">The IServiceCollection instance to configure with mock services.</param>
   /// <returns>The updated IServiceCollection with the mock data providers configured.</returns>
-  public static IServiceCollection SetUpMockDataProviders(this IServiceCollection services) {
+  public static IServiceCollection SetUpMockDataProviders<TDataContextType>(this IServiceCollection services)
+      where TDataContextType : UnrealPluginManagerContext {
     return services.AddMockSystemAbstractions()
-        .AddDbContext<UnrealPluginManagerContext, TestUnrealPluginManagerContext>(ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+        .AddDbContext<UnrealPluginManagerContext, TDataContextType>(ServiceLifetime.Singleton,
+            ServiceLifetime.Singleton);
   }
 }

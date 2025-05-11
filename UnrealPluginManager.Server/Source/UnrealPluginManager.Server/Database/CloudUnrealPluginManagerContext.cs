@@ -61,7 +61,7 @@ public class CloudUnrealPluginManagerContext : UnrealPluginManagerContext {
   /// Initialization includes loading database configuration settings from an external configuration source.
   /// </remarks>
   public CloudUnrealPluginManagerContext(IConfiguration config) {
-    _config = config.GetRequiredSection("Postgresql").Get<PostgresConfig>() ?? new PostgresConfig();
+    _config = config.GetSection("Postgresql").Get<PostgresConfig>() ?? new PostgresConfig();
   }
 
   /// <inheritdoc />
