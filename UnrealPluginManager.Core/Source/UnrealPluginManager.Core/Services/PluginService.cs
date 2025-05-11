@@ -46,6 +46,8 @@ public partial class PluginService : IPluginService {
     return _dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Icon)
+        .Include(x => x.Patches)
+        .ThenInclude(x => x.FileResource)
         .Where(x => x.Parent.Name.ToUpper().Contains(pluginName.ToUpper()))
         .WhereVersionInRange(versionRange)
         .GroupBy(x => x.ParentId)
