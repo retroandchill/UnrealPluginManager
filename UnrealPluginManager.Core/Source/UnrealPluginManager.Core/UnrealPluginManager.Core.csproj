@@ -21,7 +21,7 @@
         </PackageReference>
         <PackageReference Include="Dunet" Version="1.11.2" />
         <PackageReference Include="EntityFrameworkCore.NamingConventions" Version="8.0.0" />
-        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-52"/>
+        <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-54"/>
         <PackageReference Include="LinqKit.Core" Version="1.2.8"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
