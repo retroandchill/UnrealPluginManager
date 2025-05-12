@@ -33,15 +33,4 @@ public interface IBinaryCacheService {
   Task<Option<PluginBuildInfo>> GetCachedPluginBuild(string pluginName, SemVersion pluginVersion, string engineVersion,
                                                      IReadOnlyCollection<string> targetPlatforms);
 
-  /// Retrieves the directory of a cached plugin build, if it exists, based on the provided plugin name,
-  /// version, engine version, and target platforms.
-  /// <param name="pluginName">The name of the plugin whose cached build is being queried.</param>
-  /// <param name="pluginVersion">The semantic version of the plugin.</param>
-  /// <param name="engineVersion">The version of the engine associated with the cached build.</param>
-  /// <param name="targetPlatforms">The collection of target platforms for which the plugin was built.</param>
-  /// <returns>An option containing the directory of the cached plugin build if it exists, otherwise none.</returns>
-  Task<Option<IDirectoryInfo>> GetCachedBuildDirectory(string pluginName, SemVersion pluginVersion,
-                                                       string engineVersion,
-                                                       IReadOnlyCollection<string> targetPlatforms);
-
 }

@@ -12,6 +12,9 @@ using UnrealPluginManager.Server.Database.Building;
 
 namespace UnrealPluginManager.Local.Services;
 
+/// <summary>
+/// Provides functionality for caching plugin builds in binary form.
+/// </summary>
 [AutoConstructor]
 public partial class BinaryCacheService : IBinaryCacheService {
 
@@ -20,6 +23,7 @@ public partial class BinaryCacheService : IBinaryCacheService {
   private readonly IPluginService _pluginService;
   private readonly IEngineService _engineService;
 
+  /// <inheritdoc />
   public async Task<PluginBuildInfo> CacheBuiltPlugin(PluginManifest manifest, IDirectoryInfo directory,
                                                       IReadOnlyList<string> patches,
                                                       string engineVersion,
@@ -90,13 +94,5 @@ public partial class BinaryCacheService : IBinaryCacheService {
         .OrderByDescending(x => x.BuiltOn)
         .Select(x => x.ToPluginBuildInfo())
         .FirstAsync();
-  }
-
-  /// <inheritdoc />
-  public async Task<Option<IDirectoryInfo>> GetCachedBuildDirectory(string pluginName, SemVersion pluginVersion,
-                                                                    string engineVersion,
-                                                                    IReadOnlyCollection<string> targetPlatforms) {
-    var cachedInstall = await GetCachedPluginBuild(pluginName, pluginVersion, engineVersion, targetPlatforms);
-    return cachedInstall.Select(x => _fileSystem.DirectoryInfo.New(x.DirectoryName));
   }
 }
