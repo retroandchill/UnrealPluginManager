@@ -66,7 +66,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     entries: ['cypress/**/*'],
-    include: ['react-router', 'oidc-client-ts', 'uuid']
+    include: ['react-router', 'oidc-client-ts']
   },
   resolve: {
     alias: {
