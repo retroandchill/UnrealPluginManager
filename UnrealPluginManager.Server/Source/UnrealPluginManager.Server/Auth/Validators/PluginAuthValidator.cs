@@ -44,25 +44,24 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
           .Where(x => x.Username == context.User.Identity.Name)
           .SelectMany(x => x.Plugins)
           .AnyAsync(x => x.Name == pluginName);
-      ;
-    } else {
-      ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
-      var validPlugin = await _dbContext.Plugins
-          .LeftJoin(_dbContext.PluginOwners, x => x.Id, x => x.PluginId,
-              (plugin, owner) => new {
-                  Plugin = plugin,
-                  owner.Owner
-              })
-          .Where(x => x.Plugin.Name == pluginName)
-          .GroupBy(x => x.Plugin.Name)
-          .Select(x => new {
-              x.Key,
-              Owners = x.Select(y => y.Owner.Username).ToList()
-          })
-          .FirstOrDefaultAsync();
-      if (validPlugin is null || validPlugin.Owners.Contains(context.User.Identity.Name)) {
-        return true;
-      }
+    }
+
+    ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
+    var validPlugin = await _dbContext.Plugins
+        .LeftJoin(_dbContext.PluginOwners, x => x.Id, x => x.PluginId,
+                  (plugin, owner) => new {
+                      Plugin = plugin,
+                      owner.Owner
+                  })
+        .Where(x => x.Plugin.Name == pluginName)
+        .GroupBy(x => x.Plugin.Name)
+        .Select(x => new {
+            x.Key,
+            Owners = x.Select(y => y.Owner.Username).ToList()
+        })
+        .FirstOrDefaultAsync();
+    if (validPlugin is null || validPlugin.Owners.Contains(context.User.Identity.Name)) {
+      return true;
     }
 
     return false;

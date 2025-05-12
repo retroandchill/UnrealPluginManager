@@ -62,13 +62,6 @@ public partial class PluginService : IPluginService {
         .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
 
-  public async Task<PluginVersionInfo> GetPluginVersionInfo(Guid pluginId, Guid versionId) {
-    return await _dbContext.PluginVersions
-        .Where(x => x.ParentId == pluginId && x.Id == versionId)
-        .ToPluginVersionInfoQuery()
-        .SingleAsync();
-  }
-
   /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, SemVersionRange versionRange) {
     return await _dbContext.PluginVersions

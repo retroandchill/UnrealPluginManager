@@ -1,7 +1,7 @@
 ﻿using Riok.Mapperly.Abstractions;
 using Semver;
+using UnrealPluginManager.Local.Database.Building;
 using UnrealPluginManager.Local.Model.Cache;
-using UnrealPluginManager.Server.Database.Building;
 
 namespace UnrealPluginManager.Local.Mappers;
 
@@ -10,7 +10,6 @@ namespace UnrealPluginManager.Local.Mappers;
 /// </summary>
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class BinaryCacheMapper {
-
   /// Converts a PluginBuild instance to a PluginBuildInfo instance by mapping relevant properties.
   /// <param name="pluginBuild">
   /// The PluginBuild object containing the plugin build information to be converted.
@@ -29,5 +28,4 @@ public static partial class BinaryCacheMapper {
   private static Dictionary<string, SemVersion> GetBuiltWith(this ICollection<DependencyBuildVersion> pluginBuild) {
     return pluginBuild.ToDictionary(pb => pb.Dependency.PluginName, pb => pb.Version);
   }
-
 }

@@ -9,7 +9,6 @@ namespace UnrealPluginManager.Core.Model.Plugins.Recipes;
 /// It includes information about the dependency's name, version constraints, and optional repository source.
 /// </summary>
 public record PluginDependencyManifest {
-
   /// <summary>
   /// Gets or sets the name of the plugin dependency.
   /// </summary>
@@ -21,10 +20,4 @@ public record PluginDependencyManifest {
   /// </summary>
   [JsonConverter(typeof(SemVersionRangeJsonConverter))]
   public SemVersionRange Version { get; init; } = SemVersionRange.AllRelease;
-
-  /// <summary>
-  /// Gets or sets the source of the plugin repository associated with the dependency.
-  /// </summary>
-  public PluginRepositorySource? RepositorySource { get; init; }
-
 }

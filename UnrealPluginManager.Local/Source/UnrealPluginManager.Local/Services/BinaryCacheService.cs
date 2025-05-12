@@ -6,9 +6,9 @@ using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Database;
+using UnrealPluginManager.Local.Database.Building;
 using UnrealPluginManager.Local.Mappers;
 using UnrealPluginManager.Local.Model.Cache;
-using UnrealPluginManager.Server.Database.Building;
 
 namespace UnrealPluginManager.Local.Services;
 
@@ -17,9 +17,7 @@ namespace UnrealPluginManager.Local.Services;
 /// </summary>
 [AutoConstructor]
 public partial class BinaryCacheService : IBinaryCacheService {
-
   private readonly LocalUnrealPluginManagerContext _dbContext;
-  private readonly IFileSystem _fileSystem;
   private readonly IPluginService _pluginService;
   private readonly IEngineService _engineService;
 
@@ -62,15 +60,16 @@ public partial class BinaryCacheService : IBinaryCacheService {
     foreach (var dependency in pluginVersion.Dependencies) {
       var installedPluginVersion = await _engineService.GetInstalledPluginVersion(dependency.PluginName, engineVersion);
       installedPluginVersion.Match(x => {
-            build.BuiltWith.Add(new DependencyBuildVersion {
-                Dependency = dependency,
-                DependencyId = dependency.Id,
-                Version = x
-            });
-          },
-          () => throw new ContentNotFoundException(
-              $"Missing a {dependency.PluginName} plugin in the engine's package directory."));
+                                     build.BuiltWith.Add(new DependencyBuildVersion {
+                                         Dependency = dependency,
+                                         DependencyId = dependency.Id,
+                                         Version = x
+                                     });
+                                   },
+                                   () => throw new ContentNotFoundException(
+                                       $"Missing a {dependency.PluginName} plugin in the engine's package directory."));
     }
+
     _dbContext.CachedBuilds.Add(build);
     await _dbContext.SaveChangesAsync();
 

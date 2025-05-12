@@ -32,8 +32,6 @@ public interface IPluginService {
   Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange,
                                                    Pageable pageable = default);
 
-  Task<PluginVersionInfo> GetPluginVersionInfo(Guid pluginId, Guid versionId);
-
   /// <summary>
   /// Retrieves detailed version information associated with a specific plugin name and version range.
   /// </summary>
@@ -128,6 +126,13 @@ public interface IPluginService {
   /// </returns>
   Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme);
 
+  /// <summary>
+  /// Submits a plugin by uploading its archive and returns information about the plugin version.
+  /// </summary>
+  /// <param name="archiveStream">The stream containing the plugin archive to be submitted.</param>
+  /// <returns>
+  /// A <see cref="PluginVersionInfo"/> object containing details about the submitted plugin version.
+  /// </returns>
   Task<PluginVersionInfo> SubmitPlugin(Stream archiveStream);
 
   /// <summary>
@@ -152,6 +157,4 @@ public interface IPluginService {
   /// A task that represents the asynchronous operation. The task result contains a list of <see cref="SourcePatchInfo"/> representing the source patches for the specified plugin version.
   /// </returns>
   Task<List<SourcePatchInfo>> GetSourcePatches(Guid pluginId, Guid versionId);
-
-
 }

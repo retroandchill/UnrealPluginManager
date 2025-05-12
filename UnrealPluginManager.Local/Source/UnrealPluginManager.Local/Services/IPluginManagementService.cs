@@ -12,7 +12,7 @@ namespace UnrealPluginManager.Local.Services;
 /// </summary>
 public interface IPluginManagementService {
   /// <summary>
-  /// Searches for a locally stored plugin matching the specified name and version range.
+  /// Searches for a locally stored plugin matching the specified name, version range, engine version, and platforms.
   /// </summary>
   /// <param name="pluginName">
   /// The name of the plugin to search for. This is a required string identifying the plugin.
@@ -20,9 +20,15 @@ public interface IPluginManagementService {
   /// <param name="versionRange">
   /// The semantic version range that the plugin must match.
   /// </param>
+  /// <param name="engineVersion">
+  /// The specific version of the engine for which the plugin is sought.
+  /// </param>
+  /// <param name="platforms">
+  /// A collection of platform identifiers that the plugin must support.
+  /// </param>
   /// <returns>
   /// A task representing the asynchronous operation. Upon completion, returns an <see cref="Option{T}"/>
-  /// containing a <see cref="PluginVersionInfo"/> if a matching plugin is found, or <see cref="Option{T}.None"/> if no match exists.
+  /// containing a <see cref="PluginBuildInfo"/> if a matching plugin is found, or <see cref="Option{T}.None"/> if no match exists.
   /// </returns>
   Task<Option<PluginBuildInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange, string engineVersion,
                                                 IReadOnlyCollection<string> platforms);
@@ -103,46 +109,51 @@ public interface IPluginManagementService {
 
   /// <summary>
   /// Uploads a plugin with the specified name and version to a given remote.
-  /// The method retrieves the plugin's file data, including its binaries and icon (if available),
-  /// and submits it to the specified or default remote.
+  /// The method retrieves the plugin's data, including its binaries and icon (if available),
+  /// and submits it to the designated or default remote location.
   /// </summary>
   /// <param name="pluginName">
-  ///   The name of the plugin to upload.
+  /// The name of the plugin to upload.
   /// </param>
   /// <param name="version">
-  ///   The version of the plugin to upload, represented as a <see cref="SemVersion"/>.
+  /// The version of the plugin to upload, represented as a <see cref="SemVersion"/> object.
   /// </param>
   /// <param name="remote">
-  ///   An optional string specifying the name of the remote to which the plugin will be uploaded.
-  ///   If null, the default remote is used.
+  /// An optional string specifying the name of the remote destination for the plugin upload.
+  /// If null, the default remote is used.
   /// </param>
   /// <returns>
-  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginDetails"/>
+  /// A task representing the asynchronous operation. Upon completion, returns a <see cref="PluginVersionInfo"/>
   /// object containing detailed information about the uploaded plugin.
   /// </returns>
   Task<PluginVersionInfo> UploadPlugin(string pluginName, SemVersion version, string? remote);
 
   /// <summary>
-  /// Downloads the specified version of a plugin from a remote source.
-  /// If the plugin cannot be fetched from the remote, alternative handling might occur,
-  /// such as returning a default or fallback value.
+  /// Downloads the specified version of a plugin from a remote source
+  /// and retrieves its build information, such as compatibility and platform details.
   /// </summary>
   /// <param name="pluginName">
-  ///   The name of the plugin to be downloaded. This value must not be null or empty.
+  /// The name of the plugin to be downloaded. This must not be null or empty.
   /// </param>
   /// <param name="version">
-  ///   The semantic version of the plugin to be downloaded.
+  /// The semantic version of the plugin to be downloaded.
   /// </param>
   /// <param name="remote">
-  ///   An optional string specifying the remote source from which to download the plugin.
-  ///   If null, a default remote source may be used.
+  /// An optional identifier for the remote source from which to download the plugin.
+  /// If null, a default source may be utilized.
   /// </param>
-  /// <param name="engineVersion"></param>
-  /// <param name="platforms"></param>
+  /// <param name="engineVersion">
+  /// The specific version of the engine for which the plugin is being retrieved.
+  /// This value ensures compatibility with the desired engine version.
+  /// </param>
+  /// <param name="platforms">
+  /// A list of target platforms for which the plugin should be downloaded.
+  /// This allows specifying platform-specific plugin requirements.
+  /// </param>
   /// <returns>
   /// A task representing the asynchronous operation. Upon completion,
-  /// returns a <see cref="PluginDetails"/> object containing detailed
-  /// information about the downloaded plugin, including its versions.
+  /// provides a <see cref="PluginBuildInfo"/> object containing the downloaded plugin's
+  /// build details, including relevant metadata such as supported platforms and version information.
   /// </returns>
   Task<PluginBuildInfo> DownloadPlugin(string pluginName, SemVersion version, int? remote,
                                        string engineVersion,

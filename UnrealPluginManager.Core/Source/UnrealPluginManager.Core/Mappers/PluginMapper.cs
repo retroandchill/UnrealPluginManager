@@ -16,7 +16,6 @@ namespace UnrealPluginManager.Core.Mappers;
 /// </summary>
 [Mapper(UseDeepCloning = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class PluginMapper {
-
   /// <summary>
   /// Maps a <see cref="PluginVersion"/> entity to its <see cref="PluginSummary"/> representation.
   /// </summary>
@@ -65,6 +64,11 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(PluginVersion.Patches))]
   public static partial PluginVersion ToPluginVersion(this PluginManifest manifest);
 
+  /// <summary>
+  /// Maps a <see cref="PluginVersionInfo"/> entity to its <see cref="PluginManifest"/> representation.
+  /// </summary>
+  /// <param name="version">The <see cref="PluginVersionInfo"/> instance to be mapped to a <see cref="PluginManifest"/>.</param>
+  /// <returns>A <see cref="PluginManifest"/> instance representing the provided <see cref="PluginVersionInfo"/>.</returns>
   public static partial PluginManifest ToPluginManifest(this PluginVersionInfo version);
 
   /// <summary>
@@ -79,6 +83,11 @@ public static partial class PluginMapper {
   [MapperIgnoreTarget(nameof(Dependency.ParentId))]
   public static partial Dependency ToDependency(this PluginDependencyManifest manifest);
 
+  /// <summary>
+  /// Maps a <see cref="PluginDependency"/> entity to its <see cref="PluginDependencyManifest"/> representation.
+  /// </summary>
+  /// <param name="dependency">The <see cref="PluginDependency"/> instance to be mapped to a <see cref="PluginDependencyManifest"/>.</param>
+  /// <returns>A <see cref="PluginDependencyManifest"/> representing the provided <see cref="PluginDependency"/>.</returns>
   [MapProperty(nameof(PluginDependency.PluginName), nameof(PluginDependencyManifest.Name))]
   [MapProperty(nameof(PluginDependency.PluginVersion), nameof(PluginDependencyManifest.Version))]
   public static partial PluginDependencyManifest ToPluginDependencyManifest(this PluginDependency dependency);
@@ -106,11 +115,19 @@ public static partial class PluginMapper {
   }
 
   /// <summary>
-  /// Converts a <see cref="PluginVersion"/> instance into its corresponding <see cref="VersionDetails"/> representation.
+  /// Converts an <see cref="IDependencyHolder"/> instance to a <see cref="DependencyChainRoot"/> representation.
   /// </summary>
-  /// <param name="version">The <see cref="PluginVersion"/> instance to be converted.</param>
-  /// <returns>A <see cref="VersionDetails"/> instance representing the provided <see cref="PluginVersion"/>.</returns>
-  public static partial VersionDetails ToVersionDetails(this PluginVersion version);
+  /// <param name="descriptor">The source <see cref="IDependencyHolder"/> containing plugin dependency information.</param>
+  /// <returns>A <see cref="DependencyChainRoot"/> instance representing the dependency chain of the provided <see cref="IDependencyHolder"/>.</returns>
+  [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
+  public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
+
+  /// <summary>
+  /// Maps a <see cref="PluginManifest"/> instance to its <see cref="DependencyChainRoot"/> representation.
+  /// </summary>
+  /// <param name="manifest">The <see cref="PluginManifest"/> instance to be mapped to a <see cref="DependencyChainRoot"/>.</param>
+  /// <returns>A <see cref="DependencyChainRoot"/> representing the provided <see cref="PluginManifest"/>.</returns>
+  public static partial DependencyChainRoot ToDependencyChainRoot(this PluginManifest manifest);
 
   /// <summary>
   /// Maps a <see cref="Dependency"/> entity to a <see cref="PluginDependency"/> representation.
@@ -120,19 +137,19 @@ public static partial class PluginMapper {
   public static partial PluginDependency ToPluginDependency(this Dependency dependency);
 
   /// <summary>
-  /// Converts an <see cref="IDependencyHolder"/> instance to a <see cref="DependencyChainRoot"/> representation.
+  /// Maps a <see cref="PluginReferenceDescriptor"/> instance to its <see cref="PluginDependency"/> representation.
   /// </summary>
-  /// <param name="descriptor">The source <see cref="IDependencyHolder"/> containing plugin dependency information.</param>
-  /// <returns>A <see cref="DependencyChainRoot"/> instance representing the dependency chain of the provided <see cref="IDependencyHolder"/>.</returns>
-  [MapProperty(nameof(IDependencyHolder.Plugins), nameof(DependencyChainRoot.Dependencies))]
-  public static partial DependencyChainRoot ToDependencyChainRoot(this IDependencyHolder descriptor);
-
-  public static partial DependencyChainRoot ToDependencyChainRoot(this PluginManifest manifest);
-
+  /// <param name="manifest">The <see cref="PluginReferenceDescriptor"/> instance to be mapped to a <see cref="PluginDependency"/>.</param>
+  /// <returns>A <see cref="PluginDependency"/> representing the provided <see cref="PluginReferenceDescriptor"/>.</returns>
   [MapProperty(nameof(PluginReferenceDescriptor.Name), nameof(PluginDependency.PluginName))]
   [MapProperty(nameof(PluginReferenceDescriptor.VersionMatcher), nameof(PluginDependency.PluginVersion))]
   public static partial PluginDependency ToPluginDependency(this PluginReferenceDescriptor manifest);
 
+  /// <summary>
+  /// Maps a <see cref="PluginDependencyManifest"/> entity to its <see cref="PluginDependency"/> representation.
+  /// </summary>
+  /// <param name="manifest">The <see cref="PluginDependencyManifest"/> instance to be mapped to a <see cref="PluginDependency"/>.</param>
+  /// <returns>A <see cref="PluginDependency"/> representing the provided <see cref="PluginDependencyManifest"/>.</returns>
   [MapProperty(nameof(PluginDependencyManifest.Name), nameof(PluginDependency.PluginName))]
   [MapProperty(nameof(PluginDependencyManifest.Version), nameof(PluginDependency.PluginVersion))]
   public static partial PluginDependency ToPluginDependency(this PluginDependencyManifest manifest);

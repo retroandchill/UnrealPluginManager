@@ -38,12 +38,12 @@ public class PluginVersion : IVersionedEntity {
   [NotMapped]
   public SemVersion Version {
     get => new(Major, Minor, Patch,
-        PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
-        Metadata?.Split('.'));
+               PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
+               Metadata?.Split('.'));
     set {
-      Major = (int) value.Major;
-      Minor = (int) value.Minor;
-      Patch = (int) value.Patch;
+      Major = (int)value.Major;
+      Minor = (int)value.Minor;
+      Patch = (int)value.Patch;
       PrereleaseNumber = value.IsPrerelease ? value.PrereleaseIdentifiers.GetPrereleaseNumber() : null;
       Prerelease = value.IsPrerelease ? value.PrereleaseIdentifiers[0].Value : null;
       Metadata = value.Metadata != "" ? value.Metadata : null;
@@ -153,6 +153,9 @@ public class PluginVersion : IVersionedEntity {
   /// </summary>
   public required SourceLocation Source { get; set; }
 
+  /// <summary>
+  /// Gets or sets the collection of source patches associated with the plugin version.
+  /// </summary>
   public ICollection<PluginSourcePatch> Patches { get; set; } = new List<PluginSourcePatch>();
 
   /// <summary>

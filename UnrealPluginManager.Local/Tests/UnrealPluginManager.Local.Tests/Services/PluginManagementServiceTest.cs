@@ -443,11 +443,11 @@ public class PluginManagementServiceTest {
   }
 
 
+  private static readonly IReadOnlyCollection<string> Platforms = ["Win64"];
+
   [Test]
   public async Task TestDownloadPlugin_AlreadyDownloaded() {
-    _binaryCacheService.Setup(x => x.GetCachedPluginBuild("TestPlugin", new SemVersion(1, 0, 0), "5.5", new[] {
-            "Win64"
-        }))
+    _binaryCacheService.Setup(x => x.GetCachedPluginBuild("TestPlugin", new SemVersion(1, 0, 0), "5.5", Platforms))
         .ReturnsAsync(new PluginBuildInfo {
             PluginName = "TestPlugin",
             PluginVersion = new SemVersion(1, 0, 0),

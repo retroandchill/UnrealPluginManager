@@ -1,12 +1,16 @@
 ﻿using System.IO.Compression;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Auth.Policies;
 using UnrealPluginManager.Server.Auth.Validators;
@@ -20,6 +24,7 @@ public class CanSubmitPluginHandlerTest {
   private CloudUnrealPluginManagerContext _dbContext;
   private ServiceProvider _serviceProvider;
   private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+  private IJsonService _jsonService;
   private IAuthorizationHandler _handler;
 
   [SetUp]
@@ -34,6 +39,9 @@ public class CanSubmitPluginHandlerTest {
     // Set up mocks
     _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
     services.AddSingleton(_httpContextAccessorMock.Object);
+
+    _jsonService = new JsonService(JsonSerializerOptions.Default);
+    services.AddSingleton(_jsonService);
 
     // Register the real PluginAuthValidator
     services.AddScoped<IPluginAuthValidator, PluginAuthValidator>();
@@ -52,13 +60,23 @@ public class CanSubmitPluginHandlerTest {
     _serviceProvider.Dispose();
   }
 
-  private static IFormFile CreatePluginZipFile(string pluginName) {
+  private IFormFile CreatePluginZipFile(string pluginName) {
     var memoryStream = new MemoryStream();
     using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)) {
-      var upluginEntry = archive.CreateEntry($"{pluginName}.uplugin");
+      var upluginEntry = archive.CreateEntry("plugin.json");
       using var writer = new StreamWriter(upluginEntry.Open());
-      writer.Write("{}"); // Minimal valid JSON
+      var manifest = new PluginManifest {
+          Name = pluginName,
+          Version = new SemVersion(1, 0, 0),
+          Source = new SourceLocation {
+              Url = new Uri("https://github.com/test/test"),
+              Sha = "NotARealSha"
+          },
+          Dependencies = []
+      };
+      writer.Write(_jsonService.Serialize(manifest));
     }
+
     memoryStream.Position = 0;
 
     var formFile = new Mock<IFormFile>();

@@ -24,6 +24,9 @@ public class VersionOverview {
   [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; set; }
 
+  /// <summary>
+  /// Gets or sets the location of the source, including its URL and associated SHA hash.
+  /// </summary>
   public SourceLocation Source { get; set; }
 
 

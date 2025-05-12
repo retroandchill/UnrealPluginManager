@@ -51,6 +51,7 @@ public partial class InstallService : IInstallService {
     return await InstallToEngine(dependencyTree, engineVersion, platforms);
   }
 
+  /// <inheritdoc />
   public async Task<List<VersionChange>> InstallRequirements(PluginManifest manifest, string? engineVersion,
                                                              IReadOnlyCollection<string> platforms) {
     var chainRoot = manifest.ToDependencyChainRoot();
@@ -75,7 +76,7 @@ public partial class InstallService : IInstallService {
     foreach (var dep in resolvedDependencies) {
       if (currentlyInstalled.TryGetValue(dep.Name, out var current) && current.Version == dep.Version
                                                                     && platforms.All(x =>
-                                                                        current.Platforms.Contains(x))) {
+                                                                          current.Platforms.Contains(x))) {
         continue;
       }
 
@@ -84,11 +85,12 @@ public partial class InstallService : IInstallService {
       var cachedPlugin =
           await _pluginManagementService.FindLocalPlugin(dep.Name, dep.Version, currentVersion.Name, platforms);
       var plugin = await cachedPlugin.OrElseGetAsync(async () =>
-          await _pluginManagementService.DownloadPlugin(dep.Name, dep.Version, dep.RemoteIndex,
-              currentVersion.Name, platforms.ToList()));
+                                                         await _pluginManagementService.DownloadPlugin(
+                                                             dep.Name, dep.Version, dep.RemoteIndex,
+                                                             currentVersion.Name, platforms.ToList()));
 
       _engineService.InstallPlugin(plugin.PluginName, _fileSystem.DirectoryInfo.New(plugin.DirectoryName),
-          engineVersion);
+                                   engineVersion);
       installChanges.Add(new VersionChange(dep.Name, current.Version, dep.Version));
     }
 
