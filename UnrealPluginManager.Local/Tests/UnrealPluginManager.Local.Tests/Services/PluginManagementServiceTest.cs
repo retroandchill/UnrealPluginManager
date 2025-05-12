@@ -9,9 +9,11 @@ using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
+using UnrealPluginManager.Core.Model.Storage;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
+using UnrealPluginManager.Local.Exceptions;
 using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.Local.Model.Cache;
 using UnrealPluginManager.Local.Model.Engine;
@@ -31,6 +33,7 @@ public class PluginManagementServiceTest {
   private Mock<IEngineService> _engineService;
   private Mock<ISourceDownloadService> _sourceDownloadService;
   private Mock<IBinaryCacheService> _binaryCacheService;
+  private OrderedDictionary<string, RemoteConfig> _remoteConfigs;
   private IPluginManagementService _pluginManagementService;
 
   [SetUp]
@@ -39,18 +42,19 @@ public class PluginManagementServiceTest {
 
     _storageService = new Mock<IStorageService>();
     services.AddSingleton(_storageService.Object);
+    _remoteConfigs = new OrderedDictionary<string, RemoteConfig> {
+        ["default"] = new() {
+            Url = new Uri("https://unrealpluginmanager.com")
+        },
+        ["alt"] = new() {
+            Url = new Uri("https://github.com/api/v1/repos/EpicGames/UnrealEngine/releases/latest")
+        },
+        ["unaccessible"] = new() {
+            Url = new Uri("https://unrealpluginmanager.com/invalid")
+        }
+    };
     _storageService.Setup(x => x.GetConfig(It.IsAny<string>(), It.IsAny<OrderedDictionary<string, RemoteConfig>>()))
-        .Returns(new OrderedDictionary<string, RemoteConfig> {
-            ["default"] = new() {
-                Url = new Uri("https://unrealpluginmanager.com")
-            },
-            ["alt"] = new() {
-                Url = new Uri("https://github.com/api/v1/repos/EpicGames/UnrealEngine/releases/latest")
-            },
-            ["unaccessible"] = new() {
-                Url = new Uri("https://unrealpluginmanager.com/invalid")
-            }
-        });
+        .Returns(_remoteConfigs);
 
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
@@ -305,6 +309,139 @@ public class PluginManagementServiceTest {
                                                     _pluginManagementService.UploadPlugin(
                                                         "TestPlugin", version, "default"));
   }
+
+  [Test]
+  public async Task TestUploadPlugin_WithIcon() {
+    var version = new SemVersion(1, 0, 0);
+    var pluginVersion = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = [],
+        Icon = new ResourceInfo { StoredFilename = "icon.png", OriginalFilename = "icon.png" }
+    };
+
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", SemVersionRange.Equals(version), default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+    _pluginService.Setup(x => x.GetSourcePatches(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync([]);
+
+    // Setup mock icon stream
+    var iconStream = new MemoryStream(new byte[] { 1, 2, 3, 4 });
+    _storageService.Setup(x => x.GetResourceStream("icon.png"))
+        .Returns(iconStream);
+
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync(pluginVersion);
+
+    var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
+    Assert.That(result.PluginId, Is.EqualTo(pluginVersion.PluginId));
+  }
+
+  [Test]
+  public async Task TestUploadPlugin_WithReadme() {
+    var version = new SemVersion(1, 0, 0);
+    var pluginVersion = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = []
+    };
+
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", SemVersionRange.Equals(version), default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+    _pluginService.Setup(x => x.GetSourcePatches(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync([]);
+
+    // Setup mock readme content
+    const string readmeContent = "# Test Plugin\nThis is a test plugin";
+    _pluginService.Setup(x => x.GetPluginReadme(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync(readmeContent);
+
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync(pluginVersion);
+
+    var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
+    Assert.That(result.PluginId, Is.EqualTo(pluginVersion.PluginId));
+  }
+
+  [Test]
+  public async Task TestUploadPlugin_WithPatches() {
+    var version = new SemVersion(1, 0, 0);
+    var pluginVersion = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = [],
+        Patches = ["patch1.diff", "patch2.diff"]
+    };
+
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", SemVersionRange.Equals(version), default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+
+    // Setup mock patches
+    var patches = new List<string> { "patch1.diff", "patch2.diff" };
+    _pluginService.Setup(x => x.GetSourcePatches(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync(patches.Select(p => new SourcePatchInfo(p, $"Content of {p}")).ToList());
+
+    _pluginsApi.Setup(x => x.SubmitPluginAsync(It.IsAny<FileParameter>(), It.IsAny<CancellationToken>()))
+        .ReturnsAsync(pluginVersion);
+
+    var result = await _pluginManagementService.UploadPlugin("TestPlugin", version, "default");
+    Assert.That(result.PluginId, Is.EqualTo(pluginVersion.PluginId));
+  }
+
+  [Test]
+  public void TestUploadPlugin_PatchesMismatch() {
+    var version = new SemVersion(1, 0, 0);
+    var pluginVersion = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = []
+    };
+
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", SemVersionRange.Equals(version), default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+
+    // Setup patches with mismatched count
+    var patches = new List<string> { "patch1.diff" }; // Only one patch
+    _pluginService.Setup(x => x.GetSourcePatches(pluginVersion.PluginId, pluginVersion.VersionId))
+        .ReturnsAsync(patches.Select(p => new SourcePatchInfo(p, $"Content of {p}")).ToList());
+
+    // The manifest expects two patches but we only provide one
+    pluginVersion.Patches = new List<string> { "patch1.diff", "patch2.diff" };
+
+    Assert.ThrowsAsync<BadSubmissionException>(() =>
+                                                   _pluginManagementService.UploadPlugin(
+                                                       "TestPlugin", version, "default"));
+  }
+
+  [Test]
+  public void TestUploadPlugin_NoDefaultRemote() {
+    var version = new SemVersion(1, 0, 0);
+    var pluginVersion = new PluginVersionDetails {
+        PluginId = Guid.NewGuid(),
+        Name = "TestPlugin",
+        VersionId = Guid.NewGuid(),
+        Version = version,
+        Dependencies = []
+    };
+
+    _pluginService.Setup(x => x.ListLatestVersions("TestPlugin", SemVersionRange.Equals(version), default))
+        .ReturnsAsync(new Page<PluginVersionInfo>([pluginVersion]));
+
+    _remoteConfigs.Clear();
+
+    // Test when no remote is specified and no default remote exists
+    Assert.ThrowsAsync<RemoteNotFoundException>(() =>
+                                                    _pluginManagementService.UploadPlugin("TestPlugin", version, null));
+  }
+
 
   [Test]
   public async Task TestDownloadPlugin_AlreadyDownloaded() {
