@@ -63,7 +63,7 @@ public class TestCommands {
           services.AddSingleton(_pluginService.Object);
           services.AddSingleton(_pluginManagementService.Object);
           services.AddSingleton(_installService.Object);
-          services.AddSingleton(_jsonService);
+          services.AddSingleton<IJsonService>(_jsonService);
         });
 
     _parser = builder.Build();
