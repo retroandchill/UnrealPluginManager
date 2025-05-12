@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
 
@@ -70,10 +69,5 @@ public record PluginManifest {
   /// with the plugin's requirements, allowing proper functionality within the Unreal Plugin Manager.
   /// </summary>
   public required List<PluginDependencyManifest> Dependencies { get; init; }
-
-  /// <inheritdoc />
-  public override string ToString() {
-    return JsonSerializer.Serialize(this);
-  }
 
 }
