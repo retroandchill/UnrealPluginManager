@@ -33,20 +33,5 @@ declare global {
 
 Cypress.Commands.add('mount', mount)
 
-Cypress.on('test:before:run', () => {
-  // Wait for any pending HMR operations
-  return new Promise(resolve => {
-    if (import.meta.hot) {
-      import.meta.hot.on('vite:beforeUpdate', () => {
-        // Wait for HMR to complete
-        import.meta.hot.on('vite:afterUpdate', resolve);
-      });
-    } else {
-      resolve();
-    }
-  });
-});
-
-
 // Example use:
 // cy.mount(<MyComponent />)

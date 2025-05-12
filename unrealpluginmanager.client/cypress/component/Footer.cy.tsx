@@ -1,9 +1,14 @@
 ﻿import React from 'react';
 import {Footer} from "@/components";
+import {createTheme, ThemeProvider} from '@mui/material';
+import {theme} from "@/Theme";
 
 describe('<Footer/>', () => {
   beforeEach(() => {
-    cy.mount(<Footer/>);
+    const appTheme = createTheme(theme);
+    cy.mount(<ThemeProvider theme={appTheme}>
+      <Footer/>
+    </ThemeProvider>);
   });
 
   it('renders all footer sections', () => {
