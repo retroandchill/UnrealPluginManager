@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
 using LanguageExt;
 using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files.Plugins;
 using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
@@ -23,12 +23,13 @@ namespace UnrealPluginManager.Local.Services;
 public partial class PluginManagementService : IPluginManagementService {
   private readonly IFileSystem _fileSystem;
   private readonly IRemoteService _remoteService;
+  private readonly IJsonService _jsonService;
+  private readonly IStorageService _storageService;
   private readonly IEngineService _engineService;
   private readonly IPluginService _pluginService;
-  private readonly IStorageService _storageService;
+  private readonly IPluginStructureService _pluginStructureService;
   private readonly ISourceDownloadService _sourceDownloadService;
   private readonly IBinaryCacheService _binaryCacheService;
-  private readonly IJsonService _jsonService;
 
   private const int DefaultPageSize = 100;
 
@@ -48,7 +49,7 @@ public partial class PluginManagementService : IPluginManagementService {
           try {
             return await searchTerm.ToEnumerable()
                 .PageToEndAsync((y, p) => x.GetPluginsAsync(y, p.PageNumber, p.PageSize),
-                    DefaultPageSize)
+                                DefaultPageSize)
                 .ToListAsync();
           } catch (ApiException e) {
             return Fin<List<PluginOverview>>.Fail(e);
@@ -72,7 +73,8 @@ public partial class PluginManagementService : IPluginManagementService {
 
     var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
     return resolved.OrElseThrow(() =>
-        new PluginNotFoundException($"Unable to resolve plugin {pluginName} with version {versionRange}."));
+                                    new PluginNotFoundException(
+                                        $"Unable to resolve plugin {pluginName} with version {versionRange}."));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
@@ -85,11 +87,11 @@ public partial class PluginManagementService : IPluginManagementService {
       string pluginName, SemVersionRange versionRange) {
     var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
         .Select(x => pluginName.ToEnumerable()
-            .PageToEndAsync(
-                (y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize),
-                DefaultPageSize)
-            .FirstOrDefaultAsync()
-            .ToRef())
+                    .PageToEndAsync(
+                        (y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize),
+                        DefaultPageSize)
+                    .FirstOrDefaultAsync()
+                    .ToRef())
         .ToList();
 
     return await SafeTasks.WhenEach(tasks)
@@ -115,8 +117,8 @@ public partial class PluginManagementService : IPluginManagementService {
     var dependencyTasks = _pluginService.GetPossibleVersions(allDependencies)
         .Map(x => x.SetInstalledPlugins(currentlyInstalled)).ToEnumerable()
         .Concat(_remoteService.GetApiAccessors<IPluginsApi>()
-            .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
-                .Map(y => y.SetRemoteIndex(i))))
+                    .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
+                                .Map(y => y.SetRemoteIndex(i))))
         .ToList();
 
     var dependencyManifest = await SafeTasks.WhenEach(dependencyTasks)
@@ -142,7 +144,7 @@ public partial class PluginManagementService : IPluginManagementService {
     var manifest = plugin.ToPluginManifest();
     var patches = await _pluginService.GetSourcePatches(plugin.PluginId, plugin.VersionId)
         .Map(x => x.Select(y => y.Content)
-            .ToList());
+                 .ToList());
     if (manifest.Patches.Count != patches.Count) {
       throw new BadSubmissionException("Patches are not the same length as the source files.");
     }
@@ -155,39 +157,9 @@ public partial class PluginManagementService : IPluginManagementService {
         .ContinueWith(x => x.IsFaulted ? null : x.Result);
 
     var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
-    var manifestJson = _jsonService.Serialize(manifest);
-
     using var memoryStream = new MemoryStream();
-    using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)) {
-      var pluginEntry = zipArchive.CreateEntry("plugin.json");
-      await using (var entryStream = pluginEntry.Open()) {
-        await using var jsonStream = manifestJson.ToStream();
-        await jsonStream.CopyToAsync(entryStream);
-      }
-
-      if (manifest.Patches.Count > 0) {
-        zipArchive.CreateEntry("patches/");
-        for (var i = 0; i < manifest.Patches.Count; i++) {
-          var patchEntry = zipArchive.CreateEntry($"patches/{manifest.Patches[i]}");
-          await using var entryStream = patchEntry.Open();
-          await using var patchStream = patches[i].ToStream();
-          await patchStream.CopyToAsync(entryStream);
-        }
-      }
-
-      if (iconFile is not null) {
-        var iconEntry = zipArchive.CreateEntry("icon.png");
-        await using var entryStream = iconEntry.Open();
-        await iconFile.CopyToAsync(entryStream);
-      }
-
-      if (readme is not null) {
-        var readmeEntry = zipArchive.CreateEntry("readme.md");
-        await using var entryStream = readmeEntry.Open();
-        await using var readmeStream = readme.ToStream();
-        await readmeStream.CopyToAsync(entryStream);
-      }
-    }
+    await _pluginStructureService.CompressPluginSubmission(new PluginSubmission(manifest, patches, iconFile, readme),
+                                                           memoryStream);
     memoryStream.Position = 0;
 
     return await pluginsApi.SubmitPluginAsync(new FileParameter(memoryStream));
@@ -208,7 +180,7 @@ public partial class PluginManagementService : IPluginManagementService {
       var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
       var pluginToDownload = await pluginName.ToEnumerable()
           .PageToEndAsync((y, p) => pluginsApi.GetLatestVersionsAsync(y, version.ToString(), p.PageNumber, p.PageSize),
-              DefaultPageSize)
+                          DefaultPageSize)
           .FirstOrDefaultAsync();
       if (pluginToDownload is null) {
         throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
@@ -218,7 +190,7 @@ public partial class PluginManagementService : IPluginManagementService {
 
       var patches = await pluginsApi.GetPluginPatchesAsync(pluginToDownload.PluginId, pluginToDownload.VersionId)
           .Map(x => x.Select(y => y.Content)
-              .ToList());
+                   .ToList());
 
       return await BuildFromManifest(manifest, patches, engineVersion, platforms);
     });
@@ -231,7 +203,7 @@ public partial class PluginManagementService : IPluginManagementService {
     var installedEngine = _engineService.GetInstalledEngine(engineVersion);
 
     var pluginDirectoryName = Path.Join(_storageService.BaseDirectory,
-        PluginCacheDirectory, manifest.Name, manifest.Version.ToString());
+                                        PluginCacheDirectory, manifest.Name, manifest.Version.ToString());
     var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
     pluginDirectory.Create();
 
@@ -265,8 +237,8 @@ public partial class PluginManagementService : IPluginManagementService {
     }
 
     var cachedPlugin = await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches,
-        installedEngine.Name,
-        platforms);
+                                                                  installedEngine.Name,
+                                                                  platforms);
     var buildInfoJson = _jsonService.Serialize(cachedPlugin);
     var buildInfoFile = _fileSystem.FileInfo.New(Path.Join(buildDirectory.FullName, "build-info.json"));
     await buildInfoFile.WriteAllTextAsync(buildInfoJson);

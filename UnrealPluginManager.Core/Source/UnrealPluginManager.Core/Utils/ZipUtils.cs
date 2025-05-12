@@ -101,6 +101,23 @@ public static class ZipUtils {
   }
 
   /// <summary>
+  /// Creates a new entry in the specified ZIP archive from a given file.
+  /// </summary>
+  /// <param name="fileSystem">The abstracted file system to access the source file.</param>
+  /// <param name="targetZip">The ZIP archive where the new entry will be created.</param>
+  /// <param name="sourceFilename">The full path of the file to be added to the ZIP archive.</param>
+  /// <param name="entryName">The name of the entry to create within the ZIP archive.</param>
+  /// <returns>A task that represents the asynchronous operation, with the result being the created ZIP archive entry.</returns>
+  public static async Task<ZipArchiveEntry> CreateEntryFromFile(this IFileSystem fileSystem, ZipArchive targetZip,
+                                                                string sourceFilename, string entryName) {
+    var entry = targetZip.CreateEntry(entryName);
+    await using var entryStream = entry.Open();
+    await using var sourceFile = fileSystem.FileStream.New(sourceFilename, FileMode.Open);
+    await sourceFile.CopyToAsync(entryStream);
+    return entry;
+  }
+
+  /// <summary>
   /// Extracts the contents of a ZIP archive to a specified destination directory using an abstracted file system.
   /// </summary>
   /// <param name="fileSystem">The file system abstraction to be used for creating directories and writing files.</param>

@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Retro.SimplePage;
 using Semver;
@@ -15,6 +16,7 @@ using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
 using UnrealPluginManager.Core.Tests.Mocks;
+using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Tests.Services;
 
@@ -26,7 +28,6 @@ public class PluginServiceTests {
   private MockFileSystem _mockFilesystem;
   private UnrealPluginManagerContext _context;
   private ServiceProvider _serviceProvider;
-  private IStorageService _storageService;
 
   [SetUp]
   public void Setup() {
@@ -45,7 +46,7 @@ public class PluginServiceTests {
     services.AddSingleton<IStorageService, MockStorageService>();
     _serviceProvider = services.BuildServiceProvider();
 
-    _storageService = _serviceProvider.GetRequiredService<IStorageService>();
+    _serviceProvider.GetRequiredService<IStorageService>();
   }
 
   [TearDown]
@@ -250,13 +251,13 @@ public class PluginServiceTests {
       Assert.That(conflicts[0].Versions, Has.Count.EqualTo(2));
     });
     Assert.That(conflicts[0].Versions,
-        Has.Exactly(1)
-            .Matches<PluginRequirement>(x => x.RequiredBy == "App"
-                                             && x.RequiredVersion == SemVersionRange.Parse("=1.0.0")));
+                Has.Exactly(1)
+                    .Matches<PluginRequirement>(x => x.RequiredBy == "App"
+                                                     && x.RequiredVersion == SemVersionRange.Parse("=1.0.0")));
     Assert.That(conflicts[0].Versions,
-        Has.Exactly(1)
-            .Matches<PluginRequirement>(x => x.RequiredBy == "Sql"
-                                             && x.RequiredVersion == SemVersionRange.Parse("=2.0.0")));
+                Has.Exactly(1)
+                    .Matches<PluginRequirement>(x => x.RequiredBy == "Sql"
+                                                     && x.RequiredVersion == SemVersionRange.Parse("=2.0.0")));
   }
 
   [Test]
@@ -268,12 +269,14 @@ public class PluginServiceTests {
 
     const string readmeText = "This is a readme";
     Assert.ThrowsAsync<PluginNotFoundException>(() =>
-        pluginService.UpdatePluginReadme(Guid.NewGuid(), versionId, readmeText));
+                                                    pluginService.UpdatePluginReadme(
+                                                        Guid.NewGuid(), versionId, readmeText));
     Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.UpdatePluginReadme(pluginId, versionId, readmeText));
 
     var added = await pluginService.AddPluginReadme(pluginId, versionId, readmeText);
     Assert.ThrowsAsync<PluginNotFoundException>(() =>
-        pluginService.AddPluginReadme(Guid.NewGuid(), versionId, readmeText));
+                                                    pluginService.AddPluginReadme(
+                                                        Guid.NewGuid(), versionId, readmeText));
     Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.AddPluginReadme(pluginId, versionId, readmeText));
     Assert.That(added, Is.EqualTo(readmeText));
 
@@ -288,8 +291,204 @@ public class PluginServiceTests {
     Assert.That(retrieved, Is.EqualTo(updatedReadmeText));
   }
 
-  private async Task<(Guid, Guid)> SetupTestPluginEnvironment() {
+  [Test]
+  public async Task TestSubmitPluginWithStream_Success() {
+    // Arrange
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
 
+    // Create the necessary files for a valid plugin archive
+    using var tempDir = _mockFilesystem.CreateDisposableDirectory(out var directory);
+
+    // Create a plugin.json file
+    var pluginManifest = new PluginManifest {
+        Name = "StreamTestPlugin",
+        Version = new SemVersion(1, 0, 0),
+        Source = new SourceLocation {
+            Url = new Uri("https://github.com/ue4plugins/StreamTestPlugin"),
+            Sha = "StreamTestSha"
+        },
+        Dependencies = [],
+        Patches = ["patch1.txt", "patch2.txt"]
+    };
+
+    // Create plugin.json
+    var manifestFile = _mockFilesystem.FileInfo.New(Path.Join(directory.FullName, "plugin.json"));
+    await using (var manifestStream = manifestFile.Create()) {
+      var pluginManifestJson = _serviceProvider.GetRequiredService<IJsonService>().Serialize(pluginManifest);
+      await using var pluginManifestStream = pluginManifestJson.ToStream();
+      await pluginManifestStream.CopyToAsync(manifestStream);
+    }
+
+    // Create patches directory
+    var patchesDir = _mockFilesystem.DirectoryInfo.New(Path.Join(directory.FullName, "patches"));
+    patchesDir.Create();
+
+    // Create patch files
+    var patch1File = _mockFilesystem.FileInfo.New(Path.Join(patchesDir.FullName, "patch1.txt"));
+    await using (var patch1Stream = patch1File.Create()) {
+      await using var writer = new StreamWriter(patch1Stream);
+      await writer.WriteLineAsync("This is patch 1");
+    }
+
+    var patch2File = _mockFilesystem.FileInfo.New(Path.Join(patchesDir.FullName, "patch2.txt"));
+    await using (var patch2Stream = patch2File.Create()) {
+      await using var writer = new StreamWriter(patch2Stream);
+      await writer.WriteLineAsync("This is patch 2");
+    }
+
+    // Create an icon
+    var iconFile = _mockFilesystem.FileInfo.New(Path.Join(directory.FullName, "icon.png"));
+    await using (var iconStream = iconFile.Create()) {
+      await using var writer = new StreamWriter(iconStream);
+      await writer.WriteLineAsync("Dummy icon data");
+    }
+
+    // Create a README
+    var readmeFile = _mockFilesystem.FileInfo.New(Path.Join(directory.FullName, "README.md"));
+    await using (var readmeStream = readmeFile.Create()) {
+      await using var writer = new StreamWriter(readmeStream);
+      await writer.WriteLineAsync("# Test Plugin\nThis is a test plugin.");
+    }
+
+    // Create a zip file from the directory
+    Assert.That(directory.Parent, Is.Not.Null);
+    var zipFilePath = Path.Join(directory.Parent.FullName, "plugin.zip");
+    var zipFile = _mockFilesystem.FileInfo.New(zipFilePath);
+
+    await using (var zipStream = zipFile.Create()) {
+      using var zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
+
+      // Add all files to the zip
+      foreach (var file in _mockFilesystem.Directory.GetFiles(directory.FullName, "*", SearchOption.AllDirectories)) {
+        var relativePath = file[(directory.FullName.Length + 1)..].Replace(Path.PathSeparator, '/');
+        await _mockFilesystem.CreateEntryFromFile(zipArchive, file, relativePath);
+      }
+    }
+
+    // Act
+    await using var archiveStream = zipFile.OpenRead();
+    var result = await pluginService.SubmitPlugin(archiveStream);
+
+    // Assert
+    Assert.That(result, Is.Not.Null);
+    Assert.Multiple(() => {
+      Assert.That(result.Name, Is.EqualTo("StreamTestPlugin"));
+      Assert.That(result.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(result.Dependencies, Is.Empty);
+      Assert.That(result.Patches, Has.Count.EqualTo(2));
+    });
+
+    // Check that the plugin was actually added to the database
+    var pluginVersions = await _context.PluginVersions
+        .Include(v => v.Parent)
+        .Include(v => v.Patches)
+        .ThenInclude(p => p.FileResource)
+        .Include(v => v.Icon)
+        .Include(v => v.Readme)
+        .Where(v => v.Parent.Name == "StreamTestPlugin")
+        .ToListAsync();
+
+    Assert.That(pluginVersions, Has.Count.EqualTo(1));
+    var version = pluginVersions[0];
+    Assert.Multiple(() => {
+      Assert.That(version.Parent.Name, Is.EqualTo("StreamTestPlugin"));
+      Assert.That(version.Version, Is.EqualTo(new SemVersion(1, 0, 0)));
+      Assert.That(version.Patches, Has.Count.EqualTo(2));
+      Assert.That(version.Icon, Is.Not.Null);
+      Assert.That(version.Readme, Is.Not.Null);
+    });
+  }
+
+  [Test]
+  public async Task TestSubmitPluginWithStream_MissingManifest() {
+    // Arrange
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+
+    // Create directory with no plugin.json file
+    using var tempDir = _mockFilesystem.CreateDisposableDirectory(out var directory);
+
+    // Create a dummy file (but no plugin.json)
+    var dummyFile = _mockFilesystem.FileInfo.New(Path.Join(directory.FullName, "dummy.txt"));
+    await using (var dummyStream = dummyFile.Create()) {
+      await using var writer = new StreamWriter(dummyStream);
+      await writer.WriteLineAsync("This is a dummy file");
+    }
+
+    // Create a zip file from the directory
+    Assert.That(directory.Parent, Is.Not.Null);
+    var zipFilePath = Path.Join(directory.Parent.FullName, "plugin.zip");
+    var zipFile = _mockFilesystem.FileInfo.New(zipFilePath);
+
+    await using (var zipStream = zipFile.Create()) {
+      using var zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
+
+      // Add all files to the zip
+      foreach (var file in _mockFilesystem.Directory.GetFiles(directory.FullName, "*", SearchOption.AllDirectories)) {
+        var relativePath = file[(directory.FullName.Length + 1)..].Replace(Path.PathSeparator, '/');
+        await _mockFilesystem.CreateEntryFromFile(zipArchive, file, relativePath);
+      }
+    }
+
+    // Act & Assert
+    await using var archiveStream = zipFile.OpenRead();
+    var exception = Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.SubmitPlugin(archiveStream));
+    Assert.That(exception.Message, Does.Contain("Plugin manifest file was not found"));
+  }
+
+  [Test]
+  public async Task TestSubmitPluginWithStream_MissingPatchFiles() {
+    // Arrange
+    var pluginService = _serviceProvider.GetRequiredService<IPluginService>();
+
+    // Create the necessary files for plugin archive with missing patches
+    using var tempDir = _mockFilesystem.CreateDisposableDirectory(out var directory);
+
+    // Create a plugin.json file referencing patches that don't exist
+    var pluginManifest = new PluginManifest {
+        Name = "MissingPatchesPlugin",
+        Version = new SemVersion(1, 0, 0),
+        Source = new SourceLocation {
+            Url = new Uri("https://github.com/ue4plugins/MissingPatchesPlugin"),
+            Sha = "MissingPatchesTestSha"
+        },
+        Dependencies = [],
+        Patches = ["missing_patch.txt"]
+    };
+
+    // Create plugin.json
+    var manifestFile = _mockFilesystem.FileInfo.New(Path.Join(directory.FullName, "plugin.json"));
+    await using (var manifestStream = manifestFile.Create()) {
+      var pluginManifestJson = _serviceProvider.GetRequiredService<IJsonService>().Serialize(pluginManifest);
+      await using var pluginManifestStream = pluginManifestJson.ToStream();
+      await pluginManifestStream.CopyToAsync(manifestStream);
+    }
+
+    // Create patches directory but don't add the referenced patch file
+    var patchesDir = _mockFilesystem.DirectoryInfo.New(Path.Join(directory.FullName, "patches"));
+    patchesDir.Create();
+
+    // Create a zip file from the directory
+    Assert.That(directory.Parent, Is.Not.Null);
+    var zipFilePath = Path.Join(directory.Parent.FullName, "plugin.zip");
+    var zipFile = _mockFilesystem.FileInfo.New(zipFilePath);
+
+    await using (var zipStream = zipFile.Create()) {
+      using var zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
+
+      // Add all files to the zip
+      foreach (var file in _mockFilesystem.Directory.GetFiles(directory.FullName, "*", SearchOption.AllDirectories)) {
+        var relativePath = file[(directory.FullName.Length + 1)..].Replace(Path.PathSeparator, '/');
+        await _mockFilesystem.CreateEntryFromFile(zipArchive, file, relativePath);
+      }
+    }
+
+    // Act & Assert
+    await using var archiveStream = zipFile.OpenRead();
+    var exception = Assert.ThrowsAsync<BadSubmissionException>(() => pluginService.SubmitPlugin(archiveStream));
+    Assert.That(exception.Message, Does.Contain("Missing patch file"));
+  }
+
+  private async Task<(Guid, Guid)> SetupTestPluginEnvironment() {
     var filesystem = _serviceProvider.GetRequiredService<IFileSystem>();
     var context = _serviceProvider.GetRequiredService<UnrealPluginManagerContext>();
 

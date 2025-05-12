@@ -55,6 +55,8 @@ public class PluginManagementServiceTest {
     _pluginService = new Mock<IPluginService>();
     services.AddSingleton(_pluginService.Object);
 
+    services.AddSingleton<IPluginStructureService, PluginStructureService>();
+
     _engineService = new Mock<IEngineService>();
     services.AddSingleton(_engineService.Object);
 
@@ -88,10 +90,10 @@ public class PluginManagementServiceTest {
 
     _serviceProvider = services.BuildServiceProvider();
 
-    var realPluginService = new PluginService(null, null, null, jsonService);
+    var realPluginService = new PluginService(null, null, null, null);
     _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
         .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
-            realPluginService.GetDependencyList(root, manifest));
+                     realPluginService.GetDependencyList(root, manifest));
 
     _pluginManagementService = _serviceProvider.GetRequiredService<IPluginManagementService>();
 
@@ -101,7 +103,7 @@ public class PluginManagementServiceTest {
 
     var pageIndex = 0;
     _pluginsApi.Setup(x => x.GetPluginsAsync(It.IsAny<string>(), It.IsAny<int?>(),
-            It.Is(100, EqualityComparer<int>.Default), It.IsAny<CancellationToken>()))
+                                             It.Is(100, EqualityComparer<int>.Default), It.IsAny<CancellationToken>()))
         .Returns((string? _, int? _, int? _, CancellationToken _) => {
           if (pageIndex >= pageList.Count) {
             throw new ApiException(404, "Unreachable");
@@ -200,31 +202,31 @@ public class PluginManagementServiceTest {
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is "Http" or "StdLib")
                 .ToDictionary(x => x.Key, x => x.Value
-                    .Select(y =>
-                        new PluginVersionInfo {
-                            VersionId = Guid.NewGuid(),
-                            PluginId = Guid.NewGuid(),
-                            Name = x.Key,
-                            Version = y,
-                            Dependencies = []
-                        })
-                    .ToList())
+                                  .Select(y =>
+                                              new PluginVersionInfo {
+                                                  VersionId = Guid.NewGuid(),
+                                                  PluginId = Guid.NewGuid(),
+                                                  Name = x.Key,
+                                                  Version = y,
+                                                  Dependencies = []
+                                              })
+                                  .ToList())
         }));
 
     _pluginsApi.Setup(x => x.GetCandidateDependenciesAsync(
-            It.IsAny<List<PluginDependency>>(), It.IsAny<CancellationToken>()))
+                          It.IsAny<List<PluginDependency>>(), It.IsAny<CancellationToken>()))
         .Returns(Task.FromResult(new DependencyManifest {
             FoundDependencies = allPlugins.Where(x => x.Key is not "Http" and not "StdLib")
                 .ToDictionary(x => x.Key, x => x.Value
-                    .Select(y =>
-                        new PluginVersionInfo {
-                            VersionId = Guid.NewGuid(),
-                            PluginId = Guid.NewGuid(),
-                            Name = x.Key,
-                            Version = y,
-                            Dependencies = []
-                        })
-                    .ToList())
+                                  .Select(y =>
+                                              new PluginVersionInfo {
+                                                  VersionId = Guid.NewGuid(),
+                                                  PluginId = Guid.NewGuid(),
+                                                  Name = x.Key,
+                                                  Version = y,
+                                                  Dependencies = []
+                                              })
+                                  .ToList())
         }));
 
     var dependencyGraph = await _pluginManagementService.GetPluginsToInstall(root, null);
@@ -245,7 +247,8 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(LanguageExt.Option<PluginVersionInfo>.None);
 
     _pluginsApi.Setup(x =>
-            x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 100, CancellationToken.None))
+                          x.GetLatestVersionsAsync("TestPlugin", SemVersionRange.All.ToString(), 1, 100,
+                                                   CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([
             new PluginVersionInfo {
                 PluginId = Guid.NewGuid(),
@@ -299,7 +302,8 @@ public class PluginManagementServiceTest {
         .ReturnsAsync(new Page<PluginVersionInfo>([]));
 
     Assert.ThrowsAsync<PluginNotFoundException>(() =>
-        _pluginManagementService.UploadPlugin("TestPlugin", version, "default"));
+                                                    _pluginManagementService.UploadPlugin(
+                                                        "TestPlugin", version, "default"));
   }
 
   [Test]
@@ -323,7 +327,7 @@ public class PluginManagementServiceTest {
   [Test]
   public void TestDownloadPlugin_NotDownloadedLocalOnly() {
     Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.DownloadPlugin("TestPlugin",
-        new SemVersion(1, 0, 0), null, "5.5", ["Win54"]));
+                                                  new SemVersion(1, 0, 0), null, "5.5", ["Win54"]));
   }
 
   [Test]
@@ -331,7 +335,7 @@ public class PluginManagementServiceTest {
     _pluginsApi.Setup(x => x.GetLatestVersionsAsync("TestPlugin", "1.0.0", 1, 100, CancellationToken.None))
         .ReturnsAsync(new Page<PluginVersionInfo>([]));
     Assert.ThrowsAsync<PluginNotFoundException>(() => _pluginManagementService.DownloadPlugin("TestPlugin",
-        new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]));
+                                                  new SemVersion(1, 0, 0), 0, "5.5", ["Win54"]));
   }
 
   [Test]
@@ -359,7 +363,8 @@ public class PluginManagementServiceTest {
         });
 
     _binaryCacheService.Setup(x => x.CacheBuiltPlugin(It.IsAny<PluginManifest>(), It.IsAny<IDirectoryInfo>(),
-            It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>()))
+                                                      It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(),
+                                                      It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync(new PluginBuildInfo {
             PluginName = pluginDetails.Name,
             PluginVersion = pluginDetails.Version,
@@ -369,8 +374,7 @@ public class PluginManagementServiceTest {
         });
 
     var result = await _pluginManagementService.DownloadPlugin("TestPlugin",
-        new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);
+                                                               new SemVersion(1, 0, 0), 0, "5.5", ["Win64"]);
     Assert.That(result.PluginName, Is.EqualTo(pluginDetails.Name));
   }
-
 }

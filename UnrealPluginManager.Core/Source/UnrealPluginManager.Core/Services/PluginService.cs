@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using Retro.SimplePage;
@@ -27,7 +26,7 @@ public partial class PluginService : IPluginService {
   private readonly UnrealPluginManagerContext _dbContext;
   private readonly IStorageService _storageService;
   private readonly IFileSystem _fileSystem;
-  private readonly IJsonService _jsonService;
+  private readonly IPluginStructureService _pluginStructureService;
 
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
@@ -54,11 +53,11 @@ public partial class PluginService : IPluginService {
         .WhereVersionInRange(versionRange)
         .GroupBy(x => x.ParentId)
         .Select(x => x.OrderByDescending(y => y.Major)
-            .ThenByDescending(y => y.Minor)
-            .ThenByDescending(y => y.Patch)
-            .ThenByDescending(y => y.PrereleaseNumber == null)
-            .ThenByDescending(y => y.PrereleaseNumber)
-            .First())
+                    .ThenByDescending(y => y.Minor)
+                    .ThenByDescending(y => y.Patch)
+                    .ThenByDescending(y => y.PrereleaseNumber == null)
+                    .ThenByDescending(y => y.PrereleaseNumber)
+                    .First())
         .ToPageAsync(pageable)
         .Map(x => x.Select(p => p.ToPluginVersionInfo()));
   }
@@ -126,9 +125,9 @@ public partial class PluginService : IPluginService {
         manifest.FoundDependencies.Add(pluginList.Key, asList);
 
         unresolved.UnionWith(pluginList
-            .SelectMany(p => p.Dependencies)
-            .Where(x => !manifest.FoundDependencies.ContainsKey(x.PluginName))
-            .Select(pd => pd.PluginName));
+                                 .SelectMany(p => p.Dependencies)
+                                 .Where(x => !manifest.FoundDependencies.ContainsKey(x.PluginName))
+                                 .Select(pd => pd.PluginName));
       }
 
       var intersection = currentlyExisting.Intersect(unresolved).ToList();
@@ -161,6 +160,7 @@ public partial class PluginService : IPluginService {
     if (manifest.UnresolvedDependencies.Count > 0) {
       throw new MissingDependenciesException(manifest.UnresolvedDependencies);
     }
+
     var formula = ExpressionSolver.Convert(root, manifest.FoundDependencies);
     return formula.Solve()
         .Right(List<PluginSummary> (r) => throw new DependencyConflictException(r))
@@ -173,8 +173,8 @@ public partial class PluginService : IPluginService {
     if (root is PluginVersionInfo plugin) {
       result = selectedVersions
           .Select(p => p.Name == root.Name
-              ? plugin
-              : manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
+                      ? plugin
+                      : manifest.FoundDependencies[p.Name].First(d => d.Version == p.Version));
     } else {
       result = selectedVersions
           .Where(p => p.Name != root.Name)
@@ -250,45 +250,14 @@ public partial class PluginService : IPluginService {
 
     await using var stream = readme.ToStream();
     await _storageService.UpdateResource(pluginVersion.Readme.StoredFilename,
-        new StreamFileSource(_fileSystem, stream));
+                                         new StreamFileSource(_fileSystem, stream));
     return readme;
   }
 
+  /// <inheritdoc />
   public async Task<PluginVersionInfo> SubmitPlugin(Stream archiveStream) {
-    using var directoryHandle = _fileSystem.CreateDisposableDirectory(out var tempDirectory);
-    using (var zipArchive = new ZipArchive(archiveStream)) {
-      await _fileSystem.ExtractZipFile(zipArchive, tempDirectory.FullName);
-    }
-
-    var manifestFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "plugin.json"));
-    if (!manifestFile.Exists) {
-      throw new BadSubmissionException("Plugin manifest file was not found!");
-    }
-
-    PluginManifest manifest;
-    await using (var stream = manifestFile.OpenRead()) {
-      manifest = await _jsonService.DeserializeAsync<PluginManifest>(stream);
-    }
-
-    var patches = await manifest.Patches
-        .Select(x => _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "patches", x)))
-        .ToAsyncEnumerable()
-        .SelectAwait(async x => {
-          if (!x.Exists) {
-            throw new BadSubmissionException($"Missing patch file: {x.Name}");
-          }
-
-          return await x.ReadAllTextAsync();
-        })
-        .ToListAsync();
-
-    var iconFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "icon.png"));
-    await using var iconStream = iconFile.Exists ? iconFile.OpenRead() : null;
-
-    var readmeFile = _fileSystem.FileInfo.New(Path.Join(tempDirectory.FullName, "README.md"));
-    var readme = readmeFile.Exists ? readmeFile.ReadAllText() : null;
-
-    return await SubmitPlugin(manifest, patches, iconStream, readme);
+    await using var result = await _pluginStructureService.ExtractPluginSubmission(archiveStream);
+    return await SubmitPlugin(result.Manifest, result.Patches, result.IconStream, result.ReadmeText);
   }
 
   /// <inheritdoc />
@@ -320,7 +289,7 @@ public partial class PluginService : IPluginService {
               OriginalFilename = manifest.Patches[i],
               StoredFilename = storedName
           },
-          PatchNumber = (uint) i
+          PatchNumber = (uint)i
       });
     }
 
