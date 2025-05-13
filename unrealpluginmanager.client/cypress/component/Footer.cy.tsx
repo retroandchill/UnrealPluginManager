@@ -3,9 +3,10 @@ import {Footer} from "@/components";
 import {createTheme, ThemeProvider} from '@mui/material';
 import {theme} from "@/Theme";
 
+const appTheme = createTheme(theme);
+
 describe('<Footer/>', () => {
   beforeEach(() => {
-    const appTheme = createTheme(theme);
     cy.mount(<ThemeProvider theme={appTheme}>
       <Footer/>
     </ThemeProvider>);
