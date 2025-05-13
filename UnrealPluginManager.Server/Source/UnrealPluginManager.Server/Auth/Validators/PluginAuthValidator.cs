@@ -43,15 +43,14 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
       return await _dbContext.Users
           .Where(x => x.Username == context.User.Identity.Name)
           .SelectMany(x => x.Plugins)
-          .AnyAsync(x => x.Name == pluginName);
+          .AnyAsync(x => x.Plugin.Name == pluginName);
     }
 
     ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
     var validPlugin = await _dbContext.Plugins
-        .LeftJoin(_dbContext.PluginOwners, x => x.Id, x => x.PluginId,
+        .LeftJoin(_dbContext.UserPlugins, x => x.Id, x => x.PluginId,
                   (plugin, owner) => new {
-                      Plugin = plugin,
-                      owner.Owner
+                      Plugin = plugin, Owner = owner.User
                   })
         .Where(x => x.Plugin.Name == pluginName)
         .GroupBy(x => x.Plugin.Name)

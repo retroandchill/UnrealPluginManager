@@ -45,21 +45,11 @@ public partial class PluginService : IPluginService {
   public Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange,
                                                           Pageable pageable = default) {
     return _dbContext.PluginVersions
-        .Include(x => x.Parent)
-        .Include(x => x.Icon)
-        .Include(x => x.Patches)
-        .ThenInclude(x => x.FileResource)
+        .GetLatestVersions()
         .Where(x => x.Parent.Name.ToUpper().Contains(pluginName.ToUpper()))
         .WhereVersionInRange(versionRange)
-        .GroupBy(x => x.ParentId)
-        .Select(x => x.OrderByDescending(y => y.Major)
-                    .ThenByDescending(y => y.Minor)
-                    .ThenByDescending(y => y.Patch)
-                    .ThenByDescending(y => y.PrereleaseNumber == null)
-                    .ThenByDescending(y => y.PrereleaseNumber)
-                    .First())
-        .ToPageAsync(pageable)
-        .Map(x => x.Select(p => p.ToPluginVersionInfo()));
+        .ToPluginVersionInfoQuery()
+        .ToPageAsync(pageable);
   }
 
   /// <inheritdoc />

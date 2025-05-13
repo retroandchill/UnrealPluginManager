@@ -1,14 +1,18 @@
 ﻿using System.Security.Claims;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.EntityFrameworkCore;
+using Retro.SimplePage;
+using Retro.SimplePage.EntityFrameworkCore;
+using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Mappers;
+using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Database.Users;
 using UnrealPluginManager.Server.Mappers;
-using UserMapper = UnrealPluginManager.Server.Mappers.UserMapper;
 
 namespace UnrealPluginManager.Server.Services;
 
@@ -22,6 +26,14 @@ public partial class UserService : IUserService {
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly CloudUnrealPluginManagerContext _dataContext;
   private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
+
+  /// <inheritdoc />
+  public async Task<UserOverview> GetUser(Guid userId) {
+    return await _dataContext.Users
+        .Where(x => x.Id == userId)
+        .ToUserOverviewQuery()
+        .SingleOrDefaultAsync() ?? throw new ContentNotFoundException("User not found.");
+  }
 
   /// <inheritdoc />
   public async Task<UserOverview> GetActiveUser() {
@@ -46,7 +58,28 @@ public partial class UserService : IUserService {
     _dataContext.Users.Add(newUser);
     await _dataContext.SaveChangesAsync();
 
-    return UserMapper.ToUserOverview(newUser);
+    return newUser.ToUserOverview();
+  }
+
+  /// <inheritdoc />
+  public async Task<Page<PluginVersionInfo>> GetUserPlugins(Guid userId, Pageable pageable) {
+    if (!await _dataContext.Users.AnyAsync(x => x.Id == userId)) {
+      throw new ContentNotFoundException("User not found.");
+    }
+
+    return await _dataContext.UserPlugins
+        .Join(_dataContext.PluginVersions.GetLatestVersions(),
+              x => x.PluginId,
+              x => x.ParentId,
+              (up, pv) => new {
+                  PluginVersion = pv,
+                  UserPlugin = up
+              })
+        .Where(x => x.UserPlugin.UserId == userId)
+        .Select(x => x.PluginVersion)
+        .OrderBy(x => x.Parent.Name)
+        .ToPluginVersionInfoQuery()
+        .ToPageAsync(pageable);
   }
 
   /// <inheritdoc />
@@ -87,7 +120,8 @@ public partial class UserService : IUserService {
     } catch (KeycloakHttpClientException ex) {
       throw new ForeignApiException(ex.StatusCode, "Error creating Api Key", ex);
     }
-    var newApiKey = UserMapper.ToApiKey(apiKey, createdKey.Id);
+
+    var newApiKey = apiKey.ToApiKey(createdKey.Id);
     newApiKey.UserId = userId;
     _dataContext.ApiKeys.Add(newApiKey);
 
@@ -101,10 +135,10 @@ public partial class UserService : IUserService {
       }
 
       _dataContext.AllowedPlugins.AddRange(apiKey.AllowedPlugins
-          .Select(x => new AllowedPlugin {
-              ApiKeyId = newApiKey.Id,
-              PluginId = x.Id
-          }));
+                                               .Select(x => new AllowedPlugin {
+                                                   ApiKeyId = newApiKey.Id,
+                                                   PluginId = x.Id
+                                               }));
     }
 
     await _dataContext.SaveChangesAsync();

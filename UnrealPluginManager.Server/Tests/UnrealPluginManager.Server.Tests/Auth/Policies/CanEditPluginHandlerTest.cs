@@ -66,7 +66,11 @@ public class CanEditPluginHandlerTest {
         Id = Guid.NewGuid(),
         Username = username,
         Email = "test@example.com",
-        Plugins = [plugin]
+        Plugins = [
+            new UserPlugin {
+                Plugin = plugin
+            }
+        ]
     };
 
     _dbContext.Plugins.Add(plugin);
@@ -120,7 +124,11 @@ public class CanEditPluginHandlerTest {
         Id = Guid.NewGuid(),
         Username = ownerUsername,
         Email = "owner@example.com",
-        Plugins = [plugin]
+        Plugins = [
+            new UserPlugin {
+                Plugin = plugin
+            }
+        ]
     };
 
 
@@ -174,7 +182,11 @@ public class CanEditPluginHandlerTest {
         Id = Guid.NewGuid(),
         Username = username,
         Email = "test@example.com",
-        Plugins = [plugin]
+        Plugins = [
+            new UserPlugin {
+                Plugin = plugin
+            }
+        ]
     };
 
     _dbContext.Plugins.Add(plugin);
@@ -256,7 +268,7 @@ public class CanEditPluginHandlerTest {
   [Test]
   public async Task HandleRequirementAsync_WhenHttpContextIsNull_ShouldFail() {
     // Arrange
-    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns((HttpContext) null!);
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns((HttpContext)null!);
 
     var identity = new GenericIdentity("testuser", "TestAuth");
     var claimsPrincipal = new ClaimsPrincipal(identity);

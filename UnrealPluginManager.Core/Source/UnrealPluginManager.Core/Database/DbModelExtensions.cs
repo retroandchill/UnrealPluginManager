@@ -1,4 +1,5 @@
 ﻿using UnrealPluginManager.Core.Database.Entities;
+using UnrealPluginManager.Core.Database.Entities.Plugins;
 
 namespace UnrealPluginManager.Core.Database;
 
@@ -51,5 +52,31 @@ public static class DbModelExtensions {
         .ThenByDescending(x => x.Patch)
         .ThenByDescending(x => x.PrereleaseNumber == null)
         .ThenByDescending(x => x.PrereleaseNumber);
+  }
+
+  /// <summary>
+  /// Retrieves the latest plugin versions from a sequence of <see cref="PluginVersion"/> objects.
+  /// The latest version is determined based on the semantic versioning rules, comparing major, minor, and patch versions,
+  /// as well as prerelease components when applicable.
+  /// </summary>
+  /// <param name="versions">
+  /// The sequence of <see cref="PluginVersion"/> objects to evaluate for the latest versions.
+  /// </param>
+  /// <returns>
+  /// Returns an <see cref="IQueryable{T}"/> of <see cref="PluginVersion"/> objects, where each plugin has its latest version included.
+  /// </returns>
+  public static IQueryable<PluginVersion> GetLatestVersions(this IQueryable<PluginVersion> versions) {
+    return versions.Where(pv => !versions
+                              .Any(other =>
+                                       other.ParentId == pv.ParentId && (
+                                           other.Major > pv.Major ||
+                                           (other.Major == pv.Major && other.Minor > pv.Minor) ||
+                                           (other.Major == pv.Major && other.Minor == pv.Minor &&
+                                            other.Patch > pv.Patch) ||
+                                           (other.Major == pv.Major && other.Minor == pv.Minor &&
+                                            other.Patch == pv.Patch &&
+                                            other.PrereleaseNumber != null && (pv.PrereleaseNumber == null ||
+                                                                               other.PrereleaseNumber >
+                                                                               pv.PrereleaseNumber)))));
   }
 }

@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Database.Entities.Storage;
 
 namespace UnrealPluginManager.Server.Database.Users;
@@ -92,7 +91,7 @@ public class User {
   /// the plugins that the user owns or manages. Each plugin in the collection is associated
   /// with its respective metadata and ownership structure within the system.
   /// </remarks>
-  public ICollection<Plugin> Plugins { get; set; } = new List<Plugin>();
+  public ICollection<UserPlugin> Plugins { get; set; } = new List<UserPlugin>();
 
   /// <summary>
   /// Gets or sets the collection of API keys associated with the user.
@@ -106,10 +105,6 @@ public class User {
   public ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
   internal static void DefineModelMetadata(EntityTypeBuilder<User> entity) {
-    entity.HasMany(x => x.Plugins)
-        .WithMany()
-        .UsingEntity<PluginOwner>();
-
     entity.Property(x => x.Username)
         .HasMaxLength(31);
 

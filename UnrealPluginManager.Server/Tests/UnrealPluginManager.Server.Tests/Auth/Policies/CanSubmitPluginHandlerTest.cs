@@ -99,7 +99,11 @@ public class CanSubmitPluginHandlerTest {
         Id = Guid.NewGuid(),
         Username = username,
         Email = "test@example.com",
-        Plugins = [plugin]
+        Plugins = [
+            new UserPlugin {
+                Plugin = plugin
+            }
+        ]
     };
 
     _dbContext.Plugins.Add(plugin);
@@ -151,7 +155,11 @@ public class CanSubmitPluginHandlerTest {
         Id = Guid.NewGuid(),
         Username = username,
         Email = "test@example.com",
-        Plugins = [plugin]
+        Plugins = [
+            new UserPlugin {
+                Plugin = plugin
+            }
+        ]
     };
 
     _dbContext.Plugins.Add(plugin);

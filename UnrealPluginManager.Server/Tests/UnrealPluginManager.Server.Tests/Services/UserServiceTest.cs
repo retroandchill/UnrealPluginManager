@@ -3,15 +3,19 @@ using LanguageExt.UnsafeValueAccess;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Retro.SimplePage;
+using Semver;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Database.Users;
+using UnrealPluginManager.Server.Model.Plugins;
 using UnrealPluginManager.Server.Services;
 using UnrealPluginManager.Server.Tests.Helpers;
 
@@ -50,6 +54,24 @@ public class UserServiceTest {
   public void TearDown() {
     _serviceProvider.Dispose();
     _context.Dispose();
+  }
+
+  [Test]
+  public async Task TestGetUser() {
+    var user = new User {
+        Username = "TestUser",
+        Email = "email@test.com"
+    };
+    _context.Users.Add(user);
+    await _context.SaveChangesAsync();
+
+    var foundUser = await _userService.GetUser(user.Id);
+    Assert.Multiple(() => {
+      Assert.That(foundUser.Username, Is.EqualTo("TestUser"));
+      Assert.That(foundUser.Email, Is.EqualTo("email@test.com"));
+    });
+
+    Assert.ThrowsAsync<ContentNotFoundException>(() => _userService.GetUser(Guid.NewGuid()));
   }
 
   [Test]
@@ -101,8 +123,137 @@ public class UserServiceTest {
   }
 
   [Test]
-  public async Task TestCreateApiKey() {
+  public async Task TestGetUserPlugins() {
+    // Setup user
+    var user = new User {
+        Username = "TestUser",
+        Email = "email@test.com"
+    };
+    _context.Users.Add(user);
 
+    // Setup plugins that the user contributes to
+    var plugin1 = new Plugin {
+        Name = "Plugin1",
+        Versions = new List<PluginVersion> {
+            new() {
+                Version = new SemVersion(1, 0, 0),
+                Description = "Plugin 1 v1.0.0",
+                CreatedAt = DateTimeOffset.Now.AddDays(-3),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            },
+            new() {
+                Version = new SemVersion(1, 2, 0),
+                Description = "Plugin 1 v1.2.0",
+                CreatedAt = DateTimeOffset.Now.AddDays(-2),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            },
+            new() {
+                Version = new SemVersion(2, 0, 0),
+                Description = "Plugin 1 v2.0.0 - Latest",
+                CreatedAt = DateTimeOffset.Now,
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            }
+        }
+    };
+
+    var plugin2 = new Plugin {
+        Name = "Plugin2",
+        Versions = new List<PluginVersion> {
+            new() {
+                Version = new SemVersion(0, 9, 0),
+                Description = "Plugin 2 v0.9.0",
+                CreatedAt = DateTimeOffset.Now.AddDays(-5),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            },
+            new() {
+                Version = new SemVersion(1, 0, 0),
+                Description = "Plugin 2 v1.0.0 - Latest",
+                CreatedAt = DateTimeOffset.Now.AddDays(-1),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            }
+        }
+    };
+
+    var plugin3 = new Plugin {
+        Name = "Plugin3",
+        Versions = new List<PluginVersion> {
+            new() {
+                Version = new SemVersion(0, 5, 0),
+                Description = "Plugin 3 v0.5.0",
+                CreatedAt = DateTimeOffset.Now.AddDays(-10),
+                Source = new SourceLocation {
+                    Url = new Uri("https://github.com/test/test"),
+                    Sha = "NotARealSha"
+                }
+            }
+        }
+    };
+
+    _context.Plugins.AddRange(plugin1, plugin2, plugin3);
+    await _context.SaveChangesAsync();
+
+    // Add user as contributor to plugins
+    var userPlugin1 = new UserPlugin {
+        UserId = user.Id,
+        PluginId = plugin1.Id,
+        Role = UserPluginRole.Owner
+    };
+
+    var userPlugin2 = new UserPlugin {
+        UserId = user.Id,
+        PluginId = plugin2.Id,
+        Role = UserPluginRole.Contributor
+    };
+
+    _context.UserPlugins.AddRange(userPlugin1, userPlugin2);
+    await _context.SaveChangesAsync();
+
+    // Test first page (2 items)
+    var pageable = new Pageable(1, 2);
+    var result = await _userService.GetUserPlugins(user.Id, pageable);
+
+    Assert.Multiple(() => {
+      Assert.That(result, Has.Count.EqualTo(2));
+
+      // Verify plugin1 info
+      var plugin1Result = result.First(p => p.Name == plugin1.Name);
+      Assert.That(plugin1Result.Name, Is.EqualTo(plugin1.Name));
+      Assert.That(plugin1Result.Version, Is.EqualTo(new SemVersion(2, 0, 0))); // Highest sem version
+
+      // Verify plugin2 info
+      var plugin2Result = result.First(p => p.Name == plugin2.Name);
+      Assert.That(plugin2Result.Name, Is.EqualTo(plugin2.Name));
+      Assert.That(plugin2Result.Version, Is.EqualTo(new SemVersion(1, 0, 0))); // Highest sem version
+    });
+
+    // Test second page (empty)
+    pageable = new Pageable(2, 2);
+    result = await _userService.GetUserPlugins(user.Id, pageable);
+
+    Assert.That(result, Has.Count.EqualTo(0));
+
+    // Test with non-existent user
+    Assert.ThrowsAsync<ContentNotFoundException>(() => _userService.GetUserPlugins(
+                                                     Guid.NewGuid(), new Pageable(1, 10)));
+  }
+
+  [Test]
+  public async Task TestCreateApiKey() {
     var user = new User {
         Username = "TestUser",
         Email = "email@gmail.com"
@@ -118,7 +269,7 @@ public class UserServiceTest {
 
     var externalId = Guid.CreateVersion7();
     _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
-            "unreal-plugin-manager", "TestUser", apiKeyPayload.ExpiresAt))
+                                    "unreal-plugin-manager", "TestUser", apiKeyPayload.ExpiresAt))
         .ReturnsAsync(new CreatedApiKey {
             Id = externalId,
             ApiKey = "DummyKey",
@@ -189,7 +340,7 @@ public class UserServiceTest {
 
     var externalId = Guid.CreateVersion7();
     _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
-            "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
+                                    "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
         .ReturnsAsync(new CreatedApiKey {
             Id = externalId,
             ApiKey = "DummyKey",
@@ -235,7 +386,7 @@ public class UserServiceTest {
 
     var externalId = Guid.CreateVersion7();
     _keycloakApiKeyClient.Setup(x => x.CreateNewApiKey(
-            "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
+                                    "unreal-plugin-manager", "TestUser", apiKey.ExpiresAt))
         .ReturnsAsync(new CreatedApiKey {
             Id = externalId,
             ApiKey = "DummyKey",

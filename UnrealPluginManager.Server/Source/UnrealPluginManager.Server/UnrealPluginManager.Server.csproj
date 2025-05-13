@@ -52,8 +52,4 @@
         <InternalsVisibleTo Include="UnrealPluginManager.Server.Tests" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Model\"/>
-    </ItemGroup>
-
 </Project>

@@ -32,7 +32,7 @@ public class CloudUnrealPluginManagerContext : UnrealPluginManagerContext {
   /// This property provides access to the collection of plugin ownership data, enabling CRUD operations and querying of plugin-owner relationships.
   /// It is a key component for defining and maintaining the ownership link between users and plugins within the Unreal Plugin Manager application.
   /// </remarks>
-  public DbSet<PluginOwner> PluginOwners { get; init; }
+  public DbSet<UserPlugin> UserPlugins { get; init; }
 
   /// <summary>
   /// Represents the database set for managing API keys in the Unreal Plugin Manager context.
@@ -67,7 +67,7 @@ public class CloudUnrealPluginManagerContext : UnrealPluginManagerContext {
   /// <inheritdoc />
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     optionsBuilder.UseNpgsql(_config.ConnectionString, b => b.MinBatchSize(1)
-            .MaxBatchSize(100))
+                                 .MaxBatchSize(100))
         .UseSnakeCaseNamingConvention();
   }
 
@@ -76,7 +76,7 @@ public class CloudUnrealPluginManagerContext : UnrealPluginManagerContext {
     base.OnModelCreating(modelBuilder);
     modelBuilder.Entity<User>(User.DefineModelMetadata);
     modelBuilder.Entity<ApiKey>(ApiKey.DefineModelMetadata);
-    modelBuilder.Entity<PluginOwner>(PluginOwner.DefineModelMetadata);
+    modelBuilder.Entity<UserPlugin>(UserPlugin.DefineModelMetadata);
     modelBuilder.Entity<AllowedPlugin>(AllowedPlugin.DefineModelMetadata);
   }
 }
