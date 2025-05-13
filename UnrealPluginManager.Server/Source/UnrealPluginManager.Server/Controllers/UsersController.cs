@@ -27,10 +27,20 @@ public partial class UsersController : ControllerBase {
     return _userService.GetActiveUser();
   }
 
+  /// Creates a new API key for the specified user.
+  /// <param name="userId">
+  /// The unique identifier of the user for whom the API key is being created.
+  /// </param>
+  /// <param name="apiKey">
+  /// The overview of the API key containing details necessary for creation.
+  /// </param>
+  /// <returns>
+  /// A task that represents the asynchronous operation.
+  /// The task result contains the newly created API key as a string.
+  /// </returns>
   [Authorize(AuthorizationPolicies.CallingUser)]
   [HttpPost("{userId:guid}/api-keys")]
   public Task<string> CreateApiKey([FromRoute] Guid userId, [FromBody] ApiKeyOverview apiKey) {
     return _userService.CreateApiKey(userId, apiKey);
   }
-
 }

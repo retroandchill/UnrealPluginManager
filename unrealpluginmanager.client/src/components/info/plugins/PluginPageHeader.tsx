@@ -29,7 +29,7 @@ export function PluginPageHeader({plugin}: Readonly<PluginPageHeaderProps>) {
             </Grid>
             <Grid size={{xs: 12, sm: 6}}>
               <Typography variant="h4" gutterBottom>
-                {plugin.friendlyName || plugin.name}
+                {plugin.name}
               </Typography>
               <Chip
                   label={`Version ${plugin.version}`}

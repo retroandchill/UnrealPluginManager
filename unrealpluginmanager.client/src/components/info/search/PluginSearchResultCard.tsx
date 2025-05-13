@@ -43,7 +43,7 @@ export function PluginSearchResultCard({plugin}: Readonly<PluginSearchResultCard
             </Grid>
               <Grid size={{xs: 8, sm: 9, md: 4}} sx={{alignSelf: 'flex-start'}}>
                 <Typography variant="h4" gutterBottom>
-                  {plugin.friendlyName ?? plugin.name}
+                  {plugin.name}
                 </Typography>
                 <Chip
                     label={`Version ${plugin.version}`}

@@ -8,7 +8,6 @@
 /// and the internally stored file attributes to manage resource data efficiently.
 /// </remarks>
 public class ResourceInfo {
-
   /// <summary>
   /// Gets or sets the unique identifier for the resource.
   /// </summary>
@@ -35,6 +34,5 @@ public class ResourceInfo {
   /// within the application. It reflects the actual name used in the storage
   /// system, which may differ from the original filename provided by the user.
   /// </remarks>
-  public string StoredFilename { get; set; }
-
+  public required string StoredFilename { get; set; }
 }
