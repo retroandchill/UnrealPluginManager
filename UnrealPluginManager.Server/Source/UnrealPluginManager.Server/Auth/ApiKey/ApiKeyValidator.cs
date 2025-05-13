@@ -1,10 +1,10 @@
 ﻿using Keycloak.AuthServices.Sdk;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Mappers;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Server.Clients;
+using UnrealPluginManager.Server.Database;
+using UnrealPluginManager.Server.Mappers;
 
 namespace UnrealPluginManager.Server.Auth.ApiKey;
 
@@ -20,7 +20,7 @@ namespace UnrealPluginManager.Server.Auth.ApiKey;
 [AutoConstructor]
 public partial class ApiKeyValidator : IApiKeyValidator {
 
-  private readonly UnrealPluginManagerContext _dbContext;
+  private readonly CloudUnrealPluginManagerContext _dbContext;
   private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
 
   /// <inheritdoc />

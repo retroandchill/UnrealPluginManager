@@ -30,18 +30,4 @@ public class DependencyOverview {
   /// </summary>
   [JsonConverter(typeof(SemVersionRangeJsonConverter))]
   public SemVersionRange PluginVersion { get; set; } = SemVersionRange.All;
-
-  /// <summary>
-  /// Gets or sets a value indicating whether the dependency is optional.
-  /// When set to true, the dependency is not mandatory, and the system
-  /// can function without it.
-  /// </summary>
-  public bool Optional { get; set; }
-
-  /// <summary>
-  /// Gets or sets the type of plugin associated with this dependency.
-  /// Specifies whether the dependency is an Engine plugin, a Provided plugin,
-  /// or an External plugin.
-  /// </summary>
-  public PluginType Type { get; set; } = PluginType.Provided;
 }

@@ -1,8 +1,9 @@
-﻿using System.CodeDom.Compiler;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using UnrealPluginManager.Cli.Helpers;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -81,14 +82,38 @@ public class BuildCommandOptions : ICommandOptions {
 public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
   private readonly IConsole _console;
   private readonly IFileSystem _fileSystem;
-  private readonly IEngineService _engineService;
+  private readonly IPluginManagementService _pluginManagementService;
   private readonly IInstallService _installService;
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-    var installResult = await _installService.InstallRequirements(options.Input, options.Version, 
-                                                            ["Win64"]);
+    var manifestFile = _fileSystem.FileInfo.New(options.Input);
+    await using var manifestStream = manifestFile.OpenRead();
+    var manifest = await _jsonService.DeserializeAsync<PluginManifest>(manifestStream);
+
+    var installResult = await _installService.InstallRequirements(manifest, options.Version,
+        ["Win64"]);
     _console.WriteVersionChanges(installResult);
-    return await _engineService.BuildPlugin(_fileSystem.FileInfo.New(options.Input), options.Version);
+
+    var patchesFolder = manifestFile.Directory?
+        .GetDirectories("patches", SearchOption.TopDirectoryOnly)
+        .FirstOrDefault();
+
+    var patchFiles = patchesFolder?.EnumerateFiles("*.patch", SearchOption.AllDirectories)
+        .ToDictionary(x => x.Name) ?? [];
+
+    var patchContents = await manifest.Patches
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => {
+          await using var patchStream = patchFiles[x].OpenRead();
+          using var patchReader = new StreamReader(patchStream);
+          return await patchReader.ReadToEndAsync(cancellationToken);
+        })
+        .ToListAsync(cancellationToken);
+
+
+    await _pluginManagementService.BuildFromManifest(manifest, patchContents, options.Version, ["Win64"]);
+    return 0;
   }
 }

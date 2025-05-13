@@ -3,6 +3,7 @@ using System.CommandLine.IO;
 using JetBrains.Annotations;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Local;
 using UnrealPluginManager.Local.Services;
 
 namespace UnrealPluginManager.Cli.Commands;
@@ -17,7 +18,7 @@ namespace UnrealPluginManager.Cli.Commands;
 /// </remarks>
 public class VersionsCommand()
     : Command<VersionsCommandOptions, VersionsCommandOptionsHandler>("versions",
-                                                                     "Lists all installed engine versions.");
+        "Lists all installed engine versions.");
 
 /// <summary>
 /// Represents the options required for the VersionsCommand in the CLI interface.
@@ -52,11 +53,11 @@ public partial class VersionsCommandOptionsHandler : ICommandOptionsHandler<Vers
     var installedEngines = _engineService.GetInstalledEngines();
     var currentVersion = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
         .Match(x => installedEngines.FindIndex(y => y.Name == x),
-               () => installedEngines.Index()
-                   .Where(y => !y.Item.CustomBuild)
-                   .OrderByDescending(y => y.Item.Version)
-                   .Select(y => y.Index)
-                   .FirstOrDefault(-1));
+            () => installedEngines.Index()
+                .Where(y => !y.Item.CustomBuild)
+                .OrderByDescending(y => y.Item.Version)
+                .Select(y => y.Index)
+                .FirstOrDefault(-1));
     foreach (var version in installedEngines.Index()) {
       _console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
     }

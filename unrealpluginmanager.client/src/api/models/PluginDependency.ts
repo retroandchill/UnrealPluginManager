@@ -13,15 +13,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { PluginType } from './PluginType';
-import {
-    PluginTypeFromJSON,
-    PluginTypeFromJSONTyped,
-    PluginTypeToJSON,
-    PluginTypeToJSONTyped,
-} from './PluginType';
-
 /**
  * Represents a dependency of a plugin within the Unreal Plugin Manager framework.
  * @export
@@ -35,12 +26,6 @@ export interface PluginDependency {
      */
     pluginName: string;
     /**
-     * 
-     * @type {PluginType}
-     * @memberof PluginDependency
-     */
-    type: PluginType;
-    /**
      * Gets the version range of the dependent plugin.
      * @type {string}
      * @memberof PluginDependency
@@ -48,14 +33,11 @@ export interface PluginDependency {
     pluginVersion: string;
 }
 
-
-
 /**
  * Check if a given object implements the PluginDependency interface.
  */
 export function instanceOfPluginDependency(value: object): value is PluginDependency {
     if (!('pluginName' in value) || value['pluginName'] === undefined) return false;
-    if (!('type' in value) || value['type'] === undefined) return false;
     if (!('pluginVersion' in value) || value['pluginVersion'] === undefined) return false;
     return true;
 }
@@ -71,7 +53,6 @@ export function PluginDependencyFromJSONTyped(json: any, ignoreDiscriminator: bo
     return {
         
         'pluginName': json['pluginName'],
-        'type': PluginTypeFromJSON(json['type']),
         'pluginVersion': json['pluginVersion'],
     };
 }
@@ -88,7 +69,6 @@ export function PluginDependencyToJSONTyped(value?: PluginDependency | null, ign
     return {
         
         'pluginName': value['pluginName'],
-        'type': PluginTypeToJSON(value['type']),
         'pluginVersion': value['pluginVersion'],
     };
 }

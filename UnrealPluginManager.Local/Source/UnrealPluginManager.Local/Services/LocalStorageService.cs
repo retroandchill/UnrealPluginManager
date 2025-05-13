@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using UnrealPluginManager.Cli;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Services;
 

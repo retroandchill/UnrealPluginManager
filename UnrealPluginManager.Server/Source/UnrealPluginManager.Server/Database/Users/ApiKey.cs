@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
 
-namespace UnrealPluginManager.Core.Database.Entities.Users;
+namespace UnrealPluginManager.Server.Database.Users;
 
 /// <summary>
 /// Represents an API key entity used for authenticating and authorizing access to specific resources or functionalities within the system.
@@ -99,7 +99,7 @@ public class ApiKey {
     entity.HasMany(x => x.Plugins)
         .WithMany()
         .UsingEntity<AllowedPlugin>();
-    
+
     entity.Property(x => x.DisplayName)
         .HasMaxLength(255);
 

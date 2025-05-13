@@ -56,7 +56,7 @@ public static class SwaggerExtensions {
                       AuthorizationUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/auth",
                           UriKind.Relative),
                       TokenUrl = new Uri("/kc/realms/unreal-plugin-manager/protocol/openid-connect/token",
-                                         UriKind.Relative),
+                          UriKind.Relative),
                       Scopes = new Dictionary<string, string> {
                           [AuthorizationPolicies.CanSubmitPlugin] =
                               "User is a contributor on the given plugin and has submit privileges",

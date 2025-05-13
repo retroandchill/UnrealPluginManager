@@ -4,6 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TargetFramework>net9.0</TargetFramework>
+        <MeziantouAnalysisMode>None</MeziantouAnalysisMode>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -37,6 +38,10 @@
         <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.14"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.3"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.14"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EditorConfigFiles Remove=".editorconfig"/>
     </ItemGroup>
 
 </Project>

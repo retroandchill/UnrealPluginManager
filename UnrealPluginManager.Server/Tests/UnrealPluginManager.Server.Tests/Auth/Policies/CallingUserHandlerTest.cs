@@ -5,15 +5,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Database.Entities.Users;
-using UnrealPluginManager.Core.Tests.Database;
 using UnrealPluginManager.Server.Auth.Policies;
+using UnrealPluginManager.Server.Database;
+using UnrealPluginManager.Server.Database.Users;
+using UnrealPluginManager.Server.Tests.Helpers;
 
 namespace UnrealPluginManager.Server.Tests.Auth.Policies;
 
 public class CallingUserHandlerTest {
-  private UnrealPluginManagerContext _dbContext;
+  private CloudUnrealPluginManagerContext _dbContext;
   private ServiceProvider _serviceProvider;
   private Mock<IHttpContextAccessor> _httpContextAccessorMock;
   private IAuthorizationHandler _handler;
@@ -22,7 +22,7 @@ public class CallingUserHandlerTest {
   public void Setup() {
     var services = new ServiceCollection();
 
-    _dbContext = new TestUnrealPluginManagerContext();
+    _dbContext = new TestCloudUnrealPluginManagerContext();
     _dbContext.Database.EnsureCreated();
     services.AddSingleton(_dbContext);
 

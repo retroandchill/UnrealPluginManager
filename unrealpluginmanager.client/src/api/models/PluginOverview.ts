@@ -13,14 +13,8 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { VersionOverview } from './VersionOverview';
-import {
-    VersionOverviewFromJSON,
-    VersionOverviewFromJSONTyped,
-    VersionOverviewToJSON,
-    VersionOverviewToJSONTyped,
-} from './VersionOverview';
+import type {VersionOverview} from './VersionOverview';
+import {VersionOverviewFromJSON, VersionOverviewToJSON,} from './VersionOverview';
 
 /**
  * Represents an overview of a plugin, providing basic information such as its ID, name,
@@ -41,30 +35,6 @@ export interface PluginOverview {
      * @memberof PluginOverview
      */
     name: string;
-    /**
-     * Gets or sets the user-friendly name of the plugin, which may be used for display purposes.
-     * @type {string}
-     * @memberof PluginOverview
-     */
-    friendlyName?: string | null;
-    /**
-     * Gets or sets the description of the plugin, providing detailed information about its purpose or functionality.
-     * @type {string}
-     * @memberof PluginOverview
-     */
-    description?: string | null;
-    /**
-     * Gets or sets the name of the author associated with the plugin.
-     * @type {string}
-     * @memberof PluginOverview
-     */
-    authorName?: string | null;
-    /**
-     * Gets or sets the URL associated with the author of the plugin.
-     * @type {string}
-     * @memberof PluginOverview
-     */
-    authorWebsite?: string | null;
     /**
      * Gets or sets the collection of versions associated with the plugin.
      * Each version provides a detailed overview including its version number
@@ -97,10 +67,6 @@ export function PluginOverviewFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'id': json['id'],
         'name': json['name'],
-        'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
-        'description': json['description'] == null ? undefined : json['description'],
-        'authorName': json['authorName'] == null ? undefined : json['authorName'],
-        'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
         'versions': ((json['versions'] as Array<any>).map(VersionOverviewFromJSON)),
     };
 }
@@ -118,10 +84,6 @@ export function PluginOverviewToJSONTyped(value?: PluginOverview | null, ignoreD
         
         'id': value['id'],
         'name': value['name'],
-        'friendlyName': value['friendlyName'],
-        'description': value['description'],
-        'authorName': value['authorName'],
-        'authorWebsite': value['authorWebsite'],
         'versions': ((value['versions'] as Array<any>).map(VersionOverviewToJSON)),
     };
 }

@@ -29,12 +29,14 @@ public class UploadCommand : Command<UploadCommandOptions, UploadCommandOptionsH
   public UploadCommand() : base("upload", "Uploads a plugin to the specified remote.") {
     AddArgument(new Argument<string>("name", "The name of the plugin to upload"));
     AddOption(new Option<SemVersion>(["-v", "--version"], description: "The version of the plugin to upload",
-      parseArgument: r => SemVersion.Parse(r.Tokens[0].Value)));
+        parseArgument: r => SemVersion.Parse(r.Tokens[0].Value)) {
+        IsRequired = true,
+    });
     AddOption(new Option<string>(["-r", "--remote"], description: "The remote to upload the plugin to") {
         IsRequired = false,
     });
   }
-  
+
 }
 
 /// <summary>
@@ -79,7 +81,7 @@ public class UploadCommandOptions : ICommandOptions {
   /// </remarks>
   [UsedImplicitly]
   public string? Remote { get; set; }
-  
+
 }
 
 /// <summary>

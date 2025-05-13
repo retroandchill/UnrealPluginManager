@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Core.Tests.Helpers;
+using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Tests.Helpers;
 
@@ -16,7 +18,8 @@ public static class ServerTestHelpers {
   /// <param name="builder">The WebApplicationBuilder to be configured.</param>
   /// <returns>The configured WebApplicationBuilder instance with mock data providers set up.</returns>
   public static WebApplicationBuilder SetUpMockDataProviders(this WebApplicationBuilder builder) {
-    builder.Services.SetUpMockDataProviders();
+    builder.Services.SetUpMockDataProviders<TestCloudUnrealPluginManagerContext>()
+        .AddScoped<CloudUnrealPluginManagerContext>(p => p.GetRequiredService<TestCloudUnrealPluginManagerContext>());
     return builder;
   }
 }

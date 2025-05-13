@@ -13,6 +13,8 @@
  * Do not edit the class manually.
  */
 
+import type {SourceLocation} from './SourceLocation';
+import {SourceLocationFromJSON, SourceLocationToJSON,} from './SourceLocation';
 import type {ResourceInfo} from './ResourceInfo';
 import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
 import type {PluginDependency} from './PluginDependency';
@@ -37,11 +39,17 @@ export interface PluginVersionInfo {
      */
     name: string;
     /**
-     * Gets or sets the user-friendly name of the plugin associated with the current version.
+     * Gets or sets the unique identifier for the plugin version.
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    friendlyName?: string | null;
+    versionId: string;
+  /**
+   * Gets the semantic version of the plugin.
+     * @type {string}
+     * @memberof PluginVersionInfo
+     */
+  version: string;
     /**
      * Gets or sets a brief explanation or summary of the plugin version.
      * This provides additional context or details about the plugin functionality or purpose.
@@ -54,27 +62,33 @@ export interface PluginVersionInfo {
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    authorName?: string | null;
+  author?: string | null;
     /**
-     * Gets or sets the URL associated with the author of the plugin.
+     * Gets or sets the license information associated with the plugin.
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    authorWebsite?: string | null;
+    license?: string | null;
     /**
-     * Gets or sets the unique identifier for the plugin version.
+     * Gets or sets the URL of the homepage associated with the plugin.
      * @type {string}
      * @memberof PluginVersionInfo
      */
-    versionId: string;
-    /**
-     * Gets the semantic version of the plugin.
-     * @type {string}
-     * @memberof PluginVersionInfo
-     */
-    version: string;
+    homepage?: string | null;
     /**
      * 
+     * @type {SourceLocation}
+     * @memberof PluginVersionInfo
+     */
+    source?: SourceLocation;
+  /**
+   * Gets or sets the collection of patch versions associated with the plugin.
+   * @type {Array<string>}
+   * @memberof PluginVersionInfo
+   */
+  patches?: Array<string>;
+  /**
+   * 
      * @type {ResourceInfo}
      * @memberof PluginVersionInfo
      */
@@ -111,12 +125,14 @@ export function PluginVersionInfoFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'pluginId': json['pluginId'],
         'name': json['name'],
-        'friendlyName': json['friendlyName'] == null ? undefined : json['friendlyName'],
-      'description': json['description'] == null ? undefined : json['description'],
-        'authorName': json['authorName'] == null ? undefined : json['authorName'],
-        'authorWebsite': json['authorWebsite'] == null ? undefined : json['authorWebsite'],
         'versionId': json['versionId'],
         'version': json['version'],
+      'description': json['description'] == null ? undefined : json['description'],
+      'author': json['author'] == null ? undefined : json['author'],
+      'license': json['license'] == null ? undefined : json['license'],
+      'homepage': json['homepage'] == null ? undefined : json['homepage'],
+      'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
+      'patches': json['patches'] == null ? undefined : json['patches'],
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
         'dependencies': ((json['dependencies'] as Array<any>).map(PluginDependencyFromJSON)),
     };
@@ -135,12 +151,14 @@ export function PluginVersionInfoToJSONTyped(value?: PluginVersionInfo | null, i
         
         'pluginId': value['pluginId'],
         'name': value['name'],
-        'friendlyName': value['friendlyName'],
-      'description': value['description'],
-        'authorName': value['authorName'],
-        'authorWebsite': value['authorWebsite'],
         'versionId': value['versionId'],
         'version': value['version'],
+      'description': value['description'],
+      'author': value['author'],
+      'license': value['license'],
+      'homepage': value['homepage'],
+      'source': SourceLocationToJSON(value['source']),
+      'patches': value['patches'],
         'icon': ResourceInfoToJSON(value['icon']),
         'dependencies': ((value['dependencies'] as Array<any>).map(PluginDependencyToJSON)),
     };

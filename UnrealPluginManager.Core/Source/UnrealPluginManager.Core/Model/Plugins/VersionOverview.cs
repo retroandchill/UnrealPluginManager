@@ -2,10 +2,10 @@
 using System.Text.Json.Serialization;
 using Semver;
 using UnrealPluginManager.Core.Converters;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Model.Storage;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
-
 
 /// <summary>
 /// Represents a specific version of a plugin, identified by a unique ID and version number.
@@ -23,6 +23,12 @@ public class VersionOverview {
   [Required]
   [JsonConverter(typeof(SemVersionJsonConverter))]
   public required SemVersion Version { get; set; }
+
+  /// <summary>
+  /// Gets or sets the location of the source, including its URL and associated SHA hash.
+  /// </summary>
+  public SourceLocation Source { get; set; }
+
 
   /// <summary>
   /// Gets or sets the icon resource associated with a version of a plugin.

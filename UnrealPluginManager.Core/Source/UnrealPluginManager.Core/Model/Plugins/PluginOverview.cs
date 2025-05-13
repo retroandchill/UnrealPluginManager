@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Semver;
 
 namespace UnrealPluginManager.Core.Model.Plugins;
 
@@ -7,7 +6,20 @@ namespace UnrealPluginManager.Core.Model.Plugins;
 /// Represents an overview of a plugin, providing basic information such as its ID, name,
 /// optional friendly name, description, and associated versions.
 /// </summary>
-public class PluginOverview : PluginOverviewBase {
+public class PluginOverview {
+  /// <summary>
+  /// Gets or sets the unique identifier for the plugin.
+  /// </summary>
+
+  [Required]
+  public required Guid Id { get; set; }
+
+  /// <summary>
+  /// Gets or sets the name of the plugin.
+  /// </summary>
+  [Required]
+  public required string Name { get; set; }
+
   /// <summary>
   /// Gets or sets the collection of versions associated with the plugin.
   /// Each version provides a detailed overview including its version number

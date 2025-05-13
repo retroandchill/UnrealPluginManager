@@ -13,15 +13,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { PluginType } from './PluginType';
-import {
-    PluginTypeFromJSON,
-    PluginTypeFromJSONTyped,
-    PluginTypeToJSON,
-    PluginTypeToJSONTyped,
-} from './PluginType';
-
 /**
  * Represents an overview of a plugin dependency, including its metadata and type.
  * @export
@@ -50,23 +41,7 @@ export interface DependencyOverview {
      * @memberof DependencyOverview
      */
     pluginVersion?: string;
-    /**
-     * Gets or sets a value indicating whether the dependency is optional.
-     * When set to true, the dependency is not mandatory, and the system
-     * can function without it.
-     * @type {boolean}
-     * @memberof DependencyOverview
-     */
-    optional?: boolean;
-    /**
-     * 
-     * @type {PluginType}
-     * @memberof DependencyOverview
-     */
-    type?: PluginType;
 }
-
-
 
 /**
  * Check if a given object implements the DependencyOverview interface.
@@ -90,8 +65,6 @@ export function DependencyOverviewFromJSONTyped(json: any, ignoreDiscriminator: 
         'id': json['id'],
         'pluginName': json['pluginName'],
         'pluginVersion': json['pluginVersion'] == null ? undefined : json['pluginVersion'],
-        'optional': json['optional'] == null ? undefined : json['optional'],
-        'type': json['type'] == null ? undefined : PluginTypeFromJSON(json['type']),
     };
 }
 
@@ -109,8 +82,6 @@ export function DependencyOverviewToJSONTyped(value?: DependencyOverview | null,
         'id': value['id'],
         'pluginName': value['pluginName'],
         'pluginVersion': value['pluginVersion'],
-        'optional': value['optional'],
-        'type': PluginTypeToJSON(value['type']),
     };
 }
 

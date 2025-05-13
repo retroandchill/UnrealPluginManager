@@ -1,4 +1,4 @@
-﻿namespace UnrealPluginManager.Cli;
+﻿namespace UnrealPluginManager.Local;
 
 /// <summary>
 /// Provides constants for environment variables used within the Unreal Plugin Manager.

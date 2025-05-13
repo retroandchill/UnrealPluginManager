@@ -1,11 +1,9 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
-using Semver;
-using UnrealPluginManager.Core.Files;
-using UnrealPluginManager.Core.Model.Engine;
-using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Exceptions;
+using UnrealPluginManager.Core.Files.Plugins;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Utils;
-using CopyFileSource = UnrealPluginManager.Core.Files.CopyFileSource;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -16,98 +14,9 @@ namespace UnrealPluginManager.Core.Services;
 public partial class PluginStructureService : IPluginStructureService {
   private const string Binaries = "Binaries";
   private const string Intermediate = "Intermediate";
-  private const string IntermediateBuild = "Intermediate/Build";
+  private const string IntermediateBuild = $"{Intermediate}/Build";
 
-  private readonly IFileSystem _fileSystem;
-  private readonly IStorageService _storageService;
-
-  /// <inheritdoc />
-  public async Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
-                                                       IDirectoryInfo pluginDirectory) {
-    var icon = pluginDirectory.File(Path.Join("Resources", "Icon128.png"));
-
-    ResourceHandle? pluginIcon = icon.Exists ? await _storageService.AddResource(new CopyFileSource(icon)) : null;
-
-    var readme = pluginDirectory.File("README.md");
-    ResourceHandle? pluginReadme =
-        readme.Exists ? await _storageService.AddResource(new CopyFileSource(readme)) : null;
-
-
-    ResourceHandle pluginSource;
-    using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
-      var sourceDirectories = pluginDirectory.EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
-          .Where(x => !x.Name.StartsWith(Binaries) && !x.Name.StartsWith(Intermediate));
-      var sourceFiles = pluginDirectory.EnumerateFiles("*", SearchOption.TopDirectoryOnly);
-      sourceZipInfo = await _fileSystem.CreateZipFile(sourceZipInfo.FullName, sourceDirectories, sourceFiles);
-      pluginSource = await _storageService.AddResource(new CopyFileSource(sourceZipInfo));
-    }
-
-    var binariesDirectory = pluginDirectory.SubDirectory(Binaries);
-    var intermediateDirectory = pluginDirectory.SubDirectory(Intermediate, "Build");
-    var binaryDirectories = binariesDirectory.EnumerateDirectories()
-        .ToDictionary<IDirectoryInfo, string, List<ZipSubDirectory>>(binary => binary.Name,
-            binary => [new ZipSubDirectory(Binaries, binary)]);
-
-    foreach (var intermediate in intermediateDirectory.EnumerateDirectories()) {
-      var existingDirectories = binaryDirectories.TryGetValue(intermediate.Name, out var directories)
-          ? directories
-          : [];
-      binaryDirectories[intermediate.Name] = existingDirectories
-          .Concat([new ZipSubDirectory(Path.Join(Intermediate, "Build"), intermediate)]).ToList();
-    }
-
-    var pluginBinaries = new Dictionary<PluginBinaryType, ResourceHandle>();
-    foreach (var (platform, directories) in binaryDirectories) {
-      using var disposableFile = _fileSystem.CreateDisposableFile(out var binaryZipInfo);
-      binaryZipInfo = await _fileSystem.CreateZipFile(binaryZipInfo.FullName, directories, []);
-      var key = new PluginBinaryType(engineVersion, platform);
-      pluginBinaries[key] = await _storageService.AddResource(new CopyFileSource(binaryZipInfo));
-    }
-
-    return new PartitionedPlugin(pluginSource, pluginIcon, pluginReadme, pluginBinaries);
-  }
-
-  /// <inheritdoc />
-  public async Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
-                                                       ZipArchive zipArchive) {
-    var iconEntry = zipArchive.GetEntry("Resources/Icon128.png");
-    ResourceHandle? pluginIcon = null;
-    if (iconEntry is not null) {
-      await using var iconStream = iconEntry.Open();
-      pluginIcon = await _storageService.AddResource(new StreamFileSource(_fileSystem, iconStream));
-    }
-
-    var readmeEntry = zipArchive.GetEntry("README.md");
-    ResourceHandle? pluginReadme = null;
-    if (readmeEntry is not null) {
-      await using var readmeStream = readmeEntry.Open();
-      pluginReadme = await _storageService.AddResource(new StreamFileSource(_fileSystem, readmeStream));
-    }
-
-    ResourceHandle pluginSource;
-    using (_fileSystem.CreateDisposableFile(out var sourceZipInfo)) {
-      var sourceEntries = zipArchive.Entries
-          .Where(x => !x.FullName.StartsWith(Binaries) && !x.FullName.StartsWith(Intermediate));
-      sourceZipInfo = await _fileSystem.CopyEntries(sourceEntries, sourceZipInfo.FullName);
-      pluginSource = await _storageService.AddResource(new CopyFileSource(sourceZipInfo));
-    }
-
-    var binaryEntries = zipArchive.Entries
-        .Where(x => x.FullName.StartsWith(Binaries) || x.FullName.StartsWith(IntermediateBuild))
-        .Where(x => x.FullName != "Binaries/" && x.FullName != $"{IntermediateBuild}/")
-        .GroupBy(x => x.FullName.StartsWith(Binaries) ? x.FullName.Split('/')[1] : x.FullName.Split('/')[2])
-        .ToDictionary(x => x.Key, x => x.ToList());
-
-    var pluginBinaries = new Dictionary<PluginBinaryType, ResourceHandle>();
-    foreach (var (platform, entries) in binaryEntries) {
-      using var disposableFile = _fileSystem.CreateDisposableFile(out var binaryZipInfo);
-      binaryZipInfo = await _fileSystem.CopyEntries(entries, binaryZipInfo.FullName);
-      var key = new PluginBinaryType(engineVersion, platform);
-      pluginBinaries[key] = await _storageService.AddResource(new CopyFileSource(binaryZipInfo));
-    }
-
-    return new PartitionedPlugin(pluginSource, pluginIcon, pluginReadme, pluginBinaries);
-  }
+  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public List<string> GetInstalledBinaries(IDirectoryInfo pluginDirectory) {
@@ -116,5 +25,82 @@ public partial class PluginStructureService : IPluginStructureService {
         .Select(x => x.Name)
         .Distinct()
         .ToList();
+  }
+
+  /// <inheritdoc />
+  public async Task<PluginSubmission> ExtractPluginSubmission(Stream archiveStream) {
+    using var zipArchive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
+
+    var manifestFile = zipArchive.GetEntry("plugin.json");
+    if (manifestFile is null) {
+      throw new BadSubmissionException("Plugin manifest file was not found!");
+    }
+
+    PluginManifest manifest;
+    await using (var stream = manifestFile.Open()) {
+      manifest = await _jsonService.DeserializeAsync<PluginManifest>(stream);
+    }
+
+    var patches = await manifest.Patches
+        .Select(x => (Name: x, Entry: zipArchive.GetEntry(Path.Join("patches", x))))
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => {
+          if (x.Entry is null) {
+            throw new BadSubmissionException($"Missing patch file: {x.Name}");
+          }
+
+          await using var patchStream = x.Entry.Open();
+          using var reader = new StreamReader(patchStream);
+          return await reader.ReadToEndAsync();
+        })
+        .ToListAsync();
+
+    var iconStream = zipArchive.GetEntry("icon.png")?.Open();
+
+    string? readme;
+    await using (var readmeFile = zipArchive.GetEntry("README.md")?.Open()) {
+      if (readmeFile is not null) {
+        using var streamReader = new StreamReader(readmeFile);
+        readme = await streamReader.ReadToEndAsync();
+      } else {
+        readme = null;
+      }
+    }
+
+    return new PluginSubmission(manifest, patches, iconStream, readme);
+  }
+
+  /// <inheritdoc />
+  public async Task CompressPluginSubmission(PluginSubmission submission, Stream stream) {
+    using var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, true);
+    var pluginEntry = zipArchive.CreateEntry("plugin.json");
+    await using (var entryStream = pluginEntry.Open()) {
+      var manifestJson = _jsonService.Serialize(submission.Manifest);
+      await using var jsonStream = manifestJson.ToStream();
+      await jsonStream.CopyToAsync(entryStream);
+    }
+
+    if (submission.Manifest.Patches.Count > 0) {
+      zipArchive.CreateEntry("patches/");
+      for (var i = 0; i < submission.Manifest.Patches.Count; i++) {
+        var patchEntry = zipArchive.CreateEntry($"patches/{submission.Manifest.Patches[i]}");
+        await using var entryStream = patchEntry.Open();
+        await using var patchStream = submission.Patches[i].ToStream();
+        await patchStream.CopyToAsync(entryStream);
+      }
+    }
+
+    if (submission.IconStream is not null) {
+      var iconEntry = zipArchive.CreateEntry("icon.png");
+      await using var entryStream = iconEntry.Open();
+      await submission.IconStream.CopyToAsync(entryStream);
+    }
+
+    if (submission.ReadmeText is not null) {
+      var readmeEntry = zipArchive.CreateEntry("readme.md");
+      await using var entryStream = readmeEntry.Open();
+      await using var readmeStream = submission.ReadmeText.ToStream();
+      await readmeStream.CopyToAsync(entryStream);
+    }
   }
 }

@@ -13,14 +13,10 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { ResourceInfo } from './ResourceInfo';
-import {
-    ResourceInfoFromJSON,
-    ResourceInfoFromJSONTyped,
-    ResourceInfoToJSON,
-    ResourceInfoToJSONTyped,
-} from './ResourceInfo';
+import type {SourceLocation} from './SourceLocation';
+import {SourceLocationFromJSON, SourceLocationToJSON,} from './SourceLocation';
+import type {ResourceInfo} from './ResourceInfo';
+import {ResourceInfoFromJSON, ResourceInfoToJSON,} from './ResourceInfo';
 
 /**
  * Represents a specific version of a plugin, identified by a unique ID and version number.
@@ -42,6 +38,12 @@ export interface VersionOverview {
     version: string;
     /**
      * 
+     * @type {SourceLocation}
+     * @memberof VersionOverview
+     */
+    source?: SourceLocation;
+  /**
+   * 
      * @type {ResourceInfo}
      * @memberof VersionOverview
      */
@@ -69,6 +71,7 @@ export function VersionOverviewFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'id': json['id'],
         'version': json['version'],
+      'source': json['source'] == null ? undefined : SourceLocationFromJSON(json['source']),
         'icon': json['icon'] == null ? undefined : ResourceInfoFromJSON(json['icon']),
     };
 }
@@ -86,6 +89,7 @@ export function VersionOverviewToJSONTyped(value?: VersionOverview | null, ignor
         
         'id': value['id'],
         'version': value['version'],
+      'source': SourceLocationToJSON(value['source']),
         'icon': ResourceInfoToJSON(value['icon']),
     };
 }

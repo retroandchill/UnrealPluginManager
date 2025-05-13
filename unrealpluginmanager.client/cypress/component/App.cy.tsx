@@ -2,6 +2,11 @@
 import App from "@/App";
 import {ApiContextType} from '@/components/providers/ApiProvider';
 import {ApiMockRouter} from "../support/helpers";
+import {theme} from "@/Theme";
+import {createTheme, ThemeProvider} from '@mui/material';
+
+
+const appTheme = createTheme(theme);
 
 describe('<App/>', () => {
   const mockPlugin = {
@@ -34,7 +39,9 @@ describe('<App/>', () => {
 
   it('renders landing page by default', () => {
     cy.mount(
-        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing}}/>
+        </ThemeProvider>
     );
 
     // Check header is present
@@ -46,7 +53,9 @@ describe('<App/>', () => {
 
   it('renders search page on search route', () => {
     cy.mount(
-        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search?q=test']}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search?q=test']}}/>
+        </ThemeProvider>
     );
 
     // Verify search page elements
@@ -59,7 +68,9 @@ describe('<App/>', () => {
       cy.stub(pluginsApi, 'getLatestVersion').resolves(mockPlugin);
     }
     cy.mount(
-        <App routerType={ApiMockRouter} routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin']}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter} routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin']}}/>
+        </ThemeProvider>
     );
 
     // Wait for data to load and verify content
@@ -86,8 +97,10 @@ describe('<App/>', () => {
     }
 
     cy.mount(
-        <App routerType={ApiMockRouter}
-             routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin-different']}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter}
+               routerProps={{mocking: stubbing, initialEntries: ['/plugin/test-plugin-different']}}/>
+        </ThemeProvider>
     );
 
     // Check for loading indicator
@@ -99,7 +112,9 @@ describe('<App/>', () => {
 
   it('maintains layout structure across routes', () => {
     cy.mount(
-        <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search']}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter} routerProps={{mocking: commonStubbing, initialEntries: ['/search']}}/>
+        </ThemeProvider>
     );
 
     // Verify header and footer are present
@@ -109,8 +124,10 @@ describe('<App/>', () => {
 
   it('handles tab navigation on plugin page', () => {
     cy.mount(
-        <App routerType={ApiMockRouter}
-             routerProps={{mocking: commonStubbing, initialEntries: ['/plugin/test-plugin']}}/>
+        <ThemeProvider theme={appTheme}>
+          <App routerType={ApiMockRouter}
+               routerProps={{mocking: commonStubbing, initialEntries: ['/plugin/test-plugin']}}/>
+        </ThemeProvider>
     );
 
     // Wait for content to load

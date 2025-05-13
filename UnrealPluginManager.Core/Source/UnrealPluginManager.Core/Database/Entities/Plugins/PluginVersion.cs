@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Semver;
 using UnrealPluginManager.Core.Database.Entities.Storage;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
@@ -37,12 +38,12 @@ public class PluginVersion : IVersionedEntity {
   [NotMapped]
   public SemVersion Version {
     get => new(Major, Minor, Patch,
-        PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
-        Metadata?.Split('.'));
+               PrereleaseNumber is not null ? [Prerelease ?? "rc", PrereleaseNumber.Value.ToString()] : null,
+               Metadata?.Split('.'));
     set {
-      Major = (int) value.Major;
-      Minor = (int) value.Minor;
-      Patch = (int) value.Patch;
+      Major = (int)value.Major;
+      Minor = (int)value.Minor;
+      Patch = (int)value.Patch;
       PrereleaseNumber = value.IsPrerelease ? value.PrereleaseIdentifiers.GetPrereleaseNumber() : null;
       Prerelease = value.IsPrerelease ? value.PrereleaseIdentifiers[0].Value : null;
       Metadata = value.Metadata != "" ? value.Metadata : null;
@@ -101,14 +102,46 @@ public class PluginVersion : IVersionedEntity {
   public string? Metadata { get; private set; }
 
   /// <summary>
+  /// Gets or sets the description of the plugin.
+  /// </summary>
+  /// <remarks>
+  /// This property contains a textual representation that describes the plugin's purpose, functionality, or other relevant details.
+  /// It is constrained to a string length between 1 and 2000 characters.
+  /// </remarks>
+  [MinLength(1)]
+  [MaxLength(2000)]
+  public string? Description { get; set; }
+
+  /// <summary>
+  /// Gets or sets the name of the author of the plugin.
+  /// </summary>
+  /// <remarks>
+  /// This property contains the name of the individual or entity responsible for creating the plugin.
+  /// It is optional but must adhere to the specified length and format restrictions if provided.
+  /// </remarks>
+  [MinLength(1)]
+  [MaxLength(255)]
+  public string? Author { get; set; }
+
+  /// <summary>
+  /// Gets or sets the license information for the plugin version.
+  /// This property typically indicates the terms under which the plugin is distributed.
+  /// </summary>
+  [MaxLength(255)]
+  public string? License { get; init; }
+
+  /// <summary>
+  /// Gets or sets the URI pointing to the homepage of the plugin version.
+  /// The homepage typically contains additional information about the plugin,
+  /// such as documentation, updates, and support resources.
+  /// </summary>
+  [MaxLength(255)]
+  public Uri? Homepage { get; set; }
+
+  /// <summary>
   /// Gets or sets the collection of dependencies for the plugin version.
   /// </summary>
   public ICollection<Dependency> Dependencies { get; set; } = new List<Dependency>();
-
-  /// <summary>
-  /// Gets or sets the collection of binaries associated with the plugin version.
-  /// </summary>
-  public ICollection<UploadedBinaries> Binaries { get; set; } = new List<UploadedBinaries>();
 
   /// <summary>
   /// Gets or sets the timestamp indicating when the plugin version was created.
@@ -116,16 +149,14 @@ public class PluginVersion : IVersionedEntity {
   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
   /// <summary>
-  /// Gets or sets the source file resource associated with this plugin version.
-  /// Represents a file entity that contains the actual source content for the given plugin version.
-  /// This property is required and establishes a relationship with the <see cref="FileResource"/> class.
+  /// Gets or sets the source location associated with the plugin version.
   /// </summary>
-  public FileResource Source { get; set; } = null!;
+  public required SourceLocation Source { get; set; }
 
   /// <summary>
-  /// Gets or sets the unique identifier of the source file resource associated with this plugin version.
+  /// Gets or sets the collection of source patches associated with the plugin version.
   /// </summary>
-  public Guid SourceId { get; set; }
+  public ICollection<PluginSourcePatch> Patches { get; set; } = new List<PluginSourcePatch>();
 
   /// <summary>
   /// Gets or sets the associated icon for the plugin version.
@@ -159,11 +190,10 @@ public class PluginVersion : IVersionedEntity {
 
     entity.Ignore(x => x.Version);
 
-    entity.HasOne(x => x.Source)
-        .WithMany()
-        .HasForeignKey(x => x.SourceId)
-        .OnDelete(DeleteBehavior.NoAction)
-        .IsRequired();
+    entity.ComplexProperty(x => x.Source, sourceBuilder => {
+      sourceBuilder.Property(s => s.Url).HasColumnName("source_url");
+      sourceBuilder.Property(s => s.Sha).HasColumnName("source_sha");
+    });
 
     entity.HasOne(x => x.Icon)
         .WithMany()

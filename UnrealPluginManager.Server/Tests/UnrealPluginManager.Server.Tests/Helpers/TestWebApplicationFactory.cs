@@ -8,6 +8,7 @@ using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Tests.Helpers;
 using UnrealPluginManager.Core.Utils;
+using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Tests.Helpers;
 
@@ -27,7 +28,9 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
         services.Remove(service);
       }
 
-      services.SetUpMockDataProviders();
+      services.SetUpMockDataProviders<TestCloudUnrealPluginManagerContext>()
+          .AddSingleton<CloudUnrealPluginManagerContext>(p =>
+              p.GetRequiredService<TestCloudUnrealPluginManagerContext>());
 
       services.AddAuthentication("Test")
           .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", null);

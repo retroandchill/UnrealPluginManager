@@ -79,7 +79,7 @@
         "tags": [
           "Plugins"
         ],
-        "summary": "Submits a plugin for processing by uploading source code and a collection of binaries.",
+        "summary": "Submits a new plugin version along with optional icon and README information.",
         "operationId": "submitPlugin",
         "requestBody": {
           "content": {
@@ -87,15 +87,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "submission": {
+                  "archive": {
                     "type": "string",
-                    "description": "An object containing the plugin's source code file and associated binaries for submission.",
                     "format": "binary"
                   }
                 }
               },
               "encoding": {
-                "submission": {
+                "archive": {
                   "style": "form"
                 }
               }
@@ -108,7 +107,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PluginVersionDetails"
+                  "$ref": "#/components/schemas/PluginVersionInfo"
                 }
               }
             }
@@ -205,77 +204,6 @@
         "security": [
           {
             "oauth2": []
-          }
-        ]
-      }
-    },
-    "/plugins/{engineVersion}/submit": {
-      "post": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Adds a plugin by uploading a plugin file and specifying the target Unreal Engine version.",
-        "operationId": "addPlugin",
-        "parameters": [
-          {
-            "name": "engineVersion",
-            "in": "path",
-            "description": "The target Unreal Engine version for which the plugin is being added.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "pluginFile": {
-                    "type": "string",
-                    "description": "The uploaded plugin file in a valid format.",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "pluginFile": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PluginVersionDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "oauth2": [
-              "CanSubmitPlugin"
-            ]
-          },
-          {
-            "apiKey": [
-              "CanSubmitPlugin"
-            ]
           }
         ]
       }
@@ -385,89 +313,6 @@
                   "items": {
                     "$ref": "#/components/schemas/PluginSummary"
                   }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          }
-        ]
-      }
-    },
-    "/plugins/{pluginId}/latest/{engineVersion}/download": {
-      "get": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Downloads a plugin file as a ZIP archive for the specified plugin, engine version, and target platforms.",
-        "operationId": "downloadLatestPlugin",
-        "parameters": [
-          {
-            "name": "pluginId",
-            "in": "path",
-            "description": "The unique identifier of the plugin to be downloaded.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "engineVersion",
-            "in": "path",
-            "description": "The Unreal Engine version for which the plugin file is requested.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "targetVersion",
-            "in": "query",
-            "description": "The semantic version range that specifies the version of the plugin to target. Defaults to all release versions if not specified.",
-            "schema": {
-              "type": "string",
-              "example": ">=1.0.0"
-            }
-          },
-          {
-            "name": "platforms",
-            "in": "query",
-            "description": "The collection of target platforms for which the plugin file is compatible.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "separated",
-            "in": "query",
-            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
                 }
               }
             }
@@ -688,18 +533,18 @@
         ]
       }
     },
-    "/plugins/{pluginId}/{versionId}/download/{engineVersion}": {
+    "/plugins/{pluginId}/{versionId}/patches": {
       "get": {
         "tags": [
           "Plugins"
         ],
-        "summary": "Downloads the specified version of a plugin as a ZIP file for the specified Unreal Engine version and target platforms.",
-        "operationId": "downloadPluginVersion",
+        "summary": "Retrieves a list of source patch information for the specified plugin version.",
+        "operationId": "getPluginPatches",
         "parameters": [
           {
             "name": "pluginId",
             "in": "path",
-            "description": "The unique identifier of the plugin to download.",
+            "description": "The unique identifier of the plugin.",
             "required": true,
             "schema": {
               "type": "string",
@@ -709,91 +554,7 @@
           {
             "name": "versionId",
             "in": "path",
-            "description": "The unique identifier of the plugin version to download.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "engineVersion",
-            "in": "path",
-            "description": "The version of Unreal Engine compatible with the plugin.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platforms",
-            "in": "query",
-            "description": "The collection of target platforms for the plugin.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "separated",
-            "in": "query",
-            "description": "A boolean value indicating whether to separate the plugin files by platform. Defaults to false.",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          }
-        ]
-      }
-    },
-    "/plugins/{pluginId}/{versionId}/download/source": {
-      "get": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Downloads the source code of a specific plugin version as a zip file.",
-        "operationId": "downloadPluginSource",
-        "parameters": [
-          {
-            "name": "pluginId",
-            "in": "path",
-            "description": "The unique identifier of the plugin to download.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "versionId",
-            "in": "path",
-            "description": "The unique identifier of the specific version of the plugin to download.",
+            "description": "The unique identifier of the plugin version.",
             "required": true,
             "schema": {
               "type": "string",
@@ -805,83 +566,12 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/zip": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "oauth2": []
-          }
-        ]
-      }
-    },
-    "/plugins/{pluginId}/{versionId}/download/{engineVersion}/{platform}/binaries": {
-      "get": {
-        "tags": [
-          "Plugins"
-        ],
-        "summary": "Downloads the binary files of a specified plugin for a given version, engine version, and platform.",
-        "operationId": "downloadPluginBinaries",
-        "parameters": [
-          {
-            "name": "pluginId",
-            "in": "path",
-            "description": "The unique identifier of the plugin whose binaries are being downloaded.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "versionId",
-            "in": "path",
-            "description": "The unique identifier of the plugin version to download binaries for.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "engineVersion",
-            "in": "path",
-            "description": "The engine version for which the plugin binaries are compatible.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platform",
-            "in": "path",
-            "description": "The platform for which the plugin binaries are compiled.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SourcePatchInfo"
+                  }
                 }
               }
             }
@@ -1182,13 +872,6 @@
             "type": "string",
             "description": "Gets or sets the version range associated with the plugin dependency.\r\nThis version range defines the compatible versions of the plugin required by the dependency.",
             "example": ">=1.0.0"
-          },
-          "optional": {
-            "type": "boolean",
-            "description": "Gets or sets a value indicating whether the dependency is optional.\r\nWhen set to true, the dependency is not mandatory, and the system\r\ncan function without it."
-          },
-          "type": {
-            "$ref": "#/components/schemas/PluginType"
           }
         },
         "additionalProperties": false,
@@ -1197,17 +880,13 @@
       "PluginDependency": {
         "required": [
           "pluginName",
-          "pluginVersion",
-          "type"
+          "pluginVersion"
         ],
         "type": "object",
         "properties": {
           "pluginName": {
             "type": "string",
             "description": "Gets the name of the plugin."
-          },
-          "type": {
-            "$ref": "#/components/schemas/PluginType"
           },
           "pluginVersion": {
             "type": "string",
@@ -1217,31 +896,6 @@
         },
         "additionalProperties": false,
         "description": "Represents a dependency of a plugin within the Unreal Plugin Manager framework."
-      },
-      "PluginDetails": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PluginOverviewBase"
-          },
-          {
-            "required": [
-              "versions"
-            ],
-            "type": "object",
-            "properties": {
-              "versions": {
-                "minItems": 1,
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/VersionDetails"
-                },
-                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
-              }
-            },
-            "additionalProperties": false
-          }
-        ],
-        "description": "Represents detailed information about a plugin, including its associated versions.\r\nInherits from UnrealPluginManager.Core.Model.Plugins.PluginOverviewBase to provide core metadata."
       },
       "PluginIdentifiers": {
         "type": "object",
@@ -1260,34 +914,10 @@
         "description": "Represents the identifiers for a plugin, including a globally unique identifier (GUID) and its corresponding name."
       },
       "PluginOverview": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PluginOverviewBase"
-          },
-          {
-            "required": [
-              "versions"
-            ],
-            "type": "object",
-            "properties": {
-              "versions": {
-                "minItems": 1,
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/VersionOverview"
-                },
-                "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
-              }
-            },
-            "additionalProperties": false
-          }
-        ],
-        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
-      },
-      "PluginOverviewBase": {
         "required": [
           "id",
-          "name"
+          "name",
+          "versions"
         ],
         "type": "object",
         "properties": {
@@ -1301,30 +931,17 @@
             "type": "string",
             "description": "Gets or sets the name of the plugin."
           },
-          "friendlyName": {
-            "type": "string",
-            "description": "Gets or sets the user-friendly name of the plugin, which may be used for display purposes.",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "description": "Gets or sets the description of the plugin, providing detailed information about its purpose or functionality.",
-            "nullable": true
-          },
-          "authorName": {
-            "type": "string",
-            "description": "Gets or sets the name of the author associated with the plugin.",
-            "nullable": true
-          },
-          "authorWebsite": {
-            "type": "string",
-            "description": "Gets or sets the URL associated with the author of the plugin.",
-            "format": "uri",
-            "nullable": true
+          "versions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionOverview"
+            },
+            "description": "Gets or sets the collection of versions associated with the plugin.\r\nEach version provides a detailed overview including its version number\r\nand unique identifier."
           }
         },
         "additionalProperties": false,
-        "description": "Provides a base class for representing essential metadata of a plugin.\r\nThis includes core properties such as the plugin's unique identifier, name,\r\noptional friendly name, description, author's name, and website."
+        "description": "Represents an overview of a plugin, providing basic information such as its ID, name,\r\noptional friendly name, description, and associated versions."
       },
       "PluginOverviewPage": {
         "required": [
@@ -1374,7 +991,6 @@
       },
       "PluginSummary": {
         "required": [
-          "friendlyName",
           "name",
           "pluginId",
           "version",
@@ -1392,11 +1008,6 @@
             "type": "string",
             "description": "Gets the name of the plugin.\r\nThis property is required and uniquely identifies the plugin within the context of the plugin system."
           },
-          "friendlyName": {
-            "type": "string",
-            "description": "Gets or sets an optional user-friendly name for the plugin.\r\nThis property provides a more descriptive or colloquial name that can be displayed in user interfaces\r\nand used as an alternative to the plugin's primary name when needed.",
-            "nullable": true
-          },
           "versionId": {
             "minimum": 1,
             "type": "string",
@@ -1412,15 +1023,6 @@
         },
         "additionalProperties": false,
         "description": "Represents a summary of a plugin, including its name, version, and optional description."
-      },
-      "PluginType": {
-        "enum": [
-          "Engine",
-          "Provided",
-          "External"
-        ],
-        "type": "string",
-        "description": "Specifies the type of plugin in the Unreal Plugin Manager system."
       },
       "PluginVersionDetails": {
         "allOf": [
@@ -1462,26 +1064,6 @@
             "type": "string",
             "description": "Gets the name of the plugin associated with the current version."
           },
-          "friendlyName": {
-            "type": "string",
-            "description": "Gets or sets the user-friendly name of the plugin associated with the current version.",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "description": "Gets or sets a brief explanation or summary of the plugin version.\r\nThis provides additional context or details about the plugin functionality or purpose.",
-            "nullable": true
-          },
-          "authorName": {
-            "type": "string",
-            "description": "Gets or sets the name of the author associated with the plugin.",
-            "nullable": true
-          },
-          "authorWebsite": {
-            "type": "string",
-            "description": "Gets or sets the URL associated with the author of the plugin.",
-            "nullable": true
-          },
           "versionId": {
             "type": "string",
             "description": "Gets or sets the unique identifier for the plugin version.",
@@ -1492,6 +1074,36 @@
             "type": "string",
             "description": "Gets the semantic version of the plugin.",
             "example": "1.0.0"
+          },
+          "description": {
+            "type": "string",
+            "description": "Gets or sets a brief explanation or summary of the plugin version.\r\nThis provides additional context or details about the plugin functionality or purpose.",
+            "nullable": true
+          },
+          "author": {
+            "type": "string",
+            "description": "Gets or sets the name of the author associated with the plugin.",
+            "nullable": true
+          },
+          "license": {
+            "type": "string",
+            "description": "Gets or sets the license information associated with the plugin.",
+            "nullable": true
+          },
+          "homepage": {
+            "type": "string",
+            "description": "Gets or sets the URL of the homepage associated with the plugin.",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceLocation"
+          },
+          "patches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Gets or sets the collection of patch versions associated with the plugin."
           },
           "icon": {
             "$ref": "#/components/schemas/ResourceInfo"
@@ -1576,6 +1188,39 @@
         "additionalProperties": false,
         "description": "Represents metadata and file-related information for a resource."
       },
+      "SourceLocation": {
+        "required": [
+          "sha",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Gets or sets the URL representing the location of the source.",
+            "format": "uri"
+          },
+          "sha": {
+            "type": "string",
+            "description": "Gets or sets the SHA hash associated with the source location."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the location of a source, containing information about its URL and associated SHA hash."
+      },
+      "SourcePatchInfo": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents information about a source patch file, including its filename\r\nand content."
+      },
       "UserOverview": {
         "required": [
           "email",
@@ -1611,7 +1256,6 @@
           },
           {
             "required": [
-              "binaries",
               "dependencies"
             ],
             "type": "object",
@@ -1622,13 +1266,6 @@
                   "$ref": "#/components/schemas/DependencyOverview"
                 },
                 "description": "A collection of dependency overviews associated with a specific version of a plugin.\r\nEach dependency overview provides information about dependent plugins, including their metadata, version requirements, and optionality."
-              },
-              "binaries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/BinariesOverview"
-                },
-                "description": "A collection of binary overviews associated with a specific version of a plugin.\r\nEach binary overview provides details about the platform and engine version it supports."
               }
             },
             "additionalProperties": false
@@ -1653,6 +1290,9 @@
             "type": "string",
             "description": "Gets or sets the semantic version of the plugin, representing its specific version details.",
             "example": "1.0.0"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceLocation"
           },
           "icon": {
             "$ref": "#/components/schemas/ResourceInfo"

@@ -1,5 +1,7 @@
 ﻿using System.IO.Compression;
 using Microsoft.AspNetCore.Authorization;
+using UnrealPluginManager.Core.Model.Plugins.Recipes;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Auth.Validators;
 
 namespace UnrealPluginManager.Server.Auth.Policies;
@@ -20,9 +22,9 @@ public class CanSubmitPluginRequirement : IAuthorizationRequirement;
 /// </summary>
 [AutoConstructor]
 public partial class CanSubmitPluginHandler : GeneralAuthorizationHandler<CanSubmitPluginRequirement> {
-
   private readonly IHttpContextAccessor _httpContextAccessor;
   private readonly IPluginAuthValidator _pluginAuthValidator;
+  private readonly IJsonService _jsonService;
 
 
   /// <inheritdoc />
@@ -47,12 +49,14 @@ public partial class CanSubmitPluginHandler : GeneralAuthorizationHandler<CanSub
     try {
       using var zipFile = new ZipArchive(stream);
       var upluginFile = zipFile.Entries
-          .FirstOrDefault(x => x.Name.EndsWith(".uplugin"));
+          .FirstOrDefault(x => x.Name == "plugin.json");
       if (upluginFile is null) {
         return;
       }
 
-      var pluginName = Path.GetFileNameWithoutExtension(upluginFile.FullName);
+      await using var upluginFileStream = upluginFile.Open();
+      var manifest = await _jsonService.DeserializeAsync<PluginManifest>(upluginFileStream);
+      var pluginName = manifest.Name;
       if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
         context.Fail();
       }

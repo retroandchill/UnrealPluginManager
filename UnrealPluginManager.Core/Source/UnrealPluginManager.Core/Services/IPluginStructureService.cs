@@ -1,8 +1,5 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
-using LanguageExt;
-using Semver;
-using UnrealPluginManager.Core.Model.Storage;
+using UnrealPluginManager.Core.Files.Plugins;
 
 namespace UnrealPluginManager.Core.Services;
 
@@ -11,31 +8,24 @@ namespace UnrealPluginManager.Core.Services;
 /// </summary>
 public interface IPluginStructureService {
   /// <summary>
-  /// Partitions a plugin into its source, icon, and binary components and stores them using the storage service.
-  /// </summary>
-  /// <param name="pluginName">The name of the plugin to be partitioned.</param>
-  /// <param name="version">The version of the plugin.</param>
-  /// <param name="engineVersion">The version of the Unreal Engine.</param>
-  /// <param name="pluginDirectory">The directory containing the plugin's files.</param>
-  /// <returns>A <see cref="PartitionedPlugin"/> record containing the plugin's source, optional icon, and binaries.
-  /// </returns>
-  Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
-                                          IDirectoryInfo pluginDirectory);
-
-  /// <summary>
-  /// Partitions a plugin from a ZIP archive into its source, optional icon, and binary components and stores them using the storage service.
-  /// </summary>
-  /// <param name="pluginName">The name of the plugin to be partitioned.</param>
-  /// <param name="version">The semantic version of the plugin.</param>
-  /// <param name="engineVersion">The version of the Unreal Engine.</param>
-  /// <param name="zipArchive">The ZIP archive containing the plugin's files to be partitioned.</param>
-  /// <returns>A <see cref="PartitionedPlugin"/> record containing the plugin's source, optional icon, and binaries.</returns>
-  Task<PartitionedPlugin> PartitionPlugin(string pluginName, SemVersion version, string engineVersion,
-                                          ZipArchive zipArchive);
-  /// <summary>
   /// Retrieves a list of installed binary directories for a given plugin.
   /// </summary>
   /// <param name="pluginDirectory">The directory containing the plugin's files.</param>
   /// <returns>A list of strings representing the paths to the installed binaries.</returns>
   List<string> GetInstalledBinaries(IDirectoryInfo pluginDirectory);
+
+  /// <summary>
+  /// Extracts the plugin submission details from a provided archive stream.
+  /// </summary>
+  /// <param name="archiveStream">The archive stream containing the plugin data to be extracted.</param>
+  /// <returns>A <see cref="PluginSubmission"/> object containing the plugin manifest, patches, optional icon stream, and optional readme text.</returns>
+  Task<PluginSubmission> ExtractPluginSubmission(Stream archiveStream);
+
+  /// <summary>
+  /// Compresses a plugin submission into a specified stream as an archive.
+  /// </summary>
+  /// <param name="submission">The plugin submission containing the manifest, patches, optional icon stream, and optional readme text.</param>
+  /// <param name="stream">The output stream where the compressed plugin submission will be written.</param>
+  /// <returns>A task that represents the asynchronous operation of compressing the plugin submission.</returns>
+  Task CompressPluginSubmission(PluginSubmission submission, Stream stream);
 }

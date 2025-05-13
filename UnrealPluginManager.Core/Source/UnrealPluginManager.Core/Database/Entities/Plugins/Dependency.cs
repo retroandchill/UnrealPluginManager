@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Semver;
-using UnrealPluginManager.Core.Model.Plugins;
 
 namespace UnrealPluginManager.Core.Database.Entities.Plugins;
 
@@ -71,27 +70,6 @@ public class Dependency : IVersionedEntityChild {
   [MinLength(1)]
   [MaxLength(255)]
   public SemVersionRange PluginVersion { get; set; } = SemVersionRange.All;
-
-  /// <summary>
-  /// Gets or sets a value indicating whether the dependency is optional.
-  /// </summary>
-  /// <remarks>
-  /// The <c>Optional</c> property specifies if the dependency is not strictly required
-  /// for the parent plugin's functionality. An optional dependency allows the parent plugin
-  /// to function correctly even when the dependent plugin is not installed.
-  /// </remarks>
-  public bool Optional { get; set; }
-
-  /// <summary>
-  /// Gets or sets the type of the plugin dependency.
-  /// </summary>
-  /// <remarks>
-  /// The <c>Type</c> property determines the nature of the plugin dependency,
-  /// represented by the <c>PluginType</c> enumeration. It indicates whether
-  /// the dependency is part of the engine, provided along with the plugin,
-  /// or externally sourced.
-  /// </remarks>
-  public PluginType Type { get; set; } = PluginType.Provided;
 
   internal static void DefineModelMetadata(EntityTypeBuilder<Dependency> entity) {
     entity.HasOne(x => x.Parent)

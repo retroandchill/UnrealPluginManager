@@ -12,10 +12,14 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// </remarks>
 public class ProcessRunner : IProcessRunner {
   /// <inheritdoc />
-  public async Task<int> RunProcess(string command, string[] arguments) {
+  public async Task<int> RunProcess(string command, string[] arguments, string? workingDirectory = null) {
     var process = new Process();
     process.StartInfo.FileName = command;
     process.StartInfo.Arguments = string.Join(" ", arguments);
+
+    if (workingDirectory is not null) {
+      process.StartInfo.WorkingDirectory = workingDirectory;
+    }
 
     process.Start();
     await process.WaitForExitAsync();

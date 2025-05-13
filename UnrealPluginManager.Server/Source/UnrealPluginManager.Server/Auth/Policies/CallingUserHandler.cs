@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using UnrealPluginManager.Core.Database;
+using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Auth.Policies;
 
@@ -28,7 +28,7 @@ public class CallingUserRequirement : IAuthorizationRequirement;
 [AutoConstructor]
 public partial class CallingUserHandler : GeneralAuthorizationHandler<CallingUserRequirement> {
   private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly UnrealPluginManagerContext _dbContext;
+  private readonly CloudUnrealPluginManagerContext _dbContext;
 
   /// <inheritdoc />
   protected override async Task HandleInternal(AuthorizationHandlerContext context,

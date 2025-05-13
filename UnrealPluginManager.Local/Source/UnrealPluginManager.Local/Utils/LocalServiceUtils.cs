@@ -41,9 +41,12 @@ public static class LocalServiceUtils {
 
     return services.AddScoped<IEngineService, EngineService>()
         .AddSingleton<IStorageService, LocalStorageService>()
+        .AddSingleton<HttpClient>()
         .AddScoped<IRemoteService, RemoteService>()
         .AddScoped<IPluginManagementService, PluginManagementService>()
         .AddScoped<IInstallService, InstallService>()
+        .AddScoped<IBinaryCacheService, BinaryCacheService>()
+        .AddScoped<ISourceDownloadService, SourceDownloadService>()
         .AddSingleton<IJsonService>(_ => new JsonService(jsonSerializationOptions));
   }
 

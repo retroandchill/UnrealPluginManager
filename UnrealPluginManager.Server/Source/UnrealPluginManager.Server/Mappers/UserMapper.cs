@@ -1,10 +1,10 @@
 ﻿using Riok.Mapperly.Abstractions;
 using UnrealPluginManager.Core.Database.Entities.Plugins;
-using UnrealPluginManager.Core.Database.Entities.Users;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Users;
+using UnrealPluginManager.Server.Database.Users;
 
-namespace UnrealPluginManager.Core.Mappers;
+namespace UnrealPluginManager.Server.Mappers;
 
 /// <summary>
 /// Provides mapping functionality between user-related entities and models.
