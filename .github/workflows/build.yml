@@ -75,6 +75,8 @@ jobs:
             exit $LASTEXITCODE
           }
           Rename-Item -Path ./coverage -NewName coverage-vitest
+          Remove-Item -Path ./node_modules/.vite -Recurse -Force
+          
           npm run cypress:coverage
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
