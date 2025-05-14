@@ -94,7 +94,7 @@ public class PluginManagementServiceTest {
 
     _serviceProvider = services.BuildServiceProvider();
 
-    var realPluginService = new PluginService(null, null, null, null);
+    var realPluginService = new PluginService(null, null, null, null, null);
     _pluginService.Setup(x => x.GetDependencyList(It.IsAny<IDependencyChainNode>(), It.IsAny<DependencyManifest>()))
         .Returns((IDependencyChainNode root, DependencyManifest manifest) =>
                      realPluginService.GetDependencyList(root, manifest));

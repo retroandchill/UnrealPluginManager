@@ -21,18 +21,17 @@ namespace UnrealPluginManager.Core.Services;
 /// <summary>
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
-[AutoConstructor]
-public partial class PluginService : IPluginService {
-  private readonly UnrealPluginManagerContext _dbContext;
-  private readonly IStorageService _storageService;
-  private readonly IFileSystem _fileSystem;
-  private readonly IPluginStructureService _pluginStructureService;
-
+public class PluginService(
+    UnrealPluginManagerContext dbContext,
+    IStorageService storageService,
+    IFileSystem fileSystem,
+    IPluginStructureService pluginStructureService,
+    IPluginOwnerService? pluginOwnerService = null) : IPluginService {
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
   /// <inheritdoc/>
   public async Task<Page<PluginOverview>> ListPlugins(string matcher = "", Pageable pageable = default) {
-    return await _dbContext.Plugins
+    return await dbContext.Plugins
         .Where(x => x.Name.ToUpper().Contains(matcher.ToUpper()))
         .Include(x => x.Versions)
         .ThenInclude(x => x.Icon)
@@ -44,7 +43,7 @@ public partial class PluginService : IPluginService {
   /// <inheritdoc />
   public Task<Page<PluginVersionInfo>> ListLatestVersions(string pluginName, SemVersionRange versionRange,
                                                           Pageable pageable = default) {
-    return _dbContext.PluginVersions
+    return dbContext.PluginVersions
         .GetLatestVersions()
         .Where(x => x.Parent.Name.ToUpper().Contains(pluginName.ToUpper()))
         .WhereVersionInRange(versionRange)
@@ -54,7 +53,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(Guid pluginId, SemVersionRange versionRange) {
-    return await _dbContext.PluginVersions
+    return await dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .WhereVersionInRange(versionRange)
         .OrderByVersionDescending()
@@ -64,7 +63,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersionRange versionRange) {
-    return await _dbContext.PluginVersions
+    return await dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
         .WhereVersionInRange(versionRange)
         .OrderByVersionDescending()
@@ -74,7 +73,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc />
   public async Task<Option<PluginVersionInfo>> GetPluginVersionInfo(string pluginName, SemVersion version) {
-    return await _dbContext.PluginVersions
+    return await dbContext.PluginVersions
         .Where(x => x.Parent.Name == pluginName)
         .Where(x => x.VersionString == version.ToString())
         .OrderByVersionDescending()
@@ -91,7 +90,7 @@ public partial class PluginService : IPluginService {
 
     while (unresolved.Count > 0) {
       var currentlyExisting = unresolved.ToHashSet();
-      var plugins = await _dbContext.PluginVersions
+      var plugins = await dbContext.PluginVersions
           .Include(p => p.Parent)
           .Include(p => p.Dependencies)
           .Where(p => unresolved.Contains(p.Parent.Name))
@@ -127,7 +126,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc/>
   public async Task<List<PluginSummary>> GetDependencyList(Guid pluginId, SemVersionRange? targetVersion = null) {
-    var plugin = await _dbContext.PluginVersions
+    var plugin = await dbContext.PluginVersions
         .Where(p => p.ParentId == pluginId)
         .WhereVersionInRange(targetVersion ?? SemVersionRange.AllRelease)
         .OrderByVersionDescending()
@@ -170,7 +169,7 @@ public partial class PluginService : IPluginService {
 
   /// <inheritdoc />
   public async Task<string> GetPluginReadme(Guid pluginId, Guid versionId) {
-    var readmeName = await _dbContext.PluginVersions
+    var readmeName = await dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .Where(x => x.Id == versionId)
         .Select(x => x.Readme != null ? x.Readme.StoredFilename : null)
@@ -179,14 +178,14 @@ public partial class PluginService : IPluginService {
       throw new PluginNotFoundException($"Readme for plugin {pluginId} version {versionId} was not found!");
     }
 
-    await using var readmeStream = _storageService.GetResourceStream(readmeName);
+    await using var readmeStream = storageService.GetResourceStream(readmeName);
     using var reader = new StreamReader(readmeStream);
     return await reader.ReadToEndAsync();
   }
 
   /// <inheritdoc />
   public async Task<string> AddPluginReadme(Guid pluginId, Guid versionId, string readme) {
-    var pluginVersion = await _dbContext.PluginVersions
+    var pluginVersion = await dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .Where(x => x.Id == versionId)
         .Include(x => x.Parent)
@@ -201,23 +200,23 @@ public partial class PluginService : IPluginService {
     }
 
     await using var stream = readme.ToStream();
-    var (storedFilename, _) = await _storageService.AddResource(new StreamFileSource(_fileSystem, stream));
+    var (storedFilename, _) = await storageService.AddResource(new StreamFileSource(fileSystem, stream));
     var resource = new FileResource {
         OriginalFilename = $"{pluginVersion.Parent.Name}_{pluginVersion.Version}.md",
         StoredFilename = storedFilename
     };
-    _dbContext.FileResources.Add(resource);
+    dbContext.FileResources.Add(resource);
     pluginVersion.ReadmeId = resource.Id;
     pluginVersion.Readme = resource;
 
 
-    await _dbContext.SaveChangesAsync();
+    await dbContext.SaveChangesAsync();
     return readme;
   }
 
   /// <inheritdoc />
   public async Task<string> UpdatePluginReadme(Guid pluginId, Guid versionId, string readme) {
-    var pluginVersion = await _dbContext.PluginVersions
+    var pluginVersion = await dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId)
         .Where(x => x.Id == versionId)
         .Include(x => x.Parent)
@@ -232,14 +231,14 @@ public partial class PluginService : IPluginService {
     }
 
     await using var stream = readme.ToStream();
-    await _storageService.UpdateResource(pluginVersion.Readme.StoredFilename,
-                                         new StreamFileSource(_fileSystem, stream));
+    await storageService.UpdateResource(pluginVersion.Readme.StoredFilename,
+                                        new StreamFileSource(fileSystem, stream));
     return readme;
   }
 
   /// <inheritdoc />
   public async Task<PluginVersionInfo> SubmitPlugin(Stream archiveStream) {
-    await using var result = await _pluginStructureService.ExtractPluginSubmission(archiveStream);
+    await using var result = await pluginStructureService.ExtractPluginSubmission(archiveStream);
     return await SubmitPlugin(result.Manifest, result.Patches, result.IconStream, result.ReadmeText);
   }
 
@@ -248,13 +247,18 @@ public partial class PluginService : IPluginService {
                                                     IReadOnlyList<string> patches,
                                                     Stream? icon = null,
                                                     string? readme = null) {
-    var mainPlugin = await _dbContext.Plugins
+    await using var transaction = await dbContext.StartTransaction();
+    var mainPlugin = await dbContext.Plugins
         .SingleOrDefaultAsync(x => x.Name == manifest.Name);
     if (mainPlugin is null) {
       mainPlugin = new Plugin {
           Name = manifest.Name
       };
-      _dbContext.Plugins.Add(mainPlugin);
+      dbContext.Plugins.Add(mainPlugin);
+      await dbContext.SaveChangesAsync();
+      if (pluginOwnerService is not null) {
+        await pluginOwnerService.AssignInitialOwnershipOfPlugin(mainPlugin.Id);
+      }
     }
 
     var version = manifest.ToPluginVersion();
@@ -265,8 +269,8 @@ public partial class PluginService : IPluginService {
 
     for (var i = 0; i < manifest.Patches.Count; i++) {
       await using var patchStream = patches[i].ToStream();
-      var fileSource = new StreamFileSource(_fileSystem, patchStream);
-      var (storedName, _) = await _storageService.AddResource(fileSource);
+      var fileSource = new StreamFileSource(fileSystem, patchStream);
+      var (storedName, _) = await storageService.AddResource(fileSource);
       version.Patches.Add(new PluginSourcePatch {
           FileResource = new FileResource {
               OriginalFilename = manifest.Patches[i],
@@ -277,7 +281,7 @@ public partial class PluginService : IPluginService {
     }
 
     if (icon is not null) {
-      var iconFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, icon));
+      var iconFile = await storageService.AddResource(new StreamFileSource(fileSystem, icon));
       version.Icon = new FileResource {
           OriginalFilename = $"{manifest.Name}_{manifest.Version}.png",
           StoredFilename = iconFile.ResourceName
@@ -286,7 +290,7 @@ public partial class PluginService : IPluginService {
 
     if (readme is not null) {
       await using var readmeStream = readme.ToStream();
-      var readmeFile = await _storageService.AddResource(new StreamFileSource(_fileSystem, readmeStream));
+      var readmeFile = await storageService.AddResource(new StreamFileSource(fileSystem, readmeStream));
       version.Readme = new FileResource {
           OriginalFilename = $"{manifest.Name}_{manifest.Version}.md",
           StoredFilename = readmeFile.ResourceName
@@ -294,15 +298,16 @@ public partial class PluginService : IPluginService {
     }
 
     mainPlugin.Versions.Add(version);
-    _dbContext.PluginVersions.Add(version);
-    await _dbContext.SaveChangesAsync();
+    dbContext.PluginVersions.Add(version);
+    await dbContext.SaveChangesAsync();
 
+    transaction.Complete();
     return version.ToPluginVersionInfo();
   }
 
   /// <inheritdoc />
   public async Task<List<SourcePatchInfo>> GetSourcePatches(Guid pluginId, Guid versionId) {
-    var pluginPatches = await _dbContext.PluginVersions
+    var pluginPatches = await dbContext.PluginVersions
         .Where(x => x.ParentId == pluginId && x.Id == versionId)
         .Select(x => new {
             PatchFiles = x.Patches
@@ -321,7 +326,7 @@ public partial class PluginService : IPluginService {
     return await pluginPatches.PatchFiles
         .ToAsyncEnumerable()
         .SelectAwait(async x => {
-          await using var stream = _storageService.GetResourceStream(x.StoredFilename);
+          await using var stream = storageService.GetResourceStream(x.StoredFilename);
           using var reader = new StreamReader(stream);
           return new SourcePatchInfo(x.OriginalFilename, await reader.ReadToEndAsync());
         })

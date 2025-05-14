@@ -67,7 +67,9 @@ public static class ServerServiceUtils {
           var options = provider.GetRequiredService<IOptions<JsonOptions>>();
           return new JsonService(options.Value.JsonSerializerOptions);
         })
-        .AddScoped<IUserService, UserService>();
+        .AddScoped<IUserService, UserService>()
+        .AddScoped<IPluginUserService, PluginUserService>()
+        .AddScoped<IPluginOwnerService>(x => x.GetRequiredService<IPluginUserService>());
   }
 
   /// <summary>
@@ -134,18 +136,17 @@ public static class ServerServiceUtils {
             return context.Request.Headers.TryGetValue(ApiKeyAuth.HeaderName, out _)
                 ? AuthenticationSchemes.ApiKey
                 : JwtBearerDefaults.AuthenticationScheme;
-
           };
         })
         .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(AuthenticationSchemes.ApiKey, _ => { })
         .AddKeycloakWebApi(builder.Configuration);
     builder.Services.AddAuthorizationBuilder()
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
-            policy.Requirements.Add(new CanSubmitPluginRequirement()))
+                       policy.Requirements.Add(new CanSubmitPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CanEditPlugin, policy =>
-            policy.Requirements.Add(new CanEditPluginRequirement()))
+                       policy.Requirements.Add(new CanEditPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CallingUser, policy =>
-            policy.Requirements.Add(new CallingUserRequirement()));
+                       policy.Requirements.Add(new CallingUserRequirement()));
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
         .AddClientCredentialsTokenHandler("Keycloak")
         .AddTypedClient<IKeycloakApiKeyClient, KeycloakApiKeyClient>();
