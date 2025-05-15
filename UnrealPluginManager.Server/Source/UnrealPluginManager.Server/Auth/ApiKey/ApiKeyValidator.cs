@@ -1,6 +1,7 @@
 ﻿using Keycloak.AuthServices.Sdk;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Database;
@@ -17,12 +18,9 @@ namespace UnrealPluginManager.Server.Auth.ApiKey;
 /// in the context of server authentication mechanisms and is registered as a service
 /// for dependency injection.
 /// </remarks>
-[AutoConstructor]
-public partial class ApiKeyValidator : IApiKeyValidator {
-
-  private readonly CloudUnrealPluginManagerContext _dbContext;
-  private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
-
+public class ApiKeyValidator(
+    [ReadOnly] CloudUnrealPluginManagerContext dbContext,
+    [ReadOnly] IKeycloakApiKeyClient keycloakApiKeyClient) : IApiKeyValidator {
   /// <inheritdoc />
   public async ValueTask<Option<ApiKeyOverview>> LookupApiKey(string? apiKey) {
     if (string.IsNullOrWhiteSpace(apiKey)) {
@@ -31,12 +29,12 @@ public partial class ApiKeyValidator : IApiKeyValidator {
 
     Guid externalId;
     try {
-      externalId = await _keycloakApiKeyClient.CheckApiKey("unreal-plugin-manager", apiKey);
+      externalId = await keycloakApiKeyClient.CheckApiKey("unreal-plugin-manager", apiKey);
     } catch (KeycloakHttpClientException) {
       return Option<ApiKeyOverview>.None;
     }
 
-    return await _dbContext.ApiKeys
+    return await dbContext.ApiKeys
         .Where(x => x.ExternalId == externalId)
         .ToApiKeyOverviewQuery()
         .SingleOrDefaultAsync();

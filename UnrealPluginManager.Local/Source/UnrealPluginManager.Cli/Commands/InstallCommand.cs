@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
-using System.CommandLine.IO;
 using JetBrains.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using Semver;
 using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Local.Services;
@@ -35,20 +35,20 @@ public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandl
     var inputArg = new Argument<string>("input", "The name of plugin to install");
     AddArgument(inputArg);
     var versionOption = new Option<SemVersionRange>(aliases: ["--version", "-v"],
-                                                                       description:
-                                                                       "The version of the plugin to install",
-                                                                       parseArgument: r =>
-                                                                           r.Tokens.Count == 1
-                                                                               ? SemVersionRange
-                                                                                   .Parse(r.Tokens[0]
-                                                                                         .Value)
-                                                                               : SemVersionRange
-                                                                                   .AllRelease) {
+                                                    description:
+                                                    "The version of the plugin to install",
+                                                    parseArgument: r =>
+                                                        r.Tokens.Count == 1
+                                                            ? SemVersionRange
+                                                                .Parse(r.Tokens[0]
+                                                                           .Value)
+                                                            : SemVersionRange
+                                                                .AllRelease) {
         IsRequired = false,
     };
     AddOption(versionOption);
     AddOption(new Option<string>(["--engine-version", "-e"],
-                                                    "The version of the engine to build the plugin for") {
+                                 "The version of the engine to build the plugin for") {
         IsRequired = false,
     });
 
@@ -117,19 +117,17 @@ public class InstallCommandOptions : ICommandOptions {
 /// installation process. It takes user-defined options such as the plugin name, version range,
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
-[AutoConstructor]
 [UsedImplicitly]
-public partial class InstallCommandHandler : ICommandOptionsHandler<InstallCommandOptions> {
-  private readonly IConsole _console;
-  private readonly IInstallService _installService;
-
+public class InstallCommandHandler(
+    [ReadOnly] IConsole console,
+    [ReadOnly] IInstallService installService) : ICommandOptionsHandler<InstallCommandOptions> {
   /// <inheritdoc />
   public async Task<int> HandleAsync(InstallCommandOptions options, CancellationToken cancellationToken) {
     var changes = options.Input.EndsWith(".uplugin", StringComparison.InvariantCultureIgnoreCase) ||
-                        options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)
-        ? await _installService.InstallRequirements(options.Input, options.EngineVersion, ["Win64"])
-        : await _installService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
-    _console.WriteVersionChanges(changes);
+                  options.Input.EndsWith(".uproject", StringComparison.InvariantCultureIgnoreCase)
+        ? await installService.InstallRequirements(options.Input, options.EngineVersion, ["Win64"])
+        : await installService.InstallPlugin(options.Input, options.Version, options.EngineVersion, ["Win64"]);
+    console.WriteVersionChanges(changes);
 
     return 0;
   }

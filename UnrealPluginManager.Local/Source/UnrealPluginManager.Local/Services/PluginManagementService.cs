@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
+using Retro.ReadOnlyParams.Annotations;
 using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
@@ -19,18 +20,16 @@ namespace UnrealPluginManager.Local.Services;
 /// <summary>
 /// Service responsible for handling remote API calls related to plugin management.
 /// </summary>
-[AutoConstructor]
-public partial class PluginManagementService : IPluginManagementService {
-  private readonly IFileSystem _fileSystem;
-  private readonly IRemoteService _remoteService;
-  private readonly IJsonService _jsonService;
-  private readonly IStorageService _storageService;
-  private readonly IEngineService _engineService;
-  private readonly IPluginService _pluginService;
-  private readonly IPluginStructureService _pluginStructureService;
-  private readonly ISourceDownloadService _sourceDownloadService;
-  private readonly IBinaryCacheService _binaryCacheService;
-
+public class PluginManagementService(
+    [ReadOnly] IFileSystem fileSystem,
+    [ReadOnly] IRemoteService remoteService,
+    [ReadOnly] IJsonService jsonService,
+    [ReadOnly] IStorageService storageService,
+    [ReadOnly] IEngineService engineService,
+    [ReadOnly] IPluginService pluginService,
+    [ReadOnly] IPluginStructureService pluginStructureService,
+    [ReadOnly] ISourceDownloadService sourceDownloadService,
+    [ReadOnly] IBinaryCacheService binaryCacheService) : IPluginManagementService {
   private const int DefaultPageSize = 100;
 
   private const string PluginCacheDirectory = "Plugins";
@@ -39,12 +38,12 @@ public partial class PluginManagementService : IPluginManagementService {
   public async Task<Option<PluginBuildInfo>> FindLocalPlugin(string pluginName, SemVersion versionRange,
                                                              string engineVersion,
                                                              IReadOnlyCollection<string> platforms) {
-    return await _binaryCacheService.GetCachedPluginBuild(pluginName, versionRange, engineVersion, platforms);
+    return await binaryCacheService.GetCachedPluginBuild(pluginName, versionRange, engineVersion, platforms);
   }
 
   /// <inheritdoc />
   public Task<OrderedDictionary<string, Fin<List<PluginOverview>>>> GetPlugins(string searchTerm) {
-    return _remoteService.GetApiAccessors<IPluginsApi>()
+    return remoteService.GetApiAccessors<IPluginsApi>()
         .ToOrderedDictionaryAsync(async x => {
           try {
             return await searchTerm.ToEnumerable()
@@ -59,7 +58,7 @@ public partial class PluginManagementService : IPluginManagementService {
 
   /// <inheritdoc />
   public async Task<List<PluginOverview>> GetPlugins(string remote, string searchTerm) {
-    var api = _remoteService.GetApiAccessor<IPluginsApi>(remote);
+    var api = remoteService.GetApiAccessor<IPluginsApi>(remote);
     return await searchTerm.ToEnumerable()
         .PageToEndAsync((y, p) => api.GetPluginsAsync(y, p.PageNumber, p.PageSize), DefaultPageSize)
         .ToListAsync();
@@ -68,8 +67,8 @@ public partial class PluginManagementService : IPluginManagementService {
   /// <inheritdoc />
   public async Task<PluginVersionInfo> FindTargetPlugin(string pluginName, SemVersionRange versionRange,
                                                         string? engineVersion) {
-    var currentlyInstalled = await _engineService.GetInstalledPluginVersion(pluginName, engineVersion)
-        .MapAsync(x => x.SelectManyAsync(v => _pluginService.GetPluginVersionInfo(pluginName, v)));
+    var currentlyInstalled = await engineService.GetInstalledPluginVersion(pluginName, engineVersion)
+        .MapAsync(x => x.SelectManyAsync(v => pluginService.GetPluginVersionInfo(pluginName, v)));
 
     var resolved = await currentlyInstalled.OrElseAsync(() => LookupPluginVersion(pluginName, versionRange));
     return resolved.OrElseThrow(() =>
@@ -78,14 +77,14 @@ public partial class PluginManagementService : IPluginManagementService {
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersion(string pluginName, SemVersionRange versionRange) {
-    var cached = await _pluginService.GetPluginVersionInfo(pluginName, versionRange);
+    var cached = await pluginService.GetPluginVersionInfo(pluginName, versionRange);
 
     return await cached.OrElseAsync(() => LookupPluginVersionOnCloud(pluginName, versionRange));
   }
 
   private async Task<Option<PluginVersionInfo>> LookupPluginVersionOnCloud(
       string pluginName, SemVersionRange versionRange) {
-    var tasks = _remoteService.GetApiAccessors<IPluginsApi>()
+    var tasks = remoteService.GetApiAccessors<IPluginsApi>()
         .Select(x => pluginName.ToEnumerable()
                     .PageToEndAsync(
                         (y, p) => x.Api.GetLatestVersionsAsync(y, versionRange.ToString(), p.PageNumber, p.PageSize),
@@ -103,7 +102,7 @@ public partial class PluginManagementService : IPluginManagementService {
 
   /// <inheritdoc />
   public async Task<List<PluginSummary>> GetPluginsToInstall(IDependencyChainNode root, string? engineVersion) {
-    var currentlyInstalled = await _engineService.GetInstalledPlugins(engineVersion)
+    var currentlyInstalled = await engineService.GetInstalledPlugins(engineVersion)
         .ToDictionaryAsync(x => x.Name, x => x.Version);
 
     var allDependencies = root.Dependencies
@@ -114,9 +113,9 @@ public partial class PluginManagementService : IPluginManagementService {
         .DistinctBy(x => x.PluginName)
         .ToList();
 
-    var dependencyTasks = _pluginService.GetPossibleVersions(allDependencies)
+    var dependencyTasks = pluginService.GetPossibleVersions(allDependencies)
         .Map(x => x.SetInstalledPlugins(currentlyInstalled)).ToEnumerable()
-        .Concat(_remoteService.GetApiAccessors<IPluginsApi>()
+        .Concat(remoteService.GetApiAccessors<IPluginsApi>()
                     .Select((x, i) => x.Api.GetCandidateDependenciesAsync(allDependencies)
                                 .Map(y => y.SetRemoteIndex(i))))
         .ToList();
@@ -125,24 +124,24 @@ public partial class PluginManagementService : IPluginManagementService {
         .Where(x => x.IsCompletedSuccessfully)
         .Select(x => x.Result)
         .Collapse();
-    return _pluginService.GetDependencyList(root, dependencyManifest);
+    return pluginService.GetDependencyList(root, dependencyManifest);
   }
 
   /// <inheritdoc />
   public async Task<PluginVersionInfo> UploadPlugin(string pluginName, SemVersion version, string? remote) {
-    var plugin = await _pluginService.ListLatestVersions(pluginName, SemVersionRange.Equals(version))
+    var plugin = await pluginService.ListLatestVersions(pluginName, SemVersionRange.Equals(version))
         .Map(x => x.Count > 0 ? x[0] : null);
     if (plugin is null) {
       throw new PluginNotFoundException($"Unable to find plugin {pluginName} with version {version}.");
     }
 
-    var remoteName = remote ?? _remoteService.DefaultRemoteName;
+    var remoteName = remote ?? remoteService.DefaultRemoteName;
     if (remoteName is null) {
       throw new RemoteNotFoundException("No default remote configured.");
     }
 
     var manifest = plugin.ToPluginManifest();
-    var patches = await _pluginService.GetSourcePatches(plugin.PluginId, plugin.VersionId)
+    var patches = await pluginService.GetSourcePatches(plugin.PluginId, plugin.VersionId)
         .Map(x => x.Select(y => y.Content)
                  .ToList());
     if (manifest.Patches.Count != patches.Count) {
@@ -150,16 +149,16 @@ public partial class PluginManagementService : IPluginManagementService {
     }
 
     await using var iconFile = plugin.Icon is not null
-        ? _storageService.GetResourceStream(plugin.Icon.StoredFilename)
+        ? storageService.GetResourceStream(plugin.Icon.StoredFilename)
         : null;
 
-    var readme = await _pluginService.GetPluginReadme(plugin.PluginId, plugin.VersionId)
+    var readme = await pluginService.GetPluginReadme(plugin.PluginId, plugin.VersionId)
         .ContinueWith(x => x.IsFaulted ? null : x.Result);
 
-    var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
+    var pluginsApi = remoteService.GetApiAccessor<IPluginsApi>(remoteName);
     using var memoryStream = new MemoryStream();
-    await _pluginStructureService.CompressPluginSubmission(new PluginSubmission(manifest, patches, iconFile, readme),
-                                                           memoryStream);
+    await pluginStructureService.CompressPluginSubmission(new PluginSubmission(manifest, patches, iconFile, readme),
+                                                          memoryStream);
     memoryStream.Position = 0;
 
     return await pluginsApi.SubmitPluginAsync(new FileParameter(memoryStream));
@@ -169,15 +168,15 @@ public partial class PluginManagementService : IPluginManagementService {
   public async Task<PluginBuildInfo> DownloadPlugin(string pluginName, SemVersion version,
                                                     int? remote, string engineVersion,
                                                     List<string> platforms) {
-    var plugin = await _binaryCacheService.GetCachedPluginBuild(pluginName, version, engineVersion, platforms);
+    var plugin = await binaryCacheService.GetCachedPluginBuild(pluginName, version, engineVersion, platforms);
     return await plugin.OrElseGetAsync(async () => {
       if (!remote.HasValue) {
         throw new PluginNotFoundException(
             $"Unable to find plugin {pluginName} with version {version} in the local cache.");
       }
 
-      var (remoteName, _) = _remoteService.GetAllRemotes().GetAt(remote.Value);
-      var pluginsApi = _remoteService.GetApiAccessor<IPluginsApi>(remoteName);
+      var (remoteName, _) = remoteService.GetAllRemotes().GetAt(remote.Value);
+      var pluginsApi = remoteService.GetApiAccessor<IPluginsApi>(remoteName);
       var pluginToDownload = await pluginName.ToEnumerable()
           .PageToEndAsync((y, p) => pluginsApi.GetLatestVersionsAsync(y, version.ToString(), p.PageNumber, p.PageSize),
                           DefaultPageSize)
@@ -200,22 +199,22 @@ public partial class PluginManagementService : IPluginManagementService {
   public async Task<PluginBuildInfo> BuildFromManifest(PluginManifest manifest, IReadOnlyList<string> patches,
                                                        string? engineVersion,
                                                        IReadOnlyCollection<string> platforms) {
-    var installedEngine = _engineService.GetInstalledEngine(engineVersion);
+    var installedEngine = engineService.GetInstalledEngine(engineVersion);
 
-    var pluginDirectoryName = Path.Join(_storageService.BaseDirectory,
+    var pluginDirectoryName = Path.Join(storageService.BaseDirectory,
                                         PluginCacheDirectory, manifest.Name, manifest.Version.ToString());
-    var pluginDirectory = _fileSystem.DirectoryInfo.New(pluginDirectoryName);
+    var pluginDirectory = fileSystem.DirectoryInfo.New(pluginDirectoryName);
     pluginDirectory.Create();
 
     var sourceDirectoryName = Path.Join(pluginDirectoryName, "Source");
-    var sourceDirectory = _fileSystem.DirectoryInfo.New(sourceDirectoryName);
+    var sourceDirectory = fileSystem.DirectoryInfo.New(sourceDirectoryName);
     sourceDirectory.Create();
 
     var upluginFile = sourceDirectory
         .EnumerateFiles("*.uplugin", SearchOption.AllDirectories)
         .FirstOrDefault();
     if (upluginFile is null) {
-      await _sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
+      await sourceDownloadService.DownloadAndExtractSources(manifest.Source, sourceDirectory);
 
       upluginFile = sourceDirectory
           .EnumerateFiles("*.uplugin", SearchOption.AllDirectories)
@@ -225,22 +224,22 @@ public partial class PluginManagementService : IPluginManagementService {
       }
 
       var rootDir = upluginFile.Directory.RequireNonNull();
-      await _sourceDownloadService.PatchSources(rootDir, patches);
+      await sourceDownloadService.PatchSources(rootDir, patches);
     }
 
 
     var buildDirectoryName = Path.Join(pluginDirectory.FullName, "Builds", Guid.CreateVersion7().ToString());
-    var buildDirectory = _fileSystem.DirectoryInfo.New(buildDirectoryName);
+    var buildDirectory = fileSystem.DirectoryInfo.New(buildDirectoryName);
     buildDirectory.Create();
-    if (await _engineService.BuildPlugin(upluginFile, buildDirectory, engineVersion, platforms) != 0) {
+    if (await engineService.BuildPlugin(upluginFile, buildDirectory, engineVersion, platforms) != 0) {
       throw new InvalidOperationException();
     }
 
-    var cachedPlugin = await _binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches,
-                                                                  installedEngine.Name,
-                                                                  platforms);
-    var buildInfoJson = _jsonService.Serialize(cachedPlugin);
-    var buildInfoFile = _fileSystem.FileInfo.New(Path.Join(buildDirectory.FullName, "build-info.json"));
+    var cachedPlugin = await binaryCacheService.CacheBuiltPlugin(manifest, buildDirectory, patches,
+                                                                 installedEngine.Name,
+                                                                 platforms);
+    var buildInfoJson = jsonService.Serialize(cachedPlugin);
+    var buildInfoFile = fileSystem.FileInfo.New(Path.Join(buildDirectory.FullName, "build-info.json"));
     await buildInfoFile.WriteAllTextAsync(buildInfoJson);
     return cachedPlugin;
   }

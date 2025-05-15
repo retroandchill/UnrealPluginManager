@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using Keycloak.AuthServices.Sdk;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -11,18 +12,16 @@ namespace UnrealPluginManager.Server.Clients;
 /// <summary>
 /// A client for interacting with the Keycloak API to manage and validate API keys.
 /// </summary>
-[AutoConstructor]
-public partial class KeycloakApiKeyClient : IKeycloakApiKeyClient {
-  private readonly HttpClient _httpClient;
-  private readonly IJsonService _jsonService;
-
+public class KeycloakApiKeyClient(
+    [ReadOnly] HttpClient httpClient,
+    [ReadOnly] IJsonService jsonService) : IKeycloakApiKeyClient {
   /// <inheritdoc />
   public async Task<Guid> CheckApiKey(string realm, string apiKey) {
     var path = $"realms/{realm}/api-keys";
     var request = new HttpRequestMessage(HttpMethod.Get, path);
     request.Headers.Add("ApiKey", apiKey);
 
-    var response = await _httpClient.SendAsync(request);
+    var response = await httpClient.SendAsync(request);
     return await response.GetResponseAsync<Guid>();
   }
 
@@ -34,11 +33,11 @@ public partial class KeycloakApiKeyClient : IKeycloakApiKeyClient {
         ExpiresOn = expireTime,
     };
 
-    var content = new StringContent(_jsonService.Serialize(payload), Encoding.UTF8,
-        MediaTypeNames.Application.Json);
+    var content = new StringContent(jsonService.Serialize(payload), Encoding.UTF8,
+                                    MediaTypeNames.Application.Json);
 
     var path = $"realms/{realm}/api-keys";
-    var response = await _httpClient.PostAsync(path, content);
+    var response = await httpClient.PostAsync(path, content);
     return (await response.GetResponseAsync<CreatedApiKey>())
         .RequireNonNull(() => new JsonException("Returned null from Keycloak API."));
   }

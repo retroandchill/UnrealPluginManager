@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.Runtime.Versioning;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Model.Engine;
@@ -22,11 +23,9 @@ namespace UnrealPluginManager.Local.Services;
 /// </example>
 /// <seealso cref="IEnginePlatformService"/>
 [SupportedOSPlatform("windows")]
-[AutoConstructor]
-public partial class WindowsEnginePlatformService : IEnginePlatformService {
-  private readonly IFileSystem _fileSystem;
-  private readonly IRegistry _registry;
-
+public class WindowsEnginePlatformService(
+    [ReadOnly] IFileSystem fileSystem,
+    [ReadOnly] IRegistry registry) : IEnginePlatformService {
   /// <inheritdoc />
   public string ScriptFileExtension => "bat";
 
@@ -38,7 +37,7 @@ public partial class WindowsEnginePlatformService : IEnginePlatformService {
   }
 
   private IEnumerable<InstalledEngine> GetInstalledEnginesFromRegistry(string registryKey) {
-    var engineInstallations = _registry.LocalMachine.OpenSubKey(registryKey);
+    var engineInstallations = registry.LocalMachine.OpenSubKey(registryKey);
     if (engineInstallations is null) {
       return [];
     }
@@ -49,11 +48,11 @@ public partial class WindowsEnginePlatformService : IEnginePlatformService {
         .Select(s => (Name: s.Key, Directory: s.Value!.GetValue<string>("InstalledDirectory")))
         .Where(s => s.Directory is not null)
         .Select((x, i) => new InstalledEngine(x.Name,
-                                              Version.Parse(x.Name), _fileSystem.DirectoryInfo.New(x.Directory!)));
+                                              Version.Parse(x.Name), fileSystem.DirectoryInfo.New(x.Directory!)));
   }
 
   private IEnumerable<InstalledEngine> GetCustomBuiltEnginesFromRegistry(string registryKey) {
-    var engineInstallations = _registry.CurrentUser.OpenSubKey(registryKey);
+    var engineInstallations = registry.CurrentUser.OpenSubKey(registryKey);
     if (engineInstallations is null) {
       return [];
     }
@@ -62,7 +61,7 @@ public partial class WindowsEnginePlatformService : IEnginePlatformService {
         .Select(s => (Name: s, Directory: engineInstallations.GetValue<string>(s)))
         .Where(s => s.Directory is not null)
         .SelectValid((x, i) => new InstalledEngine(x.Name,
-                                                   _fileSystem.GetEngineVersion(x.Directory!),
-                                                   _fileSystem.DirectoryInfo.New(x.Directory!), true));
+                                                   fileSystem.GetEngineVersion(x.Directory!),
+                                                   fileSystem.DirectoryInfo.New(x.Directory!), true));
   }
 }

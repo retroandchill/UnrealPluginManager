@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Retro.ReadOnlyParams.Annotations;
 
 namespace UnrealPluginManager.Server.Auth;
 
@@ -11,15 +12,13 @@ namespace UnrealPluginManager.Server.Auth;
 /// Implements the IDisposable interface to ensure proper cleanup
 /// of resources associated with the evaluation context.
 /// </remarks>
-[AutoConstructor]
-public sealed partial class ContextEvaluation : IDisposable {
-  private readonly AuthorizationHandlerContext _context;
-  private readonly IAuthorizationRequirement _requirement;
-
+public sealed class ContextEvaluation(
+    [ReadOnly] AuthorizationHandlerContext context,
+    [ReadOnly] IAuthorizationRequirement requirement) : IDisposable {
   /// <inheritdoc />
   public void Dispose() {
-    if (!_context.HasFailed) {
-      _context.Succeed(_requirement);
+    if (!context.HasFailed) {
+      context.Succeed(requirement);
     }
   }
 }

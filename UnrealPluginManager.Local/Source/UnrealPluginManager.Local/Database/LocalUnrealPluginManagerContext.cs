@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Local.Database.Building;
@@ -10,10 +11,7 @@ namespace UnrealPluginManager.Local.Database;
 /// Represents the SQLite implementation of the UnrealPluginManagerContext.
 /// Provides functionality to configure and manage the database context with SQLite as the underlying database.
 /// </summary>
-[AutoConstructor]
-public partial class LocalUnrealPluginManagerContext : UnrealPluginManagerContext {
-  private readonly IStorageService _storageService;
-
+public class LocalUnrealPluginManagerContext([ReadOnly] IStorageService storageService) : UnrealPluginManagerContext {
   /// <summary>
   /// Represents a collection of cached plugin builds within the database.
   /// This property is a DbSet of <see cref="PluginBuild"/> entities, allowing the management
@@ -37,8 +35,8 @@ public partial class LocalUnrealPluginManagerContext : UnrealPluginManagerContex
 
   /// <inheritdoc />
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    Directory.CreateDirectory(_storageService.BaseDirectory);
-    optionsBuilder.UseSqlite($"Filename={Path.Join(_storageService.BaseDirectory, "cache.sqlite")}", b =>
+    Directory.CreateDirectory(storageService.BaseDirectory);
+    optionsBuilder.UseSqlite($"Filename={Path.Join(storageService.BaseDirectory, "cache.sqlite")}", b =>
                                  b.MigrationsAssembly(Assembly.GetCallingAssembly())
                                      .MinBatchSize(1)
                                      .MaxBatchSize(100))

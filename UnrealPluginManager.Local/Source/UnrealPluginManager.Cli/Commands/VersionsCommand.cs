@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
 using JetBrains.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local;
@@ -18,7 +19,7 @@ namespace UnrealPluginManager.Cli.Commands;
 /// </remarks>
 public class VersionsCommand()
     : Command<VersionsCommandOptions, VersionsCommandOptionsHandler>("versions",
-        "Lists all installed engine versions.");
+                                                                     "Lists all installed engine versions.");
 
 /// <summary>
 /// Represents the options required for the VersionsCommand in the CLI interface.
@@ -41,25 +42,23 @@ public class VersionsCommandOptions : ICommandOptions;
 /// The class interacts with the IEngineService to retrieve engine version details and utilizes
 /// the console for displaying the results.
 /// </remarks>
-[AutoConstructor]
 [UsedImplicitly]
-public partial class VersionsCommandOptionsHandler : ICommandOptionsHandler<VersionsCommandOptions> {
-  private readonly IConsole _console;
-  private readonly IEnvironment _environment;
-  private readonly IEngineService _engineService;
-
+public class VersionsCommandOptionsHandler(
+    [ReadOnly] IConsole console,
+    [ReadOnly] IEnvironment environment,
+    [ReadOnly] IEngineService engineService) : ICommandOptionsHandler<VersionsCommandOptions> {
   /// <inheritdoc />
   public Task<int> HandleAsync(VersionsCommandOptions options, CancellationToken cancellationToken) {
-    var installedEngines = _engineService.GetInstalledEngines();
-    var currentVersion = _environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
+    var installedEngines = engineService.GetInstalledEngines();
+    var currentVersion = environment.GetEnvironmentVariable(EnvironmentVariables.PrimaryUnrealEngineVersion)
         .Match(x => installedEngines.FindIndex(y => y.Name == x),
-            () => installedEngines.Index()
-                .Where(y => !y.Item.CustomBuild)
-                .OrderByDescending(y => y.Item.Version)
-                .Select(y => y.Index)
-                .FirstOrDefault(-1));
+               () => installedEngines.Index()
+                   .Where(y => !y.Item.CustomBuild)
+                   .OrderByDescending(y => y.Item.Version)
+                   .Select(y => y.Index)
+                   .FirstOrDefault(-1));
     foreach (var version in installedEngines.Index()) {
-      _console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
+      console.Out.WriteLine($"- {version.Item.DisplayName}{(version.Index == currentVersion ? " *" : "")}");
     }
 
     return Task.FromResult(0);
