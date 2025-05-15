@@ -1,6 +1,4 @@
-﻿using System.Runtime.Versioning;
-
-namespace UnrealPluginManager.Core.Abstractions;
+﻿namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Represents a registry abstraction for accessing the Windows registry keys.
@@ -8,7 +6,6 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// <remarks>
 /// This interface is platform-specific and only supported on Windows.
 /// </remarks>
-[SupportedOSPlatform("windows")]
 public interface IRegistry {
   /// <summary>
   /// Gets a registry key abstraction representing the HKEY_LOCAL_MACHINE hive of the Windows registry.
