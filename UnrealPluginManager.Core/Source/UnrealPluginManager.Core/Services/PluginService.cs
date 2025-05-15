@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using Retro.SimplePage;
 using Retro.SimplePage.EntityFrameworkCore;
 using Semver;
@@ -22,11 +23,11 @@ namespace UnrealPluginManager.Core.Services;
 /// Provides operations for managing plugins within the Unreal Plugin Manager application.
 /// </summary>
 public class PluginService(
-    UnrealPluginManagerContext dbContext,
-    IStorageService storageService,
-    IFileSystem fileSystem,
-    IPluginStructureService pluginStructureService,
-    IPluginOwnerService? pluginOwnerService = null) : IPluginService {
+    [ReadOnly] UnrealPluginManagerContext dbContext,
+    [ReadOnly] IStorageService storageService,
+    [ReadOnly] IFileSystem fileSystem,
+    [ReadOnly] IPluginStructureService pluginStructureService,
+    [ReadOnly] IPluginOwnerService? pluginOwnerService = null) : IPluginService {
   /// <param name="matcher"></param>
   /// <param name="pageable"></param>
   /// <inheritdoc/>

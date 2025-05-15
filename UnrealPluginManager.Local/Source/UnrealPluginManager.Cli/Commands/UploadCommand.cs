@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using JetBrains.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using Semver;
 using UnrealPluginManager.Local.Services;
 
@@ -29,14 +30,13 @@ public class UploadCommand : Command<UploadCommandOptions, UploadCommandOptionsH
   public UploadCommand() : base("upload", "Uploads a plugin to the specified remote.") {
     AddArgument(new Argument<string>("name", "The name of the plugin to upload"));
     AddOption(new Option<SemVersion>(["-v", "--version"], description: "The version of the plugin to upload",
-        parseArgument: r => SemVersion.Parse(r.Tokens[0].Value)) {
+                                     parseArgument: r => SemVersion.Parse(r.Tokens[0].Value)) {
         IsRequired = true,
     });
     AddOption(new Option<string>(["-r", "--remote"], description: "The remote to upload the plugin to") {
         IsRequired = false,
     });
   }
-
 }
 
 /// <summary>
@@ -81,7 +81,6 @@ public class UploadCommandOptions : ICommandOptions {
   /// </remarks>
   [UsedImplicitly]
   public string? Remote { get; set; }
-
 }
 
 /// <summary>
@@ -94,17 +93,15 @@ public class UploadCommandOptions : ICommandOptions {
 /// on the user-provided input.
 /// </remarks>
 /// <seealso cref="ICommandOptionsHandler{UploadCommandOptions}" />
-[AutoConstructor]
 [UsedImplicitly]
-public partial class UploadCommandOptionsHandler : ICommandOptionsHandler<UploadCommandOptions> {
-  private readonly IConsole _console;
-  private readonly IPluginManagementService _pluginManagementService;
-
+public class UploadCommandOptionsHandler(
+    [ReadOnly] IConsole console,
+    [ReadOnly] IPluginManagementService pluginManagementService) : ICommandOptionsHandler<UploadCommandOptions> {
   /// <inheritdoc />
   public async Task<int> HandleAsync(UploadCommandOptions options, CancellationToken cancellationToken) {
-    _console.WriteLine($"Uploading plugin {options.Name}...");
-    await _pluginManagementService.UploadPlugin(options.Name, options.Version, options.Remote);
-    _console.WriteLine("Upload successful!");
+    console.WriteLine($"Uploading plugin {options.Name}...");
+    await pluginManagementService.UploadPlugin(options.Name, options.Version, options.Remote);
+    console.WriteLine("Upload successful!");
     return 0;
   }
 }

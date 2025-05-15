@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Services;
@@ -11,10 +12,7 @@ namespace UnrealPluginManager.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("users")]
-[AutoConstructor]
-public partial class UsersController : ControllerBase {
-  private readonly IUserService _userService;
-
+public class UsersController([ReadOnly] IUserService userService) : ControllerBase {
   /// Retrieves the currently active user.
   /// <returns>
   /// A task that represents the asynchronous operation.
@@ -24,7 +22,7 @@ public partial class UsersController : ControllerBase {
   [Authorize]
   [HttpGet("active")]
   public Task<UserOverview> GetActiveUser() {
-    return _userService.GetActiveUser();
+    return userService.GetActiveUser();
   }
 
   /// Creates a new API key for the specified user.
@@ -41,6 +39,6 @@ public partial class UsersController : ControllerBase {
   [Authorize(AuthorizationPolicies.CallingUser)]
   [HttpPost("{userId:guid}/api-keys")]
   public Task<string> CreateApiKey([FromRoute] Guid userId, [FromBody] ApiKeyOverview apiKey) {
-    return _userService.CreateApiKey(userId, apiKey);
+    return userService.CreateApiKey(userId, apiKey);
   }
 }

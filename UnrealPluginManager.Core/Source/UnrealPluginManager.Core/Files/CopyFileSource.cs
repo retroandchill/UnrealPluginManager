@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using Retro.ReadOnlyParams.Annotations;
 
 namespace UnrealPluginManager.Core.Files;
 
@@ -7,17 +8,14 @@ namespace UnrealPluginManager.Core.Files;
 /// It implements the IFileSource interface to provide functionality for creating
 /// copies of files at specified destination paths.
 /// </summary>
-[AutoConstructor]
-public sealed partial class CopyFileSource : IFileSource {
-  private readonly IFileInfo _fileInfo;
-
+public sealed class CopyFileSource([ReadOnly] IFileInfo info) : IFileSource {
   /// <inheritdoc />
   public Task<IFileInfo> CreateFile(string destinationPath) {
-    return Task.FromResult(_fileInfo.CopyTo(destinationPath, false));
+    return Task.FromResult(info.CopyTo(destinationPath, false));
   }
 
   /// <inheritdoc />
   public Task OverwriteFile(IFileInfo fileInfo) {
-    return Task.FromResult(_fileInfo.CopyTo(fileInfo.FullName, true));
+    return Task.FromResult(info.CopyTo(fileInfo.FullName, true));
   }
 }

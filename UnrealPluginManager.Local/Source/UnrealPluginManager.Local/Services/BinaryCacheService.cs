@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
@@ -15,18 +16,16 @@ namespace UnrealPluginManager.Local.Services;
 /// <summary>
 /// Provides functionality for caching plugin builds in binary form.
 /// </summary>
-[AutoConstructor]
-public partial class BinaryCacheService : IBinaryCacheService {
-  private readonly LocalUnrealPluginManagerContext _dbContext;
-  private readonly IPluginService _pluginService;
-  private readonly IEngineService _engineService;
-
+public class BinaryCacheService(
+    [ReadOnly] LocalUnrealPluginManagerContext dbContext,
+    [ReadOnly] IPluginService pluginService,
+    [ReadOnly] IEngineService engineService) : IBinaryCacheService {
   /// <inheritdoc />
   public async Task<PluginBuildInfo> CacheBuiltPlugin(PluginManifest manifest, IDirectoryInfo directory,
                                                       IReadOnlyList<string> patches,
                                                       string engineVersion,
                                                       IReadOnlyCollection<string> platforms) {
-    var versionInfo = await _pluginService.GetPluginVersionInfo(manifest.Name, manifest.Version);
+    var versionInfo = await pluginService.GetPluginVersionInfo(manifest.Name, manifest.Version);
     if (versionInfo.IsNone) {
       var iconFile = directory.File(Path.Join("Resources", "Icon128.png"));
       await using (var iconFileStream = iconFile.Exists ? iconFile.OpenRead() : null) {
@@ -37,11 +36,11 @@ public partial class BinaryCacheService : IBinaryCacheService {
           readmeContent = await readmeStream.ReadToEndAsync();
         }
 
-        await _pluginService.SubmitPlugin(manifest, patches, iconFileStream, readmeContent);
+        await pluginService.SubmitPlugin(manifest, patches, iconFileStream, readmeContent);
       }
     }
 
-    var pluginVersion = await _dbContext.PluginVersions
+    var pluginVersion = await dbContext.PluginVersions
         .Include(x => x.Parent)
         .Include(x => x.Dependencies)
         .SingleAsync(x => x.Parent.Name == manifest.Name && x.VersionString == manifest.Version.ToString());
@@ -58,7 +57,7 @@ public partial class BinaryCacheService : IBinaryCacheService {
             .ToList()
     };
     foreach (var dependency in pluginVersion.Dependencies) {
-      var installedPluginVersion = await _engineService.GetInstalledPluginVersion(dependency.PluginName, engineVersion);
+      var installedPluginVersion = await engineService.GetInstalledPluginVersion(dependency.PluginName, engineVersion);
       installedPluginVersion.Match(x => {
                                      build.BuiltWith.Add(new DependencyBuildVersion {
                                          Dependency = dependency,
@@ -70,8 +69,8 @@ public partial class BinaryCacheService : IBinaryCacheService {
                                        $"Missing a {dependency.PluginName} plugin in the engine's package directory."));
     }
 
-    _dbContext.CachedBuilds.Add(build);
-    await _dbContext.SaveChangesAsync();
+    dbContext.CachedBuilds.Add(build);
+    await dbContext.SaveChangesAsync();
 
     return build.ToPluginBuildInfo();
   }
@@ -80,7 +79,7 @@ public partial class BinaryCacheService : IBinaryCacheService {
   public async Task<Option<PluginBuildInfo>> GetCachedPluginBuild(string pluginName, SemVersion pluginVersion,
                                                                   string engineVersion,
                                                                   IReadOnlyCollection<string> targetPlatforms) {
-    return await _dbContext.CachedBuilds
+    return await dbContext.CachedBuilds
         .Include(x => x.PluginVersion)
         .ThenInclude(x => x.Dependencies)
         .Include(x => x.PluginVersion)

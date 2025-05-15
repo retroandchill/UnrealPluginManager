@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Core.Files;
@@ -7,17 +8,14 @@ namespace UnrealPluginManager.Core.Files;
 /// This class implements the IFileSource interface to provide functionality for creating a zip
 /// archive from the contents of a directory. It uses a file system abstraction for seamless
 /// file and directory operations.
-[AutoConstructor]
-public sealed partial class DirectoryZipFileSource : IFileSource {
-  private readonly IDirectoryInfo _directoryInfo;
-
+public sealed class DirectoryZipFileSource([ReadOnly] IDirectoryInfo directoryInfo) : IFileSource {
   /// <inheritdoc />
   public Task<IFileInfo> CreateFile(string destinationPath) {
-    return _directoryInfo.FileSystem.CreateZipFile(destinationPath, _directoryInfo.FullName);
+    return directoryInfo.FileSystem.CreateZipFile(destinationPath, directoryInfo.FullName);
   }
 
   /// <inheritdoc />
   public Task OverwriteFile(IFileInfo fileInfo) {
-    return _directoryInfo.FileSystem.CreateZipFile(fileInfo.FullName, _directoryInfo.FullName);
+    return directoryInfo.FileSystem.CreateZipFile(fileInfo.FullName, directoryInfo.FullName);
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using LanguageExt;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Files;
 using UnrealPluginManager.Core.Model.Storage;
@@ -13,19 +14,15 @@ namespace UnrealPluginManager.Core.Services;
 /// storing and retrieving plugin files while relying on derived classes for
 /// implementation of the base directory logic.
 /// </summary>
-[AutoConstructor]
-public abstract partial class StorageServiceBase : IStorageService {
+public abstract class StorageServiceBase(IFileSystem fileSystem, [ReadOnly] IJsonService jsonService)
+    : IStorageService {
   /// <summary>
   /// Provides access to the file system abstraction used by storage services.
   /// This property is used to perform file system operations without directly
   /// depending on the standard System.IO classes, facilitating unit testing
   /// and custom implementations.
   /// </summary>
-  [field: AutoConstructorInject(initializer: "filesystem",
-      injectedType: typeof(IFileSystem), parameterName: "filesystem")]
-  protected IFileSystem FileSystem { get; }
-
-  private readonly IJsonService _jsonService;
+  protected IFileSystem FileSystem { get; } = fileSystem;
 
   /// <inheritdoc />
   public abstract string BaseDirectory { get; }
@@ -55,6 +52,7 @@ public abstract partial class StorageServiceBase : IStorageService {
     if (!fileInfo.Exists) {
       throw new ResourceNotFoundException($"Resource file {filename} not found.");
     }
+
     return new ResourceHandle(filename, fileInfo);
   }
 
@@ -74,7 +72,7 @@ public abstract partial class StorageServiceBase : IStorageService {
 
     using var fileStream = fileInfo.OpenText();
     var configText = fileStream.ReadToEnd();
-    var resultObject = _jsonService.Deserialize<T>(configText);
+    var resultObject = jsonService.Deserialize<T>(configText);
 
     return resultObject;
   }
@@ -109,7 +107,7 @@ public abstract partial class StorageServiceBase : IStorageService {
 
     using var fileStream = fileInfo.OpenText();
     var configText = await fileStream.ReadToEndAsync();
-    var resultObject = _jsonService.Deserialize<T>(configText);
+    var resultObject = jsonService.Deserialize<T>(configText);
 
     return resultObject;
   }
@@ -140,7 +138,7 @@ public abstract partial class StorageServiceBase : IStorageService {
     var filePath = Path.Combine(ConfigDirectory, filename);
     var fileInfo = FileSystem.FileInfo.New(filePath);
 
-    var configText = _jsonService.Serialize(value);
+    var configText = jsonService.Serialize(value);
 
     using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
     using var textWriter = new StreamWriter(writer);
@@ -154,7 +152,7 @@ public abstract partial class StorageServiceBase : IStorageService {
     var filePath = Path.Combine(ConfigDirectory, filename);
     var fileInfo = FileSystem.FileInfo.New(filePath);
 
-    var configText = _jsonService.Serialize(value);
+    var configText = jsonService.Serialize(value);
 
     await using var writer = fileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.None);
     await using var textWriter = new StreamWriter(writer);

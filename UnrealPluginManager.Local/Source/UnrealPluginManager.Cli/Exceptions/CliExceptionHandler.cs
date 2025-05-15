@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.IO;
 using AutoExceptionHandler.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.WebClient.Client;
 
@@ -16,10 +17,7 @@ namespace UnrealPluginManager.Cli.Exceptions;
 /// to process and handle exceptions.
 /// </remarks>
 [ExceptionHandler]
-[AutoConstructor]
-public partial class CliExceptionHandler {
-  private readonly IConsole _console;
-
+public partial class CliExceptionHandler([ReadOnly] IConsole console) {
   /// <summary>
   /// Handles a given exception and returns an appropriate exit code for the CLI application.
   /// </summary>
@@ -31,35 +29,36 @@ public partial class CliExceptionHandler {
 
   [HandlesException]
   private int HandleConflicts(DependencyConflictException dependencyConflictException) {
-    _console.Out.WriteLine($"{dependencyConflictException.Message}");
+    console.Out.WriteLine($"{dependencyConflictException.Message}");
     foreach (var conflict in dependencyConflictException.Conflicts) {
-      _console.Out.WriteLine($"\n{conflict.PluginName} required by:");
+      console.Out.WriteLine($"\n{conflict.PluginName} required by:");
       foreach (var requiredBy in conflict.Versions) {
-        _console.Out.WriteLine($"    {requiredBy.RequiredBy} => {requiredBy.RequiredVersion}");
+        console.Out.WriteLine($"    {requiredBy.RequiredBy} => {requiredBy.RequiredVersion}");
       }
     }
+
     return -1;
   }
 
   [HandlesException]
   private int HandleNotFound(UnrealPluginManagerException exception) {
-    _console.Out.WriteLine($"{exception.Message}");
+    console.Out.WriteLine($"{exception.Message}");
     return 12;
   }
 
   [HandlesException(typeof(ApiException))]
   private int HandleApiException(ApiException exception) {
-    _console.Out.WriteLine($"Call to remote server failed with code {exception.ErrorCode}.");
+    console.Out.WriteLine($"Call to remote server failed with code {exception.ErrorCode}.");
     return 34;
   }
 
   [FallbackExceptionHandler]
   private int HandleGenericException(Exception ex) {
-    _console.Error.WriteLine(ex.Message);
+    console.Error.WriteLine(ex.Message);
     if (ex.StackTrace != null) {
-      _console.Error.WriteLine(ex.StackTrace);
+      console.Error.WriteLine(ex.StackTrace);
     }
+
     return 1;
   }
-
 }

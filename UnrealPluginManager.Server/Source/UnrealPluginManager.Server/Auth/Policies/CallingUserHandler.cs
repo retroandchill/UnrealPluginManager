@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Auth.Policies;
@@ -25,16 +26,14 @@ public class CallingUserRequirement : IAuthorizationRequirement;
 /// comparing the user information provided in the HTTP context against the data stored in the application’s database.
 /// If the conditions are not met, the requirement fails authorization.
 /// </remarks>
-[AutoConstructor]
-public partial class CallingUserHandler : GeneralAuthorizationHandler<CallingUserRequirement> {
-  private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly CloudUnrealPluginManagerContext _dbContext;
-
+public class CallingUserHandler(
+    [ReadOnly] IHttpContextAccessor httpContextAccessor,
+    [ReadOnly] CloudUnrealPluginManagerContext dbContext) : GeneralAuthorizationHandler<CallingUserRequirement> {
   /// <inheritdoc />
   protected override async Task HandleInternal(AuthorizationHandlerContext context,
                                                CallingUserRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
-    var httpContext = _httpContextAccessor.HttpContext;
+    var httpContext = httpContextAccessor.HttpContext;
 
     if (httpContext is null || context.User.Identity is null || !context.User.Identity.IsAuthenticated ||
         !httpContext.Request.RouteValues.TryGetValue("userId", out var id) || id is not string userIdString) {
@@ -45,7 +44,7 @@ public partial class CallingUserHandler : GeneralAuthorizationHandler<CallingUse
     var userId = Guid.Parse(userIdString);
 
     var username = context.User.Identity.Name;
-    var existingUserId = await _dbContext.Users
+    var existingUserId = await dbContext.Users
         .Where(x => x.Username == username)
         .Select(x => x.Id)
         .FirstOrDefaultAsync();
