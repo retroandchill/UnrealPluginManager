@@ -16,7 +16,7 @@ namespace UnrealPluginManager.Cli.Commands;
 /// specifying the plugin name, the desired version, and the engine version
 /// for compatibility during installation.
 /// </remarks>
-public class InstallCommand : Command<InstallCommandOptions, InstallCommandHandler> {
+public class InstallCommand : Command<InstallCommandOptions> {
   /// <summary>
   /// Represents the command used for installing software plugins into a specified Unreal Engine instance.
   /// </summary>
@@ -117,7 +117,6 @@ public class InstallCommandOptions : ICommandOptions {
 /// installation process. It takes user-defined options such as the plugin name, version range,
 /// and engine version, and ensures the appropriate installation steps are performed.
 /// </remarks>
-[UsedImplicitly]
 public class InstallCommandHandler(
     [ReadOnly] IConsole console,
     [ReadOnly] IInstallService installService) : ICommandOptionsHandler<InstallCommandOptions> {

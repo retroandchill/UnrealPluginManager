@@ -14,7 +14,6 @@ namespace UnrealPluginManager.Local.Services;
 /// 2. Otherwise, a default directory under the user's profile folder.
 /// </remarks>
 public class LocalStorageService : StorageServiceBase {
-
   /// <inheritdoc />
   public sealed override string BaseDirectory { get; }
 
@@ -26,12 +25,11 @@ public class LocalStorageService : StorageServiceBase {
   /// determines the base directory by retrieving an environment variable
   /// or defaulting to a user-specific location. Ensures necessary directory
   /// creation operations during initialization.
-  public LocalStorageService(IEnvironment environment, IFileSystem fileSystem, IJsonService jsonService) : base(
-      fileSystem, jsonService) {
-
+  public LocalStorageService(IEnvironment environment, IFileSystem fileSystem, IJsonService jsonService)
+      : base(fileSystem, jsonService) {
     BaseDirectory = environment.GetEnvironmentVariable(EnvironmentVariables.StorageDirectory) ??
                     Path.Join(environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                        ".unrealpluginmanager");
+                              ".unrealpluginmanager");
     ResourceDirectory = Path.Join(BaseDirectory, "resources");
 
     FileSystem.Directory.CreateDirectory(BaseDirectory);

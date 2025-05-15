@@ -1,6 +1,5 @@
 ﻿using LanguageExt;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Local.Config;
 using UnrealPluginManager.Local.Factories;
 using UnrealPluginManager.WebClient.Client;
@@ -18,7 +17,7 @@ public class RemoteService : IRemoteService {
   private readonly Dictionary<Type, IApiClientFactory> _clientFactories;
   private readonly Dictionary<Type, Dictionary<string, IApiAccessor>> _apiAccessors;
 
-  private const string RemoteFile = "remotes.yaml";
+  private const string RemoteFile = "remotes.json";
 
   private static OrderedDictionary<string, RemoteConfig> DefaultRemotes { get; } = new() {
       ["default"] = new Uri("https://localhost:7231")
@@ -32,9 +31,9 @@ public class RemoteService : IRemoteService {
     _storageService = storageService;
     _remoteConfigs = storageService.GetConfig(RemoteFile, DefaultRemotes);
     _clientFactories = clientFactories.ToDictionary(f => f.InterfaceType);
-    _apiAccessors = _clientFactories.ToDictionary(f => f.Key, 
-        f => _remoteConfigs.ToDictionary(x => x.Key, 
-            x => f.Value.Create(x.Value)));
+    _apiAccessors = _clientFactories.ToDictionary(f => f.Key,
+                                                  f => _remoteConfigs.ToDictionary(x => x.Key,
+                                                    x => f.Value.Create(x.Value)));
   }
 
   /// <inheritdoc />
@@ -59,6 +58,7 @@ public class RemoteService : IRemoteService {
     foreach (var (type, factory) in _clientFactories) {
       _apiAccessors[type][name] = factory.Create(uri);
     }
+
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
@@ -71,6 +71,7 @@ public class RemoteService : IRemoteService {
     foreach (var (type, _) in _clientFactories) {
       _apiAccessors[type].Remove(name);
     }
+
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
@@ -84,6 +85,7 @@ public class RemoteService : IRemoteService {
     foreach (var (type, factory) in _clientFactories) {
       _apiAccessors[type][name] = factory.Create(uri);
     }
+
     await _storageService.SaveConfigAsync(RemoteFile, _remoteConfigs);
   }
 
@@ -97,8 +99,8 @@ public class RemoteService : IRemoteService {
     if (!accessors.TryGetValue(name, out var api)) {
       throw new ArgumentException($"No API configuration for remote {name}");
     }
-    
-    return (T) api;
+
+    return (T)api;
   }
 
   /// <inheritdoc />
@@ -110,9 +112,10 @@ public class RemoteService : IRemoteService {
     return IterateOverApiAccessors<T>(accessors);
   }
 
-  private static IEnumerable<Remote<T>> IterateOverApiAccessors<T>(Dictionary<string, IApiAccessor> accessors) where T : IApiAccessor {
+  private static IEnumerable<Remote<T>> IterateOverApiAccessors<T>(Dictionary<string, IApiAccessor> accessors)
+      where T : IApiAccessor {
     foreach (var (name, api) in accessors) {
-      yield return new Remote<T>(name, (T) api);
+      yield return new Remote<T>(name, (T)api);
     }
   }
 }

@@ -42,18 +42,8 @@ public interface ICommandOptionsHandler<in TOptions> {
 /// <typeparam name="TOptions">
 /// The type of options that the command can process, implementing <see cref="ICommandOptions"/>.
 /// </typeparam>
-/// <typeparam name="TOptionsHandler">
-/// The type of the handler that processes the command options,
-/// implementing <see cref="ICommandOptionsHandler{TOptions}"/>.
-/// </typeparam>
-/// <remarks>
-/// This class provides the foundation for creating commands in a CLI application.
-/// It automatically sets up a command handler that binds the specified options and handles them
-/// using the provided <typeparamref name="TOptionsHandler"/> implementation.
-/// </remarks>
-public abstract class Command<TOptions, TOptionsHandler> : Command
-    where TOptions : class, ICommandOptions
-    where TOptionsHandler : ICommandOptionsHandler<TOptions> {
+public abstract class Command<TOptions> : Command
+    where TOptions : class, ICommandOptions {
   /// <summary>
   /// Serves as a base class for defining commands in the CLI tool, supporting specific option handlers
   /// for processing command-line arguments and related operations.
@@ -69,7 +59,7 @@ public abstract class Command<TOptions, TOptionsHandler> : Command
 
   private static async Task<int> HandleOptions(TOptions options, IServiceProvider serviceProvider,
                                                CancellationToken cancellationToken) {
-    var handler = ActivatorUtilities.CreateInstance<TOptionsHandler>(serviceProvider);
+    var handler = serviceProvider.GetRequiredService<ICommandOptionsHandler<TOptions>>();
     return await handler.HandleAsync(options, cancellationToken);
   }
 }

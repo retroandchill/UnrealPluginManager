@@ -16,7 +16,7 @@ namespace UnrealPluginManager.Cli.Commands;
 /// The <see cref="BuildCommand"/> class is utilized to build a specified Unreal Engine plugin
 /// from a given source directory, optionally specifying the target engine version.
 /// </remarks>
-public class BuildCommand : Command<BuildCommandOptions, BuildCommandOptionsHandler> {
+public class BuildCommand : Command<BuildCommandOptions> {
   /// <summary>
   /// Represents the "build" command in the command-line interface (CLI) of the Unreal Plugin Manager.
   /// </summary>
@@ -73,13 +73,12 @@ public class BuildCommandOptions : ICommandOptions {
 /// Handles the execution logic for the build command options used in compiling Unreal Engine plugins.
 /// </summary>
 /// <remarks>
-/// The <see cref="BuildCommandOptionsHandler"/> class processes the command-line arguments
+/// The <see cref="BuildCommandHandler"/> class processes the command-line arguments
 /// provided to the <see cref="BuildCommand"/> through <see cref="BuildCommandOptions"/>. It utilizes
 /// the specified engine service to perform the build operation based on the given input and optional
 /// target engine version.
 /// </remarks>
-[UsedImplicitly]
-public class BuildCommandOptionsHandler(
+public class BuildCommandHandler(
     [ReadOnly] IConsole console,
     [ReadOnly] IFileSystem fileSystem,
     [ReadOnly] IPluginManagementService pluginManagementService,

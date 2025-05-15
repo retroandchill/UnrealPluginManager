@@ -1,11 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using LanguageExt;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Retro.SimplePage;
 using Semver;
@@ -13,7 +11,6 @@ using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Exceptions;
 using UnrealPluginManager.Cli.Tests.Mocks;
-using UnrealPluginManager.Core.Abstractions;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
@@ -56,15 +53,7 @@ public class TestCommands {
     var builder = new CommandLineBuilder(rootCommand)
         .UseDefaults()
         .UseCustomExceptionHandler()
-        .UseDependencyInjection(services => {
-          services.AddSingleton<IFileSystem>(_filesystem);
-          services.AddSingleton<IEnvironment>(_environment);
-          services.AddSingleton(_engineService.Object);
-          services.AddSingleton(_pluginService.Object);
-          services.AddSingleton(_pluginManagementService.Object);
-          services.AddSingleton(_installService.Object);
-          services.AddSingleton<IJsonService>(_jsonService);
-        });
+        .UseDependencyInjection();
 
     _parser = builder.Build();
   }
