@@ -5,7 +5,6 @@ using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.DependencyInjection;
 using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Services;
@@ -28,15 +27,14 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 public partial class ServerServiceProvider([ReadOnly] IServiceProvider runtimeServiceProvider) {
   private readonly IConfiguration _configuration = runtimeServiceProvider.GetRequiredService<IConfiguration>();
 
-  private IJsonService CreateJsonService() {
+  private JsonService CreateJsonService() {
     var options = runtimeServiceProvider.GetRequiredService<IOptions<JsonOptions>>();
     return new JsonService(options.Value.JsonSerializerOptions);
   }
 
-  private UnrealPluginManagerContext GetUnrealPluginManagerContext(
-      IServiceProvider provider) {
-    return provider.GetService<CloudUnrealPluginManagerContext>()
-        .RequireNonNull();
+  private static CloudUnrealPluginManagerContext GetUnrealPluginManagerContext(
+      CloudUnrealPluginManagerContext unrealPluginManagerContext) {
+    return unrealPluginManagerContext;
   }
 
   private HttpClient GetKeycloakAdminHttpClient() {
