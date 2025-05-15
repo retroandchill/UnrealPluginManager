@@ -9,6 +9,7 @@
         <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
         <SpaProxyServerUrl>https://localhost:60493</SpaProxyServerUrl>
         <TargetFramework>net9.0</TargetFramework>
+        <DefineConstants>$(DefineConstants);JAB_ATTRIBUTES_PACKAGE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
