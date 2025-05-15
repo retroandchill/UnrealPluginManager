@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Server.Auth.Validators;
 
@@ -13,18 +14,15 @@ public class CanEditPluginRequirement : IAuthorizationRequirement;
 /// <summary>
 /// Authorization handler that determines whether a user has permission to update a plugin.
 /// </summary>
-[AutoConstructor]
-public partial class CanEditPluginHandler : GeneralAuthorizationHandler<CanEditPluginRequirement> {
-
-  private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly UnrealPluginManagerContext _dbContext;
-  private readonly IPluginAuthValidator _pluginAuthValidator;
-
+public class CanEditPluginHandler(
+    [ReadOnly] IHttpContextAccessor httpContextAccessor,
+    [ReadOnly] UnrealPluginManagerContext dbContext,
+    [ReadOnly] IPluginAuthValidator pluginAuthValidator) : GeneralAuthorizationHandler<CanEditPluginRequirement> {
   /// <inheritdoc />
   protected override async Task HandleInternal(AuthorizationHandlerContext context,
                                                CanEditPluginRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
-    var httpContext = _httpContextAccessor.HttpContext;
+    var httpContext = httpContextAccessor.HttpContext;
 
     if (httpContext is null || !httpContext.Request.HasFormContentType ||
         context.User.Identity?.IsAuthenticated != true ||
@@ -32,9 +30,10 @@ public partial class CanEditPluginHandler : GeneralAuthorizationHandler<CanEditP
       context.Fail();
       return;
     }
+
     var pluginId = Guid.Parse(pluginIdString);
 
-    var pluginName = await _dbContext.Plugins
+    var pluginName = await dbContext.Plugins
         .Where(x => x.Id == pluginId)
         .Select(x => x.Name)
         .FirstOrDefaultAsync();
@@ -42,7 +41,7 @@ public partial class CanEditPluginHandler : GeneralAuthorizationHandler<CanEditP
       return;
     }
 
-    if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
+    if (!await pluginAuthValidator.CanEditPlugin(context, pluginName)) {
       context.Fail();
     }
   }

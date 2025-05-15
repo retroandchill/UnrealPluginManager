@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using Microsoft.AspNetCore.Authorization;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Auth.Validators;
@@ -20,18 +21,15 @@ public class CanSubmitPluginRequirement : IAuthorizationRequirement;
 /// This class checks if a user is authorized to submit a plugin based on specific conditions, such as
 /// the presence of a valid .uplugin file in an uploaded archive, authentication method, and user claims or database entries.
 /// </summary>
-[AutoConstructor]
-public partial class CanSubmitPluginHandler : GeneralAuthorizationHandler<CanSubmitPluginRequirement> {
-  private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly IPluginAuthValidator _pluginAuthValidator;
-  private readonly IJsonService _jsonService;
-
-
+public class CanSubmitPluginHandler(
+    [ReadOnly] IHttpContextAccessor httpContextAccessor,
+    [ReadOnly] IPluginAuthValidator pluginAuthValidator,
+    [ReadOnly] IJsonService jsonService) : GeneralAuthorizationHandler<CanSubmitPluginRequirement> {
   /// <inheritdoc />
   protected override async Task HandleInternal(AuthorizationHandlerContext context,
                                                CanSubmitPluginRequirement requirement) {
     using var usingEvaluation = new ContextEvaluation(context, requirement);
-    var httpContext = _httpContextAccessor.HttpContext;
+    var httpContext = httpContextAccessor.HttpContext;
 
     if (httpContext == null || !httpContext.Request.HasFormContentType ||
         context.User.Identity?.IsAuthenticated != true) {
@@ -55,9 +53,9 @@ public partial class CanSubmitPluginHandler : GeneralAuthorizationHandler<CanSub
       }
 
       await using var upluginFileStream = upluginFile.Open();
-      var manifest = await _jsonService.DeserializeAsync<PluginManifest>(upluginFileStream);
+      var manifest = await jsonService.DeserializeAsync<PluginManifest>(upluginFileStream);
       var pluginName = manifest.Name;
-      if (!await _pluginAuthValidator.CanEditPlugin(context, pluginName)) {
+      if (!await pluginAuthValidator.CanEditPlugin(context, pluginName)) {
         context.Fail();
       }
     } catch (InvalidDataException) {

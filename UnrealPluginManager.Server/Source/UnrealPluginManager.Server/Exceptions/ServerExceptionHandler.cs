@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using AutoExceptionHandler.Annotations;
-using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Services;
 
@@ -20,22 +20,20 @@ namespace UnrealPluginManager.Server.Exceptions;
 /// with a consistent structure. The problem details are serialized to a
 /// JSON response with the "application/problem+json" Content-Type header.
 /// </remarks>
-[AutoConstructor]
 [ExceptionHandler]
-public partial class ServerExceptionHandler : IExceptionHandler {
-  private readonly IHostEnvironment _env;
-  private readonly ILogger<ServerExceptionHandler> _logger;
-  private readonly IJsonService _jsonService;
-
+public partial class ServerExceptionHandler(
+    [ReadOnly] IHostEnvironment env,
+    [ReadOnly] ILogger<ServerExceptionHandler> logger,
+    [ReadOnly] IJsonService jsonService) : IExceptionHandler {
   private const string ExceptionFormat = "An exception of type {Type} occurred. Message: {Message}";
 
   /// <inheritdoc />
   public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
                                               CancellationToken cancellationToken) {
-    _logger.LogError(exception, ExceptionFormat, exception.GetType().Name, exception.Message);
+    logger.LogError(exception, ExceptionFormat, exception.GetType().Name, exception.Message);
 
     var problemDetails = GetProblemDetails(exception, httpContext);
-    var json = _jsonService.Serialize(problemDetails);
+    var json = jsonService.Serialize(problemDetails);
 
     const string contentType = "application/problem+json";
     httpContext.Response.ContentType = contentType;
@@ -73,15 +71,16 @@ public partial class ServerExceptionHandler : IExceptionHandler {
 
   [FallbackExceptionHandler]
   private ProblemDetails GetDefaultProblemDetails(Exception exception, HttpContext httpContext) {
-    return CreateProblemDetails(httpContext, StatusCodes.Status500InternalServerError, 
+    return CreateProblemDetails(httpContext, StatusCodes.Status500InternalServerError,
                                 "An unexpected server error occurred", exception);
   }
 
   private ProblemDetails CreateProblemDetails(HttpContext httpContext, int statusCode, Exception exception) {
     return CreateProblemDetails(httpContext, statusCode, exception.Message, exception);
   }
-  
-  private ProblemDetails CreateProblemDetails(HttpContext httpContext, int statusCode, string message, Exception exception) {
+
+  private ProblemDetails CreateProblemDetails(HttpContext httpContext, int statusCode, string message,
+                                              Exception exception) {
     var reasonPhrase = ReasonPhrases.GetReasonPhrase(statusCode);
     var details = new ProblemDetails {
         Title = reasonPhrase,
@@ -89,7 +88,7 @@ public partial class ServerExceptionHandler : IExceptionHandler {
         Detail = message,
     };
 
-    if (!_env.IsDevelopment()) {
+    if (!env.IsDevelopment()) {
       return details;
     }
 

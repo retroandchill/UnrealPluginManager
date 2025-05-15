@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Model.Users;
 using UnrealPluginManager.Core.Utils;
@@ -16,22 +17,21 @@ namespace UnrealPluginManager.Server.Services;
 /// Provides user-related services and operations necessary for the
 /// Unreal Plugin Manager application.
 /// </summary>
-[AutoConstructor]
-public partial class UserService : IUserService {
+public class UserService(
+    [ReadOnly] IHttpContextAccessor httpContextAccessor,
+    [ReadOnly] CloudUnrealPluginManagerContext dbContext,
+    [ReadOnly] IKeycloakApiKeyClient keycloakApiKeyClient) : IUserService {
   private const string RealmName = "unreal-plugin-manager";
-  private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly CloudUnrealPluginManagerContext _dataContext;
-  private readonly IKeycloakApiKeyClient _keycloakApiKeyClient;
 
   /// <inheritdoc />
   public async Task<UserOverview> GetActiveUser() {
-    var principal = _httpContextAccessor.HttpContext?.User;
+    var principal = httpContextAccessor.HttpContext?.User;
     principal.RequireNonNull();
     var claimsDict = principal.Claims.ToDictionary(x => x.Type, x => x.Value);
     var username = principal.Identity.RequireNonNull()
         .Name.RequireNonNull();
 
-    var existingUser = await _dataContext.Users
+    var existingUser = await dbContext.Users
         .Where(x => x.Username == username)
         .ToUserOverviewQuery()
         .FirstOrDefaultAsync();
@@ -43,8 +43,8 @@ public partial class UserService : IUserService {
         Username = username,
         Email = claimsDict[ClaimTypes.Email]
     };
-    _dataContext.Users.Add(newUser);
-    await _dataContext.SaveChangesAsync();
+    dbContext.Users.Add(newUser);
+    await dbContext.SaveChangesAsync();
 
     return UserMapper.ToUserOverview(newUser);
   }
@@ -73,7 +73,7 @@ public partial class UserService : IUserService {
       throw new BadArgumentException("Api key cannot specify duplicate allowed plugins.");
     }
 
-    var username = await _dataContext.Users
+    var username = await dbContext.Users
         .Where(x => x.Id == userId)
         .Select(x => x.Username)
         .SingleOrDefaultAsync();
@@ -83,31 +83,32 @@ public partial class UserService : IUserService {
 
     CreatedApiKey createdKey;
     try {
-      createdKey = await _keycloakApiKeyClient.CreateNewApiKey(RealmName, username, apiKey.ExpiresAt);
+      createdKey = await keycloakApiKeyClient.CreateNewApiKey(RealmName, username, apiKey.ExpiresAt);
     } catch (KeycloakHttpClientException ex) {
       throw new ForeignApiException(ex.StatusCode, "Error creating Api Key", ex);
     }
+
     var newApiKey = UserMapper.ToApiKey(apiKey, createdKey.Id);
     newApiKey.UserId = userId;
-    _dataContext.ApiKeys.Add(newApiKey);
+    dbContext.ApiKeys.Add(newApiKey);
 
     if (apiKey.AllowedPlugins.Count > 0) {
       var pluginIds = apiKey.AllowedPlugins
           .Select(x => x.Id)
           .ToList();
-      var existingPluginsCount = await _dataContext.Plugins.CountAsync(x => pluginIds.Contains(x.Id));
+      var existingPluginsCount = await dbContext.Plugins.CountAsync(x => pluginIds.Contains(x.Id));
       if (existingPluginsCount != pluginIds.Count) {
         throw new ContentNotFoundException("One or more allowed plugins not found.");
       }
 
-      _dataContext.AllowedPlugins.AddRange(apiKey.AllowedPlugins
-          .Select(x => new AllowedPlugin {
-              ApiKeyId = newApiKey.Id,
-              PluginId = x.Id
-          }));
+      dbContext.AllowedPlugins.AddRange(apiKey.AllowedPlugins
+                                            .Select(x => new AllowedPlugin {
+                                                ApiKeyId = newApiKey.Id,
+                                                PluginId = x.Id
+                                            }));
     }
 
-    await _dataContext.SaveChangesAsync();
+    await dbContext.SaveChangesAsync();
 
     return createdKey.ApiKey;
   }

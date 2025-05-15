@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Retro.ReadOnlyParams.Annotations;
 using Retro.SimplePage;
 using Semver;
 using UnrealPluginManager.Core.Exceptions;
@@ -30,10 +31,7 @@ namespace UnrealPluginManager.Server.Controllers;
 /// <seealso cref="UnrealPluginManager.Core.Services.IPluginService"/>
 [ApiController]
 [Route("plugins")]
-[AutoConstructor]
-public partial class PluginsController : ControllerBase {
-  private readonly IPluginService _pluginService;
-
+public class PluginsController([ReadOnly] IPluginService pluginService) : ControllerBase {
   /// <summary>
   /// Retrieves a paginated list of plugin overviews based on the specified filter and pagination settings.
   /// </summary>
@@ -45,7 +43,7 @@ public partial class PluginsController : ControllerBase {
   [ProducesResponseType(typeof(Page<PluginOverview>), (int)HttpStatusCode.OK)]
   public Task<Page<PluginOverview>> GetPlugins([FromQuery] string match = "",
                                                [FromQuery] Pageable pageable = default) {
-    return _pluginService.ListPlugins(match, pageable);
+    return pluginService.ListPlugins(match, pageable);
   }
 
   /// <summary>
@@ -61,7 +59,7 @@ public partial class PluginsController : ControllerBase {
   [Authorize(AuthorizationPolicies.CanSubmitPlugin)]
   public async Task<PluginVersionInfo> SubmitPlugin(IFormFile archive) {
     await using var archiveStream = archive.OpenReadStream();
-    return await _pluginService.SubmitPlugin(archiveStream);
+    return await pluginService.SubmitPlugin(archiveStream);
   }
 
   /// <summary>
@@ -77,7 +75,7 @@ public partial class PluginsController : ControllerBase {
   public Task<Page<PluginVersionInfo>> GetLatestVersions([FromQuery] string match = "",
                                                          [FromQuery] SemVersionRange? versionRange = null,
                                                          [FromQuery] Pageable pageable = default) {
-    return _pluginService.ListLatestVersions(match, versionRange ?? SemVersionRange.AllRelease, pageable);
+    return pluginService.ListLatestVersions(match, versionRange ?? SemVersionRange.AllRelease, pageable);
   }
 
   /// <summary>
@@ -92,7 +90,7 @@ public partial class PluginsController : ControllerBase {
   [ProducesResponseType(typeof(PluginVersionInfo), (int)HttpStatusCode.OK)]
   public async Task<PluginVersionInfo> GetLatestVersion([FromRoute] Guid pluginId,
                                                         [FromQuery] SemVersionRange? version = null) {
-    var latest = await _pluginService.GetPluginVersionInfo(pluginId, version ?? SemVersionRange.AllRelease);
+    var latest = await pluginService.GetPluginVersionInfo(pluginId, version ?? SemVersionRange.AllRelease);
     return latest.OrElseThrow(() => new PluginNotFoundException(
                                   $"Could not find plugin {pluginId} that satisfies the specified version range."));
   }
@@ -107,7 +105,7 @@ public partial class PluginsController : ControllerBase {
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(List<PluginSummary>), (int)HttpStatusCode.OK)]
   public Task<List<PluginSummary>> GetDependencyTree([FromRoute] Guid pluginId, SemVersionRange? targetVersion = null) {
-    return _pluginService.GetDependencyList(pluginId, targetVersion);
+    return pluginService.GetDependencyList(pluginId, targetVersion);
   }
 
   /// <summary>
@@ -120,7 +118,7 @@ public partial class PluginsController : ControllerBase {
   [Produces(MediaTypeNames.Text.Markdown)]
   [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
   public Task<string> GetPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId) {
-    return _pluginService.GetPluginReadme(pluginId, versionId);
+    return pluginService.GetPluginReadme(pluginId, versionId);
   }
 
   /// <summary>
@@ -138,7 +136,7 @@ public partial class PluginsController : ControllerBase {
   [ApiKey]
   public Task<string> AddPluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                       [FromBody] string readme) {
-    return _pluginService.AddPluginReadme(pluginId, versionId, readme);
+    return pluginService.AddPluginReadme(pluginId, versionId, readme);
   }
 
   /// <summary>
@@ -156,7 +154,7 @@ public partial class PluginsController : ControllerBase {
   [ApiKey]
   public Task<string> UpdatePluginReadme([FromRoute] Guid pluginId, [FromRoute] Guid versionId,
                                          [FromBody] string readme) {
-    return _pluginService.UpdatePluginReadme(pluginId, versionId, readme);
+    return pluginService.UpdatePluginReadme(pluginId, versionId, readme);
   }
 
   /// <summary>
@@ -169,7 +167,7 @@ public partial class PluginsController : ControllerBase {
   [Produces(MediaTypeNames.Application.Json)]
   [ProducesResponseType(typeof(List<SourcePatchInfo>), (int)HttpStatusCode.OK)]
   public Task<List<SourcePatchInfo>> GetPluginPatches([FromRoute] Guid pluginId, [FromRoute] Guid versionId) {
-    return _pluginService.GetSourcePatches(pluginId, versionId);
+    return pluginService.GetSourcePatches(pluginId, versionId);
   }
 
   /// <summary>
@@ -183,6 +181,6 @@ public partial class PluginsController : ControllerBase {
   [ProducesResponseType(typeof(DependencyManifest), (int)HttpStatusCode.OK)]
   public Task<DependencyManifest> GetCandidateDependencies(
       [Required, FromBody, MinLength(1)] List<PluginDependency> dependencies) {
-    return _pluginService.GetPossibleVersions(dependencies);
+    return pluginService.GetPossibleVersions(dependencies);
   }
 }

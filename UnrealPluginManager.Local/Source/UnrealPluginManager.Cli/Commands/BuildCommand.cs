@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Cli.Helpers;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
@@ -77,24 +78,22 @@ public class BuildCommandOptions : ICommandOptions {
 /// the specified engine service to perform the build operation based on the given input and optional
 /// target engine version.
 /// </remarks>
-[AutoConstructor]
 [UsedImplicitly]
-public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCommandOptions> {
-  private readonly IConsole _console;
-  private readonly IFileSystem _fileSystem;
-  private readonly IPluginManagementService _pluginManagementService;
-  private readonly IInstallService _installService;
-  private readonly IJsonService _jsonService;
-
+public class BuildCommandOptionsHandler(
+    [ReadOnly] IConsole console,
+    [ReadOnly] IFileSystem fileSystem,
+    [ReadOnly] IPluginManagementService pluginManagementService,
+    [ReadOnly] IInstallService installService,
+    [ReadOnly] IJsonService jsonService) : ICommandOptionsHandler<BuildCommandOptions> {
   /// <inheritdoc />
   public async Task<int> HandleAsync(BuildCommandOptions options, CancellationToken cancellationToken) {
-    var manifestFile = _fileSystem.FileInfo.New(options.Input);
+    var manifestFile = fileSystem.FileInfo.New(options.Input);
     await using var manifestStream = manifestFile.OpenRead();
-    var manifest = await _jsonService.DeserializeAsync<PluginManifest>(manifestStream);
+    var manifest = await jsonService.DeserializeAsync<PluginManifest>(manifestStream);
 
-    var installResult = await _installService.InstallRequirements(manifest, options.Version,
-        ["Win64"]);
-    _console.WriteVersionChanges(installResult);
+    var installResult = await installService.InstallRequirements(manifest, options.Version,
+                                                                 ["Win64"]);
+    console.WriteVersionChanges(installResult);
 
     var patchesFolder = manifestFile.Directory?
         .GetDirectories("patches", SearchOption.TopDirectoryOnly)
@@ -113,7 +112,7 @@ public partial class BuildCommandOptionsHandler : ICommandOptionsHandler<BuildCo
         .ToListAsync(cancellationToken);
 
 
-    await _pluginManagementService.BuildFromManifest(manifest, patchContents, options.Version, ["Win64"]);
+    await pluginManagementService.BuildFromManifest(manifest, patchContents, options.Version, ["Win64"]);
     return 0;
   }
 }

@@ -1,6 +1,7 @@
 ﻿using LinqKit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Database;
@@ -15,10 +16,7 @@ namespace UnrealPluginManager.Server.Auth.Validators;
 /// to edit a specific plugin. It processes user claims and performs database lookups to
 /// confirm authorization.
 /// </remarks>
-[AutoConstructor]
-public partial class PluginAuthValidator : IPluginAuthValidator {
-  private readonly CloudUnrealPluginManagerContext _dbContext;
-
+public class PluginAuthValidator([ReadOnly] CloudUnrealPluginManagerContext dbContext) : IPluginAuthValidator {
   /// <summary>
   /// Determines whether the current user has the necessary permissions to edit the specified plugin.
   /// </summary>
@@ -40,15 +38,15 @@ public partial class PluginAuthValidator : IPluginAuthValidator {
         return false;
       }
 
-      return await _dbContext.Users
+      return await dbContext.Users
           .Where(x => x.Username == context.User.Identity.Name)
           .SelectMany(x => x.Plugins)
           .AnyAsync(x => x.Name == pluginName);
     }
 
     ArgumentNullException.ThrowIfNull(context.User.Identity.Name);
-    var validPlugin = await _dbContext.Plugins
-        .LeftJoin(_dbContext.PluginOwners, x => x.Id, x => x.PluginId,
+    var validPlugin = await dbContext.Plugins
+        .LeftJoin(dbContext.PluginOwners, x => x.Id, x => x.PluginId,
                   (plugin, owner) => new {
                       Plugin = plugin,
                       owner.Owner

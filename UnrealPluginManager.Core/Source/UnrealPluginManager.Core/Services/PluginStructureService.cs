@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Core.Files.Plugins;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
@@ -10,13 +11,10 @@ namespace UnrealPluginManager.Core.Services;
 /// <summary>
 /// Provides services for managing and processing the structure of Unreal Engine plugin directories.
 /// </summary>
-[AutoConstructor]
-public partial class PluginStructureService : IPluginStructureService {
+public class PluginStructureService([ReadOnly] IJsonService jsonService) : IPluginStructureService {
   private const string Binaries = "Binaries";
   private const string Intermediate = "Intermediate";
   private const string IntermediateBuild = $"{Intermediate}/Build";
-
-  private readonly IJsonService _jsonService;
 
   /// <inheritdoc />
   public List<string> GetInstalledBinaries(IDirectoryInfo pluginDirectory) {
@@ -38,7 +36,7 @@ public partial class PluginStructureService : IPluginStructureService {
 
     PluginManifest manifest;
     await using (var stream = manifestFile.Open()) {
-      manifest = await _jsonService.DeserializeAsync<PluginManifest>(stream);
+      manifest = await jsonService.DeserializeAsync<PluginManifest>(stream);
     }
 
     var patches = await manifest.Patches
@@ -75,7 +73,7 @@ public partial class PluginStructureService : IPluginStructureService {
     using var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, true);
     var pluginEntry = zipArchive.CreateEntry("plugin.json");
     await using (var entryStream = pluginEntry.Open()) {
-      var manifestJson = _jsonService.Serialize(submission.Manifest);
+      var manifestJson = jsonService.Serialize(submission.Manifest);
       await using var jsonStream = manifestJson.ToStream();
       await jsonStream.CopyToAsync(entryStream);
     }

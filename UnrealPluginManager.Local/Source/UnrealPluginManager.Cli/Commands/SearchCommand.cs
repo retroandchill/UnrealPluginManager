@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using JetBrains.Annotations;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Model.Plugins;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -32,7 +33,7 @@ public class SearchCommand : Command<SearchCommandOptions, SearchCommandHandler>
       "search", "Searches either the local cache or a remote for plugins matching the search term.") {
     AddArgument(new Argument<string>("searchTerm", "The search term to use."));
     AddOption(new StringOption(["--remote", "-r"],
-        "The remote to search. If not specified, the local cache will be searched. Using all will search all remotes.") {
+                               "The remote to search. If not specified, the local cache will be searched. Using all will search all remotes.") {
         IsRequired = false
     });
   }
@@ -73,14 +74,11 @@ public class SearchCommandOptions : ICommandOptions {
 /// This class implements the logic for processing the SearchCommand based on the provided options.
 /// It supports both local and remote plugin search functionality.
 /// </remarks>
-[AutoConstructor]
 [UsedImplicitly]
-public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommandOptions> {
-  private readonly IConsole _console;
-  private readonly IPluginService _pluginService;
-  private readonly IPluginManagementService _pluginManagementService;
-
-
+public class SearchCommandHandler(
+    [ReadOnly] IConsole console,
+    [ReadOnly] IPluginService pluginService,
+    [ReadOnly] IPluginManagementService pluginManagementService) : ICommandOptionsHandler<SearchCommandOptions> {
   /// <inheritdoc />
   public Task<int> HandleAsync(SearchCommandOptions options, CancellationToken cancellationToken) {
     return options.Remote.Match(
@@ -92,42 +90,42 @@ public partial class SearchCommandHandler : ICommandOptionsHandler<SearchCommand
     var hasResult = false;
     foreach (var plugin in plugins) {
       hasResult = true;
-      _console.WriteLine(plugin.Name);
+      console.WriteLine(plugin.Name);
       foreach (var version in plugin.Versions) {
-        _console.WriteLine($"- {version.Version}");
+        console.WriteLine($"- {version.Version}");
       }
     }
 
     if (!hasResult) {
-      _console.WriteLine("No results found.");
+      console.WriteLine("No results found.");
     }
 
     return 0;
   }
 
   private async Task<int> ReportLocalPlugins(string searchTerm) {
-    var plugins = await _pluginService.ListPlugins(searchTerm);
+    var plugins = await pluginService.ListPlugins(searchTerm);
     return ReportPlugins(plugins);
   }
 
   private async Task<int> ReportRemotePlugins(string searchTerm, string remote) {
     if (remote.Equals("ALL", StringComparison.InvariantCultureIgnoreCase)) {
-      var plugins = await _pluginManagementService.GetPlugins(searchTerm);
+      var plugins = await pluginManagementService.GetPlugins(searchTerm);
       if (plugins.All(x => x.Value.IsFail)) {
-        _console.WriteLine("Error: Communication with remote failed.");
+        console.WriteLine("Error: Communication with remote failed.");
         return -1;
       }
 
       foreach (var (key, value) in plugins) {
-        _console.WriteLine($"Remote: {key}");
+        console.WriteLine($"Remote: {key}");
         value.Match(x => ReportPlugins(x),
-            e => _console.WriteLine($"Error: {e.Message}"));
-        _console.WriteLine("");
+                    e => console.WriteLine($"Error: {e.Message}"));
+        console.WriteLine("");
       }
 
       return 0;
     } else {
-      var plugins = await _pluginManagementService.GetPlugins(remote, searchTerm);
+      var plugins = await pluginManagementService.GetPlugins(remote, searchTerm);
       return ReportPlugins(plugins);
     }
   }
