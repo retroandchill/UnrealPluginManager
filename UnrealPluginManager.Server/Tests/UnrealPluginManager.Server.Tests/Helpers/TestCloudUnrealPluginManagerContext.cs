@@ -17,10 +17,12 @@ public sealed class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginMan
       : IDisposable, IAsyncDisposable {
 
     public void Dispose() {
+      owner._deferredDelete = null;
       owner.Dispose();
     }
 
     public async ValueTask DisposeAsync() {
+      owner._deferredDelete = null;
       await owner.DisposeAsync();
     }
   }
