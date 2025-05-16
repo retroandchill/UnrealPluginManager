@@ -1,5 +1,4 @@
 ﻿using Jab;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -9,7 +8,6 @@ using UnrealPluginManager.Core.DependencyInjection;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
-using UnrealPluginManager.Server.Auth.Policies;
 using UnrealPluginManager.Server.Auth.Validators;
 using UnrealPluginManager.Server.Clients;
 using UnrealPluginManager.Server.Database;
@@ -32,6 +30,8 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 /// </summary>
 [ServiceProvider]
 [Import(typeof(ISystemAbstractionsModule))]
+[Singleton(typeof(ISystemAbstractionsFactory), Instance = nameof(_systemAbstractionsFactory))]
+[Singleton(typeof(IDatabaseFactory<CloudUnrealPluginManagerContext>), Instance = nameof(_databaseFactory))]
 [Singleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor))]
 [Singleton(typeof(IConfiguration), Factory = nameof(GetConfiguration))]
 [Singleton(typeof(IJsonService), Factory = nameof(CreateJsonService))]
@@ -40,19 +40,25 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 [Singleton(typeof(IHostEnvironment), Factory = nameof(GetHostEnvironment))]
 [Singleton(typeof(ILogger<>), Factory = nameof(GetExceptionHandlerLogger))]
 [Scoped(typeof(UnrealPluginManagerContext), Factory = nameof(GetUnrealPluginManagerContext))]
-[Scoped(typeof(CloudUnrealPluginManagerContext))]
+[Scoped(typeof(CloudUnrealPluginManagerContext), Factory = nameof(CreateDatabaseContext))]
 [Scoped(typeof(IPluginStructureService), typeof(PluginStructureService))]
 [Scoped(typeof(IPluginService), typeof(PluginService))]
 [Scoped(typeof(IUserService), typeof(UserService))]
 [Scoped(typeof(IApiKeyValidator), typeof(ApiKeyValidator))]
 [Scoped(typeof(IPluginAuthValidator), typeof(PluginAuthValidator))]
-[Scoped(typeof(IAuthorizationHandler), typeof(CanSubmitPluginHandler))]
-[Scoped(typeof(IAuthorizationHandler), typeof(CanEditPluginHandler))]
-[Scoped(typeof(IAuthorizationHandler), typeof(CallingUserHandler))]
 [Transient(typeof(HttpClient), Factory = nameof(GetKeycloakAdminHttpClient))]
 [Transient(typeof(IKeycloakApiKeyClient), typeof(KeycloakApiKeyClient))]
 [JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>))]
-public partial class ServerServiceProvider([ReadOnly] IServiceProvider runtimeServiceProvider) {
+public partial class ServerServiceProvider(
+    [ReadOnly] IServiceProvider runtimeServiceProvider,
+    ISystemAbstractionsFactory? systemAbstractionsFactory = null,
+    IDatabaseFactory<CloudUnrealPluginManagerContext>? databaseFactory = null) {
+
+  private readonly ISystemAbstractionsFactory _systemAbstractionsFactory = systemAbstractionsFactory ??
+                                                                           new SystemAbstractionsFactory();
+  private readonly IDatabaseFactory<CloudUnrealPluginManagerContext> _databaseFactory =
+      databaseFactory ?? new CloudDatabaseFactory();
+
   private IConfiguration GetConfiguration() {
     return runtimeServiceProvider.GetRequiredService<IConfiguration>();
   }
@@ -73,6 +79,11 @@ public partial class ServerServiceProvider([ReadOnly] IServiceProvider runtimeSe
   private static CloudUnrealPluginManagerContext GetUnrealPluginManagerContext(
       CloudUnrealPluginManagerContext unrealPluginManagerContext) {
     return unrealPluginManagerContext;
+  }
+
+  private static CloudUnrealPluginManagerContext CreateDatabaseContext(
+      IServiceProvider serviceProvider, IDatabaseFactory<CloudUnrealPluginManagerContext> databaseFactory) {
+    return databaseFactory.Create(serviceProvider);
   }
 
   private HttpClient GetKeycloakAdminHttpClient() {

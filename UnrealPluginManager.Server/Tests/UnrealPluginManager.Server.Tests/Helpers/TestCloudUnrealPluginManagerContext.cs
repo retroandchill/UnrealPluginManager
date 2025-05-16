@@ -2,13 +2,37 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Server.Database;
 
 namespace UnrealPluginManager.Server.Tests.Helpers;
 
-public class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginManagerContext(CreateMockedConfig()) {
+public sealed class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginManagerContext(CreateMockedConfig()) {
 
   private SqliteConnection? _dbConnection;
+
+  private DeferredDelete? _deferredDelete;
+
+  public sealed class DeferredDelete([ReadOnly] TestCloudUnrealPluginManagerContext owner)
+      : IDisposable, IAsyncDisposable {
+
+    public void Dispose() {
+      owner.Dispose();
+    }
+
+    public async ValueTask DisposeAsync() {
+      await owner.DisposeAsync();
+    }
+  }
+
+  public DeferredDelete DefferDeletion() {
+    if (_deferredDelete is not null) {
+      return _deferredDelete;
+    }
+
+    _deferredDelete = new DeferredDelete(this);
+    return _deferredDelete;
+  }
 
   private static IConfiguration CreateMockedConfig() {
     var config = new Mock<IConfiguration>();
@@ -31,9 +55,25 @@ public class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginManagerCon
   }
 
   public override void Dispose() {
+    if (_deferredDelete is not null) {
+      return;
+    }
+
     base.Dispose();
     _dbConnection?.Dispose();
-    GC.SuppressFinalize(this);
+  }
+
+  public override async ValueTask DisposeAsync() {
+    if (_deferredDelete is not null) {
+      return;
+    }
+
+    await base.DisposeAsync();
+    if (_dbConnection is null) {
+      return;
+    }
+
+    await _dbConnection.DisposeAsync();
   }
 
 }

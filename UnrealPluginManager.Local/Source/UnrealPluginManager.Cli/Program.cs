@@ -16,6 +16,6 @@ var rootCommand = new RootCommand {
 var builder = new CommandLineBuilder(rootCommand)
     .UseDefaults()
     .UseCustomExceptionHandler()
-    .UseDependencyInjection();
+    .UseDependencyInjection(console => new CliServiceProvider(console));
 
 await builder.Build().InvokeAsync(args);

@@ -38,6 +38,7 @@ namespace UnrealPluginManager.Local.DependencyInjection;
 [Scoped(typeof(ISourceDownloadService), typeof(SourceDownloadService))]
 [Scoped(typeof(IInstallService), typeof(InstallService))]
 public interface ILocalServiceProviderModule {
+
   /// <summary>
   /// Creates and returns an instance of JsonService configured with specific serialization options.
   /// The options include camel case property naming, camel case dictionary key naming, and indented output.

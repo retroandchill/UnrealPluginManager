@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using Jab;
 using UnrealPluginManager.Cli.Commands;
+using UnrealPluginManager.Core.DependencyInjection;
 using UnrealPluginManager.Local.DependencyInjection;
 
 namespace UnrealPluginManager.Cli.DependencyInjection;
@@ -15,11 +16,18 @@ namespace UnrealPluginManager.Cli.DependencyInjection;
 [ServiceProvider]
 [Import(typeof(ILocalServiceProviderModule))]
 [Singleton(typeof(IConsole), Instance = nameof(Console))]
+[Singleton(typeof(ISystemAbstractionsFactory), Instance = nameof(_systemAbstractionsFactory))]
 [Scoped(typeof(ICommandOptionsHandler<BuildCommandOptions>), typeof(BuildCommandHandler))]
 [Scoped(typeof(ICommandOptionsHandler<InstallCommandOptions>), typeof(InstallCommandHandler))]
 [Scoped(typeof(ICommandOptionsHandler<SearchCommandOptions>), typeof(SearchCommandHandler))]
 [Scoped(typeof(ICommandOptionsHandler<UploadCommandOptions>), typeof(UploadCommandHandler))]
 [Scoped(typeof(ICommandOptionsHandler<VersionsCommandOptions>), typeof(VersionsCommandHandler))]
-public sealed partial class CliServiceProvider(IConsole console) {
+public sealed partial class CliServiceProvider(
+    IConsole console,
+    ISystemAbstractionsFactory? systemAbstractionsFactory = null) {
+
+  private readonly ISystemAbstractionsFactory _systemAbstractionsFactory =
+      systemAbstractionsFactory ?? new SystemAbstractionsFactory();
+
   private IConsole Console { get; } = console;
 }
