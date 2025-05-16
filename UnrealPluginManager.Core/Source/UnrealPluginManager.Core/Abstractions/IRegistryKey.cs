@@ -1,6 +1,4 @@
-﻿using System.Runtime.Versioning;
-
-namespace UnrealPluginManager.Core.Abstractions;
+﻿namespace UnrealPluginManager.Core.Abstractions;
 
 /// <summary>
 /// Represents an abstraction for interacting with a Windows registry key.
@@ -9,7 +7,6 @@ namespace UnrealPluginManager.Core.Abstractions;
 /// This interface provides methods to navigate and retrieve data from registry keys.
 /// It is platform-specific and only supported on Windows.
 /// </remarks>
-[SupportedOSPlatform("windows")]
 public interface IRegistryKey {
   /// <summary>
   /// Opens a subkey within the current registry key.

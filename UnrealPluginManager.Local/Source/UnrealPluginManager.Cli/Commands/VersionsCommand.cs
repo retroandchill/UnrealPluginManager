@@ -18,8 +18,8 @@ namespace UnrealPluginManager.Cli.Commands;
 /// The command is integrated with specific options and a handler to execute the required logic for listing the engine versions.
 /// </remarks>
 public class VersionsCommand()
-    : Command<VersionsCommandOptions, VersionsCommandOptionsHandler>("versions",
-                                                                     "Lists all installed engine versions.");
+    : Command<VersionsCommandOptions>("versions",
+                                      "Lists all installed engine versions.");
 
 /// <summary>
 /// Represents the options required for the VersionsCommand in the CLI interface.
@@ -42,8 +42,7 @@ public class VersionsCommandOptions : ICommandOptions;
 /// The class interacts with the IEngineService to retrieve engine version details and utilizes
 /// the console for displaying the results.
 /// </remarks>
-[UsedImplicitly]
-public class VersionsCommandOptionsHandler(
+public class VersionsCommandHandler(
     [ReadOnly] IConsole console,
     [ReadOnly] IEnvironment environment,
     [ReadOnly] IEngineService engineService) : ICommandOptionsHandler<VersionsCommandOptions> {

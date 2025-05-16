@@ -19,7 +19,7 @@ using StringOption = Option<string>;
 /// If the "all" option is provided for the remote, the search will be executed across all configured remotes.
 /// This class extends the base <c>Command</c>, defining required arguments and options for search functionality.
 /// </remarks>
-public class SearchCommand : Command<SearchCommandOptions, SearchCommandHandler> {
+public class SearchCommand : Command<SearchCommandOptions> {
   /// <summary>
   /// Represents a search command designed to query the local cache or specified remote locations for plugins matching a search term.
   /// </summary>
@@ -74,7 +74,6 @@ public class SearchCommandOptions : ICommandOptions {
 /// This class implements the logic for processing the SearchCommand based on the provided options.
 /// It supports both local and remote plugin search functionality.
 /// </remarks>
-[UsedImplicitly]
 public class SearchCommandHandler(
     [ReadOnly] IConsole console,
     [ReadOnly] IPluginService pluginService,

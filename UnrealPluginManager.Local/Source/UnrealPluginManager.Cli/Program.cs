@@ -1,14 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
-using Microsoft.Extensions.DependencyInjection;
 using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Cli.DependencyInjection;
 using UnrealPluginManager.Cli.Exceptions;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Utils;
-using UnrealPluginManager.Local.Database;
-using UnrealPluginManager.Local.Utils;
 
 var rootCommand = new RootCommand {
     new VersionsCommand(),
@@ -21,12 +16,6 @@ var rootCommand = new RootCommand {
 var builder = new CommandLineBuilder(rootCommand)
     .UseDefaults()
     .UseCustomExceptionHandler()
-    .UseDependencyInjection(services => {
-      services.AddSystemAbstractions()
-          .AddDbContext<UnrealPluginManagerContext, LocalUnrealPluginManagerContext>()
-          .AddCoreServices()
-          .AddLocalServices()
-          .AddApis();
-    });
+    .UseDependencyInjection(console => new CliServiceProvider(console));
 
 await builder.Build().InvokeAsync(args);

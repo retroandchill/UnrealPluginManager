@@ -17,8 +17,8 @@ namespace UnrealPluginManager.Cli.Commands;
 /// <example>
 /// The command supports arguments and options to specify the desired behavior.
 /// </example>
-/// <seealso cref="Command{TOptions, TOptionsHandler}" />
-public class UploadCommand : Command<UploadCommandOptions, UploadCommandOptionsHandler> {
+/// <seealso cref="Command{TOptions}" />
+public class UploadCommand : Command<UploadCommandOptions> {
   /// <summary>
   /// Represents a command for uploading a plugin to a remote destination in the Unreal Plugin Manager CLI.
   /// </summary>
@@ -26,7 +26,7 @@ public class UploadCommand : Command<UploadCommandOptions, UploadCommandOptionsH
   /// This command provides functionality for specifying the plugin name, version, and optionally a remote target.
   /// It is utilized to publish or share plugins via specified endpoints or repositories.
   /// </remarks>
-  /// <seealso cref="Command{TOptions, TOptionsHandler}" />
+  /// <seealso cref="Command{TOptions}" />
   public UploadCommand() : base("upload", "Uploads a plugin to the specified remote.") {
     AddArgument(new Argument<string>("name", "The name of the plugin to upload"));
     AddOption(new Option<SemVersion>(["-v", "--version"], description: "The version of the plugin to upload",
@@ -93,8 +93,7 @@ public class UploadCommandOptions : ICommandOptions {
 /// on the user-provided input.
 /// </remarks>
 /// <seealso cref="ICommandOptionsHandler{UploadCommandOptions}" />
-[UsedImplicitly]
-public class UploadCommandOptionsHandler(
+public class UploadCommandHandler(
     [ReadOnly] IConsole console,
     [ReadOnly] IPluginManagementService pluginManagementService) : ICommandOptionsHandler<UploadCommandOptions> {
   /// <inheritdoc />

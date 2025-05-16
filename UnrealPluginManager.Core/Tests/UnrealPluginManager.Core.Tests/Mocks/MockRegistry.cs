@@ -10,7 +10,6 @@ namespace UnrealPluginManager.Core.Tests.Mocks;
 /// This class simulates the behavior of the Windows registry, allowing tests to interact with a virtual registry
 /// instead of the actual system registry. It is designed to work with Windows and adheres to the <see cref="SupportedOSPlatformAttribute"/> for "windows".
 /// </remarks>
-[SupportedOSPlatform("windows")]
 public class MockRegistry : IRegistry {
   /// <inheritdoc />
   public IRegistryKey LocalMachine { get; set; } = new MockRegistryKey();

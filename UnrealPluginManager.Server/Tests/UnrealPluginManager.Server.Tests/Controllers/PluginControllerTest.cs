@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
-using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.Model.Plugins.Recipes;
 using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Core.Utils;
@@ -25,8 +24,9 @@ public class PluginControllerTest {
     _client = _factory.CreateClient();
     _pluginsApi = new PluginsApi(_client);
     _serviceProvider = _factory.Services;
-    _serviceProvider.GetRequiredService<UnrealPluginManagerContext>()
+    _serviceProvider.GetRequiredService<TestCloudUnrealPluginManagerContext>()
         .Database.EnsureCreated();
+    _serviceProvider.GetRequiredService<TestCloudUnrealPluginManagerContext.DeferredDelete>();
     _jsonService = _serviceProvider.GetRequiredService<IJsonService>();
   }
 
