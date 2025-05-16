@@ -4,24 +4,14 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Retro.SimplePage.Requests;
-using UnrealPluginManager.Core.Database;
-using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.Auth;
 using UnrealPluginManager.Server.Auth.ApiKey;
 using UnrealPluginManager.Server.Auth.Policies;
-using UnrealPluginManager.Server.Auth.Validators;
 using UnrealPluginManager.Server.Binding;
-using UnrealPluginManager.Server.Clients;
-using UnrealPluginManager.Server.Database;
-using UnrealPluginManager.Server.Exceptions;
+using UnrealPluginManager.Server.DependencyInjection;
 using UnrealPluginManager.Server.Formatters;
-using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.Utils;
 
@@ -42,35 +32,6 @@ public static class ServerServiceUtils {
   }
 
   /// <summary>
-  /// Adds authentication and authorization services to the application's service collection.
-  /// </summary>
-  /// <param name="services">The <see cref="IServiceCollection"/> to which the authentication and authorization services are added.</param>
-  /// <returns>The updated <see cref="IServiceCollection"/> with the authentication and authorization services configured.</returns>
-  public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services.AddHttpContextAccessor()
-        .AddScoped<IApiKeyValidator, ApiKeyValidator>()
-        .AddScoped<IPluginAuthValidator, PluginAuthValidator>()
-        .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CallingUserHandler>();
-  }
-
-  /// <summary>
-  /// Registers server-specific services within the application's service collection.
-  /// </summary>
-  /// <param name="services">The <see cref="IServiceCollection"/> where the server services will be added.</param>
-  /// <returns>The updated <see cref="IServiceCollection"/> containing the registered server services.</returns>
-  public static IServiceCollection AddServerServices(this IServiceCollection services) {
-    return services
-        .AddSingleton<IStorageService, CloudStorageService>()
-        .AddSingleton<IJsonService>(provider => {
-          var options = provider.GetRequiredService<IOptions<JsonOptions>>();
-          return new JsonService(options.Value.JsonSerializerOptions);
-        })
-        .AddScoped<IUserService, UserService>();
-  }
-
-  /// <summary>
   /// Configures the application for production use by applying common configuration,
   /// registering essential services, and configuring database contexts.
   /// </summary>
@@ -78,10 +39,9 @@ public static class ServerServiceUtils {
   /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
   public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
     builder.SetUpCommonConfiguration();
-    builder.Services.AddProblemDetails();
-    builder.Services.AddSystemAbstractions()
+    builder.Services.AddProblemDetails()
         .AddServiceConfigs()
-        .AddDbContext<UnrealPluginManagerContext, CloudUnrealPluginManagerContext>();
+        .AddJabServices();
     return builder;
   }
 
@@ -147,13 +107,7 @@ public static class ServerServiceUtils {
         .AddPolicy(AuthorizationPolicies.CallingUser, policy =>
             policy.Requirements.Add(new CallingUserRequirement()));
     builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
-        .AddClientCredentialsTokenHandler("Keycloak")
-        .AddTypedClient<IKeycloakApiKeyClient, KeycloakApiKeyClient>();
-
-    builder.Services.AddCoreServices()
-        .AddServerServices()
-        .AddAuthServices()
-        .AddExceptionHandler<ServerExceptionHandler>();
+        .AddClientCredentialsTokenHandler("Keycloak");
 
     builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
 
