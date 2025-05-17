@@ -1,4 +1,5 @@
 ﻿using Jab;
+using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
@@ -14,4 +15,15 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 /// </remarks>
 [ServiceProviderModule]
 [Scoped<IUserService, UserService>]
-public interface IServerServiceModule;
+[Scoped<IPluginUserService, PluginUserService>]
+[Transient<IPluginOwnerService>(Factory = nameof(GetPluginUserService))]
+public interface IServerServiceModule {
+  /// <summary>
+  /// Retrieves an instance of <see cref="IPluginUserService"/>.
+  /// </summary>
+  /// <param name="pluginUserService">An instance of <see cref="IPluginUserService"/> to be returned.</param>
+  /// <returns>Returns the provided instance of <see cref="IPluginUserService"/>.</returns>
+  static IPluginUserService GetPluginUserService(IPluginUserService pluginUserService) {
+    return pluginUserService;
+  }
+}

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Retro.ReadOnlyParams.Annotations;
 using UnrealPluginManager.Core.Exceptions;
 using UnrealPluginManager.Server.Database;
 using UnrealPluginManager.Server.Database.Users;
@@ -10,19 +11,17 @@ namespace UnrealPluginManager.Server.Services;
 /// Service responsible for managing user interactions with plugins, including
 /// assigning initial ownership to a plugin. Implements <see cref="IPluginUserService"/>.
 /// </summary>
-[AutoConstructor]
-public partial class PluginUserService : IPluginUserService {
-  private readonly IHttpContextAccessor _httpContextAccessor;
-  private readonly CloudUnrealPluginManagerContext _dbContext;
-
+public class PluginUserService(
+    [ReadOnly] IHttpContextAccessor httpContextAccessor,
+    [ReadOnly] CloudUnrealPluginManagerContext dbContext) : IPluginUserService {
   /// <inheritdoc />
   public async Task<bool> AssignInitialOwnershipOfPlugin(Guid pluginId) {
-    var username = _httpContextAccessor.HttpContext?.User.Identity?.Name;
+    var username = httpContextAccessor.HttpContext?.User.Identity?.Name;
     if (username is null) {
       return false;
     }
 
-    var userId = await _dbContext.Users
+    var userId = await dbContext.Users
         .Where(x => x.Username == username)
         .Select(x => (Guid?)x.Id)
         .FirstOrDefaultAsync();
@@ -30,7 +29,7 @@ public partial class PluginUserService : IPluginUserService {
       return false;
     }
 
-    if (!await _dbContext.UserPlugins
+    if (!await dbContext.UserPlugins
             .AnyAsync(x => x.PluginId == pluginId)) {
       throw new BadArgumentException("Can only assign initial ownership to a plugin with no pre-existing owners");
     }
@@ -40,8 +39,8 @@ public partial class PluginUserService : IPluginUserService {
         UserId = userId.Value,
         Role = UserPluginRole.Owner
     };
-    _dbContext.UserPlugins.Add(userPlugin);
-    await _dbContext.SaveChangesAsync();
+    dbContext.UserPlugins.Add(userPlugin);
+    await dbContext.SaveChangesAsync();
     return true;
   }
 }

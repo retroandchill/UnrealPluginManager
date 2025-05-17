@@ -4,6 +4,9 @@ using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
 
+/// <summary>
+/// Represents data encapsulating an attribute and its associated service type.
+/// </summary>
 public record struct AttributeTypeData(Attribute Attribute, Type ServiceType);
 
 /// <summary>
