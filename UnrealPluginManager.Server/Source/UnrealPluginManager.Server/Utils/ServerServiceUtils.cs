@@ -38,8 +38,7 @@ public static class ServerServiceUtils {
   /// <param name="services">The <see cref="IServiceCollection"/> to which the authentication and authorization services are added.</param>
   /// <returns>The updated <see cref="IServiceCollection"/> with the authentication and authorization services configured.</returns>
   public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services.AddHttpContextAccessor()
-        .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
+    return services.AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
         .AddScoped<IAuthorizationHandler, CanEditPluginHandler>()
         .AddScoped<IAuthorizationHandler, CallingUserHandler>();
   }
@@ -51,11 +50,11 @@ public static class ServerServiceUtils {
   /// <param name="builder">The <see cref="WebApplicationBuilder"/> used to configure the application.</param>
   /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
   public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
+    builder.Host.UseServiceProviderFactory(new ServerServiceProviderFactory());
     builder.SetUpCommonConfiguration();
     builder.Services.AddAuthServices()
         .AddProblemDetails()
-        .AddServiceConfigs()
-        .AddJabServices();
+        .AddServiceConfigs();
     return builder;
   }
 

@@ -7,6 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <DefineConstants>$(DefineConstants);JAB_ATTRIBUTES_PACKAGE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,6 +21,7 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+        <PackageReference Include="Jab" Version="0.11.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.4"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
         <PackageReference Include="Moq" Version="4.20.72"/>

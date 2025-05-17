@@ -11,31 +11,6 @@ public sealed class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginMan
 
   private SqliteConnection? _dbConnection;
 
-  private DeferredDelete? _deferredDelete;
-
-  public sealed class DeferredDelete([ReadOnly] TestCloudUnrealPluginManagerContext owner)
-      : IDisposable, IAsyncDisposable {
-
-    public void Dispose() {
-      owner._deferredDelete = null;
-      owner.Dispose();
-    }
-
-    public async ValueTask DisposeAsync() {
-      owner._deferredDelete = null;
-      await owner.DisposeAsync();
-    }
-  }
-
-  public DeferredDelete DefferDeletion() {
-    if (_deferredDelete is not null) {
-      return _deferredDelete;
-    }
-
-    _deferredDelete = new DeferredDelete(this);
-    return _deferredDelete;
-  }
-
   private static IConfiguration CreateMockedConfig() {
     var config = new Mock<IConfiguration>();
     var mockSection = new Mock<IConfigurationSection>();
@@ -57,19 +32,11 @@ public sealed class TestCloudUnrealPluginManagerContext() : CloudUnrealPluginMan
   }
 
   public override void Dispose() {
-    if (_deferredDelete is not null) {
-      return;
-    }
-
     base.Dispose();
     _dbConnection?.Dispose();
   }
 
   public override async ValueTask DisposeAsync() {
-    if (_deferredDelete is not null) {
-      return;
-    }
-
     await base.DisposeAsync();
     if (_dbConnection is null) {
       return;

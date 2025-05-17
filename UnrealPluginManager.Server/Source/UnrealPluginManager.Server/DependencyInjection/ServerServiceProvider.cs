@@ -17,76 +17,43 @@ using UnrealPluginManager.Server.Services;
 namespace UnrealPluginManager.Server.DependencyInjection;
 
 /// <summary>
-/// The ServerServiceProvider class is a service provider implementation that manages dependency injection
-/// and service resolution for the Unreal Plugin Manager server application. It is responsible for
-/// configuring and providing the necessary services and dependencies required by the application.
-/// This class uses attributes to specify injection behaviors and service lifetimes
-/// such as Singleton, Scoped, and Transient. Furthermore, it integrates with different interfaces
-/// and factory methods to set up various services and modules.
+/// The ServerServiceProvider class is a specialized service provider for managing dependency injection
+/// and resolving services within the Unreal Plugin Manager server application. It serves as a
+/// centralized platform for handling application-level dependencies, configuring modules, and
+/// managing service lifetimes.
 /// <remarks>
-/// The class integrates custom configuration methods and factory logic for specific services
-/// such as JSON handling, storage, authorization, plugin management, and HTTP client services for Keycloak.
+/// This class integrates various modules essential for the server application, including system abstractions,
+/// authentication services, cloud database support, Keycloak client handling, and server-specific modules.
+/// Custom configuration and lifecycle handling mechanisms are implemented for optimal service management.
 /// </remarks>
 /// </summary>
 [ServiceProvider]
-[Import(typeof(ISystemAbstractionsModule))]
-[Singleton(typeof(ISystemAbstractionsFactory), Instance = nameof(_systemAbstractionsFactory))]
-[Singleton(typeof(IDatabaseFactory<CloudUnrealPluginManagerContext>), Instance = nameof(_databaseFactory))]
-[Singleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor))]
-[Singleton(typeof(IConfiguration), Factory = nameof(GetConfiguration))]
-[Singleton(typeof(IJsonService), Factory = nameof(CreateJsonService))]
-[Singleton(typeof(IStorageService), typeof(CloudStorageService))]
-[Singleton(typeof(IExceptionHandler), typeof(ServerExceptionHandler))]
-[Singleton(typeof(IHostEnvironment), Factory = nameof(GetHostEnvironment))]
-[Singleton(typeof(ILogger<>), Factory = nameof(GetExceptionHandlerLogger))]
-[Scoped(typeof(UnrealPluginManagerContext), Factory = nameof(GetUnrealPluginManagerContext))]
-[Scoped(typeof(CloudUnrealPluginManagerContext), Factory = nameof(CreateDatabaseContext))]
-[Scoped(typeof(IPluginStructureService), typeof(PluginStructureService))]
-[Scoped(typeof(IPluginService), typeof(PluginService))]
-[Scoped(typeof(IUserService), typeof(UserService))]
-[Scoped(typeof(IApiKeyValidator), typeof(ApiKeyValidator))]
-[Scoped(typeof(IPluginAuthValidator), typeof(PluginAuthValidator))]
-[Transient(typeof(HttpClient), Factory = nameof(GetKeycloakAdminHttpClient))]
-[Transient(typeof(IKeycloakApiKeyClient), typeof(KeycloakApiKeyClient))]
+[Import<ISystemAbstractionsModule>]
+[Import<IWebContextModule>]
+[Import<IAuthModule>]
+[Import<IServerIoModule>]
+[Import<ICoreServicesModule>]
+[Import<ICloudDatabaseModule>]
+[Import<IKeycloakClientModule>]
+[Import<IServerServiceModule>]
+[Singleton<ServiceProviderWrapper>(Instance = nameof(RuntimeServiceProvider))]
 [JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>))]
-public partial class ServerServiceProvider(
-    [ReadOnly] IServiceProvider runtimeServiceProvider,
-    ISystemAbstractionsFactory? systemAbstractionsFactory = null,
-    IDatabaseFactory<CloudUnrealPluginManagerContext>? databaseFactory = null) {
+public sealed partial class ServerServiceProvider(IServiceProvider runtimeServiceProvider) : IServerServiceProvider {
+  private ServiceProviderWrapper RuntimeServiceProvider { get; } = new(runtimeServiceProvider);
 
-  private readonly ISystemAbstractionsFactory _systemAbstractionsFactory = systemAbstractionsFactory ??
-                                                                           new SystemAbstractionsFactory();
-  private readonly IDatabaseFactory<CloudUnrealPluginManagerContext> _databaseFactory =
-      databaseFactory ?? new CloudDatabaseFactory();
-
-  private IConfiguration GetConfiguration() {
-    return runtimeServiceProvider.GetRequiredService<IConfiguration>();
+  IServerServiceProvider.IScope IServerServiceProvider.CreateScope() {
+    return CreateScope();
   }
 
-  private IHostEnvironment GetHostEnvironment() {
-    return runtimeServiceProvider.GetRequiredService<IHostEnvironment>();
-  }
-
-  private ILogger<T> GetExceptionHandlerLogger<T>() {
-    return runtimeServiceProvider.GetRequiredService<ILogger<T>>();
-  }
-
-  private JsonService CreateJsonService() {
-    var options = runtimeServiceProvider.GetRequiredService<IOptions<JsonOptions>>();
-    return new JsonService(options.Value.JsonSerializerOptions);
-  }
-
-  private static CloudUnrealPluginManagerContext GetUnrealPluginManagerContext(
-      CloudUnrealPluginManagerContext unrealPluginManagerContext) {
-    return unrealPluginManagerContext;
-  }
-
-  private static CloudUnrealPluginManagerContext CreateDatabaseContext(
-      IServiceProvider serviceProvider, IDatabaseFactory<CloudUnrealPluginManagerContext> databaseFactory) {
-    return databaseFactory.Create(serviceProvider);
-  }
-
-  private HttpClient GetKeycloakAdminHttpClient() {
-    return runtimeServiceProvider.GetRequiredKeyedService<HttpClient>("keycloak_admin_api");
-  }
+  /// <summary>
+  /// The Scope class represents a nested, scoped service provider within the Unreal Plugin Manager
+  /// server application. It is designed to manage service lifetimes for specific contexts, providing
+  /// dependency resolutions that are limited to the defined scope lifecycle.
+  /// <remarks>
+  /// This class implements the IServerServiceProvider.IScope interface, which includes IServiceProvider
+  /// and IServiceScope, offering support for scoped dependency injection. It allows for encapsulated
+  /// resource management and ensures proper disposal of resources tied to a specific service scope.
+  /// </remarks>
+  /// </summary>
+  public sealed partial class Scope : IServerServiceProvider.IScope;
 }
