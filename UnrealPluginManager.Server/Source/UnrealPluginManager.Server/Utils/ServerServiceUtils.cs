@@ -38,7 +38,7 @@ public static class ServerServiceUtils {
   /// <param name="builder">The <see cref="WebApplicationBuilder"/> used to configure the application.</param>
   /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
   public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
-    builder.Host.UseServiceProviderFactory(new ServerServiceProviderFactory());
+    builder.Host.UseServiceProviderFactory(new ServerServiceProviderFactory(builder.Configuration));
     builder.SetUpCommonConfiguration();
     builder.Services.AddProblemDetails()
         .AddServiceConfigs();
@@ -78,9 +78,18 @@ public static class ServerServiceUtils {
             }
         );
 
+    builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
+        .AddClientCredentialsTokenHandler("Keycloak");
+
+    builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
+
+    return builder;
+  }
+
+  public static IServiceCollection ConfigureAuth(this IServiceCollection services, IConfiguration configuration) {
     const string smartScheme = "Smart";
 
-    builder.Services.AddAuthentication(options => {
+    services.AddAuthentication(options => {
           options.DefaultScheme = smartScheme;
           options.DefaultChallengeScheme = smartScheme;
         })
@@ -97,16 +106,8 @@ public static class ServerServiceUtils {
           };
         })
         .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(AuthenticationSchemes.ApiKey, _ => { })
-        .AddKeycloakWebApi(builder.Configuration);
-    builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
-        .AddClientCredentialsTokenHandler("Keycloak");
+        .AddKeycloakWebApi(configuration);
 
-    builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
-
-    return builder;
-  }
-
-  public static IServiceCollection ConfigureAuth(this IServiceCollection services) {
     services.AddAuthorizationBuilder()
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
                        policy.Requirements.Add(new CanSubmitPluginRequirement()))

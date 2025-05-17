@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using UnrealPluginManager.Core.Utils;
 using UnrealPluginManager.Server.DependencyInjection;
 using UnrealPluginManager.Server.Utils;
 
@@ -10,9 +13,18 @@ public class TestServerServiceProviderFactory : IServiceProviderFactory<IService
   }
 
   public IServiceProvider CreateServiceProvider(IServiceCollection containerBuilder) {
-    return containerBuilder
+    var configuration = containerBuilder.Where(x => x.ServiceType == typeof(IConfiguration))
+        .Select(x => x.ImplementationInstance ?? x.ImplementationFactory?.Invoke(null))
+        .OfType<IConfiguration>()
+        .FirstOrDefault();
+
+    var services = containerBuilder
         .AddJabServices(p => new TestServerServiceProvider(p))
-        .ConfigureAuth()
-        .BuildServiceProvider();
+        .ConfigureAuth(configuration.RequireNonNull());
+
+    services.AddAuthentication("Test")
+        .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", null);
+
+    return services.BuildServiceProvider();
   }
 }

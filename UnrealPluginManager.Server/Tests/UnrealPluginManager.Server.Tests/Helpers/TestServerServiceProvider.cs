@@ -12,6 +12,7 @@ namespace UnrealPluginManager.Server.Tests.Helpers;
 [ServiceProvider]
 [Import<IMockAbstractionsModule>]
 [Import<IWebContextModule>]
+[Import<IAuthenticationModule>]
 [Import<IAuthorizationModule>]
 [Import<IServerIoModule>]
 [Import<ICoreServicesModule>]
@@ -20,12 +21,13 @@ namespace UnrealPluginManager.Server.Tests.Helpers;
 [Singleton<ServiceProviderWrapper>(Instance = nameof(RuntimeServiceProvider))]
 [JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>),
                 typeof(IOptions<>))]
-public partial class TestServerServiceProvider(IServiceProvider runtimeServiceProvider) : IServerServiceProvider {
+public sealed partial class TestServerServiceProvider(IServiceProvider runtimeServiceProvider)
+    : IServerServiceProvider {
   private ServiceProviderWrapper RuntimeServiceProvider { get; } = new(runtimeServiceProvider);
 
   IServerServiceProvider.IScope IServerServiceProvider.CreateScope() {
     return CreateScope();
   }
 
-  public partial class Scope : IServerServiceProvider.IScope;
+  public sealed partial class Scope : IServerServiceProvider.IScope;
 }

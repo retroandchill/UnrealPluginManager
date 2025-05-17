@@ -1,4 +1,5 @@
-﻿using UnrealPluginManager.Server.Utils;
+﻿using Retro.ReadOnlyParams.Annotations;
+using UnrealPluginManager.Server.Utils;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
 
@@ -11,7 +12,8 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 /// for the server's dependency injection container. It integrates with Jab extensions
 /// and custom modules used in the server.
 /// </remarks>
-public class ServerServiceProviderFactory : IServiceProviderFactory<IServiceCollection> {
+public class ServerServiceProviderFactory([ReadOnly] IConfiguration configuration)
+    : IServiceProviderFactory<IServiceCollection> {
   /// <summary>
   /// Creates a builder for the <see cref="IServiceCollection"/> that can be used to configure
   /// services for the dependency injection container in the server application.
@@ -38,7 +40,7 @@ public class ServerServiceProviderFactory : IServiceProviderFactory<IServiceColl
   public IServiceProvider CreateServiceProvider(IServiceCollection containerBuilder) {
     return containerBuilder
         .AddJabServices(p => new ServerServiceProvider(p))
-        .ConfigureAuth()
+        .ConfigureAuth(configuration)
         .BuildServiceProvider();
   }
 }
