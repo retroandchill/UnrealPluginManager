@@ -30,8 +30,7 @@ public interface IServerIoModule {
   /// A newly created instance of <see cref="JsonService"/> configured with
   /// options retrieved from the service provider.
   /// </returns>
-  static JsonService CreateJsonService(ServiceProviderWrapper serviceProvider) {
-    var options = serviceProvider.GetRequiredService<IOptions<JsonOptions>>();
+  static JsonService CreateJsonService(IOptions<JsonOptions> options) {
     return new JsonService(options.Value.JsonSerializerOptions);
   }
 }

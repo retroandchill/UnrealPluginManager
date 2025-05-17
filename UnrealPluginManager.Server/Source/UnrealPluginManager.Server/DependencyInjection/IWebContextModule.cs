@@ -1,10 +1,7 @@
 ﻿using Jab;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using UnrealPluginManager.Core.Services;
 using UnrealPluginManager.Server.Exceptions;
-using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
 
@@ -24,6 +21,7 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 [Singleton<IConfiguration>(Factory = nameof(GetConfiguration))]
 [Singleton<IHostEnvironment>(Factory = nameof(GetHostEnvironment))]
 [Singleton(typeof(ILogger<>), Factory = nameof(GetLogger))]
+[Singleton(typeof(IOptions<>), Factory = nameof(GetOptions))]
 public interface IWebContextModule {
   /// Retrieves an `IConfiguration` instance from the provided `ServiceProviderWrapper`.
   /// <param name="serviceProvider">
@@ -57,5 +55,8 @@ public interface IWebContextModule {
   static ILogger<T> GetLogger<T>(ServiceProviderWrapper serviceProvider) {
     return serviceProvider.GetRequiredService<ILogger<T>>();
   }
-  
+
+  static IOptions<T> GetOptions<T>(ServiceProviderWrapper serviceProvider) where T : class {
+    return serviceProvider.GetRequiredService<IOptions<T>>();
+  }
 }

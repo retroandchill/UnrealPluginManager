@@ -1,18 +1,6 @@
 ﻿using Jab;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Retro.ReadOnlyParams.Annotations;
-using UnrealPluginManager.Core.Database;
 using UnrealPluginManager.Core.DependencyInjection;
-using UnrealPluginManager.Core.Services;
-using UnrealPluginManager.Server.Auth;
-using UnrealPluginManager.Server.Auth.ApiKey;
-using UnrealPluginManager.Server.Auth.Validators;
-using UnrealPluginManager.Server.Clients;
-using UnrealPluginManager.Server.Database;
-using UnrealPluginManager.Server.Exceptions;
-using UnrealPluginManager.Server.Services;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
 
@@ -37,7 +25,8 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 [Import<IKeycloakClientModule>]
 [Import<IServerServiceModule>]
 [Singleton<ServiceProviderWrapper>(Instance = nameof(RuntimeServiceProvider))]
-[JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>))]
+[JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>),
+                typeof(IOptions<>))]
 public sealed partial class ServerServiceProvider(IServiceProvider runtimeServiceProvider) : IServerServiceProvider {
   private ServiceProviderWrapper RuntimeServiceProvider { get; } = new(runtimeServiceProvider);
 

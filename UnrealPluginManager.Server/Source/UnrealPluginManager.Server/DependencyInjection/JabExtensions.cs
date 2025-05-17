@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
 using Jab;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using UnrealPluginManager.Core.Utils;
 
 namespace UnrealPluginManager.Server.DependencyInjection;
+
+public record struct AttributeTypeData(Attribute Attribute, Type ServiceType);
 
 /// <summary>
 /// Provides extension methods for configuring and injecting services into the dependency injection container
@@ -41,14 +42,8 @@ public static class JabExtensions {
           return serverProvider.CreateScope();
         });
 
-    foreach (var attribute in providerType.GetInjectionAttributes()) {
-      var typedAttribute = attribute.GetType().GetProperty(nameof(SingletonAttribute.ServiceType));
-      var serviceType = typedAttribute?.GetValue(attribute) as Type;
-      serviceType.RequireNonNull();
-      if (IsInvalidType(serviceType, excludedTypes)) {
-        continue;
-      }
-
+    foreach (var (attribute, serviceType) in providerType.GetInjectionAttributes()
+                 .Where(x => !IsInvalidType(x.ServiceType, excludedTypes))) {
       var attributeType = attribute.GetType();
       if (attributeType.IsBaseOf<SingletonAttribute>()) {
         services.AddSingleton(serviceType, p => {
@@ -71,13 +66,12 @@ public static class JabExtensions {
     return services;
   }
 
-  private static IEnumerable<Attribute> GetInjectionAttributes(this Type type) {
-
+  private static IEnumerable<AttributeTypeData> GetInjectionAttributes(this Type type) {
     return type.GetCustomAttributes()
         .Where(IsJabAttribute)
         .SelectMany(x => {
           if (!x.GetType().IsBaseOf(typeof(ImportAttribute))) {
-            return [x];
+            return [x.GetAttributeTypeData()];
           }
 
           var property = x.GetType().GetProperty(nameof(ImportAttribute.ModuleType));
@@ -85,13 +79,12 @@ public static class JabExtensions {
           moduleType.RequireNonNull();
           return moduleType.GetInjectionAttributes();
         });
-
   }
 
   private static bool IsJabAttribute(Attribute attribute) {
     return attribute.GetType().IsBaseOfAny([
         typeof(ImportAttribute),
-        typeof(SingletonAttribute), 
+        typeof(SingletonAttribute),
         typeof(ScopedAttribute),
         typeof(TransientAttribute)
     ]);
@@ -105,12 +98,19 @@ public static class JabExtensions {
     if (type.Namespace != nameof(Jab)) {
       return false;
     }
-    
+
     if (baseType.FullName == type.FullName) {
       return true;
     }
-    
+
     return type.BaseType is not null && IsBaseOf(type.BaseType, baseType);
+  }
+
+  private static AttributeTypeData GetAttributeTypeData(this Attribute attribute) {
+    var typedAttribute = attribute.GetType().GetProperty(nameof(SingletonAttribute.ServiceType));
+    var serviceType = typedAttribute?.GetValue(attribute) as Type;
+    serviceType.RequireNonNull();
+    return new AttributeTypeData(attribute, serviceType);
   }
 
   private static bool IsBaseOfAny(this Type type, IReadOnlyCollection<Type> baseTypes) {
@@ -131,5 +131,4 @@ public static class JabExtensions {
 
     return false;
   }
-
 }

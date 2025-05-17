@@ -1,4 +1,5 @@
-﻿
+﻿using UnrealPluginManager.Server.Utils;
+
 namespace UnrealPluginManager.Server.DependencyInjection;
 
 /// <summary>
@@ -37,6 +38,7 @@ public class ServerServiceProviderFactory : IServiceProviderFactory<IServiceColl
   public IServiceProvider CreateServiceProvider(IServiceCollection containerBuilder) {
     return containerBuilder
         .AddJabServices(p => new ServerServiceProvider(p))
+        .ConfigureAuth()
         .BuildServiceProvider();
   }
 }

@@ -1,8 +1,8 @@
 ﻿using Jab;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UnrealPluginManager.Core.DependencyInjection;
 using UnrealPluginManager.Core.Tests.Helpers;
 using UnrealPluginManager.Server.DependencyInjection;
@@ -18,15 +18,14 @@ namespace UnrealPluginManager.Server.Tests.Helpers;
 [Import<ITestCloudDatabaseModule>]
 [Import<IKeycloakClientModule>]
 [Singleton<ServiceProviderWrapper>(Instance = nameof(RuntimeServiceProvider))]
-[JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>))]
+[JabCopyExclude(typeof(IConfiguration), typeof(IHostEnvironment), typeof(HttpClient), typeof(ILogger<>),
+                typeof(IOptions<>))]
 public partial class TestServerServiceProvider(IServiceProvider runtimeServiceProvider) : IServerServiceProvider {
-  
   private ServiceProviderWrapper RuntimeServiceProvider { get; } = new(runtimeServiceProvider);
-  
+
   IServerServiceProvider.IScope IServerServiceProvider.CreateScope() {
     return CreateScope();
   }
 
   public partial class Scope : IServerServiceProvider.IScope;
-
 }
