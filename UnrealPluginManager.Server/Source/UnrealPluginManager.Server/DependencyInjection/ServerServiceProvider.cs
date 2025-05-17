@@ -18,7 +18,7 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 [ServiceProvider]
 [Import<ISystemAbstractionsModule>]
 [Import<IWebContextModule>]
-[Import<IAuthModule>]
+[Import<IAuthorizationModule>]
 [Import<IServerIoModule>]
 [Import<ICoreServicesModule>]
 [Import<ICloudDatabaseModule>]

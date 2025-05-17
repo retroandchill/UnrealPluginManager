@@ -4,7 +4,6 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Retro.SimplePage.Requests;
 using UnrealPluginManager.Server.Auth;
@@ -30,17 +29,6 @@ public static class ServerServiceUtils {
       options.ValueLengthLimit = int.MaxValue;
       options.MultipartBodyLengthLimit = long.MaxValue;
     });
-  }
-
-  /// <summary>
-  /// Adds authentication and authorization services to the application's service collection.
-  /// </summary>
-  /// <param name="services">The <see cref="IServiceCollection"/> to which the authentication and authorization services are added.</param>
-  /// <returns>The updated <see cref="IServiceCollection"/> with the authentication and authorization services configured.</returns>
-  public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services.AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CallingUserHandler>();
   }
 
   /// <summary>

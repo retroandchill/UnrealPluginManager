@@ -12,7 +12,7 @@ namespace UnrealPluginManager.Server.Tests.Helpers;
 [ServiceProvider]
 [Import<IMockAbstractionsModule>]
 [Import<IWebContextModule>]
-[Import<IAuthModule>]
+[Import<IAuthorizationModule>]
 [Import<IServerIoModule>]
 [Import<ICoreServicesModule>]
 [Import<ITestCloudDatabaseModule>]

@@ -34,5 +34,5 @@ namespace UnrealPluginManager.Server.DependencyInjection;
 [Transient<IAuthorizationHandler, CanSubmitPluginHandler>]
 [Transient<IAuthorizationHandler, CanEditPluginHandler>]
 [Transient<IAuthorizationHandler, CallingUserHandler>]
-public interface IAuthModule {
+public interface IAuthorizationModule {
 }
