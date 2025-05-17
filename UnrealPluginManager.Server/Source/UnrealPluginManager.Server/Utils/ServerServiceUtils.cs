@@ -4,7 +4,6 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Retro.SimplePage.Requests;
 using UnrealPluginManager.Server.Auth;
@@ -33,29 +32,16 @@ public static class ServerServiceUtils {
   }
 
   /// <summary>
-  /// Adds authentication and authorization services to the application's service collection.
-  /// </summary>
-  /// <param name="services">The <see cref="IServiceCollection"/> to which the authentication and authorization services are added.</param>
-  /// <returns>The updated <see cref="IServiceCollection"/> with the authentication and authorization services configured.</returns>
-  public static IServiceCollection AddAuthServices(this IServiceCollection services) {
-    return services.AddHttpContextAccessor()
-        .AddScoped<IAuthorizationHandler, CanSubmitPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CanEditPluginHandler>()
-        .AddScoped<IAuthorizationHandler, CallingUserHandler>();
-  }
-
-  /// <summary>
   /// Configures the application for production use by applying common configuration,
   /// registering essential services, and configuring database contexts.
   /// </summary>
   /// <param name="builder">The <see cref="WebApplicationBuilder"/> used to configure the application.</param>
   /// <returns>The updated <see cref="WebApplicationBuilder"/> configured for production deployment.</returns>
   public static WebApplicationBuilder SetUpProductionApplication(this WebApplicationBuilder builder) {
+    builder.Host.UseServiceProviderFactory(new ServerServiceProviderFactory(builder.Configuration));
     builder.SetUpCommonConfiguration();
-    builder.Services.AddAuthServices()
-        .AddProblemDetails()
-        .AddServiceConfigs()
-        .AddJabServices();
+    builder.Services.AddProblemDetails()
+        .AddServiceConfigs();
     return builder;
   }
 
@@ -92,9 +78,18 @@ public static class ServerServiceUtils {
             }
         );
 
+    builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
+        .AddClientCredentialsTokenHandler("Keycloak");
+
+    builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
+
+    return builder;
+  }
+
+  public static IServiceCollection ConfigureAuth(this IServiceCollection services, IConfiguration configuration) {
     const string smartScheme = "Smart";
 
-    builder.Services.AddAuthentication(options => {
+    services.AddAuthentication(options => {
           options.DefaultScheme = smartScheme;
           options.DefaultChallengeScheme = smartScheme;
         })
@@ -108,24 +103,20 @@ public static class ServerServiceUtils {
             return context.Request.Headers.TryGetValue(ApiKeyAuth.HeaderName, out _)
                 ? AuthenticationSchemes.ApiKey
                 : JwtBearerDefaults.AuthenticationScheme;
-
           };
         })
         .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(AuthenticationSchemes.ApiKey, _ => { })
-        .AddKeycloakWebApi(builder.Configuration);
-    builder.Services.AddAuthorizationBuilder()
+        .AddKeycloakWebApi(configuration);
+
+    services.AddAuthorizationBuilder()
         .AddPolicy(AuthorizationPolicies.CanSubmitPlugin, policy =>
-            policy.Requirements.Add(new CanSubmitPluginRequirement()))
+                       policy.Requirements.Add(new CanSubmitPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CanEditPlugin, policy =>
-            policy.Requirements.Add(new CanEditPluginRequirement()))
+                       policy.Requirements.Add(new CanEditPluginRequirement()))
         .AddPolicy(AuthorizationPolicies.CallingUser, policy =>
-            policy.Requirements.Add(new CallingUserRequirement()));
-    builder.Services.AddKeycloakAdminHttpClient(builder.Configuration)
-        .AddClientCredentialsTokenHandler("Keycloak");
+                       policy.Requirements.Add(new CallingUserRequirement()));
 
-    builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = null);
-
-    return builder;
+    return services;
   }
 
   /// <summary>

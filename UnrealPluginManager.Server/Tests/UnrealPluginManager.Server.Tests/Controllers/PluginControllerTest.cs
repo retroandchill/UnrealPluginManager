@@ -26,7 +26,6 @@ public class PluginControllerTest {
     _serviceProvider = _factory.Services;
     _serviceProvider.GetRequiredService<TestCloudUnrealPluginManagerContext>()
         .Database.EnsureCreated();
-    _serviceProvider.GetRequiredService<TestCloudUnrealPluginManagerContext.DeferredDelete>();
     _jsonService = _serviceProvider.GetRequiredService<IJsonService>();
   }
 
