@@ -1,6 +1,5 @@
 ﻿using System.CommandLine;
 using Jab;
-using UnrealPluginManager.Cli.Commands;
 using UnrealPluginManager.Local.DependencyInjection;
 
 namespace UnrealPluginManager.Cli.DependencyInjection;
@@ -13,8 +12,8 @@ namespace UnrealPluginManager.Cli.DependencyInjection;
 /// command options with their respective handlers. It also integrates services from a local service provider module.
 /// </remarks>
 [ServiceProvider]
-[Import(typeof(ILocalServiceProviderModule))]
-[Import(typeof(ICommandsModule))]
+[Import<ILocalServiceProviderModule>]
+[Import<ICommandsModule>]
 [Singleton<IConsole>(Instance = nameof(Console))]
 public sealed partial class CliServiceProvider(IConsole console) {
   private IConsole Console { get; } = console;

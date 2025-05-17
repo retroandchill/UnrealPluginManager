@@ -25,8 +25,14 @@ namespace UnrealPluginManager.Core.DependencyInjection;
 [Singleton<IProcessRunner, ProcessRunner>]
 [Singleton<IRegistry>(Factory = nameof(CreateRegistry))]
 public interface ISystemAbstractionsModule {
-
-  public static IRegistry CreateRegistry() {
+  /// Creates and returns an instance of the IRegistry interface.
+  /// The implementation depends on the operating system:
+  /// - Returns a WindowsRegistry instance for Windows-based operating systems.
+  /// - Returns an UnsupportedPlatformRegistry instance for unsupported platforms.
+  /// <returns>
+  /// An implementation of the IRegistry interface appropriate for the platform.
+  /// </returns>
+  static IRegistry CreateRegistry() {
     return OperatingSystem.IsWindows() ? new WindowsRegistry() : new UnsupportedPlatformRegistry();
   }
 }
