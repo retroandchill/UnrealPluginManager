@@ -1,5 +1,4 @@
-﻿using System.Runtime.Versioning;
-using UnrealPluginManager.Core.Abstractions;
+﻿using UnrealPluginManager.Core.Abstractions;
 
 namespace UnrealPluginManager.Core.Tests.Mocks;
 
@@ -15,7 +14,6 @@ namespace UnrealPluginManager.Core.Tests.Mocks;
 /// and provides methods for accessing and querying these properties, mimicking real registry
 /// behavior.
 /// </remarks>
-[SupportedOSPlatform("windows")]
 public class MockRegistryKey : IRegistryKey {
   /// <summary>
   /// Gets or sets the collection of subkeys under the current registry key.
@@ -70,6 +68,6 @@ public class MockRegistryKey : IRegistryKey {
 
   /// <inheritdoc />
   public T? GetValue<T>(string name) {
-    return (T?)Values.GetValueOrDefault(name);
+    return (T?) Values.GetValueOrDefault(name);
   }
 }

@@ -56,7 +56,9 @@ public class TestCommands {
     var builder = new CommandLineBuilder(rootCommand)
         .UseDefaults()
         .UseCustomExceptionHandler()
-        .UseDependencyInjection(services => {
+        .UseDependencyInjection(console => {
+
+          var services = new ServiceCollection();
           services.AddSingleton<IFileSystem>(_filesystem);
           services.AddSingleton<IEnvironment>(_environment);
           services.AddSingleton(_engineService.Object);
@@ -64,6 +66,16 @@ public class TestCommands {
           services.AddSingleton(_pluginManagementService.Object);
           services.AddSingleton(_installService.Object);
           services.AddSingleton<IJsonService>(_jsonService);
+
+          services.AddSingleton(console);
+
+          services.AddScoped<ICommandOptionsHandler<BuildCommandOptions>, BuildCommandHandler>();
+          services.AddScoped<ICommandOptionsHandler<InstallCommandOptions>, InstallCommandHandler>();
+          services.AddScoped<ICommandOptionsHandler<SearchCommandOptions>, SearchCommandHandler>();
+          services.AddScoped<ICommandOptionsHandler<UploadCommandOptions>, UploadCommandHandler>();
+          services.AddScoped<ICommandOptionsHandler<VersionsCommandOptions>, VersionsCommandHandler>();
+
+          return services.BuildServiceProvider();
         });
 
     _parser = builder.Build();
@@ -124,32 +136,32 @@ public class TestCommands {
     _jsonService.Serialize(pluginManifest);
     _filesystem.Directory.CreateDirectory("C:/dev/MyPlugin");
     await _filesystem.File.WriteAllTextAsync("C:/dev/MyPlugin/MyPlugin.uplugin",
-                                             _jsonService.Serialize(pluginManifest));
+        _jsonService.Serialize(pluginManifest));
 
     _installService.Setup(x => x.InstallRequirements(It.IsAny<PluginManifest>(), It.IsAny<string?>(),
-                                                     It.IsAny<IReadOnlyCollection<string>>()))
+            It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync([]);
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _pluginManagementService.Verify(x =>
-                                        x.BuildFromManifest(It.IsAny<PluginManifest>(),
-                                                            It.IsAny<IReadOnlyList<string>>(),
-                                                            It.Is<string?>(y => y == "5.5"),
-                                                            It.IsAny<IReadOnlyCollection<string>>()));
+        x.BuildFromManifest(It.IsAny<PluginManifest>(),
+            It.IsAny<IReadOnlyList<string>>(),
+            It.Is<string?>(y => y == "5.5"),
+            It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin");
     Assert.That(returnCode, Is.EqualTo(0));
     _pluginManagementService.Verify(x =>
-                                        x.BuildFromManifest(It.IsAny<PluginManifest>(),
-                                                            It.IsAny<IReadOnlyList<string>>(),
-                                                            It.Is<string?>(y => y == null),
-                                                            It.IsAny<IReadOnlyCollection<string>>()));
+        x.BuildFromManifest(It.IsAny<PluginManifest>(),
+            It.IsAny<IReadOnlyList<string>>(),
+            It.Is<string?>(y => y == null),
+            It.IsAny<IReadOnlyCollection<string>>()));
   }
 
   [Test]
   public async Task TestRequestBuildWithGenericError() {
     _installService.Setup(x => x.InstallRequirements(It.IsAny<string>(), It.IsAny<string?>(),
-                                                     It.IsAny<IReadOnlyCollection<string>>()))
+            It.IsAny<IReadOnlyCollection<string>>()))
         .ThrowsAsync(new ArithmeticException());
     var returnCode = await _parser.InvokeAsync("build C:/dev/MyPlugin/MyPlugin.uplugin --version 5.5");
     Assert.That(returnCode, Is.EqualTo(1));
@@ -158,32 +170,32 @@ public class TestCommands {
   [Test]
   public async Task TestInstallPlugin() {
     _installService.Setup(x => x.InstallPlugin(It.IsAny<string>(), It.IsAny<SemVersionRange>(), It.IsAny<string?>(),
-                                               It.IsAny<IReadOnlyCollection<string>>()))
+            It.IsAny<IReadOnlyCollection<string>>()))
         .ReturnsAsync([new VersionChange("MyPlugin", null, new SemVersion(1, 0, 0))]);
     var returnCode = await _parser.InvokeAsync("install MyPlugin");
     Assert.That(returnCode, Is.EqualTo(0));
     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                                It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
-                                                It.Is<string?>(y => y == null),
-                                                It.IsAny<IReadOnlyCollection<string>>()));
+        It.Is<SemVersionRange>(y => y == SemVersionRange.AllRelease),
+        It.Is<string?>(y => y == null),
+        It.IsAny<IReadOnlyCollection<string>>()));
 
     returnCode = await _parser.InvokeAsync("install MyPlugin --version 1.0.0");
     Assert.That(returnCode, Is.EqualTo(0));
     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                                It.Is<SemVersionRange>(y => y ==
-                                                                            SemVersionRange.Parse("1.0.0", 2048)),
-                                                It.Is<string?>(y => y == null),
-                                                It.IsAny<IReadOnlyCollection<string>>()));
+        It.Is<SemVersionRange>(y => y ==
+                                    SemVersionRange.Parse("1.0.0", 2048)),
+        It.Is<string?>(y => y == null),
+        It.IsAny<IReadOnlyCollection<string>>()));
 
     _installService.Invocations.Clear();
     returnCode = await _parser.InvokeAsync("install MyPlugin --version >=1.0.0 --engine-version 5.5");
     Assert.That(returnCode, Is.EqualTo(0));
     _installService.Verify(x => x.InstallPlugin(It.Is<string>(y => y == "MyPlugin"),
-                                                It.Is<SemVersionRange>(y => y ==
-                                                                            SemVersionRange.AtLeast(
-                                                                                new SemVersion(1, 0, 0), false)),
-                                                It.Is<string?>(y => y == "5.5"),
-                                                It.IsAny<IReadOnlyCollection<string>>()));
+        It.Is<SemVersionRange>(y => y ==
+                                    SemVersionRange.AtLeast(
+                                        new SemVersion(1, 0, 0), false)),
+        It.Is<string?>(y => y == "5.5"),
+        It.IsAny<IReadOnlyCollection<string>>()));
   }
 
   [Test]
@@ -226,8 +238,8 @@ public class TestCommands {
         })
         .GroupBy(x => x.Index / 10)
         .Select((x, i) => new KeyValuePair<string, Fin<List<PluginOverview>>>(
-                    $"group{i}",
-                    i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
+            $"group{i}",
+            i != 3 ? x.Select(y => y.Value).ToList() : Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
     _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(split));
@@ -237,8 +249,8 @@ public class TestCommands {
 
     var allErrors = Enumerable.Range(0, 100)
         .Select(i => new KeyValuePair<string, Fin<List<PluginOverview>>>(
-                    $"group{i}",
-                    Fin<List<PluginOverview>>.Fail("Error")))
+            $"group{i}",
+            Fin<List<PluginOverview>>.Fail("Error")))
         .ToOrderedDictionary();
     _pluginManagementService.Setup(x => x.GetPlugins("*"))
         .Returns(Task.FromResult(allErrors));
