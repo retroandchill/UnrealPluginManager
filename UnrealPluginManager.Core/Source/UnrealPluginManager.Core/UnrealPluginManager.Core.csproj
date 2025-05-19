@@ -20,17 +20,17 @@
         <PackageReference Include="Jab" Version="0.11.0"/>
         <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-54"/>
         <PackageReference Include="LinqKit.Core" Version="1.2.8"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.5"/>
         <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
         <PackageReference Include="Retro.SimplePage.EntityFrameworkCore" Version="1.0.0"/>
         <PackageReference Include="Riok.Mapperly" Version="4.2.1"/>
         <PackageReference Include="Semver" Version="3.0.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1" />
-        <PackageReference Include="System.CodeDom" Version="9.0.4"/>
+        <PackageReference Include="System.CodeDom" Version="9.0.5"/>
         <PackageReference Include="System.Linq.Async" Version="6.0.1"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.14"/>
         <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.3"/>
