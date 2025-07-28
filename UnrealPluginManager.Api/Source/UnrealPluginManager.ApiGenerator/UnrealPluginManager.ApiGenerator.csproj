@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\UnrealPluginManager.Server\Source\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Server\Source\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
-        <PackageReference Include="Retro.SimplePage.Swashbuckle" Version="1.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1"/>
+        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0" />
+        <PackageReference Include="Retro.SimplePage.Swashbuckle" Version="1.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
     </ItemGroup>
 
 </Project>

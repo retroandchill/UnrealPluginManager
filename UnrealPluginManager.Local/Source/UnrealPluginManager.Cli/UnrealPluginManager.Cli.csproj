@@ -16,19 +16,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Jab" Version="0.11.0"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.1.0-eap1"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.13.0"/>
-        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
-        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
-        <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1"/>
-        <PackageReference Include="AutoExceptionHandler" Version="1.0.0"/>
+        <PackageReference Include="Jab" Version="0.11.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta6.25358.103" />
+        <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta5.25306.1" />
+        <PackageReference Include="AutoExceptionHandler" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj"/>
-        <ProjectReference Include="..\..\..\UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj"/>
-        <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj"/>
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Core\Source\UnrealPluginManager.Core\UnrealPluginManager.Core.csproj" />
+        <ProjectReference Include="..\..\..\UnrealPluginManager.Api\Source\UnrealPluginManager.WebClient\UnrealPluginManager.WebClient.csproj" />
+        <ProjectReference Include="..\UnrealPluginManager.Local\UnrealPluginManager.Local.csproj" />
     </ItemGroup>
 
 </Project>
