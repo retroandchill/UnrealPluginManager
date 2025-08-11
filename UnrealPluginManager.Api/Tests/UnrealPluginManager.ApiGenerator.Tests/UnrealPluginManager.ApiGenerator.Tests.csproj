@@ -10,9 +10,9 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
         <PackageReference Include="NUnit" Version="4.3.2"/>
-        <PackageReference Include="NUnit.Analyzers" Version="4.7.0"/>
+        <PackageReference Include="NUnit.Analyzers" Version="4.10.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="5.0.0"/>
         <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
     </ItemGroup>
@@ -28,6 +28,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.0.15" />
         <ProjectReference Include="..\..\Source\UnrealPluginManager.ApiGenerator\UnrealPluginManager.ApiGenerator.csproj"/>
         <ProjectReference Include="..\..\..\UnrealPluginManager.Server\Tests\UnrealPluginManager.Server.Tests\UnrealPluginManager.Server.Tests.csproj"/>
         <ProjectReference Include="..\..\..\UnrealPluginManager.Server\Source\UnrealPluginManager.Server\UnrealPluginManager.Server.csproj"/>
