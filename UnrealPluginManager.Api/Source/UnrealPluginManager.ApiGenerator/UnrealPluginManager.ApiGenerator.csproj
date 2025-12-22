@@ -12,9 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
+        <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.1"/>
         <PackageReference Include="Retro.SimplePage.Swashbuckle" Version="1.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0"/>
     </ItemGroup>
 
 </Project>
