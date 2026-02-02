@@ -12,9 +12,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Jab" Version="0.12.0" />
+      <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-55" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="Retro.ReadOnlyParams" Version="1.0.0"/>
         <PackageReference Include="Retro.SimplePage.Swashbuckle" Version="1.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.1"/>
     </ItemGroup>
 
 </Project>
